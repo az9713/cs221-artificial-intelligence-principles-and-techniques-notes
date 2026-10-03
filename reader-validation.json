@@ -1,0 +1,114 @@
+{
+  "checked_at_utc": "2026-10-03T07:36:26.371370+00:00",
+  "static": {
+    "status": "passed",
+    "html_files": 5,
+    "local_links_checked": 49,
+    "timestamps_checked": 6,
+    "chapter_pages_with_dollar_math": 0,
+    "failures": [],
+    "warnings": []
+  },
+  "browser": {
+    "status": "passed",
+    "findings": [
+      {
+        "mathErrors": 0,
+        "mathNodes": 0,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "index.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 0,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "index.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 143,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-01-foundations-and-tensors.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 143,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-01-foundations-and-tensors.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 0,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "numerical-lab.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 0,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "numerical-lab.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 0,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "references.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 0,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "references.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 0,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "source-map.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 0,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "source-map.html",
+        "viewport": 390
+      }
+    ],
+    "failures": [],
+    "clipboard": "Fallback branch checked with captured text; manual OS clipboard verification not performed",
+    "network": "HTTP and HTTPS requests blocked during browser checks"
+  },
+  "human_accessibility": "not performed",
+  "renderer": "Explicit disposable headless Chromium, no user session or browser fallback",
+  "course": "CS221",
+  "scope": "Chapter 1 and existing five-page reader only; full course incomplete"
+}

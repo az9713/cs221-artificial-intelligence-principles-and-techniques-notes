@@ -1,0 +1,38 @@
+{
+  "chapter": "lecture-01-foundations-and-tensors.html",
+  "checked_at_utc": "2026-10-03T07:36:20.859515+00:00",
+  "status": "independently reviewed and locally validated pilot",
+  "independent_review": {
+    "rounds": 2,
+    "gate_6b": "accepted",
+    "passes_7_8": "accepted",
+    "blocking_defects": 0,
+    "review_report_sha256": "824eeb551100f3f2ac1151e6baf2aa9cb216664c04a5ff65bff20590f3e3e8b9"
+  },
+  "accepted_scientific_body_sha256": "ded1654d52105cb8a2a7a92e9dfa47fb8619bb3876b605780f51a5f18572c396",
+  "accepted_metadata_sha256": "11b13303a71fa1f588170d33c8b06fce8845001aa3fb987e53e01be523e3451b",
+  "accepted_lab_sha256": "2c289f963482201c8cc58f98f00a1ba1652674ba885175ed829d5f9eefb217e1",
+  "source_scope": "Sequential transcript and claim-specific primary-source/official-module inspection; online pinned GitHub tree fetch restricted; retained clean source snapshot inspected",
+  "historical_audit": "Earlier author audit superseded by independent two-round review; earlier evidence retained privately",
+  "worked_solutions": 6,
+  "limits": [
+    "Only Chapter 1 is covered",
+    "Human keyboard/screen-reader audit not performed",
+    "No full slide review or human ASR accuracy claim",
+    "No speed or deployment-performance benchmark",
+    "The complete twenty-chapter course is not finished"
+  ],
+  "pass_9": {
+    "status": "passed within pilot scope",
+    "reader_report": "reader-validation.json",
+    "math_segments_checked": 145,
+    "embedded_python_blocks_executed": 1,
+    "invalid_input_cases": 14,
+    "converted_float_boundary_cases": 5,
+    "independent_float_oracle_cases": 1025,
+    "independent_invalid_checks": 40,
+    "visual_inspection": "Actual revised desktop title/control view and mobile masked-normalization/named-axes views inspected",
+    "privacy_scan": "No local user paths, private source paths, task errors or local account name found in public documents and code",
+    "human_accessibility": "not performed"
+  }
+}

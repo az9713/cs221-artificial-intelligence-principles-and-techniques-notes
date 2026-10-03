@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+_private_sources/
+transcripts/
+*.vtt
+*.srt
+*.json3
+*.mp4
+*.m4a
+*.webm

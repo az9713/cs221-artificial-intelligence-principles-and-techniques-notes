@@ -1,0 +1,173 @@
+{
+  "title": "Intelligent agents, historical ideas, and executable tensors",
+  "number": 1,
+  "video_id": "yaLEGZuIIgE",
+  "source_type": "locally generated automatic speech recognition",
+  "sections": [
+    {
+      "section": "agent",
+      "start": 138,
+      "end": 466,
+      "lecture_material": "Perception, reasoning, action, learning, computation and information limits.",
+      "research_extension": "No separate external empirical result.",
+      "teaching_construction": "Delivery robot; state/observation/history/policy/belief; original single-step loss derivation and 0.2 threshold.",
+      "evidence_class": "definition and stipulated mathematical model"
+    },
+    {
+      "section": "objectives",
+      "start": 466,
+      "end": 1049,
+      "lecture_material": "Developer alignment versus societal values; tensor-native and executable lectures.",
+      "research_extension": "No separate external empirical result.",
+      "teaching_construction": "Penalty sensitivity, separate outcome dimensions, metric gaming versus incomplete objective; interfaces and axis contracts.",
+      "evidence_class": "conceptual analysis and engineering example"
+    },
+    {
+      "section": "history",
+      "start": 1049,
+      "end": 2273,
+      "lecture_material": "Turing evaluation, symbolic search and expert systems, neural models, statistical methods, foundation models, industrialization.",
+      "research_extension": "Primary Turing, Dartmouth, McCulloch/Pitts, backpropagation, foundation models, BERT, transformer, GPT4 report.",
+      "teaching_construction": "Search tree count, XOR impossibility in exercises, robot synthesis.",
+      "evidence_class": "historical primary sources and mathematical counterexample"
+    },
+    {
+      "section": "tensors",
+      "start": 2273,
+      "end": 2850,
+      "lecture_material": "Array rank and shapes, initialization, datasets/language/images/weights, slicing/views, elementwise and triangular operations.",
+      "research_extension": "NumPy copies/views.",
+      "teaching_construction": "Rank distinctions, dimensions/units, exact image storage calculation, mutable aliasing case. Explicit elementwise arithmetic and lower/upper triangular extraction.",
+      "evidence_class": "definitions and implementation semantics"
+    },
+    {
+      "section": "contractions",
+      "start": 2850,
+      "end": 3116,
+      "lecture_material": "Matrix multiplication, batches and broadcasting.",
+      "research_extension": "NumPy matmul/broadcasting; transformer causal masking.",
+      "teaching_construction": "Persistent loss table as contraction Q@C, numeric loss outputs, tie rule, causal-mask clarification. Worked masked softmax row and prefix-dependency condition; converted-float threshold versus rounded losses.",
+      "evidence_class": "derivation and implementation semantics"
+    },
+    {
+      "section": "named-axes",
+      "start": 3116,
+      "end": 3980.87,
+      "lecture_material": "Efficiency, named einsum indices, reduction, rearrange.",
+      "research_extension": "einops einsum and rearrange documentation.",
+      "teaching_construction": "Operation count, CPU/GPU distinction, batched pairwise dot product, feature index factorization. Original checked example contrasts reducing before choosing an action (3) with adaptive action then mean (2.5).",
+      "evidence_class": "arithmetic model and implementation semantics"
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "Extends tensor-computation topics.",
+      "research_extension": "No separate external empirical result.",
+      "teaching_construction": "Standard-library cumulative model; optional NumPy equivalence; domain, mutation and independent batch tests.",
+      "evidence_class": "engineering check"
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate lecture claim: original supporting material.",
+      "research_extension": "No separate external empirical result.",
+      "teaching_construction": "Six original exercises with full threshold, XOR, shape, ownership, index and evaluation solutions.",
+      "evidence_class": "original teaching construction"
+    },
+    {
+      "section": "boundaries",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate lecture claim: original supporting material.",
+      "research_extension": "No separate external empirical result.",
+      "teaching_construction": "Explicit source, machine-caption and mathematical model limits.",
+      "evidence_class": "provenance"
+    }
+  ],
+  "references": [
+    {
+      "title": "Turing (1950), Computing Machinery and Intelligence",
+      "url": "https://www.csee.umbc.edu/courses/471/papers/turing.pdf",
+      "supports": "The imitation-game measurement framing; university-hosted primary paper."
+    },
+    {
+      "title": "McCarthy et al. (1955), Dartmouth proposal",
+      "url": "https://www-formal.stanford.edu/jmc/history/dartmouth/dartmouth.html",
+      "supports": "1955 proposal for 1956 workshop; language, abstraction, and intelligence aims."
+    },
+    {
+      "title": "McCulloch and Pitts (1943), A Logical Calculus",
+      "url": "https://doi.org/10.1007/BF02478259",
+      "supports": "Connections between neuron-like networks and propositional logic."
+    },
+    {
+      "title": "Rumelhart, Hinton and Williams (1986), Learning representations by back-propagating errors",
+      "url": "https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf",
+      "supports": "Backpropagation through layered networks; author-hosted primary paper."
+    },
+    {
+      "title": "On the Opportunities and Risks of Foundation Models",
+      "url": "https://arxiv.org/abs/2108.07258",
+      "supports": "Broad pretraining and adaptation across downstream tasks."
+    },
+    {
+      "title": "BERT",
+      "url": "https://arxiv.org/html/1810.04805v2",
+      "supports": "Masked-language-model pretraining differs from next-token prediction."
+    },
+    {
+      "title": "Attention Is All You Need",
+      "url": "https://arxiv.org/html/1706.03762v7",
+      "supports": "Transformer architecture, dot-product attention, and masking forbidden pre-softmax positions."
+    },
+    {
+      "title": "GPT-4 Technical Report",
+      "url": "https://arxiv.org/html/2303.08774v6",
+      "supports": "Explicit limits on architecture and training disclosure; no speculative model-size claims imported."
+    },
+    {
+      "title": "NumPy: Copies and views",
+      "url": "https://numpy.org/doc/stable/user/basics.copies.html",
+      "supports": "Shared storage, basic versus advanced indexing, reshape copy/view behavior."
+    },
+    {
+      "title": "NumPy: matmul",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.matmul.html",
+      "supports": "Final-two-axis matrix multiplication and broadcast leading axes; scalars rejected."
+    },
+    {
+      "title": "NumPy: Broadcasting",
+      "url": "https://numpy.org/doc/stable/user/basics.broadcasting.html",
+      "supports": "Trailing-axis compatibility and singleton expansion; copies need not be materialized."
+    },
+    {
+      "title": "einops: einsum",
+      "url": "https://einops.rocks/api/einsum/",
+      "supports": "Named-axis contractions with unmentioned output axes summed."
+    },
+    {
+      "title": "einops: rearrange",
+      "url": "https://einops.rocks/api/rearrange/",
+      "supports": "Axis permutations and split/merge patterns."
+    },
+    {
+      "title": "einops: reduce",
+      "url": "https://einops.rocks/api/reduce/",
+      "supports": "Named-axis reduction; absent output axes aggregated with specified operation."
+    },
+    {
+      "title": "Official CS221 executable lectures, retained Autumn 2025 snapshot",
+      "url": "https://github.com/stanford-cs221/lectures/tree/f70063773fe9e04ddcbc248059501837053b810a",
+      "supports": "welcome.py: introductory agent/objective sequence; history.py: historical sequence; tensors.py: array operations and named-axis examples"
+    }
+  ],
+  "limitations": [
+    "Machine-generated transcript, not human-authored captions.",
+    "No claim of complete slide inspection.",
+    "Robot losses and examples are stipulated original teaching constructions.",
+    "No performance benchmark or deployed-robot evaluation.",
+    "Contemporary library documentation verifies stable operation semantics, not historical package versions."
+  ]
+}
