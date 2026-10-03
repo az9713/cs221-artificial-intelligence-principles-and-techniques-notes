@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="2cf63c537ad2c7fa0aa5350f648864ce93e2a95d62c207255a2ccdc1009b106c"><title>Search problems, reusable futures, and approximate planning · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START -->
+<header><p class="eyebrow">CS221 · Autumn 2025 · Lecture 5</p><h1>Search problems, reusable futures, and approximate planning</h1><p class="lede">A planner can explore more paths, remember solved states, or discard candidates. These choices buy different forms of efficiency and lose different guarantees.</p><p>Independent enhanced chapter accompanying <a href="https://www.youtube.com/watch?v=fPESauMaJYA">Percy Liang's Search I recording</a>. The sequence and timestamp links follow machine transcription. The constrained travel case, proofs, counterexamples, exercises, and runnable program are original teaching constructions. The pinned official executable lecture and checked research are cited beside their supported claims.</p></header>
+<section><h2 id="motivation">1. Choosing a sequence requires a model of what follows <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=5s">00:05</a></h2>
+<p>A traveler must reach a meeting before a deadline. Walking is reliable, a tram can skip locations, tickets are limited, and the route may prohibit consecutive tram rides. Choosing a locally attractive action can leave the traveler unable to finish. The output should be a complete feasible route and its total cost, rather than a prediction of which action looks good at the current location.</p>
+<p><strong>Planning</strong> chooses actions using a model of their consequences. <strong>Search</strong> explores possible sequences in that model. A learned predictor can supply a transition model, a cost estimate, or a policy that proposes actions; search then uses those objects. The search result is only as meaningful as the stipulated model and objective. Finding a least-cost route in a graph does not certify that its tram exists or that a predicted travel time is accurate.</p>
+<p>The lecture motivates a combination of learning and computation rather than a rigid boundary between them. We will distinguish three questions throughout: what information defines a state, which complete sequences the algorithm can reach, and what score it minimizes among those sequences. A failure in the first two questions cannot be repaired by sorting candidates more accurately.</p>
+<p><a href="lecture-01-foundations-and-tensors.html#agent">Chapter 1's observations, objectives, and actions</a> are useful background. <a href="lecture-03-classification-probabilities-and-text.html#text">Chapter 3's text representation</a> provides another warning: compressing an input can erase information needed for the eventual decision. All search objects needed here are defined locally.</p>
+</section>
+<section><h2 id="problem">2. Separate the problem from the algorithm <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=316s">05:16</a></h2>
+<p>A finite deterministic <strong>search problem</strong> consists of a finite state set <span class="inline-math">\(S\)</span>, a start state <span class="inline-math">\(s_{\mathrm{start}}\in S\)</span>, a terminal or goal set <span class="inline-math">\(G\subseteq S\)</span>, and a finite legal-action set <span class="inline-math">\(A(s)\)</span> at each nonterminal state. For each legal action <span class="inline-math">\(a\in A(s)\)</span>, the successor <span class="inline-math">\(\operatorname{Succ}(s,a)\in S\)</span> is deterministic and the edge cost <span class="inline-math">\(c(s,a)\in\mathbb R\)</span> is finite. The algorithms below stop on first arrival at a goal; outgoing edges from goals are therefore irrelevant.</p>
+<p>A complete path <span class="inline-math">\(P=(s_0,a_0,s_1,\ldots,a_{L-1},s_L)\)</span> starts at <span class="inline-math">\(s_0=s_{\mathrm{start}}\)</span>, follows legal transitions, and first reaches a goal at <span class="inline-math">\(s_L\in G\)</span>. Here <span class="inline-math">\(L\)</span> is its number of actions. Its additive cost is</p>
+<div class="math">\[C(P)=\sum_{t=0}^{L-1}c(s_t,a_t).\]</div>
+<p>The index <span class="inline-math">\(t\)</span> denotes action position. The optimization problem is to minimize <span class="inline-math">\(C(P)\)</span> over complete feasible paths. A partial path that has not reached a goal is not an admissible answer, however small its current cost. If the start is already a goal, the empty action sequence is complete and has cost zero. If no goal is reachable, there is no solution; we represent its optimal value by <span class="inline-math">\(+\infty\)</span>, not by zero.</p>
+<p>For a concrete case, let locations be the integers <span class="inline-math">\(i=1,\ldots,n\)</span>, where <span class="inline-math">\(n\)</span> is the destination location and the traveler starts at 1. Walking sends <span class="inline-math">\(i\to i+1\)</span> at cost one minute. A tram sends <span class="inline-math">\(i\to2i\)</span> at cost two minutes. An action is legal only if its destination is at most <span class="inline-math">\(n\)</span>. These costs are stipulated travel minutes, not measured timings.</p>
+<p>For <span class="inline-math">\(n=10\)</span>, walking throughout requires nine actions and costs nine minutes. The route <span class="inline-math">\(1\to2\to3\to6\to10\)</span> is not feasible: there is no edge from 6 to 10. The feasible route <span class="inline-math">\(1\to2\to3\to6\to7\to8\to9\to10\)</span> costs eight minutes if the first two moves are walks and the third is a tram. A better complete route is <span class="inline-math">\(1\to2\to4\to5\to10\)</span>, costing <span class="inline-math">\(1+2+1+2=6\)</span>. Local plausibility is not a substitute for checking each edge.</p>
+<p>The <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/search.py">pinned official search module</a> provides this separation through start, successor, and terminal methods. Our program uses an explicit finite graph and exact rational costs. That representation choice changes the implementation, not the mathematical interface.</p>
+</section>
+<section><h2 id="state">3. A state is a promise that the forgotten history will not matter <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=658s">10:58</a></h2>
+<p>In the unconstrained street problem, location alone determines all future legal actions and their costs. Two histories that arrive at the same location face the same remaining optimization problem even if their accumulated costs differ. A search <strong>node</strong> can store a path and its accumulated cost; a problem <strong>state</strong> summarizes the future. Treating these as the same object wastes reusable work or discards information needed for correctness.</p>
+<p>Now give the traveler <span class="inline-math">\(k_{\mathrm{ticket}}\)</span> unused tram tickets, a nonnegative integer. Each tram consumes one ticket; walking consumes none. A location-only state is insufficient. At location 5 with destination 10, a traveler with no tickets must walk five times, costing five minutes. A traveler with one ticket can take the tram to 10 for two minutes. The same location has different optimal suffixes.</p>
+<p>Suppose consecutive tram rides are also forbidden. Introduce <span class="inline-math">\(b_{\mathrm{last}}\in\{0,1\}\)</span>, indicating whether the preceding action was a tram. The sufficient state is</p>
+<div class="math">\[s=(i,k_{\mathrm{ticket}},b_{\mathrm{last}}).\]</div>
+<p>A walk increments location, preserves the ticket count, and resets the bit to zero. A tram is legal only when <span class="inline-math">\(k_{\mathrm{ticket}}\gt0\)</span>, <span class="inline-math">\(b_{\mathrm{last}}=0\)</span>, and <span class="inline-math">\(2i\le n\)</span>; it doubles location, decrements tickets, and sets the bit to one. Every state with <span class="inline-math">\(i=n\)</span> is terminal, regardless of its unused tickets or bit.</p>
+<table><caption>Different futures at location 5, destination 10, under both constraints</caption><thead><tr><th>Unused tickets</th><th>Previous action was tram?</th><th>Minimum future cost</th><th>Reason</th></tr></thead><tbody><tr><td>0</td><td>No</td><td>5 minutes</td><td>Only walking can finish.</td></tr><tr><td>1</td><td>No</td><td>2 minutes</td><td>The tram 5→10 is legal.</td></tr><tr><td>1</td><td>Yes</td><td>5 minutes</td><td>A walk to 6 resets the bit, but every later tram overshoots 10.</td></tr></tbody></table>
+<p>Formally, history compression is valid when any two histories mapped to the same state have the same terminal status and matching legal actions, successor states, and incremental costs. By induction on the number of remaining actions, they then have the same feasible suffixes and suffix costs. Their earlier accumulated costs need not match. Additivity lets us compare those prefixes separately from the shared future.</p>
+<p>This criterion is relative to the model. A departure-time-dependent tram requires clock information; a fatigue-dependent walk may require fatigue. Enlarging the state restores sufficiency only if the added variables capture the relevant dependency. We have not modeled uncertain travel times or partial observation. A deterministic graph solver cannot infer those missing variables from its search budget.</p>
+</section>
+<section><h2 id="recurrence">4. The best future can be decomposed at its first edge <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=1233s">20:33</a></h2>
+<p>Define <span class="inline-math">\(F(s)\)</span> as the minimum cost of a complete suffix starting at state <span class="inline-math">\(s\)</span>, with <span class="inline-math">\(F(s)=+\infty\)</span> when no such suffix exists. To establish a terminating exact computation, assume the start-reachable graph after making goals absorbing is a <strong>directed acyclic graph</strong>, abbreviated DAG. A DAG has no directed cycle. Equivalently for a finite graph, we can order its states so every edge points forward. The location coordinate supplies such an order in our travel model because both actions increase it.</p>
+<div class="math">\[F(s)=\begin{cases}0,&amp;s\in G,\\\displaystyle\min_{a\in A(s)}\left[c(s,a)+F(\operatorname{Succ}(s,a))\right],&amp;s\notin G.\end{cases}\]</div>
+<p>The minimum of an empty set is defined here as <span class="inline-math">\(+\infty\)</span>. Adding a finite cost to an unreachable suffix still gives <span class="inline-math">\(+\infty\)</span>. These conventions distinguish a dead end from a completed empty path.</p>
+<p><strong>Proof.</strong> Consider states in reverse topological order. A goal has exactly the empty suffix under the stopping rule. A nonterminal complete suffix must begin with one legal action <span class="inline-math">\(a\)</span>. After that action, the remainder is a complete suffix from its successor. By the induction hypothesis, no remainder is cheaper than that successor's <span class="inline-math">\(F\)</span>, so no complete suffix is cheaper than the displayed minimum. Conversely, if a candidate has finite successor value, append its attained optimal successor suffix to that first action. This constructs a path with the candidate cost. Taking the best candidate achieves the minimum. If every successor is unreachable, no complete suffix exists.</p>
+<p>The proof uses finite acyclic structure and additive costs; it does not require nonnegative edges. A DAG containing <span class="inline-math">\(s\to a\)</span> of cost 3 and <span class="inline-math">\(a\to g\)</span> of cost −5 has optimal cost −2. Negative costs invalidate some later search shortcuts, but they do not invalidate this reverse-order recurrence.</p>
+<p>For destination 4, work backward. The goal has <span class="inline-math">\(F(4)=0\)</span>. Location 3 can only walk, giving <span class="inline-math">\(F(3)=1\)</span>. Location 2 can walk for <span class="inline-math">\(1+1=2\)</span> or tram for <span class="inline-math">\(2+0=2\)</span>, so <span class="inline-math">\(F(2)=2\)</span>. At location 1, walking gives <span class="inline-math">\(1+2=3\)</span> and taking a tram to 2 gives <span class="inline-math">\(2+2=4\)</span>. Thus <span class="inline-math">\(F(1)=3\)</span>.</p>
+<p>A scalar value does not specify a route. Record one minimizing action beside each finite nonterminal value, then follow those backpointers from the start until a goal. Ties can be broken by fixed action enumeration order without changing optimal cost. Our program orders walking before taking a tram; destination 4 therefore returns the all-walking route, although another route ties it.</p>
+</section>
+<section><h2 id="exhaustive">5. Exhaustive search expands histories that may share a future <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=1629s">27:09</a></h2>
+<p><strong>Exhaustive search</strong> visits every legal complete path and chooses the cheapest. On a finite DAG, it terminates because no path can repeat a state. A depth-first traversal can begin at the start, extend the current path by each legal action, and evaluate each arrival at a goal. It must still inspect all siblings before certifying an optimum; the first completed path need not be cheapest.</p>
+<p>The destination 4 traversal calls the suffix problem at location 2 once after walking from 1 and again after taking the tram from 1. It also reaches later locations repeatedly. Counting each entered path prefix, including goal entries, gives nine visits while there are only four problem states. These are different counts with different computational meanings.</p>
+<table><caption>Original finite exact checks of the unconstrained travel model</caption><thead><tr><th>Destination</th><th>Optimal cost, minutes</th><th>Exhaustive entered prefixes</th><th>Distinct reachable states</th></tr></thead><tbody><tr><td>4</td><td>3</td><td>9</td><td>4</td></tr><tr><td>10</td><td>6</td><td>59</td><td>10</td></tr><tr><td>17</td><td>8</td><td>237</td><td>17</td></tr></tbody></table>
+<p>A standard worst-case bound needs explicit hypotheses. If every prefix has at most <span class="inline-math">\(b\)</span> children and no path exceeds <span class="inline-math">\(h\)</span> actions, the number of entered prefixes is at most <span class="inline-math">\(1+b+\cdots+b^h\)</span>, exponential in <span class="inline-math">\(h\)</span> for fixed <span class="inline-math">\(b\gt1\)</span>. This bound is attained by a full branching tree. It is not a proof that the specific street graph grows exponentially in its destination index.</p>
+<p>A small DAG can nevertheless unfold into exponentially many paths. Construct a start state followed by a positive integer number <span class="inline-math">\(h\)</span> of layers of two states each, with every state connected to both states of the next layer. Both final-layer states are goals. There are <span class="inline-math">\(1+2h\)</span> distinct states, <span class="inline-math">\(2^h\)</span> complete paths, and <span class="inline-math">\(2^{h+1}-1\)</span> entered prefixes in the unfolded traversal. Different histories repeatedly meet the same future.</p>
+<p>A streaming recursive depth-first implementation can use workspace proportional to path depth if it keeps only a current path, local iterators, and an incumbent, excluding input graph storage. That is an implementation choice. Our transparent iterative exhaustive routine stores immutable full prefix tuples on its stack; copying and pending siblings consume additional space and time. Its visit counter measures combinatorial expansion, not allocation bytes or wall time.</p>
+</section>
+<section><h2 id="cycles">6. A recurrence, an evaluator, and a finite horizon are different objects <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=1999s">33:19</a></h2>
+<p>Add a zero-cost self-loop at state <span class="inline-math">\(s\)</span> and an edge from <span class="inline-math">\(s\)</span> to goal <span class="inline-math">\(g\)</span> costing 5. A naive recursive evaluator that follows the loop first calls itself indefinitely. Memoization does not fix this: the value is not stored until the call returns. The true optimal complete-path cost is still 5.</p>
+<p>The cyclic equation <span class="inline-math">\(F(s)=\min\{F(s),5\}\)</span> illustrates another subtlety. Every real value at most 5 satisfies that algebraic equation, but most are not the value of the defined path optimization problem. Merely solving a fixed-point equation without a correct boundary or selection principle does not identify the desired value. The cyclic problem is not automatically meaningless; the acyclic evaluator is inapplicable.</p>
+<p>A finite <strong>action horizon</strong> <span class="inline-math">\(H\in\{0,1,2,\ldots\}\)</span> changes the problem to completion in at most <span class="inline-math">\(H\)</span> actions. Define <span class="inline-math">\(F_h(s)\)</span> for a remaining action budget <span class="inline-math">\(h\)</span>. Set <span class="inline-math">\(F_0(s)=0\)</span> at goals and <span class="inline-math">\(+\infty\)</span> elsewhere. For <span class="inline-math">\(h\gt0\)</span>, goals retain zero and nonterminals obey the same first-edge recurrence with successor budget <span class="inline-math">\(h-1\)</span>. Every recursive call decreases the budget, even when the location does not change.</p>
+<p>Introducing a time coordinate without a finite upper bound does not ensure finite search. With a finite horizon, termination is guaranteed for finite branching, but equivalence to the original optimum is not. Destination 10 needs at least four actions in the unconstrained graph. A horizon of 3 therefore returns failure even though complete routes exist with larger budgets.</p>
+<p>For a finite graph with nonnegative edge costs, deleting a cycle from a complete path cannot increase its cost and preserves its continuation. Repeating this deletion produces a simple path, one with no repeated states. If a goal is reachable, some optimal path therefore uses at most <span class="inline-math">\(|S|-1\)</span> actions. Here <span class="inline-math">\(|S|\)</span> is the number of states. This provides a sufficient horizon, not a promise that every truncated rollout will reach the goal.</p>
+<p>Negative cycles require a different boundary. If a negative-total-cost cycle is reachable from the start before termination and can subsequently reach a goal, traversing it repeatedly gives arbitrarily low complete-path costs. The infimum is <span class="inline-math">\(-\infty\)</span> and no finite optimum exists. A negative cycle in an unreachable component, or one from which no goal can be reached, does not cause that conclusion. Our exact program rejects any start-reachable nonterminal cycle; it makes no claim to solve cyclic shortest paths.</p>
+</section>
+<section><h2 id="cache">7. Reuse the solved state, then reconstruct one witness <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=2240s">37:20</a></h2>
+<p><strong>Memoization</strong> stores a function's result under its argument so repeated calls can reuse it. For a sufficient acyclic state, the future-cost function is exactly the reusable object. Once <span class="inline-math">\(F(5)\)</span> has been computed for the unconstrained destination 10 problem, every prefix ending at 5 can use it. Earlier prefix costs remain separate.</p>
+<p>Memoized recursion and reverse-topological iteration compute the same recurrence in different orders. Recursion discovers reachable states on demand; a reverse-order solver first identifies the reachable graph and then evaluates each state after its successors. Both need correct state identity. Caching under location alone in the ticket model returns values from the wrong problem, even if the cache itself is implemented perfectly.</p>
+<p>Our exact solver returns a scalar future-value map and a reconstructed route. Unreachable values are represented internally by <code>None</code>, avoiding arithmetic with infinite rational numbers. A goal value is the exact rational zero. The solver records only one chosen outgoing edge per finite nonterminal state; it follows these choices after computing the start value.</p>
+<p>For destination 10, the exact value is 6. With walk-first tie breaking, our route is <span class="inline-math">\(1\to2\to3\to4\to5\to10\)</span>, four walks plus one tram. The shorter-in-action-count route <span class="inline-math">\(1\to2\to4\to5\to10\)</span> also costs 6. Minimizing minutes does not impose a secondary preference for fewer actions. If that preference matters, define a lexicographic objective or another explicit tie rule before reporting a unique optimum.</p>
+<p>For destination 17 without constraints, the value is 8. With two tickets and no consecutive trams, the value rises to 9, attained by <span class="inline-math">\(1\to2\to3\to6\to7\to8\to16\to17\)</span>. The two tram actions are separated by walks. This difference results from the feasible set, rather than an optimizer failing to find the unconstrained solution.</p>
+</section>
+<section><h2 id="memory">8. Count values, path records, and representation costs separately <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=2602s">43:22</a></h2>
+<p>Let <span class="inline-math">\(V\)</span> and <span class="inline-math">\(E\)</span> denote the numbers of start-reachable states and outgoing edges after making goals absorbing. Under unit-cost arithmetic and dictionary access, topological ordering and scalar recurrence evaluation take <span class="inline-math">\(O(V+E)\)</span> operations. Each edge participates in ordering and one candidate comparison. Values, one backpointer per state, ordering, and degree counts require <span class="inline-math">\(O(V)\)</span> auxiliary entries. The reachable adjacency lists require <span class="inline-math">\(O(V+E)\)</span> entries. Constructing and validating a larger supplied graph also inspects and stores its unreachable input states and edges; the solver bound refers to its reachable subgraph.</p>
+<p>These are abstract counts. Python dictionaries and objects have overhead; exact rational additions can increase numerator and denominator lengths. Neither hashing arbitrary state descriptions nor exact arithmetic is universally constant-time. The program's finite cost/graph bounds and algorithmic checks do not constitute a hardware memory or timing benchmark.</p>
+<p>The <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/search.py#L364-L410">official dynamic-programming implementation</a> caches a whole solution suffix for each state, rather than only its scalar value and one edge. On a chain of <span class="inline-math">\(V\)</span> states ending in a goal, those suffix lists contain <span class="inline-math">\(V-1,V-2,\ldots,1,0\)</span> step references. The total is</p>
+<div class="math">\[\sum_{j=0}^{V-1}j=\frac{V(V-1)}2.\]</div>
+<p>Creating a new list by prepending an edge to an existing suffix copies those references; summing a full suffix's costs traverses it again. On this chain the representation therefore introduces quadratic list storage and work, even though the mathematical scalar recurrence is linear. Memoizing a richer object can be useful, but it does not inherit the scalar implementation's cost bound automatically.</p>
+<p>State sufficiency also controls space. With destination <span class="inline-math">\(n\)</span>, at most <span class="inline-math">\(K\)</span> tickets initially, and the last-action bit, the candidate state grid contains at most <span class="inline-math">\(2n(K+1)\)</span> combinations. Many are unreachable; the program constructs only reachable combinations. Additional binary resources can multiply the grid again. Caching removes repeated histories only after paying for the distinct future situations the model retains.</p>
+<p>A raw token-prefix state usually has very little exact merging: different ordered prefixes are different states. Merging them by length alone would be efficient but wrong whenever their next-token distributions or terminal validity differ. The computational attraction of approximate search comes partly from this absence of cheap sufficient-state compression.</p>
+</section>
+<section><h2 id="sampling">9. Sampling succeeds only on complete paths inside its support <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=3004s">50:04</a></h2>
+<p>A stochastic <strong>policy</strong> <span class="inline-math">\(\pi(a\mid s)\)</span> assigns probabilities to legal actions at nonterminal state <span class="inline-math">\(s\)</span>, with nonnegative values summing to one. A rollout samples successive actions from that policy until it reaches a goal, encounters a dead end, or exhausts a horizon <span class="inline-math">\(H\)</span>. Only the first outcome is a complete candidate.</p>
+<p><strong>Best of <span class="inline-math">\(N_{\mathrm{sample}}\)</span></strong> runs that many rollouts and returns the cheapest complete one, where <span class="inline-math">\(N_{\mathrm{sample}}\)</span> is a positive integer trial budget. If all fail, it returns failure. A partial route with cost zero must never defeat a successful complete route simply because its prefix cost is smaller.</p>
+<p>Let <span class="inline-math">\(q\)</span> be the probability that one rollout completes some optimal path within <span class="inline-math">\(H\)</span>. Assuming independent trials with the same fixed policy and horizon, each trial misses with probability <span class="inline-math">\(1-q\)</span>. Multiplying the independent miss events gives</p>
+<div class="math">\[\Pr(\text{all trials miss})=(1-q)^{N_{\mathrm{sample}}},\qquad \Pr(\text{at least one optimum})=1-(1-q)^{N_{\mathrm{sample}}}.\]</div>
+<p>If <span class="inline-math">\(q=0\)</span>, extra trials cannot help. This can happen because the horizon is too short or because the policy excludes a necessary action. If <span class="inline-math">\(q=1\)</span>, one trial succeeds with probability one. For <span class="inline-math">\(0\lt q\lt1\)</span>, the miss probability tends to zero as the trial budget grows without bound, but finite budgets can still be ineffective. In this latter domain, for a desired miss probability at most <span class="inline-math">\(\varepsilon\in(0,1)\)</span>, taking logs and dividing by the negative number <span class="inline-math">\(\log(1-q)\)</span> gives</p>
+<div class="math">\[N_{\mathrm{sample}}\ge\left\lceil\frac{\log\varepsilon}{\log(1-q)}\right\rceil.\]</div>
+<p>Here logs are natural and the ceiling chooses an integer trial count. For <span class="inline-math">\(q=2^{-20}\)</span>, 1000 trials still miss with probability about 0.99904678. Reducing the miss probability to 0.01 requires 4,828,869 trials under these assumptions. A policy can improve efficiency by allocating more mass to useful paths, but a deterministic policy concentrated on the wrong path removes support entirely.</p>
+<p>Independence is consequential. If all trials reuse a single random choice and follow the same resulting path, their collective miss probability is <span class="inline-math">\(1-q\)</span>, regardless of the nominal trial count. The seeded pseudorandom program produces a reproducible finite trace; its observed success does not establish an independent-trial model for a real generator.</p>
+<p>Parallel rollouts can reduce elapsed time when compute and communication permit, but do not change the mathematical candidate set or trial budget. A final minimum over complete costs is order-independent; tie-selected routes can depend on reduction order unless tie rules are standardized. We report finite visits and costs here, not a parallel speedup.</p>
+</section>
+<section><h2 id="beam">10. Beam search pays for fewer prefixes by making irreversible choices <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=3485s">58:05</a></h2>
+<p><strong>Beam search</strong> maintains a bounded collection of path records. Fix a positive integer width <span class="inline-math">\(B\)</span> and a finite action horizon <span class="inline-math">\(H\)</span>. Our depth-synchronous variant starts with the empty-action path. At each round it keeps already complete records, extends every unfinished record by every legal edge, sorts the resulting pool by accumulated cost, and retains its first <span class="inline-math">\(B\)</span> records. After at most <span class="inline-math">\(H\)</span> rounds, it chooses the cheapest retained complete record.</p>
+<p>Ties retain candidate enumeration order through a stable sort. Complete records occupy beam slots in subsequent rounds; they are not separately archived. Dead ends produce no extensions. A start-goal path succeeds immediately. An empty final set of complete candidates returns failure. These conventions are part of the algorithm, not incidental formatting.</p>
+<p>Take the graph with start edges <span class="inline-math">\(s\to a\)</span> costing 1 and <span class="inline-math">\(s\to b\)</span> costing 2. Let <span class="inline-math">\(a\to g\)</span> cost 100 and <span class="inline-math">\(b\to g\)</span> cost 0. With <span class="inline-math">\(H=2\)</span>, width 1 retains <span class="inline-math">\(a\)</span> after the first round and returns total cost 101. Width 2 retains both prefixes and returns cost 2. The locally cheaper prefix leads to the worse complete route.</p>
+<p>Width 1 is greedy under this prefix-cost ranking. It is not a general best-first procedure that globally prioritizes states using a future-cost estimate. Beam search's ranking can be replaced with other heuristics, but those define different algorithms and require separate assumptions. Accumulated cost alone contains no estimate of the remaining suffix.</p>
+<p>If each retained nonterminal record has at most <span class="inline-math">\(b\)</span> children, the candidate pool has at most <span class="inline-math">\(B\max\{1,b\}\)</span> records per round. Comparison sorting therefore costs at most order <span class="inline-math">\(H B\max\{1,b\}\log(B\max\{1,b\})\)</span> ranking operations under a unit-cost comparison model, with the usual constant-size treatment when the pool is at most one. Full immutable path copying adds up to another factor proportional to path length. A width bound is not a bound on model evaluations, token memory, or elapsed time without these details.</p>
+</section>
+<section><h2 id="beam-limits">11. A wider beam need not contain the narrower beam's answer <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=4036s">1:07:16</a></h2>
+<p>It is tempting to infer that increasing width always improves the final result. That would follow if the larger run retained every candidate from the smaller run at every depth. Standard independently run beams do not satisfy that nesting property. Newly admitted parents can generate enough cheaply ranked children to displace the smaller run's surviving branch.</p>
+<table><caption>A nonnegative-cost counterexample; each listed edge is legal</caption><thead><tr><th>Parent</th><th>Children and incremental costs</th></tr></thead><tbody><tr><td>s</td><td>a:1; b:2</td></tr><tr><td>a</td><td>a1:4; a2:4.5</td></tr><tr><td>b</td><td>b1:0; b2:0</td></tr><tr><td>a1, a2</td><td>g:0</td></tr><tr><td>b1, b2</td><td>g:100</td></tr><tr><td>g</td><td>Terminal</td></tr></tbody></table>
+<p>With horizon 3 and width 1, the first round keeps <span class="inline-math">\(a\)</span> at cost 1. Its children have accumulated costs 5 and 5.5, so the second round keeps <span class="inline-math">\(a1\)</span>. The final answer costs 5. Width 2 initially keeps both <span class="inline-math">\(a\)</span> and <span class="inline-math">\(b\)</span>. At the second round, <span class="inline-math">\(b1,b2\)</span> each cost 2 and crowd out both <span class="inline-math">\(a\)</span>-branch children. The final answer costs 102. The wider run is worse despite having more candidates and no negative edges.</p>
+<p>Without pruning, a depth-synchronous expansion with finite horizon enumerates every path of at most that many actions, keeping complete paths available at later rounds. On a finite branching graph there is a finite width large enough to avoid every truncation through that horizon. The resulting answer is optimal <em>within the horizon</em>. An unbounded-width slogan does not remove a finite horizon, guarantee termination on unbounded cyclic paths, or prove monotonicity between finite-width runs.</p>
+<p>Holding completed records inside the beam favors some short solutions by letting them compete against unfinished prefixes. Archiving complete incumbents separately changes this behavior. Prefix-cost pruning against an incumbent also needs a valid lower bound: with nonnegative future costs, a prefix already more expensive than the incumbent cannot improve it. With an edge cost 10 followed by a cost−20 edge, a prefix of 10 can finish at−10 and beat an incumbent of 0. Pruning that prefix solely on its current cost is unsound.</p>
+<p>These distinctions matter for terminal rewards in language-model search. A negative reward edge can make an expensive unfinished prefix eventually attractive. They also limit the recording's analogy to particle filtering: a deterministic cost-sorted beam is not a probabilistic particle approximation unless the proposal, weights, and resampling distribution are separately defined. We do not transfer particle-filter guarantees to this algorithm.</p>
+</section>
+<section><h2 id="tokens">12. Token search connects likelihood to path cost, not automatically to truth <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=4279s">1:11:19</a></h2>
+<p>Fix a language model, a prompt represented by ordered token IDs <span class="inline-math">\(u\)</span>, and a finite vocabulary <span class="inline-math">\(\mathcal V\)</span> containing an explicit end-of-sequence token, EOS. A state is the prompt plus an ordered generated token-ID prefix. At action position <span class="inline-math">\(t\)</span>, the model assigns normalized conditional probabilities <span class="inline-math">\(p_t(a\mid u,y_{1:t-1})\)</span> to vocabulary tokens. Here <span class="inline-math">\(y_{1:t-1}\)</span> is the generated prefix, and candidate <span class="inline-math">\(y_{1:L}\)</span> includes EOS at its final position.</p>
+<p>For a candidate whose every conditional probability is positive, the chain rule and additivity of the natural log give</p>
+<div class="math">\[p(y_{1:L}\mid u)=\prod_{t=1}^L p_t(y_t\mid u,y_{1:t-1}),\qquad -\log p(y_{1:L}\mid u)=\sum_{t=1}^L-\log p_t(y_t\mid u,y_{1:t-1}).\]</div>
+<p>Thus minimizing summed surprisal, measured in nats, maximizes the modeled sequence probability. A zero-probability edge has infinite surprisal and is outside a finite-cost candidate's support. The prompt's own likelihood is excluded because the prompt is conditioned on, and EOS is included because termination is part of the candidate event. Comparing variable lengths by summed surprisal can favor shorter sequences; dividing by length defines a different objective.</p>
+<p>High model probability is not equivalent to correctness. Define a hard verifier <span class="inline-math">\(v(y)\in\{0,1\}\)</span> and restrict goals to completed candidates for which <span class="inline-math">\(v(y)=1\)</span>. A solver can then minimize likelihood cost over that feasible set. Its conclusion remains “best according to this model among candidates accepted by this verifier.” Verifier acceptance must still be compared with the actual task's correctness criterion.</p>
+<p><a href="https://arxiv.org/pdf/2407.21787v1">Brown and colleagues' 2024 <em>Large Language Monkeys</em>, v1</a> separates generation coverage from selecting a correct answer (Figure 1, page 2). In its reported Llama-3-8B-Instruct/MATH setup, coverage rises from 79.8% at 100 attempts to 95.3% at 10,000. Common selection methods, including majority voting and reward-model scoring, plateau; its page 3 summary reports selection accuracy changing from 38.7% to 39.8% over those budgets. Figure 7, page 10, shows this oracle-versus-selection gap. These are dated experimental results for that setup, not a guarantee for arbitrary prompts or present models.</p>
+<p>The paper's page 4 reports a finite-pool pass-at-<span class="inline-math">\(k\)</span> estimator. We can derive its combinatorial quantity without confusing it with the independent-trial formula. Suppose a retained pool contains <span class="inline-math">\(N_{\mathrm{pool}}\)</span> candidates, exactly <span class="inline-math">\(C_{\mathrm{pool}}\)</span> of which meet a stipulated correctness label. Choose <span class="inline-math">\(k\)</span> distinct pool members uniformly without replacement. There are <span class="inline-math">\(\binom{N_{\mathrm{pool}}}{k}\)</span> equally likely subsets and <span class="inline-math">\(\binom{N_{\mathrm{pool}}-C_{\mathrm{pool}}}{k}\)</span> all-incorrect subsets. Therefore</p>
+<div class="math">\[\Pr(\text{chosen subset contains a correct candidate}\mid\text{this pool})=1-\frac{\binom{N_{\mathrm{pool}}-C_{\mathrm{pool}}}{k}}{\binom{N_{\mathrm{pool}}}{k}}.\]</div>
+<p>Define <span class="inline-math">\(\binom{m}{k}=0\)</span> when <span class="inline-math">\(k\gt m\)</span>. The domain is <span class="inline-math">\(1\le k\le N_{\mathrm{pool}}\)</span> and <span class="inline-math">\(0\le C_{\mathrm{pool}}\le N_{\mathrm{pool}}\)</span>. For a pool of 5 with 2 correct candidates, choosing 2 has coverage <span class="inline-math">\(1-3/10=0.7\)</span>. Treating the observed fraction 0.4 as a fresh independent-trial probability gives 0.64 instead. One conditions on a fixed pool without replacement; the other posits future draws with replacement. Neither supplies a selector that recognizes the correct member.</p>
+<p>A simple original distribution makes the gap explicit. If an independently drawn answer is correct with probability 0.01 and all incorrect answers agree on one wrong value, oracle coverage reaches about 0.634 after 100 draws and 0.999957 after 1000. A majority selector still tends toward the wrong answer because the wrong value has probability 0.99. Candidate generation and answer selection require separate evidence.</p>
+</section>
+<section><h2 id="demo-audit">13. Check the transition, support, reward, and terminal test in the actual demo <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=4513s">1:15:13</a></h2>
+<p>The <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/search.py#L535-L610">pinned language-model demonstration</a> illustrates token search, but its executable contracts differ from an exact token-prefix model. It keeps a text string, decodes one proposed token, appends that text, then tokenizes the whole string again on the next call. Decoding and re-tokenizing need not preserve the previously generated token-ID prefix. A clean token search model should retain ordered IDs directly and decode only for display or a specified verifier.</p>
+<p>The demo offers only the five highest-probability next tokens at each state. This removes other model-supported actions from search. If a necessary token falls outside that set, increasing the beam or number of rollouts cannot recover the excluded path. One can expand the action set, but the resulting compute and support are different.</p>
+<p>Its terminal predicate checks whether text ends with a closing parenthesis. Its bonus predicate calls Python <code>eval</code> and accepts any expression that evaluates without raising an exception. That does not establish JSON syntax, a numeric return value, the intended arithmetic answer, or valid intermediate reasoning. The original function is not used by our program. Our safe fixture parses JSON data only and verifies an exact declared answer schema.</p>
+<p>The demo also subtracts 100 from an accepted terminating edge's cost. If <span class="inline-math">\(R\gt0\)</span> is a finite terminal bonus and <span class="inline-math">\(C_{\mathrm{LM}}(y)\)</span> is the base summed surprisal, its shaped complete score is</p>
+<div class="math">\[C_R(y)=C_{\mathrm{LM}}(y)-R\,v(y).\]</div>
+<p>This is a soft preference, not a hard feasibility constraint. With <span class="inline-math">\(R=100\)</span>, a valid candidate of base cost 200 has shaped cost 100 and loses to an invalid candidate of base cost 1. No fixed finite bonus guarantees acceptance without an appropriate bound on competing likelihood costs. The negative bonus edge also invalidates nonnegative-prefix pruning.</p>
+<p>The demo's sampling policy applies softmax to the negative <em>shaped</em> successor costs. For retained action set <span class="inline-math">\(\mathcal T(s)\)</span>, base action probability <span class="inline-math">\(p(a\mid s)\)</span>, and immediate bonus indicator <span class="inline-math">\(v_a\)</span>, elementary substitution gives</p>
+<div class="math">\[\widetilde\pi(a\mid s)=\frac{p(a\mid s)e^{Rv_a}}{\sum_{b\in\mathcal T(s)}p(b\mid s)e^{Rv_b}},\qquad a\in\mathcal T(s).\]</div>
+<p>The symbol <span class="inline-math">\(b\)</span> indexes an alternative action in this denominator. This is neither the untruncated model policy nor, when bonuses differ, that policy simply conditioned on its top-five support. For base probabilities 2/3 and 1/3 with a bonus 100 on the first action only, the shaped probability is <span class="inline-math">\(1/(1+e^{-100}/2)\)</span>, extremely close to 1. Binary64 arithmetic rounds this example to 1, although its exact real value is strictly less than 1. The source code's model identifier is a demonstration setting, not evidence of current model quality or an experiment run here.</p>
+<p>For the program's stipulated arithmetic task, the correct answer to <span class="inline-math">\(3+7\cdot3\)</span> is 24 under ordinary multiplication precedence. The hard predicate accepts a JSON object with exactly one key, <code>answer</code>, whose value has exact integer type and equals 24. Duplicate keys, Boolean values, floating-point 24.0, extra keys, incorrect integers, and malformed JSON are rejected. Parsing data instead of executing expressions removes the demo's execution behavior, but this predicate certifies only this exact answer format and value. It is not a general verifier for reasoning, tools, or arbitrary arithmetic.</p>
+</section>
+<section><h2 id="synthesis">14. Spend compute on the failure you actually have <a class="timestamp" href="https://www.youtube.com/watch?v=fPESauMaJYA&amp;t=4778s">1:19:38</a></h2>
+<table><caption>Algorithms under the contracts defined in this chapter</caption><thead><tr><th>Method</th><th>Reuse or pruning</th><th>What its result certifies</th><th>Main boundary</th></tr></thead><tbody><tr><td>Exhaustive DAG traversal</td><td>Enumerates histories</td><td>Global finite-DAG optimum if traversal completes</td><td>Potentially exponential visits; explicit resource cap can stop it</td></tr><tr><td>Scalar DAG dynamic programming</td><td>Reuses sufficient-state futures</td><td>Same optimum with one reconstructed witness</td><td>Requires valid state compression, acyclicity, and stored state space</td></tr><tr><td>Best ofN_sample</td><td>Samples complete candidates</td><td>Cheapest observed complete candidate</td><td>Support, horizon, policy mass, independence for probability formula</td></tr><tr><td>Cost-ranked beam</td><td>Irreversibly prunes prefixes</td><td>Cheapest retained complete candidate</td><td>No finite-width optimality or width-monotonicity guarantee</td></tr></tbody></table>
+<p>First check whether the state is sufficient and terminal success is correctly defined. Then ask whether exact sufficient-state reuse is affordable. If approximation is necessary, measure completion rate, task correctness, candidate coverage, and selection accuracy separately under a fixed budget. Counting a failed prefix as a successful cheap answer corrupts the experiment before any statistical comparison begins.</p>
+<p>Increasing compute can explore a better part of an unchanged feasible set. It cannot include an action deleted from support, restore a discarded resource variable, or turn a proxy reward into task truth. Learned proposal quality, objective alignment, and search efficiency are separate contributions. The next search chapter develops algorithms for cyclic graphs and estimated remaining costs; their conditions should not be inferred from this chapter's acyclic proof.</p>
+</section>
+<section><h2 id="implementation">15. An executable model with exact costs and explicit failure</h2>
+<p>Run <code>python programs/chapter05.py</code> from the course repository root. The program uses the Python standard library only, reads no files or input, downloads no model, accesses no network, and prints a deterministic JSON report. Importing it produces no report. Its graph factory copies adjacency lists into immutable tuples and a read-only mapping, so changing the caller's original list cannot change the validated problem.</p>
+<p>States and action names are nonempty strings of at most 100 characters. A graph has 1–10,000 states and at most 100,000 edges; every target and goal must exist, and each state's action names are unique. Costs are Python integers or <code>Fraction</code> values, excluding Boolean and floating-point values, with magnitude and denominator at most 1,000,000. Exact rational comparison prevents numerical rounding from deciding a cost tie. Accumulated rational values can grow beyond individual-edge bounds.</p>
+<p>The travel factory accepts destination 1–200, an optional ticket count 0–20, and a Boolean consecutive-tram restriction. Exact solvers reject a start-reachable nonterminal cycle. Exhaustive traversal has an entered-prefix budget, default 100,000 and configurable up to 1,000,000. The beam supports width 1–10,000, horizon 0–1000, and a candidate-pool cap 200,000. Sampling supports 1–10,000 trials, horizon 0–1000, a signed 64-bit integer seed, and a declared action-work bound 100,000. These operational limits raise <code>ValueError</code>; they are not proofs that a mathematical graph is unsolvable.</p>
+<p>Successful routines return complete immutable <code>Solution</code> records containing states, actions, and exact total cost. When an algorithm returns no complete path, its solution component is <code>None</code>. Malformed input, unsupported numeric types, violated bounds, or an inapplicable DAG solver raise <code>ValueError</code>. A start-goal answer is a real solution with one state, no actions, and cost zero. Sampling also reports its number of completed trials, preserving the distinction between completion and best cost.</p>
+<p>The pass-at-k function returns an exact <code>Fraction</code> for integer pool counts. Its bounds are 1≤total≤100,000,0≤correct≤total, and 1≤k≤total. The safe JSON predicate accepts strings of at most 1000 characters. Malformed or rejected candidate content returns <code>False</code>; an unsupported argument type or exceeded string bound raises <code>ValueError</code>. It rejects duplicate object keys explicitly rather than allowing the parser's last key to silently replace an earlier answer.</p>
+<details><summary>Complete original standard-library program</summary><pre><code class="language-python" id="chapter-program">&quot;&quot;&quot;Original finite-search lab. Standard library only; no model, network or eval.
+
+Exact integer/Fraction costs; graphs are copied and frozen. Algorithms stop on
+first arrival at a goal. Failure returns None; malformed inputs, cycles passed
+to DAG solvers, or declared resource caps raise ValueError. Seeded sampling is
+a reproducible finite trace, not evidence of statistical independence.
+&quot;&quot;&quot;
+from collections import deque
+from dataclasses import dataclass
+from fractions import Fraction
+from math import comb, exp, log1p
+from random import Random
+from types import MappingProxyType
+import json
+
+
+def integer(value, name, low, high):
+    if type(value) is not int or not low &lt;= value &lt;= high:
+        raise ValueError(f&#x27;{name} must be an integer in [{low}, {high}]&#x27;)
+    return value
+
+
+def name(value, label):
+    if type(value) is not str or not value or len(value) &gt; 100:
+        raise ValueError(f&#x27;{label} must be a nonempty string of at most100 characters&#x27;)
+    return value
+
+
+@dataclass(frozen=True)
+class Edge:
+    action: str
+    target: str
+    cost: Fraction
+
+
+class Problem:
+    &quot;&quot;&quot;Validated snapshot: dict[str, sequence[Edge]], start, iterable of goals.&quot;&quot;&quot;
+    __slots__ = (&#x27;graph&#x27;, &#x27;start&#x27;, &#x27;goals&#x27;)
+
+    def __init__(self, graph, start, goals):
+        if type(graph) is not dict or not 1 &lt;= len(graph) &lt;= 10000:
+            raise ValueError(&#x27;graph must be a dict with1..10000 states&#x27;)
+        nodes = {name(s, &#x27;state&#x27;) for s in graph}
+        start = name(start, &#x27;start&#x27;)
+        if start not in nodes or type(goals) not in (tuple, list, set, frozenset):
+            raise ValueError(&#x27;start must be a state; goals must be a finite collection&#x27;)
+        frozen_goals = frozenset(name(g, &#x27;goal&#x27;) for g in goals)
+        if not frozen_goals &lt;= nodes:
+            raise ValueError(&#x27;goals must be graph states&#x27;)
+        copied = {}
+        count = 0
+        for state, edges in graph.items():
+            if type(edges) not in (tuple, list):
+                raise ValueError(&#x27;adjacency must be tuple or list&#x27;)
+            actions = set()
+            row = []
+            for edge in edges:
+                if type(edge) is not Edge:
+                    raise ValueError(&#x27;adjacency entries must be Edge objects&#x27;)
+                action, target = name(edge.action, &#x27;action&#x27;), name(edge.target, &#x27;target&#x27;)
+                if action in actions or target not in nodes:
+                    raise ValueError(&#x27;actions must be unique per state; targets must exist&#x27;)
+                if type(edge.cost) not in (int, Fraction):
+                    raise ValueError(&#x27;cost must be an integer or Fraction, excluding bool&#x27;)
+                cost = Fraction(edge.cost)
+                if abs(cost) &gt; 1000000 or cost.denominator &gt; 1000000:
+                    raise ValueError(&#x27;cost magnitude and denominator must be at most1000000&#x27;)
+                row.append(Edge(action, target, cost))
+                actions.add(action)
+                count += 1
+                if count &gt; 100000:
+                    raise ValueError(&#x27;at most100000 edges supported&#x27;)
+            copied[state] = tuple(row)
+        object.__setattr__(self, &#x27;graph&#x27;, MappingProxyType(copied))
+        object.__setattr__(self, &#x27;start&#x27;, start)
+        object.__setattr__(self, &#x27;goals&#x27;, frozen_goals)
+
+    def __setattr__(self, key, value):
+        raise AttributeError(&#x27;Problem is immutable&#x27;)
+
+
+@dataclass(frozen=True)
+class Solution:
+    states: tuple
+    actions: tuple
+    cost: Fraction
+
+
+def problem(value):
+    if type(value) is not Problem:
+        raise ValueError(&#x27;a validated Problem is required&#x27;)
+    return value
+
+
+def outgoing(p, state):
+    return () if state in p.goals else p.graph[state]
+
+
+def travel(n, tickets=None, forbid_consecutive=False):
+    integer(n, &#x27;n&#x27;, 1, 200)
+    if tickets is not None:
+        integer(tickets, &#x27;tickets&#x27;, 0, 20)
+    if type(forbid_consecutive) is not bool:
+        raise ValueError(&#x27;forbid_consecutive must be bool&#x27;)
+    def key(state):
+        i, k, last = state
+        return f&#x27;{i}|{k if k is not None else &quot;u&quot;}|{int(last)}&#x27;
+    start = (1, tickets, False)
+    pending, seen, graph, goals = deque([start]), {start}, {}, []
+    while pending:
+        state = pending.popleft()
+        i, k, last = state
+        successors = []
+        if i == n:
+            goals.append(key(state))
+        else:
+            successors.append((&#x27;walk&#x27;, (i + 1, k, False), 1))
+            if 2 * i &lt;= n and (k is None or k &gt; 0) and not last:
+                successors.append((&#x27;tram&#x27;, (2 * i, None if k is None else k - 1,
+                                            forbid_consecutive), 2))
+        graph[key(state)] = [Edge(a, key(t), c) for a, t, c in successors]
+        for _, target, _ in successors:
+            if target not in seen:
+                seen.add(target)
+                pending.append(target)
+    return Problem(graph, key(start), goals)
+
+
+def dag_order(p):
+    &quot;&quot;&quot;Topological order of start-reachable states, goals treated as absorbing.&quot;&quot;&quot;
+    problem(p)
+    reachable, discovered, stack = {p.start}, [], [p.start]
+    while stack:
+        state = stack.pop()
+        discovered.append(state)
+        for edge in outgoing(p, state):
+            if edge.target not in reachable:
+                reachable.add(edge.target)
+                stack.append(edge.target)
+    indegree = {s: 0 for s in discovered}
+    for state in indegree:
+        for edge in outgoing(p, state):
+            indegree[edge.target] += 1
+    ready = deque(s for s, degree in indegree.items() if degree == 0)
+    order = []
+    while ready:
+        state = ready.popleft()
+        order.append(state)
+        for edge in outgoing(p, state):
+            indegree[edge.target] -= 1
+            if indegree[edge.target] == 0:
+                ready.append(edge.target)
+    if len(order) != len(reachable):
+        raise ValueError(&#x27;DAG solver requires acyclic start-reachable nonterminal graph&#x27;)
+    return order
+
+
+def exact_dag(p):
+    order = dag_order(p)
+    values, choices = {}, {}
+    for state in reversed(order):
+        best, choice = (Fraction(0), None) if state in p.goals else (None, None)
+        for edge in outgoing(p, state):
+            suffix = values[edge.target]
+            if suffix is not None:
+                candidate = edge.cost + suffix
+                if best is None or candidate &lt; best:
+                    best, choice = candidate, edge
+        values[state], choices[state] = best, choice
+    if values[p.start] is None:
+        return None, values
+    states, actions, state = [p.start], [], p.start
+    while state not in p.goals:
+        edge = choices[state]
+        actions.append(edge.action)
+        state = edge.target
+        states.append(state)
+    return Solution(tuple(states), tuple(actions), values[p.start]), values
+
+
+def exhaustive(p, max_visits=100000):
+    dag_order(p)
+    integer(max_visits, &#x27;max_visits&#x27;, 1, 1000000)
+    stack = [Solution((p.start,), (), Fraction(0))]
+    best, visits = None, 0
+    while stack:
+        path = stack.pop()
+        visits += 1
+        if visits &gt; max_visits:
+            raise ValueError(&#x27;exhaustive visit budget exceeded&#x27;)
+        state = path.states[-1]
+        if state in p.goals:
+            if best is None or path.cost &lt; best.cost:
+                best = path
+        else:
+            for edge in reversed(outgoing(p, state)):
+                stack.append(Solution(path.states + (edge.target,),
+                                      path.actions + (edge.action,), path.cost + edge.cost))
+    return best, visits
+
+
+def beam(p, width, horizon):
+    problem(p)
+    integer(width, &#x27;width&#x27;, 1, 10000)
+    integer(horizon, &#x27;horizon&#x27;, 0, 1000)
+    candidates = [Solution((p.start,), (), Fraction(0))]
+    for _ in range(horizon):
+        pool = []
+        for path in candidates:
+            state = path.states[-1]
+            if state in p.goals:
+                pool.append(path)
+            else:
+                pool.extend(Solution(path.states + (e.target,), path.actions + (e.action,),
+                                     path.cost + e.cost) for e in outgoing(p, state))
+            if len(pool) &gt; 200000:
+                raise ValueError(&#x27;beam candidate budget exceeded&#x27;)
+        candidates = sorted(pool, key=lambda path: path.cost)[:width]
+        if not candidates or all(path.states[-1] in p.goals for path in candidates):
+            break
+    complete = [path for path in candidates if path.states[-1] in p.goals]
+    return min(complete, key=lambda path: path.cost, default=None)
+
+
+def best_sample(p, trials, horizon, seed=0):
+    problem(p)
+    integer(trials, &#x27;trials&#x27;, 1, 10000)
+    integer(horizon, &#x27;horizon&#x27;, 0, 1000)
+    integer(seed, &#x27;seed&#x27;, -(2 ** 63), 2 ** 63 - 1)
+    if trials * max(horizon, 1) &gt; 100000:
+        raise ValueError(&#x27;sampling action budget exceeded&#x27;)
+    rng, best, completed = Random(seed), None, 0
+    for _ in range(trials):
+        states, actions, cost, state = [p.start], [], Fraction(0), p.start
+        for _ in range(horizon):
+            if state in p.goals:
+                break
+            edges = outgoing(p, state)
+            if not edges:
+                break
+            edge = rng.choice(edges)
+            actions.append(edge.action)
+            cost += edge.cost
+            state = edge.target
+            states.append(state)
+        if state in p.goals:
+            completed += 1
+            candidate = Solution(tuple(states), tuple(actions), cost)
+            if best is None or cost &lt; best.cost:
+                best = candidate
+    return best, completed
+
+
+def pass_at_k(total, correct, k):
+    integer(total, &#x27;total&#x27;, 1, 100000)
+    integer(correct, &#x27;correct&#x27;, 0, total)
+    integer(k, &#x27;k&#x27;, 1, total)
+    return 1 - Fraction(comb(total - correct, k), comb(total, k))
+
+
+def safe_answer(text):
+    &quot;&quot;&quot;Hard verifier for the stipulated answer to3+7*3, not general reasoning.&quot;&quot;&quot;
+    if type(text) is not str or len(text) &gt; 1000:
+        raise ValueError(&#x27;candidate must be a string of at most1000 characters&#x27;)
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError(&#x27;duplicate JSON key&#x27;)
+            result[key] = value
+        return result
+    try:
+        value = json.loads(text, object_pairs_hook=pairs,
+                           parse_constant=lambda token: (_ for _ in ()).throw(ValueError(token)))
+    except (ValueError, RecursionError):
+        return False
+    return type(value) is dict and set(value) == {&#x27;answer&#x27;} and type(value[&#x27;answer&#x27;]) is int and value[&#x27;answer&#x27;] == 24
+
+
+def fixture(nonmonotonic=False):
+    if not nonmonotonic:
+        rows = {&#x27;s&#x27;: [(&#x27;a&#x27;, 1), (&#x27;b&#x27;, 2)], &#x27;a&#x27;: [(&#x27;g&#x27;, 100)], &#x27;b&#x27;: [(&#x27;g&#x27;, 0)], &#x27;g&#x27;: []}
+    else:
+        rows = {&#x27;s&#x27;: [(&#x27;a&#x27;, 1), (&#x27;b&#x27;, 2)], &#x27;a&#x27;: [(&#x27;a1&#x27;, 4), (&#x27;a2&#x27;, Fraction(9, 2))],
+                &#x27;b&#x27;: [(&#x27;b1&#x27;, 0), (&#x27;b2&#x27;, 0)], &#x27;a1&#x27;: [(&#x27;g&#x27;, 0)], &#x27;a2&#x27;: [(&#x27;g&#x27;, 0)],
+                &#x27;b1&#x27;: [(&#x27;g&#x27;, 100)], &#x27;b2&#x27;: [(&#x27;g&#x27;, 100)], &#x27;g&#x27;: []}
+    return Problem({s: [Edge(f&#x27;to_{t}&#x27;, t, c) for t, c in edges] for s, edges in rows.items()}, &#x27;s&#x27;, [&#x27;g&#x27;])
+
+
+def report():
+    travel_rows = {}
+    for n in (4, 10, 17):
+        p = travel(n)
+        exact, values = exact_dag(p)
+        full, visits = exhaustive(p)
+        assert exact.cost == full.cost
+        travel_rows[str(n)] = {&#x27;cost&#x27;: int(exact.cost), &#x27;visits&#x27;: visits, &#x27;states&#x27;: len(values),
+                               &#x27;route&#x27;: [s.split(&#x27;|&#x27;)[0] for s in exact.states]}
+    sample, completed = best_sample(travel(17), 100, 20, 7)
+    constrained, _ = exact_dag(travel(17, 2, True))
+    widths = {&#x27;greedy_failure&#x27;: [int(beam(fixture(), b, 2).cost) for b in (1, 2)],
+              &#x27;nonmonotonic&#x27;: [int(beam(fixture(True), b, 3).cost) for b in (1, 2)]}
+    return {&#x27;travel&#x27;: travel_rows, &#x27;two_tickets_no_consecutive_cost&#x27;: int(constrained.cost),
+            &#x27;sampling_seed7&#x27;: {&#x27;best_cost&#x27;: int(sample.cost), &#x27;complete_trials&#x27;: completed},
+            &#x27;beam_width1_width2&#x27;: widths, &#x27;rare_path_miss_1000&#x27;: round(exp(1000 * log1p(-2 ** -20)), 12),
+            &#x27;pool_pass_at_k_N5_C2&#x27;: [str(pass_at_k(5, 2, k)) for k in range(1, 6)],
+            &#x27;safe_answer&#x27;: [safe_answer(t) for t in (&#x27;{&quot;answer&quot;:24}&#x27;, &#x27;{&quot;answer&quot;:23}&#x27;, &#x27;{&quot;answer&quot;:true}&#x27;,
+                                                       &#x27;{&quot;answer&quot;:24,&quot;answer&quot;:23}&#x27;, &#x27;__import__(&quot;os&quot;)&#x27;)],
+            &#x27;finite_bonus_scores&#x27;: {&#x27;valid&#x27;: 200 - 100, &#x27;invalid&#x27;: 1}}
+
+
+if __name__ == &#x27;__main__&#x27;:
+    print(json.dumps(report(), indent=2))
+</code></pre></details>
+<p>The actual default stdout is:</p><pre><code id="chapter-stdout">{
+  &quot;travel&quot;: {
+    &quot;4&quot;: {
+      &quot;cost&quot;: 3,
+      &quot;visits&quot;: 9,
+      &quot;states&quot;: 4,
+      &quot;route&quot;: [
+        &quot;1&quot;,
+        &quot;2&quot;,
+        &quot;3&quot;,
+        &quot;4&quot;
+      ]
+    },
+    &quot;10&quot;: {
+      &quot;cost&quot;: 6,
+      &quot;visits&quot;: 59,
+      &quot;states&quot;: 10,
+      &quot;route&quot;: [
+        &quot;1&quot;,
+        &quot;2&quot;,
+        &quot;3&quot;,
+        &quot;4&quot;,
+        &quot;5&quot;,
+        &quot;10&quot;
+      ]
+    },
+    &quot;17&quot;: {
+      &quot;cost&quot;: 8,
+      &quot;visits&quot;: 237,
+      &quot;states&quot;: 17,
+      &quot;route&quot;: [
+        &quot;1&quot;,
+        &quot;2&quot;,
+        &quot;3&quot;,
+        &quot;4&quot;,
+        &quot;8&quot;,
+        &quot;16&quot;,
+        &quot;17&quot;
+      ]
+    }
+  },
+  &quot;two_tickets_no_consecutive_cost&quot;: 9,
+  &quot;sampling_seed7&quot;: {
+    &quot;best_cost&quot;: 8,
+    &quot;complete_trials&quot;: 100
+  },
+  &quot;beam_width1_width2&quot;: {
+    &quot;greedy_failure&quot;: [
+      101,
+      2
+    ],
+    &quot;nonmonotonic&quot;: [
+      5,
+      102
+    ]
+  },
+  &quot;rare_path_miss_1000&quot;: 0.999046779832,
+  &quot;pool_pass_at_k_N5_C2&quot;: [
+    &quot;2/5&quot;,
+    &quot;7/10&quot;,
+    &quot;9/10&quot;,
+    &quot;1&quot;,
+    &quot;1&quot;
+  ],
+  &quot;safe_answer&quot;: [
+    true,
+    false,
+    false,
+    false,
+    false
+  ],
+  &quot;finite_bonus_scores&quot;: {
+    &quot;valid&quot;: 100,
+    &quot;invalid&quot;: 1
+  }
+}
+</code></pre>
+<p>The displayed route to 10 contains four walks and one tram; another route has the same six-minute cost with fewer actions. The seeded 100-rollout result happens to find cost 8 and completes all 100 trials under its generous horizon 20. Those observations are finite reproducible checks, not estimates of a general success probability. The numerical miss probability is a separate stipulated independent-trial calculation.</p>
+</section>
+<section><h2 id="exercises">16. Six worked problems that distinguish the guarantees</h2>
+<h3>1. When may two histories share a cached future?</h3>
+<p>Destination 10 has one remaining ticket, no consecutive trams, and the state rules above. Compute the future costs at location 5 with previous-action bits 0 and 1. A programmer caches only by <code>(location,tickets)</code>; explain why this fails. Prove a sufficient history-equivalence condition for caching under the finite-horizon model, and give one additional variable required if edge costs depend on departure time.</p>
+<details class="solution"><summary>Complete solution</summary>
+<p>At <span class="inline-math">\((5,1,0)\)</span>, tram 5→10 is legal and costs 2. Walking instead cannot be cheaper than 2 because at least two positive-cost actions would be required and the only direct goal edge is the tram; in fact, after walking to 6 no tram stays within 10, so that route costs 5. Thus the optimum is 2.</p>
+<p>At <span class="inline-math">\((5,1,1)\)</span>, the tram is initially forbidden. The mandatory walk to 6 resets the bit, but every possible tram from 6 or later overshoots 10. Five walks cost 5. The two histories have different futures despite identical <code>(location,tickets)</code>, so whichever value is cached first is wrong for the other query.</p>
+<p>A sufficient condition is equality of terminal status and equality of legal action labels, incremental costs, and compressed successor states for every corresponding action. At zero remaining horizon, equivalent states agree on the goal-zero versus unreachable-infinity value. Assuming equality of successor values for remaining horizon <span class="inline-math">\(h-1\)</span>, the same candidate costs yield the same minimum at horizon <span class="inline-math">\(h\)</span>. Induction proves equal horizon-bounded futures. Earlier prefix cost is not part of the suffix state under an additive objective.</p>
+<p>Departure-time dependence requires a clock coordinate or a sufficient time class, such as a timetable slot if costs genuinely depend only on that slot. Adding an arbitrary rounded time can still be invalid if two rounded values imply different future costs. State compression must preserve the actual stipulated transition/cost functions.</p>
+</details>
+<h3>2. Prove the recurrence without assuming nonnegative edges</h3>
+<p>A DAG has start edges s→a with cost 3 and s→d with cost −100. State a has an edge to terminal g with cost −5; state d is a nonterminal dead end. Compute all future values and the complete optimum. Prove why the cheaper-looking first edge to d cannot win. Then replace the dead end with a self-loop of cost −1 and an edge to g of cost 0; explain how the unrestricted and finite-horizon problems differ.</p>
+<details class="solution"><summary>Complete solution</summary>
+<p>Goal <span class="inline-math">\(g\)</span> has value 0. Dead end <span class="inline-math">\(d\)</span> has value <span class="inline-math">\(+\infty\)</span>. State <span class="inline-math">\(a\)</span> has value−5. The start candidates are <span class="inline-math">\(3-5=-2\)</span> and <span class="inline-math">\(-100+\infty=+\infty\)</span>, so the complete optimum is−2 along s→a→g.</p>
+<p>Every complete path starts with one legal first edge, and its suffix must itself reach a goal. The reverse-order induction establishes the minimum suffix cost for each successor. A dead-end prefix contributes no feasible complete path, irrespective of its prefix score. This first-edge argument proves both the lower bound and attainment by concatenating a chosen edge with an attained finite suffix; nonnegative costs were never needed.</p>
+<p>After replacing the dead end, the path s→d, followed by <span class="inline-math">\(m\)</span> self-loops, then d→g has cost <span class="inline-math">\(-100-m\)</span> for every nonnegative integer <span class="inline-math">\(m\)</span>. The unrestricted infimum is <span class="inline-math">\(-\infty\)</span>, with no finite minimizing path. The DAG solver correctly rejects this reachable cycle.</p>
+<p>Under a horizon <span class="inline-math">\(H\ge2\)</span>, the branch throughd permits at most <span class="inline-math">\(H-2\)</span> loops, so its best cost is <span class="inline-math">\(-100-(H-2)=-H-98\)</span>. It beats−2. For <span class="inline-math">\(H\lt2\)</span>, neither route completes. Finite horizon gives a finite, explicitly different optimization problem.</p>
+</details>
+<h3>3. Explain a speedup without claiming a memory measurement</h3>
+<p>Build a start followed by h≥1 layers of two states, with full connections between successive layers and both last-layer states terminal. Count distinct states, complete paths, and depth-first entered prefixes. Explain why scalar dynamic programming avoids repeated work. On a separate V-state chain, compute the total cached suffix-list step references and compare with scalar values/backpointers.</p>
+<details class="solution"><summary>Complete solution</summary>
+<p>The graph has <span class="inline-math">\(1+2h\)</span> states. Every action position chooses one of two next-layer states, so each of the <span class="inline-math">\(h\)</span> positions has two choices and there are <span class="inline-math">\(2^h\)</span> complete histories. At depth <span class="inline-math">\(t\)</span> the unfolded traversal has <span class="inline-math">\(2^t\)</span> prefixes. Summing depths 0 through <span class="inline-math">\(h\)</span> gives <span class="inline-math">\(2^{h+1}-1\)</span> visits. The edge count is 2 for the first layer plus 4 for each later transition, or <span class="inline-math">\(4h-2\)</span>.</p>
+<p>Scalar dynamic programming evaluates each sufficient state once and scans each edge once, so its abstract work is linear in this graph's state/edge count, hence linear in h. It does not enumerate the <span class="inline-math">\(2^h\)</span> histories. A stored backpointer at a state can reconstruct one minimizing suffix reused after any prefix reaching that state.</p>
+<p>On a V-state chain, complete suffixes have lengths 0 through <span class="inline-math">\(V-1\)</span>. Storing a separate list for each state uses <span class="inline-math">\(V(V-1)/2\)</span> step references; for <span class="inline-math">\(V=100\)</span> this is 4950. Scalar values and one next-edge reference per nonterminal use only <span class="inline-math">\(O(V)\)</span> entries, followed by one output route of length <span class="inline-math">\(V-1\)</span>. The suffix lists might share step objects while still copying list slots. References, objects, rational digit lengths, and bytes are different units. No actual byte count follows without a representation measurement.</p>
+</details>
+<h3>4. Diagnose a sampling budget and its hidden assumptions</h3>
+<p>An independent rollout reaches an optimal complete path with probability q=2^−20. Compute the miss probability after 1000 trials and the smallest integer budget making it at most 0.01. Explain what changes if all trials share a single random draw, if the horizon excludes every optimal path, or if a fixed five-candidate pool contains two correct candidates and two distinct candidates are selected uniformly.</p>
+<details class="solution"><summary>Complete solution</summary>
+<p>Independence and identical per-trial success probability give <span class="inline-math">\((1-2^{-20})^{1000}\approx0.9990467798321046\)</span>. The smallest budget is the ceiling of <span class="inline-math">\(\log(0.01)/\log(1-2^{-20})\)</span>, namely 4,828,869. A high-precision numerical check gives a miss probability about 0.00999999647481 at that budget and 0.01000000601156 one trial earlier, confirming the neighboring boundary rather than merely rounding the quotient.</p>
+<p>Perfectly correlated repetition has collective miss probability <span class="inline-math">\(1-q\)</span>. The nominal trial count cannot be inserted into the exponent. A horizon that excludes all optimal completions makes the relevant <span class="inline-math">\(q\)</span> zero, so the denominator <span class="inline-math">\(\log(1-q)\)</span> vanishes and no finite or infinite number of those truncated trials recovers the excluded optimum. Changing the horizon changes the per-trial event and probability.</p>
+<p>For the fixed pool, ten pairs are equally likely. Three pairs consist entirely of the three incorrect candidates, leaving seven pairs with at least one correct member. The conditional coverage is 7/10. Fresh independent draws with probability 2/5 would instead yield <span class="inline-math">\(1-(3/5)^2=16/25\)</span>. Even 7/10 coverage assumes an oracle can label the pool for analysis; it does not tell a deployed selector which candidate is correct.</p>
+</details>
+<h3>5. Trace a beam rather than assuming width monotonicity</h3>
+<p>Use the nonnegative-cost graph in <a href="#beam-limits">Section 11</a> with horizon 3, stable ties, and complete candidates held inside the beam. Trace widths 1 and 2, giving every retained path's accumulated cost after each round. Is width 2 guaranteed to improve width 1? Would increasing the horizon alone recover the lost branch?</p>
+<details class="solution"><summary>Complete solution</summary>
+<p>Width 1 begins with s at 0. Round 1 compares s→a at 1 and s→b at 2, retaining s→a. Round 2 compares s→a→a1 at 5 with s→a→a2 at 5.5, retaining the first. Round 3 completes s→a→a1→g at 5. That is its answer.</p>
+<p>Width 2 retains s→a at 1 and s→b at 2 in round 1. The round 2 pool contains a1 at 5, a2 at 5.5, b1 at 2, and b2 at 2. Sorting retains the two b-paths; both a-paths are discarded. Round 3 completes both retained b-paths at 102. Stable enumeration picks the b1 route in their tie, but either costs 102.</p>
+<p>Width 2 is worse, so no universal width-monotonicity claim follows. The two runs' depth 2 beams are not nested. A larger horizon cannot reconstruct the lost a-branch because neither retained b-state has an edge back to it, and all retained records are complete by round 3. After that, holding completed records leaves the answer 102. A modified archive, restart strategy, or ranking defines another algorithm requiring its own analysis.</p>
+</details>
+<h3>6. Repair a likelihood objective and a verifier separately</h3>
+<p>A search subtracts <span class="inline-math">\(R=100\)</span> for an accepted terminal response. Candidate A passes the proxy and has base surprisal 200; candidate B fails it and has base surprisal 1. Determine the selected candidate. A local two-action policy has base probabilities 2/3 and 1/3 and awards the same bonus only to the first action; derive its shaped probability. Finally design a safe verifier and an evaluation protocol for the stipulated arithmetic answer 24 without claiming general reasoning correctness.</p>
+<details class="solution"><summary>Complete solution</summary>
+<p>Shaped costs are 100 for A and 1 for B, so minimization chooses B. A finite soft bonus cannot enforce a hard acceptance requirement here. To require a passing answer, define only passing completed responses as feasible goals and report failure when no supported completion passes. This repairs objective feasibility; it does not prove the proxy corresponds to task truth.</p>
+<p>Exponentiating negative shaped costs gives unnormalized weights <span class="inline-math">\((2/3)e^{100}\)</span> and <span class="inline-math">\(1/3\)</span>. Normalizing the first gives <span class="inline-math">\(2e^{100}/(2e^{100}+1)=1/(1+e^{-100}/2)\)</span>. It differs from 2/3 and is strictly below 1 in real arithmetic, despite rounding to 1 in binary64. Truncating a larger vocabulary to these two actions would additionally condition support before the bonus reweighting.</p>
+<p>For this task, parse data as JSON; require exactly the key <code>answer</code>, reject duplicate keys, require exact integer type, and compare with 24. Rejecting Boolean values matters because Python's Boolean type is a subtype of integer. Do not execute the candidate. Test correct 24, incorrect 23, 24.0, true, a string 24, duplicate/extra keys, malformed data, and a string containing code. This schema is a specified engineering contract, not a theorem about all possible language-model reasoning.</p>
+<p>A proposed evaluation should use a frozen collection of prompts with independent ground-truth answer labels, fixed generation budgets/horizons/support rules, and a separately defined selector. Report completion fraction, fraction of candidate pools containing a truly correct answer, selector accuracy, and verifier false accept/reject rates against those labels. Record model/version and sampling assumptions; include rejected or failed trials in denominators. The proposal supplies no measured result. Correct final answers do not certify every intermediate step, and passing finite tests does not establish arbitrary-program correctness.</p>
+</details>
+</section>
+<section><h2 id="boundaries">17. Source and computational boundaries</h2>
+<p>The recording supplies the progression from search-problem modeling through exhaustive traversal, caching, sampling, beam search, and language-model test-time computation. The constrained composite state, rigorous acyclic/cyclic distinctions, exact finite checks, beam counterexamples, hard JSON fixture, and worked derivations are original explanatory additions. Timestamp links identify topic intervals; machine transcription is not a certificate of word-perfect audio accuracy.</p>
+<p>The chapter distinguishes the official demonstration's behavior from its informal comments: complete paths from prefixes, a closing-parenthesis test from a correctness verifier, a finite bonus from hard acceptance, and top-five/reweighted sampling from the base model distribution. No language-model run, wall-time benchmark, hardware measurement, or new empirical calibration is reported. The original program's exact finite graph checks and numerical examples are engineering evidence within the stated model.</p>
+<p>The recurrence is proved here under explicit finite-DAG assumptions; its historical naming is not needed as an authority for that proof. The research results below retain their pinned 2024 version and reported experiment scope. A final-answer oracle or a finite test suite measures its declared correctness label; it cannot silently certify an entire reasoning process or every possible input.</p>
+<h3>Primary references used in the chapter</h3><ol>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/search.py">Stanford CS221 executable Search I lecture, <code>search.py</code></a>, pinned commit f70063773fe9e04ddcbc248059501837053b810a. Used for the problem interface, demonstration algorithm/storage behavior, and exact language-model transition/reward/terminal audit; not copied into the original program.</li>
+<li>Brown, Juravsky, Ehrlich, Clark, Le, Ré, and Mirhoseini. <a href="https://arxiv.org/pdf/2407.21787v1"><em>Large Language Monkeys: Scaling Inference Compute with Repeated Sampling</em></a>, arXiv 2407.21787v1, 31 July 2024. Pages 2–4 and 9–12: generation/selection distinction, reported MATH comparison, finite-pool estimator, and verifier limitations. Numerical probability formulas in this chapter are separately derived original constructions.</li>
+</ol></section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-04-neural-networks-and-training.html">Previous available chapter</a><a href="index.html">Lecture index</a><a rel="next" href="lecture-06-uniform-cost-and-a-star-search.html">Next available chapter</a></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

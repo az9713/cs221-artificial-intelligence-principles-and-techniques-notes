@@ -1,0 +1,449 @@
+{
+  "title": "Search problems, reusable futures, and approximate planning",
+  "number": 5,
+  "video_id": "fPESauMaJYA",
+  "source_type": "locally generated automatic speech recognition",
+  "chapter_status": "author draft pending different-editor review",
+  "program": "programs/chapter05.py",
+  "sections": [
+    {
+      "section": "motivation",
+      "start": 5.26,
+      "end": 316.88,
+      "lecture_material": "Prediction versus planning; learning and search as complementary computation.",
+      "research_extension": "No empirical claim or unverified essay content.",
+      "teaching_construction": "Deadline-sensitive constrained traveler; observations/objectives and representation backward refreshers.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Planning/search distinction, model-relative consequence of a computed optimum, persistent task."
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "problem",
+      "start": 316.88,
+      "end": 658.96,
+      "lecture_material": "Search interface, start/goal/successors/cost; walking and tram case.",
+      "research_extension": "Pinned official search.py problem interface read.",
+      "teaching_construction": "Complete versus partial paths, additive minutes, start-goal/dead-end contracts; explicit route validation and all-walk nine-minute correction.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Finite deterministic model, goals absorbing, complete path and additive objective."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original checked against official",
+          "claim": "Legal/illegal routes, nine-minute all-walk count and six-minute complete path."
+        }
+      ],
+      "evidence_class": "definition; engineering check"
+    },
+    {
+      "section": "state",
+      "start": 658.96,
+      "end": 1233.2,
+      "lecture_material": "State sufficiency, resource/history restrictions, ticket and last-action examples.",
+      "research_extension": "No independent empirical result.",
+      "teaching_construction": "Composite state transitions/terminal set, sufficient history equivalence proof, clock counterexample and suffix costs5/2/5.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "State versus path record and composite resource/last-action state."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Matching terminal status/legal actions/costs/compressed successors implies equal finite-horizon futures by induction."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Exact5/2/5 constrained suffix fixture; not a measured travel result."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check"
+    },
+    {
+      "section": "recurrence",
+      "start": 1233.2,
+      "end": 1629.26,
+      "lecture_material": "Future-cost first-edge recurrence and worked backward street example.",
+      "research_extension": "Official recurrence checked; no historical original-content attribution.",
+      "teaching_construction": "Finite-DAG order and full lower-bound/attainment induction; infinity conventions, negative edge, witness/tie distinction.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "DAG, future value, unreachable infinity, goal stopping, topological ordering."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Finite-DAG first-edge optimality and attainment, including finite negative edges; backpointer reconstruction."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Destination4 values0/1/2/3 and negative-DAG cost\u22122."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check"
+    },
+    {
+      "section": "exhaustive",
+      "start": 1629.26,
+      "end": 1999.22,
+      "lecture_material": "Recursive exhaustive traversal, repeated states, n4/n10/n17 examples and complexity discussion.",
+      "research_extension": "Actual pinned exhaustive source inspected; recorded asymptotic intuition bounded.",
+      "teaching_construction": "Exact prefix visits9/59/237; explicit branching/depth bound, layered-DAG exponential unfolding and implementation-specific storage limits.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Exhaustive entered-prefix traversal versus distinct problem states."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Branching/depth geometric bound and layered DAG path/visit formulas; streaming recursion workspace under explicit storage assumptions."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Finite travel costs3/6/8 and visits9/59/237; own immutable-prefix implementation is not claimed depth-only storage."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check"
+    },
+    {
+      "section": "cycles",
+      "start": 1999.22,
+      "end": 2240.58,
+      "lecture_material": "Cyclic recursive evaluation and action-count augmentation/truncation.",
+      "research_extension": "Original algorithm audit; historical Bellman work unavailable and not cited as mathematical proof.",
+      "teaching_construction": "Zero-cycle nonunique fixed point, bounded-horizon recurrence, simple-path sufficient horizon and relevant negative-cycle infimum.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Zero-loop equation does not uniquely select path value; finite-horizon recurrence terminates; nonnegative cycle deletion yields optimal simple path; relevant negative cycle gives \u2212infinity."
+        },
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Action horizon changes feasible completions; cycle evaluation distinguished from problem definition."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Travel10 fails under horizon3; finite cyclic beam/sampling failures and DAG-cycle rejection."
+        }
+      ],
+      "evidence_class": "theorem; definition; engineering check"
+    },
+    {
+      "section": "cache",
+      "start": 2240.58,
+      "end": 2602.18,
+      "lecture_material": "Caching solved futures, memoization mechanics and Bellman name mentioned by speaker.",
+      "research_extension": "Pinned official dynamic_programming read; no certification of historical naming.",
+      "teaching_construction": "Scalar values plus one backpointer, exact ties and alternative six-minute routes, two-ticket/no-consecutive optimum9.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Memoization and sufficient-state future cache versus prefix cost."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Acyclic cached recurrence and reverse topological evaluation compute same optimal values; consistent backpointers recover a complete witness."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Exact destination10/17 routes and constrained17 value9; no secondary path-length objective inferred."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check"
+    },
+    {
+      "section": "memory",
+      "start": 2602.18,
+      "end": 3004.51,
+      "lecture_material": "Larger examples, memory limits and benefit from histories merging into states.",
+      "research_extension": "Official whole-suffix solution cache and list-copy behavior inspected at exact source lines364\u2013410.",
+      "teaching_construction": "Scalar O(V+E) work/O(V) auxiliary entries under unit-cost assumptions, full-suffix chain quadratic slots, state-grid bound and rational/representation qualifications.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Abstract scalar-DAG work/storage and sumV(V\u22121)/2 full-suffix references; reachable resource-state grid bounded by2n(K+1)."
+        },
+        {
+          "class": "engineering check",
+          "origin": "verified official source and original",
+          "claim": "Official full solution suffix representation incurs chain quadratic copying; no claim of measured bytes or timings."
+        },
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Input versus auxiliary storage, states/records/references/bytes and constant-time abstraction separated."
+        }
+      ],
+      "evidence_class": "theorem; engineering check; definition"
+    },
+    {
+      "section": "sampling",
+      "start": 3004.51,
+      "end": 3485.02,
+      "lecture_material": "Policies/uniform action rollout, best-of-n, cap, asymptotic support, parallelism and different lengths.",
+      "research_extension": "Actual official completion boundary inspected; no stochastic performance study claimed.",
+      "teaching_construction": "Explicit complete-only acceptance, fixed IID event and miss probability, rare probability budget, perfect-correlation and horizon counterexamples, pseudorandom scope.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Conditional policy normalization, supported complete rollouts, best observed answer and failure."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "IID miss power and logarithmic integer budget for0<q<1; q0/support/correlation boundaries; minimum complete cost order independence with tie caveat."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "70-digit rare-event miss and neighboring budget boundary; deterministic seeded trace is not an independence certificate."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check"
+    },
+    {
+      "section": "beam",
+      "start": 3485.02,
+      "end": 4036.32,
+      "lecture_material": "Beam expansion/pruning, greedy-width intuition, finished records, stable ties and horizon implementation.",
+      "research_extension": "Pinned beam_search inspected at505\u2013532.",
+      "teaching_construction": "Precisely scoped depth-synchronous beam, greedy failure101versus2, pool/ranking/path-copy operation bounds.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Finite width/horizon, full path records, stable cost ranking and completed-slot convention."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Prefix-cost greediness does not imply global optimality; candidate-pool/ranking bound under stated assumptions."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Finite101versus2 counterexample and completion/failure/start-goal program behavior."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check"
+    },
+    {
+      "section": "beam-limits",
+      "start": 4036.32,
+      "end": 4279.36,
+      "lecture_material": "Finished-slot budget, cost pruning, infinite-width intuition and informal particle-filter analogy.",
+      "research_extension": "No imported particle-filter guarantee.",
+      "teaching_construction": "Explicit nonmonotonic B1cost5/B2cost102 graph, finite-horizon completeness without pruning, negative-cost prefix-pruning failure and variant distinctions.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Nonnegative finite-width nonmonotonicity counterexample; finite-horizon unpruned completeness; nonnegative future lower bound needed for incumbent pruning."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Exact width1/2 traces5/102 and negative suffix example10\u221220."
+        },
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Archived incumbents, finished beam slots and probabilistic particle schemes are different contracts."
+        }
+      ],
+      "evidence_class": "theorem; engineering check; definition"
+    },
+    {
+      "section": "tokens",
+      "start": 4279.36,
+      "end": 4513.04,
+      "lecture_material": "Prompt/prefix/next-token search, negative-log cost, verifier and cited Large Language Monkeys.",
+      "research_extension": "Actually checked Monkeys v1 pages2\u20134/9\u201312 and visuals2/10: generation/selection, bounded reported MATH comparison, pool estimator and verification scope.",
+      "teaching_construction": "Fixed token-ID/EOS model, chain-rule derivation and units, hard validity versus likelihood, conditional pool counting and rare-correct majority counterexample.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Ordered token-prefix/prompt conditioning/EOS, positive-support surprisal nats and hard feasible verifier."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Product-to-log sum, fixed-pool without-replacement coverage formula; IID majority versus oracle coverage counterexample."
+        },
+        {
+          "class": "empirical result",
+          "origin": "verified primary",
+          "claim": "Monkeys v1 page3 Llama-3-8B-Instruct/MATH reported coverage79.8\u219295.3 at100\u219210000 versus selection38.7\u219239.8; Figure7's bounded generation/selection gap."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Exact pool5/2 values and independently computed q0.01 oracle examples; not new model results."
+        }
+      ],
+      "evidence_class": "definition; theorem; empirical result; engineering check"
+    },
+    {
+      "section": "demo-audit",
+      "start": 4513.04,
+      "end": 4778.78,
+      "lecture_material": "Illustrative Qwen arithmetic completion, top5 support, terminal reward, policy and duplicate candidates.",
+      "research_extension": "Actual official source535\u2013610 checked for string re-tokenization, top5, closing parenthesis/eval, reward and shaped-policy code; no model execution.",
+      "teaching_construction": "Hard-versus-soft objective, bonus counterexample, local policy reweighting derivation, safe strict JSON answer schema and binary64 limit.",
+      "claim_provenance": [
+        {
+          "class": "engineering check",
+          "origin": "verified official source",
+          "claim": "Pinned source implementation audited; no source model or eval executed, no current model-quality claim."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Finite bonus lacks universal hard-acceptance guarantee; shaped softmax policy equals restrictedp timesexpRv normalized."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Valid200\u2212100loses to invalid1;2/3bonus-reweighting high-precision value and binary64 rounding; actual safe JSON finite boundaries."
+        },
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Hard exact answer24 schema and limited verifier scope; policy/transition/support/objective distinguished."
+        }
+      ],
+      "evidence_class": "engineering check; theorem; definition"
+    },
+    {
+      "section": "synthesis",
+      "start": 4778.78,
+      "end": 4898.06,
+      "lecture_material": "Four-method synthesis, learned costs with search, preview of cyclic algorithms.",
+      "research_extension": "No new measured result.",
+      "teaching_construction": "Model/support/objective/algorithm guarantee table and scoped proposed evaluation quantities.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Model correctness, exact optimum, observed sample/beam result and future chapter conditions separated."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Increasing trials/width cannot recover excluded support or missing state information under an unchanged model."
+        }
+      ],
+      "evidence_class": "definition; theorem"
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "No source performance experiment.",
+      "teaching_construction": "Complete original stdlib exact finite graph implementation, declared immutable snapshots/domain/resource failures, actual embedded code/stdout.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Exact program input/output/effect/failure contracts and operational bounds."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Actual deterministic program/stdout, independent author-oracle comparisons and invalid/support/verifier cases; not independent editorial acceptance."
+        }
+      ],
+      "evidence_class": "definition; engineering check"
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "No new research experiment.",
+      "teaching_construction": "Six complete mixed state-equivalence/proof/resource/sampling/beam/verifier problems and solutions.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Solutions1/2/3/4/5/6 mathematical inductions, counting, probability assumptions and counterexamples."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Finite suffix/route/cost/visit/neighboring-budget/subset/beam/verifier arithmetic independently author checked."
+        },
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Exercise6 proposed frozen-budget evaluation protocol, with no empirical result claimed."
+        }
+      ],
+      "evidence_class": "theorem; engineering check; definition"
+    },
+    {
+      "section": "boundaries",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "Checked pinned official and Monkeys v1 attribution/limits.",
+      "teaching_construction": "Evidence scope, machine-transcription/finite-model/hardware/verification limits and conventional primary references.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "original and verified primary",
+          "claim": "Original/recorded/primary evidence boundaries; no human/audio/model/hardware or universal verifier certificate."
+        }
+      ],
+      "evidence_class": "definition"
+    }
+  ],
+  "references": [
+    {
+      "title": "Stanford CS221 executable Search I lecture, search.py",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/search.py",
+      "version": "Git commit f70063773fe9e04ddcbc248059501837053b810a",
+      "scope": "Actual full646lines read; exact interface, suffix cache, beam and LM demo sections checked.",
+      "supports": "Pinned search.py: search interface and travel transitions; whole-suffix dynamic-programming storage; beam completion handling; string-based arithmetic demo, top-five support, eval acceptance and terminal bonus."
+    },
+    {
+      "title": "Brown et al., Large Language Monkeys: Scaling Inference Compute with Repeated Sampling",
+      "url": "https://arxiv.org/pdf/2407.21787v1",
+      "version": "arXiv2407.21787v1,31July2024",
+      "scope": "Actual retained30pagePDF; pages1\u20134/9\u201312 read, visuals2/10 viewed. Bounded MATH result and generation/selection/verification claims; no current model/API pricing assertion.",
+      "supports": "Pinned v1 pages2\u20134 and9\u201312: coverage versus selection, reported Llama-3-8B-Instruct MATH comparison, conditional fixed-pool pass@k estimator and verifier limitations; figures1/7 on PDF pages2/10."
+    }
+  ],
+  "body_sha256": "2cf63c537ad2c7fa0aa5350f648864ce93e2a95d62c207255a2ccdc1009b106c",
+  "implementation": {
+    "program_sha256": "5a85a4cf33b2dc0dbb1b0fdbb1a145cd8a52e0489cfff3560443e12ff5ef086e",
+    "stdout_sha256": "936539f2bbdfc099729bea9a154305d5a3453177746286fd351492cb504c1d69",
+    "runtime": "Python standard library; exact finite graph diagnostic report only"
+  }
+}
