@@ -1,11 +1,11 @@
 {
-  "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+  "chapter": "lecture-10-games-opponent-models-and-search.html",
   "checked_at_utc": "2026-10-03T12:49:24.709815+00:00",
   "status": "independently reviewed and locally validated chapter",
-  "accepted_scientific_body_sha256": "fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4",
-  "accepted_metadata_sha256": "ecafcb9b0e2a7df34748cc7a6498aac771323e4d6616ce3c9af18b1dcfcd0e60",
-  "accepted_program_sha256": "a6d99d5484b432d2b29b79efe6e5ffa4178d8a5267e63a2f8b867e4b3e9d86dd",
-  "integrated_html_sha256": "89cac3a604977f187d71e00c0562b3f61fca912a5bb55944d853baf72cb3a645",
+  "accepted_scientific_body_sha256": "dacecac97ded7a9a05b6c7a584c86f2fd71134ec432e90656d2bf9ab6fe8093a",
+  "accepted_metadata_sha256": "f81f795b23400104f0640dacc7e1746bf1dee6eee63f648d5e20fec0661454a0",
+  "accepted_program_sha256": "4d2a6a4e419ffbf2858d3f450988b072012f9ec1963db3ff2dec1ba2a35ce742",
+  "integrated_html_sha256": "620841efe18a06751eba6c0697a8d72d42cddf5ba997bb9d98e7021c5edb7a47",
   "worked_solutions": 6,
   "current_reader_gate": {
     "status": "passed within accepted Chapters1-10 reader scope",
@@ -23,8 +23,7 @@
     "gate_6b": "accepted",
     "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "edd159004065d5536c2734d64fe26f8afb2d8054d185b9e45162d69c8341b24f",
-    "independent_numerical_checks": 7488,
-    "extra_nan_boundary_checks": 4
+    "review_report_sha256": "246badaf139e85b8c7c2b33d882e71b01c6102d4a31f00889443380555a2ecd7",
+    "independent_numerical_checks": 11815
   }
 }

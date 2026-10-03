@@ -3798,6 +3798,415 @@
       "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
       "video_id": "lOMNskWVeD8",
       "duration": 4442
+    },
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": "No recording span assigned to this original support section.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Stipulated bins and original continuing decision case",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Stipulated bins and original continuing decision case",
+          "provenance": "original teaching construction"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "unknown",
+      "start": 5.3,
+      "end": 155.94,
+      "lecture_material": "Unknown opposing selector versus known chance and classroom bins choice.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Bins fair averages/minima and C versus B decisions",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Observed-action opponent model versus known chance",
+          "provenance": "recording; actual games.py and game1 image"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Bins fair averages/minima and C versus B decisions",
+          "provenance": "original exact rational arithmetic"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "model",
+      "start": 155.94,
+      "end": 546.32,
+      "lecture_material": "Finite game tree/state/action/player/end utility, zero sum and deterministic/stochastic policies.",
+      "research_extension": "Knuth\u2013Moore PDF2\u20133 finite assumptions and fixed Max/Min convention.",
+      "teaching_construction": "Terminal-payment discount counterexample",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Finite fully observed zero-sum game/policies/terminal objective",
+          "provenance": "recording; Knuth\u2013Moore PDF2\u20133"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Terminal-payment discount counterexample",
+          "provenance": "original teaching calculation"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "halving",
+      "start": 546.32,
+      "end": 639.2,
+      "lecture_material": "Halving game; number/player state and person left with zero wins.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Strict decrease implies finite termination",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Zero-recipient rule and complete number/player state",
+          "provenance": "recording; actual games.py/halving image"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Strict decrease implies finite termination",
+          "provenance": "original induction argument"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "evaluation",
+      "start": 639.2,
+      "end": 1249.3,
+      "lecture_material": "Undiscounted terminal convention; simulation and exact fixed-policy evaluation.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "First-action expectation identity and finite independent-rollout variance; Exact zero versus original seeded -3/2 mean; explicit-tree/state-graph work; Recording demonstration mean15 from20draws",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "First-action expectation identity and finite independent-rollout variance",
+          "provenance": "original conditioning/variance derivations"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Exact zero versus original seeded -3/2 mean; explicit-tree/state-graph work",
+          "provenance": "original finite program and geometric count"
+        },
+        {
+          "evidence_class": "speaker judgment",
+          "claim": "Recording demonstration mean15 from20draws",
+          "provenance": "attributed recording demonstration, not recomputed original result"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "expectimax",
+      "start": 1249.52,
+      "end": 1530.06,
+      "lecture_material": "Optimize agent against fixed stochastic opponent, expectimax recurrence and sampling warning.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Deterministic attainment and uniform estimate/gap consequences; Affine opponent-model thresholds and max-of-noise bias",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Fixed-opponent best response recurrence",
+          "provenance": "recording; actual games.py"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Deterministic attainment and uniform estimate/gap consequences",
+          "provenance": "original convex-mixture/backward-induction proof"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Affine opponent-model thresholds and max-of-noise bias",
+          "provenance": "original finite calculations"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "minimax",
+      "start": 1530.74,
+      "end": 2129.62,
+      "lecture_material": "Minimax recurrence, halving values/perfect play and attributed solved-game discussion.",
+      "research_extension": "Schaeffer PDF1 dated three solution levels and weak checkers report.",
+      "teaching_construction": "Backward-induction lower/upper guarantees and random-policy extension; Unusual-rule halving table and winning move at11",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Two-player finite perfect-information recurrence and solution levels",
+          "provenance": "recording; Knuth\u2013Moore PDF2\u20133; Schaeffer PDF1"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Backward-induction lower/upper guarantees and random-policy extension",
+          "provenance": "original finite proof"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Unusual-rule halving table and winning move at11",
+          "provenance": "original exact program"
+        },
+        {
+          "evidence_class": "empirical result",
+          "claim": "2007paper reports weak8x8checkers solution as draw",
+          "provenance": "Schaeffer PDF1; dated reported computational result, no independent proof reproduction"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "faceoff",
+      "start": 2129.62,
+      "end": 2792.08,
+      "lecture_material": "Four policy face-offs, saddle/best-response inequalities and robust versus exploitive interpretation.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Each four-policy inequality holds with one participant fixed; -5<=1<=2<=5 and expected/pathwise boundary",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Each four-policy inequality holds with one participant fixed",
+          "provenance": "original proof from constructed saddle and best response"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "-5<=1<=2<=5 and expected/pathwise boundary",
+          "provenance": "original bins arithmetic"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "chance",
+      "start": 2792.43,
+      "end": 3112.21,
+      "lecture_material": "Known coin nodes, observed stay/left game; extra turns/players and excluded information/payoff settings.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Coin-before-selector values, commitment-order and hidden-coin information counterexamples; Extra turns versus multiple payoffs, simultaneity and information constraints",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Known normalized chance recurrence and observed coin order",
+          "provenance": "recording; actual inspected expectiminimax image"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Coin-before-selector values, commitment-order and hidden-coin information counterexamples",
+          "provenance": "original exact calculations"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Extra turns versus multiple payoffs, simultaneity and information constraints",
+          "provenance": "recording discussion corrected by original bounded full-state counterexample"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "pruning",
+      "start": 3112.43,
+      "end": 3824.14,
+      "lecture_material": "Deterministic alpha-beta/branch bounds, ancestor relevance, nine-leaf example and chance question.",
+      "research_extension": "Knuth\u2013Moore PDF1\u20139 scope; viewed PDF5/6/8 window invariant and explicit Max/Min conversion.",
+      "teaching_construction": "Bound-sensitive full-window correctness under finite deterministic game; Five of nine visits; returned6upper versus exact4middle; Internal bound status and equality cutoff/tie scope",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Bound-sensitive full-window correctness under finite deterministic game",
+          "provenance": "original induction; Knuth\u2013Moore PDF5\u20136 equations9\u201311 and PDF8 viewed"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Five of nine visits; returned6upper versus exact4middle",
+          "provenance": "original program; actual inspected source alpha-beta-example2 image"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Internal bound status and equality cutoff/tie scope",
+          "provenance": "original implementation contract; scoped primary window definition"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "ordering",
+      "start": 3824.14,
+      "end": 4013.95,
+      "lecture_material": "Successor ordering, heuristic ordering and remaining worst-case search work.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Ordering preserves full-window value and conditional chance interval bound; Three versus four visited leaves and unchanged value3; Heuristic ordering versus replacement and unfolded-tree complexity scope",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Ordering preserves full-window value and conditional chance interval bound",
+          "provenance": "original proof/case inequality"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Three versus four visited leaves and unchanged value3",
+          "provenance": "original finite program"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Heuristic ordering versus replacement and unfolded-tree complexity scope",
+          "provenance": "recording; original geometric count, no unread primary asymptotics"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "cutoff",
+      "start": 4013.95,
+      "end": 4348.66,
+      "lecture_material": "Evaluation function/features, depth cutoff/units, approximation and learned-function pointer.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Depth1/2/3 actions A/B/A under one fixed evaluator; Uniform frontier error propagation and2etaaction regret",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Terminal precedence and source round-depth versus original ply-depth",
+          "provenance": "recording; inspected eval-functions-recurrence image"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Depth1/2/3 actions A/B/A under one fixed evaluator",
+          "provenance": "original finite program"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Uniform frontier error propagation and2etaaction regret",
+          "provenance": "original max/min/normalized-average induction"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "synthesis",
+      "start": 4349.04,
+      "end": 4398.99,
+      "lecture_material": "Recurrence recap; exact pruning versus approximate evaluator and next-lecture TD pointer.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Recurrence targets and exact/approximate scope",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Recurrence targets and exact/approximate scope",
+          "provenance": "recording; original comparison table"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "No recording span assigned to this original support section.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Exact rational finite type/graph/policy/window/budget contracts; Actual source/stdout and all displayed finite fixtures",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Exact rational finite type/graph/policy/window/budget contracts",
+          "provenance": "original program"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Actual source/stdout and all displayed finite fixtures",
+          "provenance": "original executed program, no empirical system claim"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "No recording span assigned to this original support section.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Complete guarantee/order/hidden-information and uniform-error reasoning; Thresholds/halving/chance/pruning/depth arithmetic and protocol checks",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Complete guarantee/order/hidden-information and uniform-error reasoning",
+          "provenance": "original proved solutions"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Thresholds/halving/chance/pruning/depth arithmetic and protocol checks",
+          "provenance": "original worked computations"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
+    },
+    {
+      "section": "references",
+      "start": null,
+      "end": null,
+      "lecture_material": "No recording span assigned to this original support section.",
+      "research_extension": "Only separately scoped original teaching or official-source context applies.",
+      "teaching_construction": "Actual source identity/page/visual/coverage and bounded verification roles",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Actual source identity/page/visual/coverage and bounded verification roles",
+          "provenance": "recording and scoped retained original checks"
+        }
+      ],
+      "chapter": "lecture-10-games-opponent-models-and-search.html",
+      "video_id": "SMOD_GiRzb8",
+      "duration": 4405
     }
   ]
 }

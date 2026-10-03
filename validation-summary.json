@@ -1,9 +1,9 @@
 {
-  "checked_at_utc": "2026-10-03T12:15:32.881025+00:00",
+  "checked_at_utc": "2026-10-03T12:49:24.709815+00:00",
   "course": "CS221",
-  "chapter_count": 9,
+  "chapter_count": 10,
   "selected_recordings": 20,
-  "status": "Nine independently reviewed chapters locally validated; full course in development",
+  "status": "Ten independently reviewed chapters locally validated; full course in development",
   "course_complete": false,
   "human_accessibility": "not performed",
   "reader_report": "reader-validation.json",
@@ -88,7 +88,7 @@
       "CODE": "873e3db06116bad3f834cfd108de29fec4105dee30cc117c406c733e1fc4bfb2",
       "HTML": "9a03ecb6b6b48d43a3d6d310cd9a82d342a7fde4e2dfcd1e54f7dd3cda0b0988",
       "review": "reviews/lecture-08-round2.md",
-      "before_HTML": "7a67f7648b28128c072234e9a57c3c3bee5e96b755f11c267a612b826487874e",
+      "before_HTML": "ea47cbf84e6f4e47b505590eb6426b404d5dd25aa8e51c15bed23d9c535e663b",
       "review_sha256": "14f09638bfa24950a5152d6d0b98a56892c0f0a460d072b1d5f9a6c6115d0bcb",
       "path": "lecture-08-reinforcement-learning.html",
       "after_HTML": "ea47cbf84e6f4e47b505590eb6426b404d5dd25aa8e51c15bed23d9c535e663b"
@@ -99,14 +99,25 @@
       "CODE": "1ca9cc21f863de41dfd932ff1b23171aed2e933b7d36938ad7988cde3b04542d",
       "HTML": "048ac79c7c03838eeaae2cf08c0127a9c5bdedf7c1e07bb8001928c3a50a518a",
       "review": "reviews/lecture-09-round1.md",
-      "before_HTML": "048ac79c7c03838eeaae2cf08c0127a9c5bdedf7c1e07bb8001928c3a50a518a",
+      "before_HTML": "23046f4a3ccea8e3a644f0933cb438d6cd6f1c41e9567eff0ecb02e9ce3c3381",
       "review_sha256": "f3e886716e270171df251d02a3a272ff8ec7f786beb8ce42e77b04e890d6aee7",
       "path": "lecture-09-policy-gradients-and-function-approximation.html",
-      "after_HTML": "23046f4a3ccea8e3a644f0933cb438d6cd6f1c41e9567eff0ecb02e9ce3c3381"
+      "after_HTML": "165b1a5c20b4e24d5a2dc6508b34a44b3cb43206caacb4b8abaaa0b397017cad"
+    },
+    "10": {
+      "BODY": "dacecac97ded7a9a05b6c7a584c86f2fd71134ec432e90656d2bf9ab6fe8093a",
+      "META": "f81f795b23400104f0640dacc7e1746bf1dee6eee63f648d5e20fec0661454a0",
+      "CODE": "4d2a6a4e419ffbf2858d3f450988b072012f9ec1963db3ff2dec1ba2a35ce742",
+      "HTML": "e0821e393216e5c4a9a88fd8ec84fb0b3874ba9e1bb2d0f88abf9d4b622412a6",
+      "review": "reviews/lecture-10-round2.md",
+      "before_HTML": "e0821e393216e5c4a9a88fd8ec84fb0b3874ba9e1bb2d0f88abf9d4b622412a6",
+      "review_sha256": "246badaf139e85b8c7c2b33d882e71b01c6102d4a31f00889443380555a2ecd7",
+      "path": "lecture-10-games-opponent-models-and-search.html",
+      "after_HTML": "620841efe18a06751eba6c0697a8d72d42cddf5ba997bb9d98e7021c5edb7a47"
     }
   },
   "limits": [
-    "Chapters10-20, cumulative course lab, independent learning-route review and book-wide review pending",
+    "Chapters11-20, cumulative course lab, independent learning-route review and book-wide review pending",
     "No publication performed"
   ]
 }

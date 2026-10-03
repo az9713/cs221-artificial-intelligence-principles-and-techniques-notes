@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-03-classification-probabilities-and-text.html",
-  "checked_at_utc": "2026-10-03T12:15:32.881025+00:00",
+  "checked_at_utc": "2026-10-03T12:49:24.709815+00:00",
   "status": "independently reviewed and locally validated chapter",
   "independent_review": {
     "rounds": 1,
@@ -29,7 +29,7 @@
     "No publication performed"
   ],
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-9 reader scope",
+    "status": "passed within accepted Chapters1-10 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   }

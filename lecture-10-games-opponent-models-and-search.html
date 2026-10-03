@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="dacecac97ded7a9a05b6c7a584c86f2fd71134ec432e90656d2bf9ab6fe8093a"><title>Games: opponent models and search · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START -->
+<h1>Games: opponent models and search</h1>
+<p class="subtitle">Chapter 10 · A decision can be optimal against one opponent and fragile against another.</p>
+<section id="case"><h2>A favorable average is not an adversarial guarantee</h2>
+<p>You choose one of three bins. Another player sees your choice and selects a number from that bin; that number is your utility. A contains −50 and 50, B contains 1 and 3, and C contains −5 and 15. A fair selector makes C attractive. A selector minimizing your utility makes B attractive. Both choices are exact solutions to different questions. Before searching faster, decide which question the search should answer.</p>
+<p>This stipulated numerical game remains our running case. Its small tree separates a known stochastic opponent, a worst-case opponent and an external chance event. A recursive halving game then develops backward induction, and a nine-leaf tree exposes pruning's return contract. These are teaching utilities, not calibrated human behavior or measured financial payoffs.</p>
+<p>Chapters 7–8 distinguished known models, policy evaluation and learning from feedback. Games add control by another decision maker. The recording supplies the sequence; the proofs, counterexamples, exact fixtures and original code develop its conditions. An exact value is conditional on the legal moves, information, utility and opponent model supplied to the algorithm.</p></section>
+<section id="unknown"><h2>1. Identify who controls the uncertainty <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=5s">[00:05–02:35]</a></h2>
+<p>A known random environment supplies a probability row for averaging outcomes. An opponent may deliberately respond to your action. In the bins, the second player sees A, B or C before selecting a number; their rule can choose differently in each bin. Giving each number probability one half is an opponent-model assumption, not a consequence of having two numbers.</p>
+<p>Write the utilities of bin \(a\) as \(u(a,1),u(a,2)\). Fair-opponent averages are \((0,2,5)\), since C gives \((-5+15)/2=5\). Minimizing-opponent values are \((-50,1,-5)\). Maximizing the first array selects C with expectation 5; maximizing the second selects B with lower guarantee 1. A's possible 50 does not justify its choice without a model of the selector.</p>
+<p>Unknown does not imply uniform, random or adversarial. Expectimax optimizes against a specified stochastic rule. Minimax protects a lower value against every legal opposing rule. Protection can forgo opportunity against a predictable weaker opponent. Neither validates that the declared game captures deployment: allowing the selector to change bins or refuse payment changes the problem.</p>
+<p>The <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/games.py">retained official executable lecture</a> and its inspected bins image fix these numbers and move order. The classroom poll illustrates intuitions about the opponent, not a measured population strategy.</p></section>
+<section id="model"><h2>2. Utility, moves and information define the game <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=155s">[02:35–09:06]</a></h2>
+<p>Let \(S\) be a finite state set, \(s_0\) its initial state and \(S_{\mathrm{term}}\) the terminal states. At nonterminal \(s\), the nonempty finite action set is \(A(s)\); action \(a\) leads to \(T(s,a)\). The label \(\operatorname{player}(s)\) identifies agent or opponent. Terminal \(u(s)\) is the agent's utility. Every legal path terminates, and the moving player observes the complete state. An acyclic state graph can unfold into a tree of histories, with the same graph state repeated on different paths.</p>
+<p>Two-player zero sum means the opponent receives \(-u(s)\). Maximizing their utility therefore minimizes the agent's. It does not mean both maximize the displayed number, or that every two-person interaction is zero sum. General payoffs require a separate utility for each player and another solution concept.</p>
+<p>A deterministic policy \(\pi_p\) chooses a legal action at each state of player \(p\). A stochastic policy \(\pi_p(a\mid s)\) is a nonnegative distribution summing to one over \(A(s)\). It specifies contingent decisions even at states not reached by its initial choice. The bins opponent must therefore specify responses at A, B and C, rather than one global number independent of the chosen bin.</p>
+<p>Terminal utility encodes the objective. Captured-piece count and win indicator can rank strategies differently. Intermediate points can be accumulated in the state and assessed at terminal, provided this preserves the intended criterion. Terminal-only reward is sparse feedback for learning; a planner can still reason about its future consequences.</p>
+<p>We use undiscounted terminal utility. A single final payment can nevertheless be discounted as \(\gamma^\tau u(S_\tau)\), with discount \(\gamma\in(0,1]\), terminal stopping time \(\tau\) measured in moves and terminal random state \(S_\tau\). Positive utility 2 after two moves versus 1 immediately reverses its ranking at \(\gamma=1/2\). The recording's one-number explanation motivates a convention, not a mathematical prohibition on discounting. Our backward induction solves the declared undiscounted criterion.</p>
+<p><a href="https://webdocs.cs.ualberta.ca/~mmueller/courses/657-Fall2025/readings/1975-AIJ-Knuth-Moore-alphabeta.pdf">Knuth and Moore (1975), PDF pp.2–3</a>, state finite move/termination assumptions and relate player-relative values to the consistent Max/Min viewpoint. We retain the latter. A cyclic infinite game needs another horizon, termination rule or infinite-game analysis.</p></section>
+<section id="halving"><h2>3. The player to move belongs in the state <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=546s">[09:06–10:39]</a></h2>
+<p>Start at integer \(n=11\). A player decrements \(n\) or replaces it by \(\lfloor n/2\rfloor\); the other player then moves. The source's unusual rule is that the person <em>left with zero</em> wins. Moving from 1 to 0 therefore loses. Replacing this by “the last mover wins” solves a different game with identical transitions.</p>
+<p>The state is \((n,p)\), with next player \(p\). Its successors are \((n-1,\bar p)\) and \((\lfloor n/2\rfloor,\bar p)\), where \(\bar p\) is the other player. At zero, agent utility is +1 if the next player is agent and −1 otherwise. Each positive-state action strictly decreases \(n\), giving termination in at most \(n\) moves and a well-founded induction measure.</p>
+<p>The number alone would conflate terminal \((0,\text{agent})\) and \((0,\text{opponent})\), which have different utilities. At 1 the two action labels share a successor but remain distinct legal choices. A fair distribution over them still makes the successor certain. Action labels and distinct successor states are different objects.</p>
+<p>The actual official module and inspected halving image agree on the zero rule. Winning against sampled random play will not establish the stronger guarantee against every legal opposing path; that comes from complete recursion and unchanged rules.</p></section>
+<section id="evaluation"><h2>4. Evaluate fixed policies before optimizing them <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=639s">[10:39–20:49]</a></h2>
+<p>For fixed policies, define \(V(\pi,\sigma;s)=\mathbb E_{\pi,\sigma}[u(S_\tau)\mid S_0=s]\), with agent policy \(\pi\) and opponent policy \(\sigma\). Terminal utility is bounded on the finite game. Conditioning on the first action gives</p>
+\[V(\pi,\sigma;s)=\begin{cases}u(s),&s\in S_{\mathrm{term}},\\
+\sum_{a\in A(s)}\pi(a\mid s)V(\pi,\sigma;T(s,a)),&\operatorname{player}(s)=\text{agent},\\
+\sum_{a\in A(s)}\sigma(a\mid s)V(\pi,\sigma;T(s,a)),&\operatorname{player}(s)=\text{opponent}.\end{cases}\]
+<p>This identity does not optimize a policy. The opponent sum is not a minimum unless the supplied policy selects minimizing actions. Induction on remaining height proves the recurrence: terminal values are correct, and averaging correct conditional child expectations makes the parent expectation correct.</p>
+<p>Always A against fairness has value \((1/2)(-50)+(1/2)50=0\). Other bins evaluate to 2 and 5 but receive zero root-policy weight. A rollout yields either −50 or 50. The recording's twenty-trial average 15 is an attributed finite demonstration. Our separately seeded 1,000-trial fixture gives mean \(-3/2\). Neither is the exact value.</p>
+<p>For a positive integer number \(N\) of independent ideal fixed-policy rollouts, linearity makes the mean unbiased. Individual variance is \(50^2=2500\); mean variance is \(2500/N\) and standard deviation \(50/\sqrt N\). More samples reduce typical error, not force equality. Changing policies, dependence or an incorrect opponent model invalidates this calculation. Seeded pseudorandom output alone does not establish ideal independence in a real interaction.</p>
+<p>A full branching-\(b\), depth-\(d\) tree has \(1+b+\cdots+b^d=(b^{d+1}-1)/(b-1)\) nodes for \(b&gt;1\), exponential in depth. Evaluation is linear in explicit tree size. Memoizing an acyclic state graph avoids repeated identical continuations; halving has only linearly many number/player pairs despite repetition in its unfolded tree. An exponential tree bound is not a claim that every representation needs the same work.</p></section>
+<section id="expectimax"><h2>5. Expectimax names the opponent it optimizes against <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=1249s">[20:49–25:30]</a></h2>
+<p>Fix \(\sigma\), permit the agent to optimize, and call the best value \(E^\sigma(s)\). At terminal it is \(u(s)\), at opponent states \(\sum_a\sigma(a\mid s)E^\sigma(T(s,a))\), and at agent states \(\max_a E^\sigma(T(s,a))\). Expectation and maximum give expectimax its name.</p>
+<p>A deterministic maximizing action suffices because any normalized root mixture obeys \(\sum_a\pi(a\mid s)x_a\le\max_a x_a\), with equality by concentrating on a maximizer. Backward induction constructs attaining actions throughout the tree. Complete observed states and fixed \(\sigma\) are essential; this does not establish that randomization is useless for simultaneous or hidden-information games.</p>
+<p>If the first number is selected with probability \(q\) in every bin, values are \(50-100q,\ 3-2q,\ 15-20q\). Comparing affine values shows C overtakes A at \(q=7/16\), and B overtakes C at \(q=2/3\). Optimal choice is A below the first threshold, C between them and B above the second, with boundary ties. Fair \(q=1/2\) selects C. Opponent-model error near a boundary can change the choice despite exact arithmetic.</p>
+<p>Maximizing noisy estimates differs from sampling a weighted sum. Let two independent estimates of zero each equal ±1 fairly. Both are unbiased. Their maximum equals −1 only when both estimates are −1 and equals 1 otherwise. Its expectation is \((-1+1+1+1)/4=1/2\). This original selection-bias check narrows the recording's warning about naive Monte Carlo maxima; it does not prohibit sampling-based search.</p>
+<p>If every estimate is within a nonnegative error bound \(\eta\) of its true action value, its maximum is within \(\eta\), and the estimated maximizing action loses at most \(2\eta\). Insert estimates between the selected and true-best values to prove the latter inequality. Earning a simultaneous error bound from data is the missing statistical task. Individual unbiasedness does not earn it.</p></section>
+<section id="minimax"><h2>6. Minimax constructs a lower guarantee <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=1530s">[25:30–35:29]</a></h2>
+<p>For a finite perfect-information deterministic zero-sum game, \(M(s)\) is terminal \(u(s)\), maximum child value at agent states and minimum child value at opponent states. Attaining actions define \(\pi_*\) and \(\sigma_*\). A fixed agent-utility viewpoint prevents a silent omitted sign flip when changing turns.</p>
+<p>Backward induction earns the guarantee. At a leaf the payoff is fixed. Assume each child value is achievable as a lower guarantee by the agent and upper guarantee by the opponent. At an agent state, \(\pi_*\) chooses the largest lower guarantee, which no opposing continuation can reduce. Against \(\sigma_*\), any other action reaches a child whose upper guarantee is no larger than that maximum. At an opponent state, \(\sigma_*\) chooses the smallest upper guarantee, while every opposing choice leaves the agent at least that minimum. This constructs contingent policies on all branches, not just one favorable path.</p>
+\[V(\pi,\sigma_*;s_0)\le V(\pi_*,\sigma_*;s_0)=M(s_0)\le V(\pi_*,\sigma;s_0)\]
+<p>holds for every legal policy pair. Randomizing averages these pathwise bounds. In the bins, mixing cannot hide the chosen action from the selector; the expected worst-case value of a mixture is at most the largest child minimum. B attains 1 deterministically. This is a sequential guarantee, not a simultaneous-game equilibrium theorem.</p>
+<p>For halving, \(w(n)\) is the optimal utility of the next player. At zero, \(w(0)=1\). Because a move changes the player,</p>
+\[w(n)=\max\{-w(n-1),-w(\lfloor n/2\rfloor)\}.\]
+<p>At 1 both successors have value 1 to the next player, giving \(w(1)=-1\). At 2 decrement reaches losing 1, so \(w(2)=1\). At 4 both successors 3 and 2 win for the opponent, so 4 loses. For \(n=1,\ldots,11\) the sequence is \((-1,1,1,-1,1,-1,1,1,1,-1,1)\). At 11 decrement reaches losing 10 while halve reaches winning 5; decrement guarantees a win. A losing initial state may still be won against an opponent's mistake: −1 describes perfect opposition, not every path.</p>
+<p><a href="https://www.cs.cornell.edu/courses/cs6700/2013sp/readings/06-b-Checkers-Solved-Science-2007.pdf">Schaeffer et al. (2007), inspected PDF p.1</a>, distinguish ultraweak knowledge of an initial perfect-play result, weak solution with a strategy attaining it from the start, and strong solution across possible positions. Their dated report announces a weak solution of the specified 8×8 checkers variant as a draw. This is the reported computational result, not an independent reproduction of its proof here. Superhuman play does not establish exact values at all positions. The recording's broader game list is not treated as a verified current inventory.</p></section>
+<section id="faceoff"><h2>7. Hold one policy fixed in each comparison <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=2129s">[35:29–46:32]</a></h2>
+<p>Let \(\sigma_0\) be a known opponent and \(\pi_0\) an expectimax best response. Keep \(\pi_*,\sigma_*\) as minimax policies. Omitting the fixed initial state,</p>
+\[V(\pi_0,\sigma_*)\le V(\pi_*,\sigma_*)\le V(\pi_*,\sigma_0)\le V(\pi_0,\sigma_0).\]
+<p>Each inequality fixes a different participant. Against \(\sigma_*\), the agent cannot improve on \(\pi_*\). With agent \(\pi_*\) fixed, \(\sigma_*\) is at least as unfavorable as \(\sigma_0\). Against \(\sigma_0\), best response \(\pi_0\) is at least as good as \(\pi_*\). Switching both players simultaneously would not justify these comparisons. “Optimal” must state the opposing behavior assumed.</p>
+<p>For the bins, \(\pi_*\) selects B, \(\pi_0\) selects C, \(\sigma_*\) always selects the first number and \(\sigma_0\) is fair. The chain is \(-5\le1\le2\le5\). C gains three expected units against fairness while surrendering six worst-case units. B protects the lower value while declining that opportunity. Neither dominates across all opponent models.</p>
+<p>A weaker legal opponent can let \(\pi_*\) attain more than 1. Conversely, best response to fairness does not establish fairness. Estimation and adaptation introduce statistical and learning problems; the chain supplies no sample-size or regret guarantee. In deterministic halving with utility ±1, value +1 yields a pathwise win. With chance and intermediate expectations, a positive value need not imply winning every realization.</p></section>
+<section id="chance"><h2>8. Chance is averaged; information constrains decisions <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=2792s">[46:32–51:52]</a></h2>
+<p>Extend the bins by flipping a fair coin after the agent chooses. Tails keeps the chosen bin; heads moves one bin left, wrapping A to C. The opponent observes the resulting bin, then chooses its number adversarially. A chance node carries a known normalized distribution \(c(a\mid s)\); it is not a third strategic player minimizing or maximizing utility. The expectiminimax recurrence is terminal utility, max at agent nodes, min at opponent nodes and \(\sum_a c(a\mid s)M(T(s,a))\) at chance nodes.</p>
+<p>The order of those operations encodes who knows what. The opponent chooses after seeing the coin's outcome, so minimize within each realized bin first, then average. Their minima remain \(-50,1,-5\). The three initial values become \((-50-5)/2=-55/2\), \((1-50)/2=-49/2\) and \((-5+1)/2=-2\). The maximizing initial choice is now C, even though B was robustly optimal without the coin. These values match the actual inspected official chance tree; “robust” has not changed meaning, but the available dynamics have changed.</p>
+<p>Reversing move order is consequential. Suppose a selector must commit to the first or second number before knowing which of two bins a fair coin will choose. For bins A and C, the two committed average payoffs are \((-50-5)/2=-55/2\) and \((50+15)/2=65/2\). Commitment gives minimum \(-55/2\), the same here only because the same first-number action minimizes both bins. In a different two-outcome fixture, payoffs are \((0,10)\) after heads and \((10,0)\) after tails. Observing the coin before selecting lets the opponent produce zero always; committing first yields expected payoff 5 under either action. Thus \(\mathbb E[\min_a X_a]\) and \(\min_a\mathbb E[X_a]\) need not agree. A game tree cannot exchange these operations without changing the information structure.</p>
+<p>The lecture also raises extra turns and more players. Extra turns fit the state label: a max node can lead to another max node. More participants do not automatically fit one scalar max/min recurrence. If two ghosts share the same opposing objective they can be modeled as coordinated adversarial decisions under declared information. Players with different payoffs require their own objectives, and simultaneous choices cannot be modeled by granting the second mover sight of the first. Chapter 11 develops another game setting rather than extending this recurrence by renaming a player.</p>
+<p>Hidden information is a precise failure boundary. Consider a fair hidden coin followed by the agent guessing heads or tails, earning 1 if correct and 0 otherwise. Unconstrained max at each complete coin state gives value 1: choose the correct answer separately in each state. A legal uninformed agent must use the same guessing distribution at both histories. If it guesses heads with probability \(q\), expected payoff is \((1/2)q+(1/2)(1-q)=1/2\). No value of \(q\) earns 1.</p>
+<p>Those two hidden histories can still be stored in a finite tree. What fails is the independent full-state maximization, which grants information the player does not have. One must constrain decisions at indistinguishable histories to agree; in game terminology such histories form an information set. This original example corrects the recording's broad suggestion that imperfect-information games cannot be represented by trees. It does not supply a general algorithm for poker, imperfect recall or mixed-strategy equilibrium. Our program intentionally exposes complete labels and implements no such information-set constraint.</p></section>
+<section id="pruning"><h2>9. Alpha-beta discards irrelevant continuations exactly <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=3112s">[51:52–63:44]</a></h2>
+<p>Return to deterministic max/min games. If one root action has established value 3 and another leads to a min node with a discovered child 2, the second action's complete value is at most 2. Its remaining children may reduce that value, but cannot make it exceed 3. The identity \(\max(3,\min(2,x))=3\) for every real \(x\) proves that the root does not need those children. This is a branch-and-bound argument about relevance to an ancestor's choice.</p>
+<p>At a partially explored max node, the maximum of discovered child values is a lower bound on its complete value. At a min node, the minimum is an upper bound. Alpha-beta carries ancestor alternatives as search thresholds \(\alpha,\beta\). A max-side threshold records a value already available to a maximizing ancestor; a min-side threshold records a value already available to a minimizing ancestor. They are not necessarily lower and upper bounds on the current subtree's own true value. That distinction matters when interpreting a cutoff return.</p>
+<p>Here is the bound-sensitive contract used by our original search. For entry window \(\alpha_0&lt;\beta_0\), let \(v\) be the returned number and \(M(s)\) the exact subtree value. A returned upper status promises \(M(s)\le v\le\alpha_0\). Lower status promises \(M(s)\ge v\ge\beta_0\). A value strictly inside the window is exact. A terminal leaf is known exactly even outside the window. Infinite endpoints give a full window, so the finite root value is exact.</p>
+<p>This contract explains why recursion with bounds works. At a max node, begin with the lower threshold \(\alpha_0\) and search each child in the current window. If a child returns an upper bound no larger than the current lower threshold, its true value cannot improve the established alternative. If it returns an interior exact value, update the best value and lower threshold. If it returns a lower bound at least \(\beta_0\), the parent itself is at least that bound: a minimizing ancestor already has an alternative at most \(\beta_0\), so this branch cannot force a better relevant result there. Stop. At a min node reverse inequalities and update the upper threshold. Terminal correctness and induction on height establish the same contract for each call.</p>
+<p>When a max call ends without crossing the upper threshold, either it has found an exact interior best value or every child is bounded above by its final returned maximum, which remains at most \(\alpha_0\). These are the exact and upper cases. The min-call argument is symmetric. The root's full window cannot finish in an upper/lower case because its true finite payoff cannot lie beyond an infinite endpoint. Thus its returned value is exact, even though some internal calls supplied only bounds. <a href="https://webdocs.cs.ualberta.ca/~mmueller/courses/657-Fall2025/readings/1975-AIJ-Knuth-Moore-alphabeta.pdf">Knuth–Moore PDF pp.5–6, equations 9–11</a>, give the corresponding window/induction contract; their scanned equations were actually viewed. PDF p.8 translates their player-relative presentation to explicit Max/Min procedures. Our representation and fail-soft implementation are original.</p>
+<p>Work the actual nine-leaf source tree left to right. The root is max. Its left min child has leaves 9 and 7, so its value is 7 and the root gains threshold \(\alpha=7\). The middle min child has three children: leaf 6, max of 3 and 4, and max of 7 and 9. Discovering 6 proves that this min subtree is at most 6, so both remaining branches are pruned. The right min child has leaves 8 and 3. Its first 8 exceeds 7, so it cannot yet be pruned; its next 3 fixes that subtree's value at 3. Root value is 7 after visiting five of nine leaves.</p>
+<p>The middle call returns 6 as an upper bound. Exhaustively, its value is \(\min(6,\max(3,4),\max(7,9))=4\). Reporting that 6 as an exact middle value would be false, even though using it as a bound preserves the root answer. The program exposes the status and trace; a narrow-window action accompanying a bound is not certified as an optimal subtree decision. The inspected official example image fixes the unequal depths and leaf placement used in this check.</p>
+<p>Equality cutoffs also preserve the root value: a branch no better than an established alternative is dispensable. But it may contain another optimal action. Search that stops at equality need not enumerate all ties or all perfect-play paths. In this chapter it returns a first searched maximizing/minimizing choice where certified, not a complete catalogue of equivalent strategies.</p></section>
+<section id="ordering"><h2>10. Ordering changes work, not the declared value <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=3824s">[63:44–66:53]</a></h2>
+<p>For root \(\max(\min(3,5),\min(2,10))\), searching the first branch establishes 3. The second branch sees 2, cuts off 10, and search visits three leaves. Reverse the root order: its first branch fully computes 2; the next min sees 3, which is above the current root threshold 2, so it must also see 5. Four leaves are visited. Both orders return exact value 3.</p>
+<p>At max nodes, promising large child values establish useful lower thresholds early. At min nodes, promising small values establish useful upper thresholds. An inexpensive heuristic can rank moves for this purpose without replacing their true searched values. Bad ordering may save no work, but complete alpha-beta still returns the exact full-tree value. By contrast, using the heuristic as a cutoff value changes the game being evaluated. The same heuristic can therefore have two very different correctness roles.</p>
+<p>Worst-case work remains proportional to the explored unfolded tree and can be exponential in depth. Our small counts are original finite checks, not a general runtime benchmark or an unverified best-case asymptotic formula. Shared graph states can be cached by a more elaborate transposition scheme, but a cached bound must retain its status/window rather than be reused as an exact value. The original alpha-beta program deliberately has no such cache.</p>
+<p>Ordinary deterministic cutoffs do not transfer unchanged to chance nodes. Seeing one low chance outcome does not bound its expectation above by that value. If observed probability mass contributes \(z\), remaining mass is \(m\), and all remaining utilities lie in \([L,U]\), then the expectation lies in \([z+mL,z+mU]\). A decision can be pruned when this interval proves it cannot improve an ancestor, but those are expectation bounds with additional payoff assumptions. The recording's chance-pruning question is preserved as this bounded distinction; our alpha-beta entry point rejects any chance node rather than quietly applying a min cutoff.</p></section>
+<section id="cutoff"><h2>11. A depth cutoff replaces continuations with estimates <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=4013s">[66:53–72:28]</a></h2>
+<p>An evaluation function \(e(s)\) estimates the agent's continuation value quickly. A weighted feature model can use material balance, mobility or king exposure in a board game, with coefficients learned or chosen as prior knowledge. The recording's chess feature list illustrates a heuristic; it is not a verified performance claim. The units and sign of \(e\) must match the terminal utility. A material score measured in piece points is not automatically a calibrated win probability.</p>
+<p>Define \(D(s,d)\) with remaining depth \(d\) measured in plies, one traversed edge. Terminal states return their true \(u(s)\) first. A nonterminal at \(d=0\) returns \(e(s)\). Otherwise recurse to children with depth \(d-1\), applying max, min or the known chance average. The terminal-first order prevents a crude estimate from overriding a known outcome. At sufficient depth to reach every leaf, the result is exact; before then it is generally the value of a surrogate tree whose frontier leaves are estimates.</p>
+<p>The source image uses a different unit: decrement depth only at opponent moves, so in strict alternating play a unit spans an agent/opponent round. That convention is explicit in the actual inspected recurrence. Our program deliberately decrements every edge, including chance and extra turns. Asking for depth two under these conventions need not search the same states. Reporting a search budget without its unit makes comparisons ambiguous.</p>
+<p>Deeper search is not unconditionally better. Consider a root choosing A or B. Each leads through a unary min node and unary max node to true utilities 2 and 1. At the first frontier, estimates are 2 for A's min node and 1 for B's, so depth one chooses A correctly. At the second frontier, estimates are 0 for A's max node and 3 for B's, so depth two chooses B and receives true utility 1. At depth three the true leaves are reached and A returns. The fixed evaluation function is used throughout; its errors differ at the frontiers. Our program reproduces choices A, B, A.</p>
+<p>A conditional error theorem is still possible. Suppose every nonterminal frontier estimate differs from its true minimax continuation by at most \(\eta\). For arrays \(x,y\), \(|\max x-\max y|\le\max_i|x_i-y_i|\): choose an index attaining one maximum, compare at that index, then reverse the roles. The same holds for minima. A normalized nonnegative average has error at most the same uniform bound. Inducting upward therefore gives root error at most \(\eta\), without multiplying by depth. True terminal leaves contribute zero error.</p>
+<p>Write \(\widehat M(T(s,a))\) for a root action's backed-up estimate, within \(\eta\) of its true child continuation. If \(a_*\) is truly best and \(\hat a\) maximizes these estimates, then</p>
+\[M(T(s,a_*))-M(T(s,\hat a))\le
+[M(T(s,a_*))-\widehat M(T(s,a_*))]+
+[\widehat M(T(s,\hat a))-M(T(s,\hat a))]\le2\eta.\]
+<p>The omitted middle difference of estimates is nonpositive by selection. A unique action gap larger than \(2\eta\) therefore preserves the choice. Neither depth nor a plausible feature list establishes the uniform frontier premise. Training/evaluating a learned function, handling distribution shift and testing its errors are additional tasks introduced by the lecture's pointer to next time.</p></section>
+<section id="synthesis"><h2>12. Match the recurrence to the question <a class="timestamp" href="https://www.youtube.com/watch?v=SMOD_GiRzb8&amp;t=4349s">[72:29–73:18]</a></h2>
+<table><thead><tr><th>Question</th><th>Agent node</th><th>Opponent node</th><th>Result boundary</th></tr></thead><tbody>
+<tr><td>Evaluate supplied policies</td><td>Policy average</td><td>Policy average</td><td>Exact expectation under those policies/model</td></tr>
+<tr><td>Best response to known opponent</td><td>Maximum</td><td>Known-policy average</td><td>Optimal against that declared opponent</td></tr>
+<tr><td>Finite robust zero-sum play</td><td>Maximum</td><td>Minimum</td><td>Lower/upper guarantees under legal information and moves</td></tr>
+<tr><td>Exact deterministic pruning</td><td>Maximum with bounds</td><td>Minimum with bounds</td><td>Exact full-window root; internal bound status matters</td></tr>
+<tr><td>Depth-limited play</td><td>Maximum</td><td>Minimum</td><td>Depends on frontier estimates and budget units</td></tr></tbody></table>
+<p>Chance nodes use known normalized averages in the first three recurrences. Unknown behavior, adversarial decisions and physical randomness should not acquire the same operator merely because they occupy the same dictionary field. An exact algorithm answers the modeled question exactly; validating that question and its assumptions is separate.</p>
+<p>The next lecture connects game evaluation to learning. It does not retroactively convert these fixed trees into a trained agent. Here the central practical distinction is between a heuristic that only orders exact search and one that replaces an unsearched continuation. That difference determines whether a mathematical search guarantee survives.</p></section>
+<section id="implementation"><h2>13. An original exact finite experiment</h2>
+<p>The downloadable <a href="programs/chapter10.py">chapter program</a> uses only Python's standard library. Run <code>python programs/chapter10.py</code> from this book directory. It has no file, network or device effects. The printed values are exact rational teaching computations; the seeded rollout mean is an original finite fixture. It does not copy or execute the official lecture module.</p>
+<p><code>Node</code> records a named leaf, max, min or chance state. Nonterminal edges are action/successor pairs. Chance states also carry exact probabilities; leaves carry only terminal utility. <code>Game</code> copies these into frozen tuples, verifies distinct labels/actions, declared successors, exact probability normalization, complete reachability from its root, acyclicity and a maximum height. It accepts 1–4,096 states, 1–16 actions per nonterminal and at most 64 plies. The halving constructor accepts integers 0–40. These bounds constrain the finite demonstration, not the largest solvable game.</p>
+<p>Model numbers accept integers and <code>Fraction</code>, excluding booleans and floats; magnitude is at most \(10^{100}\) and denominator at most \(10^6\). Explicit rational input avoids interpreting the decimal display 0.1 as an exact tenth by accident. Intermediate rational sums/products can have larger denominators and remain exact; arithmetic cost depends on bit length, so a count of state visits is not a full runtime bound. Invalid types, malformed rows, missing policies, cycles and undefined successors raise <code>ValueError</code>.</p>
+<p><code>solve</code> memoizes state values for fixed-policy evaluation, expectimax or minimax with known chance. Fixed policies must specify exactly the requested player's nonterminal states and every admissible action, including explicit zero probabilities. Minimax consumes no supplied policy. Returned leaf count means distinct evaluated leaf states. First declared action wins an exact tie. Its value is exact for the supplied finite fully observed model, not proof of an opponent's real behavior.</p>
+<p><code>sample_value</code> uses a local <code>random.Random</code> and rational integer sampling rather than rounding probability cumulative sums to floating point. For a row, form the common denominator, draw a uniform integer below it and allocate integer counts to the actions. A common denominator above \(10^{12}\) raises <code>ValueError</code>; exact model evaluation has no such sampling-denominator restriction. The finite acyclic graph ensures a sampled trajectory terminates within its height. Seeded pseudorandom sampling provides reproducibility, not certified physical randomness.</p>
+<p><code>alpha_beta</code> rejects chance games, validates optional finite rational window endpoints and strict ordering, and can accept a permutation of actions at selected states. <code>None</code> denotes an infinite endpoint. It returns value, action, leaf visits, bound status and trace. Leaf visits count unfolded occurrences, including repeats in a shared graph; unlike <code>solve</code>, this search has no transposition cache. A strict call budget between 1 and one million raises <code>RuntimeError</code> if exhausted. The full-window root is exact when the call completes; narrow-window bound actions are not asserted optimal. Reordering affects work and tie preference, not the exact full-window value.</p>
+<p><code>depth_search</code> takes depth 0–64 in plies and an exact rational estimate for every nonterminal state. It checks terminal before cutoff, memoizes state/depth pairs, averages chance and optimizes max/min. Status is conservatively heuristic if the budget is below the graph's maximum height; it can happen that a shallower particular tree already yields the exact value. No empirical training or frontier-error certificate is supplied. The printed A, B, A depth sequence is a counterexample, not evidence that depth two usually performs worse.</p>
+<p>The following source is byte-identical to the downloadable program, and the next block is its actual stdout. The nine-leaf pruning count assumes the displayed left-to-right order. Its cut-subtree comparison deliberately exposes a bound differing from the complete subtree value, preventing an implementation match at the root from hiding an incorrect interpretation of internal returns.</p>
+<pre><code class="language-python" id="program-source">&quot;&quot;&quot;Original finite game calculations. Standard library; no file/network effects.
+
+Exact model numbers are ints/Fractions (not bools or floats), magnitude &lt;=1e100
+and denominator &lt;=1e6. Finite acyclic labelled graph: &lt;=4096 states, &lt;=16
+actions/state and &lt;=64 plies. State labels identify full information. Each
+policy/known-chance row has the exact action keys and sums exactly to one.
+&quot;&quot;&quot;
+from dataclasses import dataclass
+from fractions import Fraction
+from math import lcm
+from random import Random
+
+F = Fraction
+
+
+def rational(x, name=&#x27;number&#x27;):
+    if isinstance(x, bool) or not isinstance(x, (int, Fraction)):
+        raise ValueError(name + &#x27; must be an int or Fraction, not bool/float&#x27;)
+    x = F(x)
+    if abs(x) &gt; 10**100 or x.denominator &gt; 10**6:
+        raise ValueError(name + &#x27; exceeds magnitude/denominator bound&#x27;)
+    return x
+
+
+def count(x, name, lo, hi):
+    if type(x) is not int or not lo &lt;= x &lt;= hi:
+        raise ValueError(name + &#x27; is outside the integer bounds&#x27;)
+    return x
+
+
+@dataclass(frozen=True)
+class Node:
+    label: str
+    kind: str
+    edges: tuple = ()  # (action, successor_label)
+    utility: object = None
+    probabilities: tuple = ()  # (action, exact probability), chance only
+
+
+def distribution(edges, supplied):
+    actions = tuple(a for a, _ in edges)
+    if not isinstance(supplied, dict) or set(supplied) != set(actions):
+        raise ValueError(&#x27;distribution must have exactly the admissible keys&#x27;)
+    row = tuple((a, rational(supplied[a], &#x27;probability&#x27;)) for a in actions)
+    if any(p &lt; 0 for _, p in row) or sum(p for _, p in row) != 1:
+        raise ValueError(&#x27;probability row must be nonnegative and sum to one&#x27;)
+    return row
+
+
+@dataclass(frozen=True, init=False)
+class Game:
+    &quot;&quot;&quot;Own immutable copies; reject malformed, cyclic or unreachable states.&quot;&quot;&quot;
+    nodes: tuple
+    root: str
+    height: int
+    def __init__(self, nodes, root):
+        if not isinstance(nodes, (tuple, list)) or not 1 &lt;= len(nodes) &lt;= 4096:
+            raise ValueError(&#x27;nodes must be a finite sequence of 1..4096 Nodes&#x27;)
+        copied = {}
+        for node in nodes:
+            if not isinstance(node, Node) or not isinstance(node.label, str) or not node.label:
+                raise ValueError(&#x27;each Node needs a nonempty string label&#x27;)
+            if node.label in copied or node.kind not in (&#x27;leaf&#x27;, &#x27;max&#x27;, &#x27;min&#x27;, &#x27;chance&#x27;):
+                raise ValueError(&#x27;duplicate label or unsupported node kind&#x27;)
+            if not isinstance(node.edges, (tuple, list)) or not isinstance(node.probabilities, (tuple, list)):
+                raise ValueError(&#x27;edges/probabilities must be finite sequences&#x27;)
+            edges = []
+            for edge in node.edges:
+                if not isinstance(edge, (tuple, list)) or len(edge) != 2:
+                    raise ValueError(&#x27;edge must be an action/successor pair&#x27;)
+                a, child = edge
+                if not isinstance(a, str) or not a or not isinstance(child, str) or not child:
+                    raise ValueError(&#x27;edge labels must be nonempty strings&#x27;)
+                edges.append((a, child))
+            edges = tuple(edges)
+            if len({a for a, _ in edges}) != len(edges):
+                raise ValueError(&#x27;duplicate action&#x27;)
+            if node.kind == &#x27;leaf&#x27;:
+                if edges or node.probabilities or node.utility is None:
+                    raise ValueError(&#x27;leaf has utility and no edges/probabilities&#x27;)
+                copied[node.label] = Node(node.label, &#x27;leaf&#x27;, (), rational(node.utility), ())
+            else:
+                if not 1 &lt;= len(edges) &lt;= 16 or node.utility is not None:
+                    raise ValueError(&#x27;nonterminal needs 1..16 edges and no utility&#x27;)
+                probs = ()
+                if node.kind == &#x27;chance&#x27;:
+                    try:
+                        pairs = tuple(tuple(pair) for pair in node.probabilities)
+                        if any(len(pair) != 2 for pair in pairs) or len({pair[0] for pair in pairs}) != len(pairs):
+                            raise ValueError(&#x27;invalid/duplicate chance action&#x27;)
+                        probs = distribution(edges, dict(pairs))
+                    except (TypeError, KeyError) as exc:
+                        raise ValueError(&#x27;malformed chance distribution&#x27;) from exc
+                elif node.probabilities:
+                    raise ValueError(&#x27;only chance nodes carry probabilities&#x27;)
+                copied[node.label] = Node(node.label, node.kind, edges, None, probs)
+        if not isinstance(root, str) or root not in copied:
+            raise ValueError(&#x27;root must identify a declared state&#x27;)
+        if any(child not in copied for node in copied.values() for _, child in node.edges):
+            raise ValueError(&#x27;unknown successor&#x27;)
+        active, heights = set(), {}
+        def height(s, depth=0):
+            if depth &gt; 64:
+                raise ValueError(&#x27;graph exceeds 64-ply bound&#x27;)
+            if s in active:
+                raise ValueError(&#x27;cyclic game; finite backward induction required&#x27;)
+            if s in heights:
+                return heights[s]
+            active.add(s)
+            h = 0 if not copied[s].edges else 1 + max(height(c, depth+1) for _, c in copied[s].edges)
+            active.remove(s)
+            if h &gt; 64:
+                raise ValueError(&#x27;graph exceeds 64-ply bound&#x27;)
+            heights[s] = h
+            return h
+        height(root)
+        if set(heights) != set(copied):
+            raise ValueError(&#x27;unreachable states are not part of this Game&#x27;)
+        object.__setattr__(self, &#x27;nodes&#x27;, tuple(copied.values()))
+        object.__setattr__(self, &#x27;root&#x27;, root)
+        object.__setattr__(self, &#x27;height&#x27;, heights[root])
+
+    def table(self):
+        return {node.label: node for node in self.nodes}
+
+
+def policy_rows(game, policy, kinds):
+    if not isinstance(game, Game) or not isinstance(policy, dict):
+        raise ValueError(&#x27;Game and policy dictionary required&#x27;)
+    expected = {n.label for n in game.nodes if n.kind in kinds}
+    if set(policy) != expected:
+        raise ValueError(&#x27;policy must specify exactly the requested player states&#x27;)
+    return {n.label: distribution(n.edges, policy[n.label]) for n in game.nodes if n.label in expected}
+
+
+@dataclass(frozen=True)
+class Result:
+    value: Fraction
+    action: object
+    leaves: int
+    bound: str = &#x27;exact&#x27;
+    trace: tuple = ()
+
+
+def solve(game, mode=&#x27;minimax&#x27;, policy=None):
+    &quot;&quot;&quot;Memoized exact evaluation; leaves counts unique evaluated leaf states.&quot;&quot;&quot;
+    if not isinstance(game, Game) or mode not in (&#x27;evaluate&#x27;, &#x27;expectimax&#x27;, &#x27;minimax&#x27;):
+        raise ValueError(&#x27;invalid Game or solve mode&#x27;)
+    if mode == &#x27;minimax&#x27;:
+        if policy is not None:
+            raise ValueError(&#x27;minimax does not consume a fixed player policy&#x27;)
+        rows = {}
+    else:
+        rows = policy_rows(game, policy, (&#x27;max&#x27;, &#x27;min&#x27;) if mode == &#x27;evaluate&#x27; else (&#x27;min&#x27;,))
+    table, memo, choices, leaves = game.table(), {}, {}, set()
+    def value(s):
+        if s in memo:
+            return memo[s]
+        n = table[s]
+        if n.kind == &#x27;leaf&#x27;:
+            leaves.add(s)
+            v = n.utility
+        else:
+            child = {a: value(c) for a, c in n.edges}
+            if n.kind == &#x27;chance&#x27; or s in rows:
+                probs = n.probabilities if n.kind == &#x27;chance&#x27; else rows[s]
+                v = sum((p * child[a] for a, p in probs), F(0))
+            else:
+                choose = max if n.kind == &#x27;max&#x27; else min
+                a = choose(child, key=child.get)
+                choices[s] = a
+                v = child[a]
+        memo[s] = v
+        return v
+    v = value(game.root)
+    return Result(v, choices.get(game.root), len(leaves))
+
+
+def sample_value(game, policy, rng):
+    &quot;&quot;&quot;Exact rational action sampling with integer draws, denominator cap1e12.&quot;&quot;&quot;
+    rows = policy_rows(game, policy, (&#x27;max&#x27;, &#x27;min&#x27;))
+    if not isinstance(rng, Random):
+        raise ValueError(&#x27;local random.Random required&#x27;)
+    table, s = game.table(), game.root
+    while table[s].kind != &#x27;leaf&#x27;:
+        node = table[s]
+        row = node.probabilities if node.kind == &#x27;chance&#x27; else rows[s]
+        denominator = lcm(*(p.denominator for _, p in row))
+        if denominator &gt; 10**12:
+            raise ValueError(&#x27;exact integer sampling denominator exceeds1e12&#x27;)
+        draw = rng.randrange(denominator)
+        cumulative = 0
+        for a, p in row:
+            cumulative += p.numerator * (denominator // p.denominator)
+            if draw &lt; cumulative:
+                s = dict(node.edges)[a]
+                break
+    return table[s].utility
+
+
+def alpha_beta(game, alpha=None, beta=None, order=None, max_calls=1000000):
+    &quot;&quot;&quot;Fail-soft deterministic search; return exact/upper/lower plus trace.
+
+    None is an infinite window endpoint. A narrow-window return is not an
+    exact subtree value unless its status says exact. Leaves count visits,
+    including repeated occurrences of shared graph nodes; no transposition cache.
+    &quot;&quot;&quot;
+    if not isinstance(game, Game) or any(n.kind == &#x27;chance&#x27; for n in game.nodes):
+        raise ValueError(&#x27;alpha-beta requires a deterministic Game&#x27;)
+    max_calls=count(max_calls,&#x27;search-call budget&#x27;,1,1000000)
+    alpha = None if alpha is None else rational(alpha, &#x27;alpha&#x27;)
+    beta = None if beta is None else rational(beta, &#x27;beta&#x27;)
+    if alpha is not None and beta is not None and alpha &gt;= beta:
+        raise ValueError(&#x27;alpha must be strictly below beta&#x27;)
+    table = game.table()
+    if order is None:
+        order = {}
+    if not isinstance(order, dict) or any(s not in table or table[s].kind == &#x27;leaf&#x27; for s in order):
+        raise ValueError(&#x27;order keys must identify nonterminal states&#x27;)
+    for s, actions in order.items():
+        if not isinstance(actions, (tuple, list)) or any(not isinstance(a,str) for a in actions) or len(actions) != len(table[s].edges) or set(actions) != {a for a, _ in table[s].edges}:
+            raise ValueError(&#x27;order must be a permutation of admissible actions&#x27;)
+    visits, trace, calls = [], [], [0]
+    def search(s, a0, b0):
+        calls[0]+=1
+        if calls[0]&gt;max_calls:
+            raise RuntimeError(&#x27;alpha-beta search-call budget exhausted&#x27;)
+        n = table[s]
+        if n.kind == &#x27;leaf&#x27;:
+            visits.append(s)
+            return n.utility, None, &#x27;exact&#x27;
+        edges = dict(n.edges)
+        actions = order.get(s, tuple(edges))
+        best, chosen, a, b = None, None, a0, b0
+        for index, action in enumerate(actions):
+            v, _, _ = search(edges[action], a, b)
+            if best is None or (v &gt; best if n.kind == &#x27;max&#x27; else v &lt; best):
+                best, chosen = v, action
+            if n.kind == &#x27;max&#x27;:
+                a = best if a is None else max(a, best)
+            else:
+                b = best if b is None else min(b, best)
+            if a is not None and b is not None and a &gt;= b:
+                trace.append((s, &#x27;cutoff&#x27;, tuple(actions[index + 1:]), best))
+                break
+        status = &#x27;upper&#x27; if a0 is not None and best &lt;= a0 else &#x27;lower&#x27; if b0 is not None and best &gt;= b0 else &#x27;exact&#x27;
+        trace.append((s, status, chosen, best))
+        return best, chosen, status
+    v, action, status = search(game.root, alpha, beta)
+    return Result(v, action, len(visits), status, tuple(trace))
+
+
+def depth_search(game, depth, evaluation):
+    &quot;&quot;&quot;Terminal first, then heuristic cutoff; depth counts every traversed edge.&quot;&quot;&quot;
+    if not isinstance(game, Game):
+        raise ValueError(&#x27;Game required&#x27;)
+    depth = count(depth, &#x27;depth&#x27;, 0, 64)
+    expected = {n.label for n in game.nodes if n.kind != &#x27;leaf&#x27;}
+    if not isinstance(evaluation, dict) or set(evaluation) != expected:
+        raise ValueError(&#x27;evaluation must specify every nonterminal state exactly&#x27;)
+    evaluation = {s: rational(x, &#x27;evaluation&#x27;) for s, x in evaluation.items()}
+    table, memo, choices, leaves = game.table(), {}, {}, set()
+    def value(s, d):
+        if (s, d) in memo:
+            return memo[s, d]
+        n = table[s]
+        if n.kind == &#x27;leaf&#x27;:
+            leaves.add(s)
+            v = n.utility
+        elif d == 0:
+            v = evaluation[s]
+        else:
+            child = {a: value(c, d-1) for a, c in n.edges}
+            if n.kind == &#x27;chance&#x27;:
+                v = sum((p * child[a] for a, p in n.probabilities), F(0))
+            else:
+                a = (max if n.kind == &#x27;max&#x27; else min)(child, key=child.get)
+                choices[s, d] = a
+                v = child[a]
+        memo[s, d] = v
+        return v
+    v = value(game.root, depth)
+    return Result(v, choices.get((game.root, depth)), len(leaves), &#x27;heuristic&#x27; if depth &lt; game.height else &#x27;exact&#x27;)
+
+
+def bins(chance=False):
+    nodes = []
+    for label, numbers in [(&#x27;A&#x27;,(-50,50)),(&#x27;B&#x27;,(1,3)),(&#x27;C&#x27;,(-5,15))]:
+        nodes.append(Node(label,&#x27;min&#x27;,tuple((str(i),label+str(i)) for i in (1,2))))
+        nodes.extend(Node(label+str(i),&#x27;leaf&#x27;,utility=x) for i,x in enumerate(numbers,1))
+    targets = (&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;)
+    if chance:
+        for i,label in enumerate(targets):
+            nodes.append(Node(&#x27;coin&#x27;+label,&#x27;chance&#x27;,((&#x27;stay&#x27;,label),(&#x27;left&#x27;,targets[(i-1)%3])),probabilities=((&#x27;stay&#x27;,F(1,2)),(&#x27;left&#x27;,F(1,2)))))
+        targets = tuple(&#x27;coin&#x27;+s for s in targets)
+    nodes.append(Node(&#x27;root&#x27;,&#x27;max&#x27;,tuple(zip((&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;),targets))))
+    return Game(nodes,&#x27;root&#x27;)
+
+
+def halving(n=11):
+    n=count(n,&#x27;initial number&#x27;,0,40)
+    states={}
+    def add(k,player):
+        s=f&#x27;{k}:{player}&#x27;
+        if s in states:
+            return s
+        if k==0:
+            states[s]=Node(s,&#x27;leaf&#x27;,utility=1 if player==&#x27;max&#x27; else -1)
+        else:
+            other=&#x27;min&#x27; if player==&#x27;max&#x27; else &#x27;max&#x27;
+            states[s]=Node(s,player,((&#x27;decrement&#x27;,add(k-1,other)),(&#x27;half&#x27;,add(k//2,other))))
+        return s
+    root=add(n,&#x27;max&#x27;)
+    return Game(list(states.values()),root)
+
+
+def pruning_fixture():
+    leaves=[Node(str(x)+suffix,&#x27;leaf&#x27;,utility=x) for x,suffix in [(9,&#x27;L&#x27;),(7,&#x27;L&#x27;),(6,&#x27;M&#x27;),(3,&#x27;M&#x27;),(4,&#x27;M&#x27;),(7,&#x27;M&#x27;),(9,&#x27;M&#x27;),(8,&#x27;R&#x27;),(3,&#x27;R&#x27;)]]
+    return Game(leaves+[Node(&#x27;left&#x27;,&#x27;min&#x27;,((&#x27;a&#x27;,&#x27;9L&#x27;),(&#x27;b&#x27;,&#x27;7L&#x27;))),Node(&#x27;m1&#x27;,&#x27;max&#x27;,((&#x27;a&#x27;,&#x27;3M&#x27;),(&#x27;b&#x27;,&#x27;4M&#x27;))),Node(&#x27;m2&#x27;,&#x27;max&#x27;,((&#x27;a&#x27;,&#x27;7M&#x27;),(&#x27;b&#x27;,&#x27;9M&#x27;))),Node(&#x27;middle&#x27;,&#x27;min&#x27;,((&#x27;a&#x27;,&#x27;6M&#x27;),(&#x27;b&#x27;,&#x27;m1&#x27;),(&#x27;c&#x27;,&#x27;m2&#x27;))),Node(&#x27;right&#x27;,&#x27;min&#x27;,((&#x27;a&#x27;,&#x27;8R&#x27;),(&#x27;b&#x27;,&#x27;3R&#x27;))),Node(&#x27;root&#x27;,&#x27;max&#x27;,((&#x27;L&#x27;,&#x27;left&#x27;),(&#x27;M&#x27;,&#x27;middle&#x27;),(&#x27;R&#x27;,&#x27;right&#x27;)))],&#x27;root&#x27;)
+
+
+def main():
+    game=bins()
+    fair={s:{&#x27;1&#x27;:F(1,2),&#x27;2&#x27;:F(1,2)} for s in (&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;)}
+    robust=solve(game)
+    response=solve(game,&#x27;expectimax&#x27;,fair)
+    print(f&#x27;bins: minimax={robust.value}, action={robust.action}; expectimax={response.value}, action={response.action}&#x27;)
+    adversary={s:{&#x27;1&#x27;:1,&#x27;2&#x27;:0} for s in (&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;)}
+    for agent in (&#x27;C&#x27;,&#x27;B&#x27;):
+        row={&#x27;root&#x27;:{a:int(a==agent) for a in (&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;)}}
+        print(f&#x27;faceoff {agent}: adversarial={solve(game,&quot;evaluate&quot;,dict(row,**adversary)).value}, fair={solve(game,&quot;evaluate&quot;,dict(row,**fair)).value}&#x27;)
+    row=dict(fair,root={&#x27;A&#x27;:1,&#x27;B&#x27;:0,&#x27;C&#x27;:0})
+    rng=Random(7)
+    mean=sum((sample_value(game,row,rng) for _ in range(1000)),F(0))/1000
+    print(f&#x27;fixed A/fair: exact={solve(game,&quot;evaluate&quot;,row).value}, seeded1000 mean={mean}&#x27;)
+    print(&#x27;halving agent-turn n1..11:&#x27;,tuple(int(solve(halving(n)).value) for n in range(1,12)))
+    coin=solve(bins(True))
+    print(f&#x27;chance before informed opponent: value={coin.value}, action={coin.action}&#x27;)
+    tree=pruning_fixture()
+    pruned=alpha_beta(tree)
+    print(f&#x27;alpha-beta full window: value={pruned.value}, action={pruned.action}, visited leaves={pruned.leaves}/9, status={pruned.bound}&#x27;)
+    middle_nodes=[n for n in tree.nodes if n.label in (&#x27;middle&#x27;,&#x27;m1&#x27;,&#x27;m2&#x27;,&#x27;6M&#x27;,&#x27;3M&#x27;,&#x27;4M&#x27;,&#x27;7M&#x27;,&#x27;9M&#x27;)]
+    middle=Game(middle_nodes,&#x27;middle&#x27;)
+    cut=alpha_beta(middle,alpha=7)
+    print(f&#x27;cut middle subtree: returned={cut.value}, status={cut.bound}, exhaustive={solve(middle).value}&#x27;)
+    shallow=Game([Node(&#x27;r&#x27;,&#x27;max&#x27;,((&#x27;A&#x27;,&#x27;a&#x27;),(&#x27;B&#x27;,&#x27;b&#x27;))),Node(&#x27;a&#x27;,&#x27;min&#x27;,((&#x27;go&#x27;,&#x27;aa&#x27;),)),Node(&#x27;b&#x27;,&#x27;min&#x27;,((&#x27;go&#x27;,&#x27;bb&#x27;),)),Node(&#x27;aa&#x27;,&#x27;max&#x27;,((&#x27;finish&#x27;,&#x27;u2&#x27;),)),Node(&#x27;bb&#x27;,&#x27;max&#x27;,((&#x27;finish&#x27;,&#x27;u1&#x27;),)),Node(&#x27;u2&#x27;,&#x27;leaf&#x27;,utility=2),Node(&#x27;u1&#x27;,&#x27;leaf&#x27;,utility=1)],&#x27;r&#x27;)
+    evaluation={&#x27;r&#x27;:0,&#x27;a&#x27;:2,&#x27;b&#x27;:1,&#x27;aa&#x27;:0,&#x27;bb&#x27;:3}
+    print(&#x27;depth cutoff:&#x27;,tuple((d,depth_search(shallow,d,evaluation).action,str(depth_search(shallow,d,evaluation).value)) for d in (1,2,3)))
+    print(&#x27;Finite fixtures do not verify an opponent model or a heuristic error bound.&#x27;)
+
+
+if __name__==&#x27;__main__&#x27;:
+    main()
+</code></pre>
+<pre><code class="language-text" id="program-output">bins: minimax=1, action=B; expectimax=5, action=C
+faceoff C: adversarial=-5, fair=5
+faceoff B: adversarial=1, fair=2
+fixed A/fair: exact=0, seeded1000 mean=-3/2
+halving agent-turn n1..11: (-1, 1, 1, -1, 1, -1, 1, 1, 1, -1, 1)
+chance before informed opponent: value=-2, action=C
+alpha-beta full window: value=7, action=L, visited leaves=5/9, status=exact
+cut middle subtree: returned=6, status=upper, exhaustive=4
+depth cutoff: ((1, &#x27;A&#x27;, &#x27;2&#x27;), (2, &#x27;B&#x27;, &#x27;3&#x27;), (3, &#x27;A&#x27;, &#x27;2&#x27;))
+Finite fixtures do not verify an opponent model or a heuristic error bound.
+</code></pre></section>
+<section id="exercises"><h2>14. Six worked exercises</h2>
+<div class="exercise"><h3>Exercise 1 — An opponent model changes the best bin</h3>
+<p>The selector chooses the first number with common probability \(q\in[0,1]\). Derive all optimal-bin regions, including ties, and compare the fair-opponent and minimax choices. Then allow independent unknown first-number probabilities in each bin. Does a randomized root choice improve the minimax guarantee when the selector sees the chosen bin?</p>
+<details class="solution"><summary>Solution</summary><p>The affine values are \(A(q)=50-100q\), \(B(q)=3-2q\), \(C(q)=15-20q\). A and C tie at \(35=80q\), hence \(q=7/16\). B and C tie at \(12=18q\), hence \(q=2/3\). A and B tie at \(47=98q\), or \(47/98\), but this crossing is not on the upper envelope: there C is larger. At \(7/16\), A=C=\(25/4\) while B=\(17/8\). At \(2/3\), B=C=\(5/3\) while A=\(-50/3\). Thus A is uniquely best below \(7/16\), C between the two envelope boundaries, and B above \(2/3\); the named pairs tie at their respective boundaries.</p><p>At \(q=1/2\), values are 0,2,5, so C is best. With unknown independent probabilities, an observing adversary may select the minimum within every chosen bin. The child guarantees are −50,1,−5. For root weights \(p_A,p_B,p_C\), worst-case expected payoff is \(-50p_A+p_B-5p_C\le1\), because weights are nonnegative and sum to one. Concentrating on B attains 1. Root randomization therefore does not improve this sequential observed-action guarantee. An opponent committed without observing the action would be a different game. Knowing the model perfectly and computing its envelope exactly does not demonstrate that the selector follows that model.</p></details></div>
+<div class="exercise"><h3>Exercise 2 — Prove the halving win rather than count sampled wins</h3>
+<p>Under the rule that the player left with zero wins, derive values for \(n=0,\ldots,6\), identify a winning move at 11 and prove what value +1 guarantees. Explain why omitting the player field or reversing the zero rule breaks the computation.</p>
+<details class="solution"><summary>Solution</summary><p>Use next-player utility \(w(0)=1\) and \(w(n)=\max(-w(n-1),-w(\lfloor n/2\rfloor))\). Sequentially, \(w(1)=-1\), \(w(2)=1\), \(w(3)=1\), \(w(4)=-1\), \(w(5)=1\), \(w(6)=-1\). At 5, decrement reaches losing 4; at 6 both successors 5 and 3 win for the next player. Continuing gives \(w(10)=-1\), \(w(11)=1\): decrement 11→10 hands the opponent a losing state, while halve 11→5 hands it a winning one.</p><p>Induct on positive \(n\). A winning state has at least one move to a losing state for the next player. A losing state has no such move, so every action leads to a winning state for its opponent. Strict decrease ensures these classifications eventually reach the terminal base case. A player following attaining moves from a winning state wins against every legal response; random draws are unnecessary for this claim. From a losing state a weaker opponent may err later, so losing value does not imply defeat against every policy.</p><p>In an agent-utility representation, terminal \((0,\text{agent})\) is +1 and \((0,\text{opponent})\) is −1; \(n=0\) alone cannot distinguish them. If the last mover instead won, the next player would lose at zero and \(w(0)\) would become −1. Already \(w(1)\) changes to +1. That countercheck catches a wrong base convention before a larger table makes it hard to notice. The induction depends on the declared legal actions and information, not on sampled success against a random opponent.</p></details></div>
+<div class="exercise"><h3>Exercise 3 — Face-off inequalities and chance order</h3>
+<p>Prove the four-policy chain and compute it for the bins. Then compute the fair stay/left-coin minimax values. Finally use heads payoffs \((0,10)\) and tails payoffs \((10,0)\) to distinguish an opponent committing before the coin from one observing it before selecting.</p>
+<details class="solution"><summary>Solution</summary><p>The minimax saddle inequalities give \(V(\pi_0,\sigma_*)\le V(\pi_*,\sigma_*)\) and \(V(\pi_*,\sigma_*)\le V(\pi_*,\sigma_0)\). Best response to fixed \(\sigma_0\) gives \(V(\pi_*,\sigma_0)\le V(\pi_0,\sigma_0)\). Each step changes exactly one policy. With B as \(\pi_*\), C as \(\pi_0\), first-number responses as \(\sigma_*\) and fairness as \(\sigma_0\), the values are −5,1,2,5. The expected-response improvement 2→5 costs worst-case guarantee 1→−5.</p><p>For the observed stay/left coin, minimize in the resulting bin before averaging. A averages A's −50 and C's −5, giving \(-55/2\); B averages 1 and −50, giving \(-49/2\); C averages −5 and 1, giving −2. Root maximization chooses C. Each chance row is normalized; treating it as another min node would replace averages by worst outcomes and solve a different problem.</p><p>For the final payoff fixture, an informed opponent selects first after heads and second after tails, producing 0 in either case. A committed first action has average \((0+10)/2=5\); a committed second also has 5. The committed minimum is 5, while the expected realized minimum is 0. Generally averaging pointwise minima is no greater than minimizing averages, because each pointwise minimum is bounded above by every committed action payoff. The strict example identifies the information responsible for the difference.</p></details></div>
+<div class="exercise"><h3>Exercise 4 — Trace bounds without inventing exact subtree values</h3>
+<p>Compute exhaustive values in the nine-leaf pruning fixture, then trace left-to-right alpha-beta and classify its middle return. Compare leaf visits for \(\max(\min(3,5),\min(2,10))\) under the two root orders. Can an equality cutoff enumerate every optimal action?</p>
+<details class="solution"><summary>Solution</summary><p>The left min is 7. Middle is \(\min(6,\max(3,4),\max(7,9))=\min(6,4,9)=4\). Right min is 3. Exact root is \(\max(7,4,3)=7\). Searching left visits 9 and 7 and establishes root threshold 7. Middle first sees 6, an upper bound below that alternative, so both max branches are skipped. Its returned 6 is an upper bound on true 4, not an exact value. Right first sees 8, which does not refute it relative to 7, and must see 3. Total visited leaves are 9,7,6,8,3: five. The full-window root value is exact and its L action is valid.</p><p>In the smaller ordering fixture, first searching min(3,5) establishes 3, so the next min sees 2 and skips 10: three leaves. Reversing branches fully evaluates min(2,10)=2; then seeing 3 in the second min is insufficient to refute that branch, so 5 is read too: four leaves. Ordering changes the amount of certified work, not root value 3.</p><p>If a second min branch's first leaf is 3 under root threshold 3, equality permits stopping. Its unseen leaf might also be 3, making this branch truly tied, or might be 0, making it worse. Root value remains 3 either way. The cutoff cannot certify which case occurred and therefore cannot enumerate all optimal root actions. A narrow-window bound/status must accompany a reused return; ignoring it in a transposition cache can turn an exact root algorithm into an incorrect one.</p></details></div>
+<div class="exercise"><h3>Exercise 5 — Hidden state and noisy selection</h3>
+<p>A fair hidden coin is followed by a guess earning 1 for correctness. Compute value under illegal full-state maximization and under every legal uninformed guessing mixture. Separately compute the expected maximum of two independent fair ±1 estimates of true zero values. State which assumptions each counterexample invalidates.</p>
+<details class="solution"><summary>Solution</summary><p>Full-state max selects heads in the heads state and tails in the tails state, giving value 1. An uninformed policy must use one common heads probability \(q\) at both histories, so expected correctness is \(q/2+(1-q)/2=1/2\). It cannot condition on the hidden outcome. A tree can represent both histories, but independent maximization grants forbidden information. Constraining decisions across their information set restores the legal value. This is a representation/observation problem, not a failure of arithmetic or chance normalization.</p><p>The estimate pairs are \((-1,-1),(-1,1),(1,-1),(1,1)\), each with probability one fourth. Maxima are −1,1,1,1, so expected maximum is \(1/2\). Individual unbiasedness of both estimates does not imply unbiasedness after maximization. Neither example establishes that sampling is unusable or that randomization cannot help other games. They identify the invalid premises: observable complete states in the first, and linearity through a nonlinear selection operator in the second. To certify a sampled best action, obtain simultaneous errors or another justified selection/evaluation procedure rather than labeling the largest estimate unbiased.</p></details></div>
+<div class="exercise"><h3>Exercise 6 — Cutoff error, depth and experimental claims</h3>
+<p>Reproduce the depth-one/depth-two/depth-three A,B,A counterexample. Prove a uniform frontier error \(\eta\) remains at most \(\eta\) at the root and yields at most \(2\eta\) action regret. Design a check distinguishing heuristic ordering from heuristic replacement, including terminal precedence, depth units and work counts.</p>
+<details class="solution"><summary>Solution</summary><p>Use root actions leading through unary min and unary max nodes to utilities 2 and 1. Give the min nodes estimates 2 and 1; give the later max nodes estimates 0 and 3. Depth one returns A/value2, depth two returns B/value3, depth three reaches terminal leaves and returns A/value2. B's actual complete payoff is 1. The function is fixed; its frontier errors differ by depth, so deeper search need not monotonically improve the chosen action.</p><p>If two child arrays differ coordinatewise by at most \(\eta\), a maximizing index for either array shows each maximum is at most the other maximum plus \(\eta\). Reverse roles for the opposite inequality. Apply the same argument to minima. For chance, the absolute weighted error is at most \(\sum_i p_i\eta=\eta\). Terminal error is zero. Induction therefore preserves the uniform bound up the tree. For true-best \(a_*\) and selected \(\hat a\), insert their estimates into true regret. Each outer error is at most \(\eta\), while the estimate difference is nonpositive, yielding regret at most \(2\eta\). A strict true gap greater than \(2\eta\) preserves the best action. No observed depth alone earns that error premise.</p><p>For ordering, permute actions using the heuristic and run complete full-window alpha-beta; compare its value with exhaustive exact minimax and record unfolded leaf visits/call budget. Poor ordering may save nothing, but it must not change the value. For replacement, cut at declared plies and compare returned action's complete value; this tests the surrogate, not an exact-search guarantee. Include a terminal at depth zero with a deliberately wrong would-be estimate: the program must return true terminal utility. Distinguish unique memoized states from repeated tree visits, and separate seeded finite measurements from a general runtime theorem. These checks make correctness and computational benefit separate claims.</p></details></div>
+</section>
+<section id="references"><h2>15. Sources and scope</h2>
+<ul><li><a href="https://www.youtube.com/watch?v=SMOD_GiRzb8">CS221 Lecture 10 recording</a>: bins, finite game model, halving, evaluation, expectimax, minimax/face-off, chance, pruning, move ordering and cutoff sequence. Machine transcription supplies timing/topic coverage, not human-certified wording.</li>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/games.py">Official games.py at retained commit f70063773fe9e04ddcbc248059501837053b810a</a>: notation, game rules, actual policy recurrences and selected inspected source images. Original book code uses a different validated representation.</li>
+<li><a href="https://webdocs.cs.ualberta.ca/~mmueller/courses/657-Fall2025/readings/1975-AIJ-Knuth-Moore-alphabeta.pdf">Knuth and Moore (1975), An Analysis of Alpha-Beta Pruning</a>: actual PDF pp.1–9, especially finite-game assumptions and max/min conventions on pp.2–3, window correctness on pp.5–6 and explicit max/min translation on p.8. Scanned equations on pp.5,6,8 were visually inspected. No unread later-section optimality, invention or best-case complexity claim is imported.</li>
+<li><a href="https://www.cs.cornell.edu/courses/cs6700/2013sp/readings/06-b-Checkers-Solved-Science-2007.pdf">Schaeffer et al. (2007), Checkers Is Solved</a>: actual PDF p.1, printed1518, inspected in full; dated weak-solution report and three solution levels. Its complete computer proof, other game statuses and a present-day solved-game inventory are not certified here.</li></ul>
+<p>No complete recording-board/slide review is claimed. Diagram-dependent descriptions use the five specified official images and inspected primary pages. Mathematical fixtures, cutoff counterexamples and program counts are original teaching work, not empirical claims about present game-playing systems. Perfect-information legality, model normalization and finite termination remain essential; physical safety, real opponent identification and learned-evaluator validation are separate tasks. Reader integration and human accessibility remain separate from the chapter's scientific checks.</p></section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-09-policy-gradients-and-function-approximation.html">Previous available chapter</a><a href="index.html">Lecture index</a><span>Further chapters pending</span></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

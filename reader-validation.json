@@ -1,12 +1,12 @@
 {
   "course": "CS221",
-  "checked_at_utc": "2026-10-03T12:15:32.881025+00:00",
-  "scope": "Accepted Chapters1-9 and four reader support pages; full20chapter course incomplete",
+  "checked_at_utc": "2026-10-03T12:49:24.709815+00:00",
+  "scope": "Accepted Chapters1-10 and four reader support pages; full20chapter course incomplete",
   "static": {
     "status": "passed",
-    "html_files": 14,
-    "local_links_checked": 163,
-    "timestamps_checked": 115,
+    "html_files": 15,
+    "local_links_checked": 177,
+    "timestamps_checked": 127,
     "chapter_pages_with_dollar_math": 0,
     "failures": [],
     "warnings": []
@@ -192,6 +192,24 @@
         "controls": true,
         "emptyToc": false,
         "file": "lecture-09-policy-gradients-and-function-approximation.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 224,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-10-games-opponent-models-and-search.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 224,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-10-games-opponent-models-and-search.html",
         "viewport": 390
       },
       {
