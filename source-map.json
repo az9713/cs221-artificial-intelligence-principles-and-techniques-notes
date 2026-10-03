@@ -2351,6 +2351,523 @@
       "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
       "video_id": "4Iu4KPVbnAY",
       "duration": 4792
+    },
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recording span assigned.",
+      "research_extension": "Only specifically cited primary support applies.",
+      "teaching_construction": "Stipulated travel task and negative-minute objective; Backward dependency route to one-step decisions and deterministic search",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Stipulated travel task and negative-minute objective",
+          "provenance": "original model"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Backward dependency route to one-step decisions and deterministic search",
+          "provenance": "original teaching"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "uncertainty",
+      "start": 5.52,
+      "end": 144.18,
+      "lecture_material": "Deterministic search recap; uncertain action outcomes motivate contingent decisions.",
+      "research_extension": "No separate external result imported.",
+      "teaching_construction": "Path versus state-contingent policy; known model versus learned reliability",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Path versus state-contingent policy; known model versus learned reliability",
+          "provenance": "recording; original explanation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Failure creates a same-state cycle",
+          "provenance": "stipulated transition table"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "markov",
+      "start": 145.07,
+      "end": 223.44,
+      "lecture_material": "Meaning of Markov, decision and sequential process; historical aside.",
+      "research_extension": "Draft PDF76\u201378 supplies the exact controlled-response definition.",
+      "teaching_construction": "Hidden breakdown flag makes location insufficient",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Controlled Markov response conditions on current state and action",
+          "provenance": "Sutton\u2013Barto draft PDF76\u201378; recording topic"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Hidden breakdown flag makes location insufficient",
+          "provenance": "original counterexample"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "tram",
+      "start": 223.44,
+      "end": 627.92,
+      "lecture_material": "Flaky tram, decision/chance nodes, probability 0.4 and repeated-location cycles.",
+      "research_extension": "Draft PDF86 Figure3.4/text: state/action backup nodes and repeated state identity.",
+      "teaching_construction": "State5 exact rows; masked action versus official penalized invalid tram",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Actual admissible tram/walk transitions and terminal convention",
+          "provenance": "recording; official mdp.py"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Backup diagrams may repeat state identities",
+          "provenance": "Sutton\u2013Barto draft PDF86 Figure3.4 and text"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "State5 exact rows; masked action versus official penalized invalid tram",
+          "provenance": "original table; actual official implementation"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "model",
+      "start": 628.3,
+      "end": 778.58,
+      "lecture_material": "States, admissible actions, transition probabilities, rewards and row normalization.",
+      "research_extension": "No separate external result imported.",
+      "teaching_construction": "Finite fully observed model, normalized chance rows and semantic axes; Conditional mean reward preserves one-step expectation but not variance; Doubling row mass changes expectation and continuation scaling",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Finite fully observed model, normalized chance rows and semantic axes",
+          "provenance": "recording; original formalization"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Conditional mean reward preserves one-step expectation but not variance",
+          "provenance": "original conditioning identity"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Doubling row mass changes expectation and continuation scaling",
+          "provenance": "original counterexample"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "dice",
+      "start": 779.76,
+      "end": 1001.09,
+      "lecture_material": "Stay/quit dice game and possible hybrid policy.",
+      "research_extension": "No separate external result imported.",
+      "teaching_construction": "Geometric tail-sum mean and always-stay value12; Stay-once-then-quit value32/3; ASR continuation reversal correction",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Quit10/stay4, stop1/3 and continue2/3",
+          "provenance": "official mdp.py; recording"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Geometric tail-sum mean and always-stay value12",
+          "provenance": "original derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Stay-once-then-quit value32/3; ASR continuation reversal correction",
+          "provenance": "original arithmetic; source comparison"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "policies",
+      "start": 1001.09,
+      "end": 1213.39,
+      "lecture_material": "Cost/reward sign and policy as a state-contingent rule; walk and tram comparison policies.",
+      "research_extension": "No separate external result imported.",
+      "teaching_construction": "Uniform finite expected completion for this route when p<1; p=1 retrying policy is improper",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Deterministic/stochastic stationary versus history-dependent policies",
+          "provenance": "recording; Sutton\u2013Barto draft PDF84"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Uniform finite expected completion for this route when p<1",
+          "provenance": "original progress/tail bound"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "p=1 retrying policy is improper",
+          "provenance": "original boundary case"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "returns",
+      "start": 1213.39,
+      "end": 1932.75,
+      "lecture_material": "Rollout utility, discount 0/1/0.5, discount interpretations and reward-form Q&A.",
+      "research_extension": "No separate external result imported.",
+      "teaching_construction": "First-reward split and geometric bound for bounded discounted returns; Always-stay dice discounted value; Negative-cost delay and dummy-state timing counterexamples",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Decision-time discounted return, reward timing and terminal value",
+          "provenance": "recording; Sutton\u2013Barto draft PDF76,84"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "First-reward split and geometric bound for bounded discounted returns",
+          "provenance": "original derivation"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Always-stay dice discounted value",
+          "provenance": "original fixed-point derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Negative-cost delay and dummy-state timing counterexamples",
+          "provenance": "original constructions"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "sampling",
+      "start": 1935.82,
+      "end": 2543.09,
+      "lecture_material": "Policy value, independent rollout averaging, displayed 20-sample means and sample-rate discussion.",
+      "research_extension": "Draft PDF128\u2013129: return averaging and first/every-visit distinction.",
+      "teaching_construction": "Geometric moments, independent-return variance and Chebyshev bound; Tram/dice analytic means, variances and N20 standard errors; Truncation does not equal completed-return evaluation",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Policy value and fixed-policy independent complete-episode averaging",
+          "provenance": "recording; Sutton\u2013Barto draft PDF84,128\u2013129"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Geometric moments, independent-return variance and Chebyshev bound",
+          "provenance": "original derivations"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Tram/dice analytic means, variances and N20 standard errors",
+          "provenance": "original exact arithmetic"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Recorded 20-sample means attributed, not reproduced or benchmarked",
+          "provenance": "machine transcript segments64\u201382"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Truncation does not equal completed-return evaluation",
+          "provenance": "original implementation contract"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "backup",
+      "start": 2543.09,
+      "end": 3166.77,
+      "lecture_material": "One-step full-row backup, arbitrary continuation values, initialization and bootstrapping.",
+      "research_extension": "Draft PDF84\u201385: policy values and expectation equation; PDF105: full backup.",
+      "teaching_construction": "Expectation equation and finite-horizon boundary-payoff induction; \u221242 row arithmetic corrects displayed \u221241.2; terminal \u22121",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Q^pi versus provisional B[v] and full versus sampled backup",
+          "provenance": "recording; Sutton\u2013Barto draft PDF84\u201385,105"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Expectation equation and finite-horizon boundary-payoff induction",
+          "provenance": "original derivations"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "\u221242 row arithmetic corrects displayed \u221241.2; terminal \u22121",
+          "provenance": "actual transition table; original exact computation"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "stopping",
+      "start": 3166.99,
+      "end": 3284.78,
+      "lecture_material": "Maximum absolute inter-iterate difference and a stopping tolerance.",
+      "research_extension": "No separate external result imported.",
+      "teaching_construction": "Infinity norm, inter-iterate distance and Bellman residual; Discounted contraction, existence/uniqueness and old/new/residual error bounds; Discount.99 residual1e\u22125 bounds real value error by1e\u22123; Binary64 bound is numerical, not a certified roundoff interval",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Infinity norm, inter-iterate distance and Bellman residual",
+          "provenance": "recording; original local definitions"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Discounted contraction, existence/uniqueness and old/new/residual error bounds",
+          "provenance": "original probability-row and geometric-tail proofs"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Discount.99 residual1e\u22125 bounds real value error by1e\u22123",
+          "provenance": "original arithmetic"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Binary64 bound is numerical, not a certified roundoff interval",
+          "provenance": "original computational limit"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "evaluation",
+      "start": 3290.7,
+      "end": 3900.08,
+      "lecture_material": "Synchronous policy-evaluation loop, terminal boundaries and arithmetic trace.",
+      "research_extension": "Draft PDF104\u2013105: evaluation equations and synchronous/in-place distinction.",
+      "teaching_construction": "Discounted linear-system inverse as geometric series; Chain update order, \u2212100 versus infinity comment, stale-return defect and state5 loop elimination",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Synchronous versus in-place evaluation",
+          "provenance": "recording; Sutton\u2013Barto draft PDF104\u2013105"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Discounted linear-system inverse as geometric series",
+          "provenance": "original derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Chain update order, \u2212100 versus infinity comment, stale-return defect and state5 loop elimination",
+          "provenance": "original fixtures; actual official loop"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "convergence",
+      "start": 3900.08,
+      "end": 4156.85,
+      "lecture_material": "Displayed convergence interpretation and always-stay dice value.",
+      "research_extension": "No separate external result imported.",
+      "teaching_construction": "Dice exact iterate errors; proper-route undiscounted convergence; Undiscounted zero-reward wait/quit has many spurious fixed points",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "evidence_class": "engineering check",
+          "claim": "Displayed two-phase curve remains an attributed example",
+          "provenance": "recording segments125\u2013132; not reproduced benchmark"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Dice exact iterate errors; proper-route undiscounted convergence",
+          "provenance": "original proofs"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Undiscounted zero-reward wait/quit has many spurious fixed points",
+          "provenance": "original counterexample"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "optimal",
+      "start": 4156.85,
+      "end": 4643.89,
+      "lecture_material": "Max backup, value iteration, action extraction and improved tram route.",
+      "research_extension": "Draft PDF89\u201391,114: optimality/max backup and actually inspected Figure3.7.",
+      "teaching_construction": "Max inequality, discounted optimality and dominance over arbitrary histories; Proper-route self-loop elimination and global optimality; Full state table; exact \u221222/3>\u22129>\u221212 ranking repairs ASR comparison; Mean-optimal deadline probability21/25 and variance40/9",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Max outside chance expectation and greedy extraction",
+          "provenance": "recording; Sutton\u2013Barto draft PDF89\u201391,114"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Max inequality, discounted optimality and dominance over arbitrary histories",
+          "provenance": "original conditional-expectation proof"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Proper-route self-loop elimination and global optimality",
+          "provenance": "original branch verification and tail argument"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Full state table; exact \u221222/3>\u22129>\u221212 ranking repairs ASR comparison",
+          "provenance": "original rational computation; retained source comparison"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Mean-optimal deadline probability21/25 and variance40/9",
+          "provenance": "original geometric fixture"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "ties",
+      "start": 4644.78,
+      "end": 4814.03,
+      "lecture_material": "Deterministic optimal policy, ties/randomization, games contrast and unknown-model next topic.",
+      "research_extension": "Draft PDF91: greedy maximizing actions and stochastic ties.",
+      "teaching_construction": "Discounted deterministic optimum exists; mixtures over maximizers are optimal; Dice discount9/10 threshold and stationary-mixture identity; Clock-dependent finite-horizon choice counterexample; Known-model planning is distinct from learning/coverage/safety",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Discounted deterministic optimum exists; mixtures over maximizers are optimal",
+          "provenance": "original fixed-point proof; draft PDF91 definition context"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Dice discount9/10 threshold and stationary-mixture identity",
+          "provenance": "original derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Clock-dependent finite-horizon choice counterexample",
+          "provenance": "original construction"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Known-model planning is distinct from learning/coverage/safety",
+          "provenance": "recording closing sequence; original scope"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recording span assigned.",
+      "research_extension": "Only specifically cited primary support applies.",
+      "teaching_construction": "Original program/domain, exact code/stdout, rational route and float discounted iterator",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "evidence_class": "engineering check",
+          "claim": "Original program/domain, exact code/stdout, rational route and float discounted iterator",
+          "provenance": "original implementation; author checks pending independent review"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recording span assigned.",
+      "research_extension": "Only specifically cited primary support applies.",
+      "teaching_construction": "Probability conditioning, geometric moments, variance/residual bounds, mixture identity and proper-route dominance; Chance-row, deadline, stale-return, horizon and invalid-input examples",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Probability conditioning, geometric moments, variance/residual bounds, mixture identity and proper-route dominance",
+          "provenance": "original worked proofs"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Chance-row, deadline, stale-return, horizon and invalid-input examples",
+          "provenance": "original worked computations and counterexamples"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
+    },
+    {
+      "section": "references",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recording span assigned.",
+      "research_extension": "Only specifically cited primary support applies.",
+      "teaching_construction": "Inspected primary roles, actual retained edition and source/visual limits",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Inspected primary roles, actual retained edition and source/visual limits",
+          "provenance": "actual primary identity/pages; original provenance statement"
+        }
+      ],
+      "chapter": "lecture-07-markov-decision-processes.html",
+      "video_id": "2ZtF1j3n6XE",
+      "duration": 4820
     }
   ]
 }

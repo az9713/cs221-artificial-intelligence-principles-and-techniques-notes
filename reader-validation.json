@@ -1,12 +1,12 @@
 {
   "course": "CS221",
-  "checked_at_utc": "2026-10-03T10:37:08.966562+00:00",
-  "scope": "Accepted Chapters1-6 and four reader support pages; full20chapter course incomplete",
+  "checked_at_utc": "2026-10-03T11:11:19.791116+00:00",
+  "scope": "Accepted Chapters1-7 and four reader support pages; full20chapter course incomplete",
   "static": {
     "status": "passed",
-    "html_files": 10,
-    "local_links_checked": 122,
-    "timestamps_checked": 73,
+    "html_files": 11,
+    "local_links_checked": 136,
+    "timestamps_checked": 87,
     "chapter_pages_with_dollar_math": 0,
     "failures": [],
     "warnings": []
@@ -138,6 +138,24 @@
         "controls": true,
         "emptyToc": false,
         "file": "lecture-06-uniform-cost-and-a-star-search.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 366,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-07-markov-decision-processes.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 366,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-07-markov-decision-processes.html",
         "viewport": 390
       },
       {

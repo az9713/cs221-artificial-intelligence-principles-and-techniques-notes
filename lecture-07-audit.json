@@ -1,11 +1,11 @@
 {
-  "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+  "chapter": "lecture-07-markov-decision-processes.html",
   "checked_at_utc": "2026-10-03T11:11:19.791116+00:00",
   "status": "independently reviewed and locally validated chapter",
-  "accepted_scientific_body_sha256": "fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4",
-  "accepted_metadata_sha256": "ecafcb9b0e2a7df34748cc7a6498aac771323e4d6616ce3c9af18b1dcfcd0e60",
-  "accepted_program_sha256": "a6d99d5484b432d2b29b79efe6e5ffa4178d8a5267e63a2f8b867e4b3e9d86dd",
-  "integrated_html_sha256": "89cac3a604977f187d71e00c0562b3f61fca912a5bb55944d853baf72cb3a645",
+  "accepted_scientific_body_sha256": "2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa",
+  "accepted_metadata_sha256": "e2eabcefbc817001beffc1b2ac334f85140ec10915d7adf53e3c6ff63bf74169",
+  "accepted_program_sha256": "d762f9d424dc09583f814907cfb453924720a9a31e0d602f0b8ea4ecd51e3f26",
+  "integrated_html_sha256": "0fa3ba791fa8d6525cc21e71ebec39d8c9c0c5499cad1c5b93a9ad6d1b6b9ee5",
   "worked_solutions": 6,
   "current_reader_gate": {
     "status": "passed within accepted Chapters1-7 reader scope",
@@ -23,8 +23,7 @@
     "gate_6b": "accepted",
     "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "edd159004065d5536c2734d64fe26f8afb2d8054d185b9e45162d69c8341b24f",
-    "independent_numerical_checks": 7488,
-    "extra_nan_boundary_checks": 4
+    "review_report_sha256": "65a1034dcf81fbd0ab339bad114b4547b9051c1de01eeae2876ac9de2b221c25",
+    "independent_numerical_checks": 612
   }
 }

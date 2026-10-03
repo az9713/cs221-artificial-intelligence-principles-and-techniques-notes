@@ -1,9 +1,9 @@
 {
-  "checked_at_utc": "2026-10-03T10:37:08.966562+00:00",
+  "checked_at_utc": "2026-10-03T11:11:19.791116+00:00",
   "course": "CS221",
-  "chapter_count": 6,
+  "chapter_count": 7,
   "selected_recordings": 20,
-  "status": "Six independently reviewed chapters locally validated; full course in development",
+  "status": "Seven independently reviewed chapters locally validated; full course in development",
   "course_complete": false,
   "human_accessibility": "not performed",
   "reader_report": "reader-validation.json",
@@ -43,7 +43,7 @@
       "META": "7d6dd90e91c70e67e8e7a7fb45450c229d95dcaccc7c7d0316a450c6ebea8469",
       "CODE": "9d0966317c21d58b3480efabc54af091a68f4688ee45b5e527e32e9bdf31081e",
       "review": "reviews/lecture-04-round1.md",
-      "before_HTML": "c22754b0b591e1d86e5805b58158cf6d9da9da11bd2eb0847ffd77104c2dc250",
+      "before_HTML": "0bc30ae31bde092f870f557bb0b50255cd07ad71c3ae918bfaf726a4b13de5ce",
       "review_sha256": "9183b1262577693e0afb3c2c9e12937338c0f81bc0d4b03df1bdb0a8880ee730",
       "path": "lecture-04-neural-networks-and-training.html",
       "after_HTML": "0bc30ae31bde092f870f557bb0b50255cd07ad71c3ae918bfaf726a4b13de5ce"
@@ -54,7 +54,7 @@
       "META": "61d5ac5788398157f5e8bf852f590c1e4a57631ad06d0ea9d0bf07c2aa5e0425",
       "CODE": "5a85a4cf33b2dc0dbb1b0fdbb1a145cd8a52e0489cfff3560443e12ff5ef086e",
       "review": "reviews/lecture-05-round1.md",
-      "before_HTML": "226c0bfbeb0ca62ce4262245a83cdc2c243d1ac57c59761ba6f02dda19a07a45",
+      "before_HTML": "ef19dbc6745b1861425f8f305344577f68b503c568d87faaa8d3a23de192e128",
       "review_sha256": "54df384864cfd92fb1f4eb636c077f13af7e0c876c3517ef1006b57f484b4ada",
       "path": "lecture-05-search-problems-and-approximate-planning.html",
       "after_HTML": "ef19dbc6745b1861425f8f305344577f68b503c568d87faaa8d3a23de192e128"
@@ -66,14 +66,25 @@
       "CODE": "a6d99d5484b432d2b29b79efe6e5ffa4178d8a5267e63a2f8b867e4b3e9d86dd",
       "STDOUT": "3b9f7d112cd8fcfff33387b4aa4c5a315463c4cd915af3199e284e55abb64dd6",
       "review": "reviews/lecture-06-round2.md",
-      "before_HTML": "b2e93c0d205efcbfd90c1507aac3bcdbc7aaebaf38a52745c147be8b84a51d04",
+      "before_HTML": "adb980f0fa891928d243d02cf5c2f5477637227f983f5f939eddd82ed9458c2c",
       "review_sha256": "edd159004065d5536c2734d64fe26f8afb2d8054d185b9e45162d69c8341b24f",
       "path": "lecture-06-uniform-cost-and-a-star-search.html",
-      "after_HTML": "adb980f0fa891928d243d02cf5c2f5477637227f983f5f939eddd82ed9458c2c"
+      "after_HTML": "89cac3a604977f187d71e00c0562b3f61fca912a5bb55944d853baf72cb3a645"
+    },
+    "7": {
+      "BODY": "2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa",
+      "META": "e2eabcefbc817001beffc1b2ac334f85140ec10915d7adf53e3c6ff63bf74169",
+      "CODE": "d762f9d424dc09583f814907cfb453924720a9a31e0d602f0b8ea4ecd51e3f26",
+      "HTML": "93bb870972c69ac5697b8573ab41b7203456da9e31ce8cfeee80575cf6792361",
+      "review": "reviews/lecture-07-round2.md",
+      "before_HTML": "93bb870972c69ac5697b8573ab41b7203456da9e31ce8cfeee80575cf6792361",
+      "review_sha256": "65a1034dcf81fbd0ab339bad114b4547b9051c1de01eeae2876ac9de2b221c25",
+      "path": "lecture-07-markov-decision-processes.html",
+      "after_HTML": "0fa3ba791fa8d6525cc21e71ebec39d8c9c0c5499cad1c5b93a9ad6d1b6b9ee5"
     }
   },
   "limits": [
-    "Chapters7-20, cumulative course lab, full learning route and book-wide review pending",
+    "Chapters8-20, cumulative course lab, full learning route and book-wide review pending",
     "No publication performed"
   ]
 }

@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa"><title>Markov decision processes · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START -->
+<h1>Markov decision processes</h1>
+<p class="subtitle">Chapter 7 · A route becomes a contingent decision when the tram can fail.</p>
+<section id="case">
+<h2>A commuter needs an arrival policy</h2>
+<p>A commuter starts at location 1 and must reach location 10. Walking advances one location and takes one minute. A tram attempt takes two minutes and, when the doubled location is within the route, succeeds with probability \(3/5\); otherwise the commuter remains where they were. Is the faster-looking vehicle actually faster in expectation? What should the commuter do after a failed attempt? A fixed list of moves cannot answer the second question until it includes rules for every possible outcome.</p>
+<p>We retain this stipulated travel model throughout the chapter. Its probabilities are teaching assumptions, not measured transport reliability. Rewards will be negative elapsed minutes, so maximizing expected reward minimizes expected journey duration when the discount is one. We will compute three policies exactly, examine the variation hidden by their means, and use the same transition rows to explain simulation, policy evaluation and value iteration. The distinction between a valid mathematical model and a reliable real transport forecast remains separate.</p>
+<p>Chapter 1 supplied a one-step expected-loss decision; Chapters 5–6 develop search when successor states are known. Here an action produces a distribution of successors. The main question is how to choose a rule for acting across those successors, including states reached repeatedly. All additional proofs, error bounds and exact arithmetic below are original teaching developments. The recording supplies the topic sequence and examples; timestamp links delimit that source sequence.</p>
+</section>
+<section id="uncertainty">
+<h2>1. From a search path to a contingent plan <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=5s">[00:05–02:24]</a></h2>
+<p>In deterministic search, an edge specifies both a cost and a successor. A path therefore determines its own sequence of states. If the tram sometimes stays at its departure location, the action sequence “tram, tram, walk” has no single state sequence or cost. Taking the first tram from location 1 may lead to 2 or back to 1; the second action can then have a different destination. Expected costs cannot be assigned to a fixed successful path while ignoring its failed attempts.</p>
+<p>The useful object is a policy: a rule that selects an action from the current state. A policy can say “walk until location 5; at 5, retry the tram until it succeeds.” Every failure now has a specified continuation. The outcome sequence remains random, but the decision rule is complete. Planning means comparing such rules under a known model. Learning the failure probability from observations is a further problem; none of the Bellman calculations below establishes that the stipulated probability is accurate.</p>
+<p>There is also a change in graph structure. Deterministic progress could permit a backward calculation on an acyclic graph. A failed tram attempt creates a self-loop. One cannot recursively call the value of the same state without either solving its equation or introducing an iterative approximation. This small cycle is the reason a route example becomes a fixed-point problem.</p>
+</section>
+<section id="markov">
+<h2>2. What the current state must retain <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=145s">[02:25–03:43]</a></h2>
+<p>A Markov decision process, abbreviated MDP, models an environment whose next response, conditional on the current state and chosen action, does not additionally depend on the earlier history. Let \(S_t\) be the random state at decision index \(t\), \(A_t\) the selected action, and \(R_{t+1}\) the reward produced by that action. Let \(H_t\) denote the complete history through the current state. The controlled Markov assumption is</p>
+\[\Pr(S_{t+1}=s',R_{t+1}=r\mid H_t,A_t=a)
+=\Pr(S_{t+1}=s',R_{t+1}=r\mid S_t=s,A_t=a),\quad S_t=s.\]
+<p>These conditional statements apply to histories and actions with positive conditioning probability. The action must appear: two different actions at the same location generally have different successor distributions. Nor does this assumption say that the agent's future actions ignore its history. A history-dependent policy can still be used in a Markov environment. A stationary policy, which we define later, makes the additional choice to depend only on the current state.</p>
+<p>Location alone is sufficient in our tram model because its reliability is constant across attempts. If failure becomes more likely after a breakdown, two histories ending at location 5 can predict different outcomes. “Location 5” is then an inadequate state. A known breakdown flag could be added to the state; if the flag is hidden, the agent instead needs an observation model and possibly a belief about the hidden condition. Merely calling an observation a state does not create the Markov property.</p>
+<p>The retained <a href="https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf">Sutton–Barto second-edition draft</a>, PDF pp.76–78, defines the environment response given state and action and contrasts it with a response conditioned on the full history. Its frontmatter identifies an edition in progress with copyright 2014, 2015. We use that actual draft, rather than assign later edition dates to it. The recording's historical aside is not needed to justify the mathematical assumption.</p>
+</section>
+<section id="tram">
+<h2>3. Build the flaky-tram rows before computing values <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=223s">[03:43–10:27]</a></h2>
+<p>The state set is \(S=\{1,2,\ldots,10\}\), where 10 is terminal: the journey has ended, no action is taken there, and no further reward is earned. For a nonterminal location \(s\), walking is admissible. A tram action is admissible only if \(2s\le10\). Write \(A(s)\) for this state-specific action set and \(p=2/5\) for the failure probability. The three nonzero transition entries are</p>
+\[P(s+1\mid s,\text{walk})=1,\qquad
+P(2s\mid s,\text{tram})=1-p=3/5,\qquad
+P(s\mid s,\text{tram})=p=2/5.\]
+<p>The walk reward is \(-1\) minute. Both tram outcomes earn \(-2\) minutes: a failed attempt still consumes time. At location 5, the chance row is therefore “probability \(3/5\), reward \(-2\), successor 10” and “probability \(2/5\), reward \(-2\), successor 5.” Its probability mass is one. The chance node is the distribution after choosing tram; it is not a second opportunity for the agent to choose whether the tram works.</p>
+<table><thead><tr><th>Decision at 5</th><th>Next location</th><th>Probability</th><th>Reward</th></tr></thead><tbody><tr><td>walk</td><td>6</td><td>1</td><td>−1 minute</td></tr><tr><td>tram</td><td>10</td><td>3/5</td><td>−2 minutes</td></tr><tr><td>tram</td><td>5</td><td>2/5</td><td>−2 minutes</td></tr></tbody></table>
+<p>An MDP transition graph has state nodes, action choices and chance outcomes. A backup diagram instead unfolds one step of that graph to show an expectation. The same state can appear as both parent and successor in the unfolded diagram. This is why a visually lower successor node need not represent progress. The actually inspected backup diagrams in the <a href="https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf">draft's PDF p.86, Figure 3.4</a>, separate state nodes from action nodes; its accompanying text explicitly permits a state to be its own successor. We reconstruct the tram row in the table rather than infer unseen recording visuals.</p>
+<p>The <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/mdp.py">retained official executable lecture</a> has a deliberate implementation difference: a tram beyond the route is represented by a terminal transition with reward \(-100\). Here such a tram is absent from \(A(s)\), matching the stated route restriction. A forbidden action and an available expensive action are different models. In particular, our program cannot select an invalid tram merely because a pessimistic continuation value makes its \(-100\) reward temporarily look attractive. Terminal states also expose no successors.</p>
+</section>
+<section id="model">
+<h2>4. The finite MDP contract <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=628s">[10:28–12:58]</a></h2>
+<p>Our finite, fully observed model specifies states \(S\), nonempty admissible action sets \(A(s)\) at nonterminal states, a transition distribution \(P(s'\mid s,a)\), a transition reward \(r(s,a,s')\), and a discount \(\gamma\in[0,1]\). Each transition row satisfies \(P(s'\mid s,a)\ge0\) and \(\sum_{s'\in S}P(s'\mid s,a)=1\). The destination is observed before the next decision. A terminal state's continuation value is zero; the reward for entering it is counted on the preceding transition.</p>
+<p>The transition array has semantic axes current state, action and next state. State-specific action sets make it a collection of rows, not necessarily a rectangular array with every action valid everywhere. A rectangular representation needs an explicit mask. The reward array has the same transition semantics; it is neither a probability nor a cost to be minimized without a sign change. In the tram model a probability has no units, while reward and value have units of minutes with a negative sign.</p>
+<p>If the environment also generates random rewards conditional on the successor, one can retain a joint distribution over successor and reward. For expected-return calculations it suffices to replace \(r(s,a,s')\) by the conditional mean reward for positive-probability successors. The elementary identity is \(\mathbb E[R+\gamma V(S')]=\sum_{s'}P(s'\mid s,a)[\mathbb E(R\mid s,a,s')+\gamma V(s')]\). This replacement preserves this expectation. It does not preserve reward variance or a probability of arriving by a deadline. Our program stores outcomes with both reward and successor, so distinct outcomes may have the same successor.</p>
+<p>A row must be normalized before the sum can be interpreted as an expectation. For example, multiplying both tram probabilities by two doubles the reward term and the continuation term; it changes an expected value into an unnormalized weighted total. Subsequent convergence arguments also use row mass one. Input validation of this invariant is part of implementing the mathematical object.</p>
+</section>
+<section id="dice">
+<h2>5. A dice game makes repeated decisions visible <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=779s">[12:59–16:41]</a></h2>
+<p>The second recorded example has states \(\{\text{in},\text{end}\}\). At “in,” quitting gives 10 dollars and ends the game. Staying gives 4 dollars immediately; the game then ends with probability \(1/3\) or returns to “in” with probability \(2/3\). At “end” no further reward is earned. An action is selected before the die outcome; staying cannot be retrospectively relabeled as quitting after an unfavorable draw.</p>
+<p>Let \(K\) be the number of stays before termination under the always-stay policy. Then \(\Pr(K=k)=(2/3)^{k-1}(1/3)\) for integers \(k\ge1\). Such a waiting time is geometric. Its mean follows directly from the tail sum: \(\mathbb E K=\sum_{j\ge0}\Pr(K>j)=\sum_{j\ge0}(2/3)^j=3\). At discount one, the return is \(4K\), with mean 12 dollars. Quitting has mean 10, but it also has no return variation.</p>
+<p>A hybrid policy could stay once and quit if the game continues. Its undiscounted expected return is \(4+(2/3)10=32/3\), between 10 and 12. This is an original finite check of the policy question raised in the recording. It does not yet show that always staying beats every possible hybrid; the optimality equation will supply that argument. The distinction matters because enumerating two policies cannot prove a global optimum over all policies.</p>
+<p>One machine-transcript passage reverses the continuation description; the actual official dice transition table assigns probability \(2/3\) to returning to “in.” All equations here use that inspected table. The original source files are preserved. This correction also makes the claimed always-stay value 12 consistent with the model.</p>
+</section>
+<section id="policies">
+<h2>6. Policies choose after outcomes become known <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=1001s">[16:41–20:13]</a></h2>
+<p>A deterministic stationary policy is a function \(\pi\) with \(\pi(s)\in A(s)\) for every nonterminal \(s\). “Deterministic” concerns the selected action, not the random environment; “stationary” means that the rule does not change with the decision index. A stochastic stationary policy instead specifies probabilities \(\pi(a\mid s)\) summing to one over admissible actions. A history-dependent policy can use the complete observed history, and a finite-horizon policy can use the remaining number of decisions.</p>
+<p>Two tram policies are \(\pi_{\mathrm{walk}}(s)=\text{walk}\) and \(\pi_{\mathrm{tram}}(s)=\text{tram}\) when \(2s\le10\), otherwise walk. The second rule retries after failure automatically, because the state is unchanged. Its successful progression is \(1\to2\to4\to8\to9\to10\), but the actual trajectory may repeat 1, 2 or 4 several times. Its expected cost must include those repetitions.</p>
+<p>For any negative travel reward \(r=-c\), maximizing \(\mathbb E\sum r\) is equivalent to minimizing \(\mathbb E\sum c\), when the sums are integrable. Changing the sign without changing the optimization direction reverses the decision. Nor can units be ignored: the dice return is in dollars, the tram return in negative minutes. Their values are not quantities to be added into a common policy objective unless a further exchange rule is stipulated.</p>
+<p>The tram policies are proper when \(p<1\): they eventually reach the terminal state with finite expected duration. To see a stronger property, let \(q=1-p>0\). Every admissible action has probability at least \(q\) of strictly increasing location at the next decision; walking succeeds with probability one. Conditional on any past, the probability of no progress for \(k\) further decisions is at most \((1-q)^k\). The expected wait for each strict increase is at most \(1/q\), and there can be at most nine increases. Thus the expected number of decisions is at most \(9/q\), even for history-dependent admissible choices. Since each costs at most two minutes, expected duration is finite. At \(p=1\), a retrying tram policy at location 1 never leaves; this conclusion fails.</p>
+</section>
+<section id="returns">
+<h2>7. Return, discount and the unit of time <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=1213s">[20:13–32:13]</a></h2>
+<p>A rollout is one realized trajectory \(S_0,A_0,R_1,S_1,A_1,R_2,\ldots\) generated by a policy and the transition model. If it ends after \(\tau\) decisions, define its return from the start as \(G_0=\sum_{t=0}^{\tau-1}\gamma^tR_{t+1}\). At a later index \(t\), the remaining return is \(G_t=\sum_{j=0}^{\tau-t-1}\gamma^jR_{t+j+1}\). Splitting off its first reward gives the hinge identity</p>
+\[G_t=R_{t+1}+\gamma G_{t+1}.\]
+<p>The terminal continuation is zero. At \(\gamma=0\), only the immediate reward contributes, with the convention that its multiplier is one; no expression \(0^0\) need be evaluated. At \(\gamma=1\), rewards are undiscounted. For a continuing task with bounded rewards \(|R_{t+1}|\le R_{\max}\) and \(0\le\gamma<1\), the absolute return is bounded by \(R_{\max}/(1-\gamma)\), a geometric-series calculation. This bound justifies the finite expectations and limiting manipulations used below. At discount one, proper termination and integrability must be established separately, as we did for the tram.</p>
+<p>In this model \(t\) counts decisions, not minutes. A two-minute tram attempt advances the discount exponent once, just as a one-minute walk does. Consequently, \(\gamma=1\) gives the literal expected journey duration after negating the return. A smaller discount gives a different objective, discounted minute costs per decision. If discounting is intended per elapsed minute, the tram continuation should instead have multiplier \(\gamma^2\), or the state model should represent its intermediate minute. One must specify that convention before comparing algorithms.</p>
+<p>Discounting positive rewards makes a delayed payment smaller. It does not universally discourage waiting or shorter trajectories. With negative costs, an immediate reward \(-1\) is worse than a zero-reward wait followed by \(-1\) at discount \(1/2\): the latter return is \(-1/2\). A policy can prefer postponing a cost. In a zero-reward self-loop with an available negative terminal payment, it may postpone forever. The recording's intuition about penalizing length therefore needs the reward convention and transition structure.</p>
+<p>The reward Q&amp;A permits state-only, action-only and transition-dependent descriptions. A state-only reward can describe a penalty for occupying a location, but it must say whether the departing or arriving state earns it. A transition reward directly charges each failed attempt. Introducing a dummy state to encode an action-dependent payment can preserve an undiscounted total while changing a discounted return: a formerly immediate reward may gain an extra factor \(\gamma\). With \(\gamma=1/2\), moving an immediate payment of 4 one decision later changes it to 2. A representation change is valid only if the reward timing and continuation discounts preserve the intended criterion.</p>
+<p>For the dice game, always staying satisfies \(v=4+(2\gamma/3)v\), hence \(v=4/(1-2\gamma/3)\). It equals 4, 6, 10 and 12 at discounts 0, \(1/2\), \(9/10\) and 1. This exact check exposes a genuine policy reversal: sufficiently strong discounting favors the immediate 10-dollar quit action. It also shows why an immediate reward should not be confused with its long-run value.</p>
+</section>
+<section id="sampling">
+<h2>8. Value is an expectation; a rollout is one observation <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=1935s">[32:15–42:23]</a></h2>
+<p>The state value under a stationary policy is \(V^\pi(s)=\mathbb E_\pi[G_0\mid S_0=s]\); the subscript means that subsequent actions follow that policy. A realized return can differ greatly from this mean. For always walking from 1, every return is \(-9\). For tram-if-possible, the number of attempts at each of locations 1, 2 and 4 is geometric with success probability \(q=3/5\). Denote these independent waiting times by \(K_1,K_2,K_3\). Independence follows from the stipulated fixed, independently sampled transition model across attempts.</p>
+\[G_{\mathrm{tram}}=-\{2(K_1+K_2+K_3)+2\},\qquad
+V^{\pi_{\mathrm{tram}}}(1)=-\{6/q+2\}=-12.\]
+<p>The two final walks contribute two minutes. For a geometric waiting time, the mean is \(1/q\) and the variance is \((1-q)/q^2\). The latter follows, for example, by differentiating the geometric-series generating function \(\mathbb E z^K=qz/[1-(1-q)z]\) twice at \(z=1\), then forming \(\mathbb E K^2-(\mathbb E K)^2\). Thus \(\operatorname{Var}(G_{\mathrm{tram}})=3\cdot4(2/5)/(3/5)^2=40/3\) square minutes. A mean alone conceals this variability.</p>
+<p>Monte Carlo policy evaluation averages independent complete rollouts from a specified start: \(\widehat V_N=N^{-1}\sum_{i=1}^NG_i\). If the returns are identically distributed with finite mean \(V\) and variance \(\sigma^2\), then \(\mathbb E\widehat V_N=V\). Expanding the variance, all cross-covariances vanish under independence, giving \(\operatorname{Var}(\widehat V_N)=\sigma^2/N\). The standard error, the standard deviation of the estimator, is therefore \(\sigma/\sqrt N\). This is the precise meaning of the rate mentioned in the recording; it is not a bound on every realized absolute error.</p>
+<p>For \(N\ge2\), the usual sample standard-error estimate is \(\widehat{\mathrm{SE}}=\sqrt{\sum_i(G_i-\widehat V_N)^2/[N(N-1)]}\). Correlated rollouts, reuse of intermediate returns within one episode, an adaptive policy or infinite return variance invalidate this simple independent-return calculation. The <a href="https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf">draft, PDF pp.128–129</a>, distinguishes first-visit from every-visit averages and states the independent finite-variance setting for the first-visit argument. Here we start each independent episode at the same state and use its whole return once.</p>
+<p>A probabilistic error bound can also be derived without a normal approximation. For a nonnegative random variable \(Z\) and \(a&gt;0\), \(\mathbb E Z\ge a\Pr(Z\ge a)\), because its contribution on that event is at least \(a\) and its contribution elsewhere is nonnegative. This is Markov's probability inequality, distinct from the controlled Markov property of a state. Set \(Z=(\widehat V_N-V)^2\) and \(a=\varepsilon^2\), where \(\varepsilon&gt;0\) is a desired value error. Then \(\Pr(|\widehat V_N-V|\ge\varepsilon)\le\sigma^2/(N\varepsilon^2)\). This Chebyshev bound is generally conservative but makes the variance and independence requirements visible.</p>
+<p>The lecture displays 20-rollout means around \(-11.7\) for tram-if-possible and 12.8 for the dice stay policy. Those are attributed demonstrations, not exact values or benchmarks reproduced by this chapter. Our exact means are \(-12\) and 12. For dice, the geometric stop probability is \(1/3\), so return variance is \(16\cdot(2/3)/(1/3)^2=96\) square dollars. At 20 episodes the analytic standard errors are \(\sqrt{(40/3)/20}\approx0.8165\) minutes and \(\sqrt{96/20}\approx2.1909\) dollars. Sampling fluctuation of those sizes is compatible with the displayed deviations; compatibility is not verification of the particular samples.</p>
+<p>Simulation has a separate failure boundary: a hard step budget may end before the episode does. Returning that partial sum as if it were a complete return estimates a different, truncated objective. Our program raises an error when its budget is exhausted before arrival. It does not drop long journeys and average only successful short ones, which would bias the value estimate.</p>
+</section>
+<section id="backup">
+<h2>9. Turn the return identity into a full backup <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=2543s">[42:23–52:47]</a></h2>
+<p>Condition on the first action and successor in \(G_0=R_1+\gamma G_1\). The Markov assumption and a stationary continuation policy identify the remaining conditional mean with \(V^\pi(s')\). Thus the action value, the mean return after taking \(a\) once and then following \(\pi\), is</p>
+\[Q^\pi(s,a)=\sum_{s'}P(s'\mid s,a)[r(s,a,s')+\gamma V^\pi(s')].\]
+<p>For a deterministic policy, \(V^\pi(s)=Q^\pi(s,\pi(s))\). For a stochastic stationary policy, \(V^\pi(s)=\sum_{a\in A(s)}\pi(a\mid s)Q^\pi(s,a)\). These are Bellman expectation equations. The <a href="https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf">draft's PDF pp.84–85, equations 3.10–3.12</a>, gives state/action values and derives the same expectation relationship, using a joint successor/reward distribution.</p>
+<p>An algorithm does not initially know \(V^\pi\). For an arbitrary continuation array \(v:S\to\mathbb R\) with zero terminal entries, define the backup quantity</p>
+\[B[v](s,a)=\sum_{s'}P(s'\mid s,a)[r(s,a,s')+\gamma v(s')],\qquad
+(T^\pi v)(s)=B[v](s,\pi(s)).\]
+<p>Here \(T^\pi\) is an operator taking one entire value array to another. For a stochastic policy its definition is \((T^\pi v)(s)=\sum_a\pi(a\mid s)B[v](s,a)\). The notation distinguishes a backup made with a provisional array from the actual policy action value \(Q^\pi\). They coincide only when the continuation array is \(V^\pi\). A full backup enumerates all outcomes in the row. One sampled target \(R_1+\gamma v(S_1)\) has that backup as its expectation under the model, but remains a noisy scalar observation. Its variance does not disappear because its mean has a Bellman form.</p>
+<p>At state 5 with discount one and the provisional array \(v_0(s)=-100\) for nonterminal states, \(v_0(10)=0\), the tram backup is</p>
+\[B[v_0](5,\text{tram})=\tfrac25(-2-100)+\tfrac35(-2+0)=-42.\]
+<p>The reward \(-2\) must appear on the failure branch as well as the success branch. The transcript's worked expression omits it in one term and produces \(-41.2\); the correct full-row calculation gives \(-42\). At state 9, walking goes directly to terminal and gives \(-1\), regardless of the other provisional entries. These two checks distinguish a terminal boundary value from a forgotten attempt cost.</p>
+<p>Repeated application, \(v_{k+1}=T^\pi v_k\), is called bootstrapping because current estimates supply the next continuation estimates. Its exact finite-horizon interpretation is</p>
+\[v_k(s)=\mathbb E_\pi\!\left[\sum_{t=0}^{k-1}\gamma^tR_{t+1}
++\gamma^k v_0(S_k)\mid S_0=s\right],\]
+<p>where terminal states are padded by zero-reward absorbing transitions for this identity. The proof is induction: it is true at \(k=0\); applying the first-step expectation shifts the remaining expression one decision ahead. An initial value of \(-100\) is a boundary payoff assigned to an unfinished horizon, not a physical quit option in the route. Zero initialization would omit that boundary payoff. Under discount below one, its contribution shrinks uniformly. Under proper undiscounted travel, it disappears because the probability of still traveling tends to zero.</p>
+</section>
+<section id="stopping">
+<h2>10. A stopping tolerance needs an error argument <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=3166s">[52:46–54:44]</a></h2>
+<p>The infinity norm of an array is \(\|v\|_\infty=\max_{s\in S}|v(s)|\). It measures the worst absolute state value. The distance between successive arrays is \(\delta_k=\|v_{k+1}-v_k\|_\infty\). A small distance is an observed change, not automatically a small error to the desired fixed point. To convert it into an error guarantee, we need a bound on the Bellman operator.</p>
+<p>For two arrays \(v,w\), the reward terms cancel. At every nonterminal state, a probability-weighted average of continuation differences is no larger than their largest absolute difference:</p>
+\[|(T^\pi v)(s)-(T^\pi w)(s)|
+\le\gamma\sum_{s'}P(s'\mid s,\pi(s))|v(s')-w(s')|
+\le\gamma\|v-w\|_\infty.\]
+<p>Terminal entries stay zero. Thus, when \(0\le\gamma<1\), \(T^\pi\) is a contraction: it shrinks distances by a factor at most \(\gamma\). Existence does not need to be taken on faith. Successive differences obey \(\delta_{k+j}\le\gamma^j\delta_k\); their summable geometric tail makes \(v_k\) a Cauchy sequence in finite-dimensional real space. Its limit is a fixed point by continuity. Two fixed points would satisfy \(\|u-v\|_\infty\le\gamma\|u-v\|_\infty\), forcing equality. This unique point is the policy value, which already satisfies the expectation equation.</p>
+<p>For any provisional array, define the Bellman residual \(\rho(v)=\|T^\pi v-v\|_\infty\). If \(V^\pi\) is the fixed point, the triangle inequality gives</p>
+\[\|v-V^\pi\|_\infty
+\le\rho(v)+\gamma\|v-V^\pi\|_\infty,
+\qquad \|v-V^\pi\|_\infty\le\frac{\rho(v)}{1-\gamma}.\]
+<p>At an old iterate \(v_k\), its residual is \(\delta_k\), so the bound is \(\delta_k/(1-\gamma)\). If we return the new array \(v_{k+1}\), contraction gives the sharper bound \(\gamma\delta_k/(1-\gamma)\). Alternatively, compute the returned array's own residual directly, as our program does. At discount \(0.99\), a residual of \(10^{-5}\) only guarantees a value error of at most \(10^{-3}\) in real arithmetic. A tolerance should express the desired value accuracy, then account for the denominator.</p>
+<p>This proof is a real-arithmetic theorem. The program evaluates weighted sums in binary64, so its printed residual and bound are numerical approximations, not certified interval bounds on roundoff. Recomputing with exact rational examples tests the implementation but does not eliminate floating-point error for every model. At \(\gamma=1\), division by \(1-\gamma\) is unavailable and the contraction proof supplies no conclusion. A proper-route argument must replace it; a small successive change by itself cannot make a general undiscounted guarantee.</p>
+</section>
+<section id="evaluation">
+<h2>11. Implement policy evaluation with a clear update order <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=3290s">[54:50–65:00]</a></h2>
+<p>A synchronous sweep reads only \(v_k\) while constructing every entry of \(v_{k+1}\). The two arrays encode the horizon identity just proved. An in-place sweep instead replaces entries immediately, so later states can read values from the same sweep. This is a different update order. The <a href="https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf">draft's PDF pp.104–105</a> explicitly distinguishes the two-array update from the in-place alternative. We use the synchronous version so each displayed sweep has one unambiguous meaning.</p>
+<p>Consider a deterministic chain \(a\to b\to\text{end}\), with reward \(-1\) on each edge and zero initial values. A synchronous first sweep gives \(v_1(a)=-1\), \(v_1(b)=-1\); a second gives \(v_2(a)=-1-\gamma\). Updating \(b\) first in place propagates \(-1-\gamma\) to \(a\) in one sweep. Updating \(a\) first does not. The fixed point can be the same under discounted convergence conditions, but iteration counts and intermediate arrays are not comparable unless the update order is stated.</p>
+<p>Three implementation invariants are essential. Terminal entries are always zero. Each policy selects an admissible action in every nonterminal state. Every backup in one synchronous sweep reads the same old array. The source demo initializes nonterminal entries to \(-100\), whereas one comment says negative infinity; a finite \(-100\) and an infinite sentinel are not equivalent. In particular, infinity subtraction makes a distance test undefined. We use finite initialization and explicit terminal boundaries.</p>
+<p>The retained official loop tests the old-to-new distance, breaks, and only otherwise assigns the new array. Its converged return can therefore be the previous array. Our implementation installs the new array before testing its own residual. On the one-state example \(T v=1+(1/2)v\), starting from zero yields 1, \(3/2\), \(7/4\), … toward 2. A loose test that accepts the first change must identify whether it is returning 0 or 1; their errors are 2 and 1. A variable named “new values” cannot repair stale-return semantics.</p>
+<p>For fixed policy, the nonterminal values can also be written as a linear system. Let \(P_\pi\) be the matrix with nonterminal current-state rows and nonterminal next-state columns, and \(\bar r_\pi\) the vector of expected immediate rewards. Terminal transitions have no continuation column, so rows of \(P_\pi\) may sum to less than one. Then \((I-\gamma P_\pi)V^\pi=\bar r_\pi\). At discount below one, the inverse is the convergent series \(\sum_{j\ge0}\gamma^jP_\pi^j\); its powers encode surviving continuation paths. This is another expression of the same geometric limit, not a claim that explicitly forming an inverse is the best numerical method.</p>
+<p>In the tram case, state 5 under repeated tram attempts solves \(V(5)=-2+pV(5)+(1-p)V(10)\). Since \(V(10)=0\), \((1-p)V(5)=-2\), giving \(V(5)=-10/3\). Failure cycles have not disappeared; their expected time has been collected in the denominator. As reliability approaches zero, this value diverges to negative infinity at discount one. This is a physical cost limit, rather than a failure of the algebra.</p>
+</section>
+<section id="convergence">
+<h2>12. Explain the examples' limits, not just their curves <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=3900s">[65:00–69:16]</a></h2>
+<p>The lecture's demo describes an early propagation phase and a later refinement phase. That is a useful reading of that displayed curve, but it is not a universal two-phase law. Propagation depth, self-loops, initialization and update order all affect the trace. A chain without loops becomes exact after sufficiently many synchronous horizon expansions when its longest remaining path is finite. A self-loop can require infinitely many real-arithmetic sweeps to become exact, although a numerical tolerance may be reached after finitely many.</p>
+<p>For the dice stay policy, write \(c=2\gamma/3\). The iteration \(v_{k+1}=4+cv_k\) has the exact solution \(v_k=v_*+c^k(v_0-v_*)\), where \(v_*=4/(1-c)\). This follows by subtracting the fixed-point equation and repeatedly multiplying the error by \(c\). At \(\gamma=1\), the generic discount contraction proof fails, but this particular operator still contracts by \(2/3\) because the remaining probability goes to a zero-value terminal state. Its finite mean is justified by termination, not by pretending that \(\gamma<1\).</p>
+<p>The tram also admits a proper undiscounted argument. The finite-horizon formula differs from the true value by the unused tail of actual rewards and the artificial boundary payoff. Uniform finite expected duration makes the expected unused tail tend to zero; bounded \(v_0\) times the probability of not having arrived also tends to zero. Hence policy evaluation converges for our proper model. This argument depends on the positive progress probability and finite route; a general MDP may not share them.</p>
+<p>A counterexample prevents that distinction from being lost. At a state with a zero-reward self-loop “wait” and a zero-reward terminal action “quit,” take \(\gamma=1\). The optimality operator on its nonterminal scalar is \(T_*v=\max(v,0)\). Every \(v\ge0\) is a fixed point, but all actual policy returns are zero. Starting from \(v_0=100\) gives no change at all, even though the represented value is wrong by 100. Uniqueness, convergence from arbitrary initialization and residual error bounds require hypotheses; Bellman form alone does not supply them.</p>
+</section>
+<section id="optimal">
+<h2>13. Value iteration chooses an action before averaging outcomes <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=4156s">[69:16–77:23]</a></h2>
+<p>The optimality backup replaces a specified policy action by the best admissible action:</p>
+\[(T_*v)(s)=\max_{a\in A(s)}B[v](s,a),\qquad
+V^*(s)=\sup_\pi V^\pi(s).\]
+<p>The maximum is outside the expectation because the agent chooses before observing the successor. Exchanging the order would grant knowledge of the future outcome. For example, two actions with rewards \((2,0)\) and \((0,2)\) in two equally likely outcome conditions each have expectation 1; observing the condition before choosing would give 2. Such a decision problem requires a different information structure. Optimal control over a chance transition is not control over the chance outcome.</p>
+<p>The <a href="https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf">draft, PDF pp.89–91 and 114</a>, presents optimal values, the max backup and greedy action extraction. Its inspected Figure 3.7 marks maxima at action-choice nodes. At chance branches the probability-weighted averaging remains. Value iteration repeatedly applies \(v_{k+1}=T_*v_k\), with terminal entries zero.</p>
+<p>For finite action sets, \(|\max_a x_a-\max_a y_a|\le\max_a|x_a-y_a|\): choose an action attaining the first maximum, bound its difference using the second maximum, and reverse the roles for the opposite sign. Combining this fact with the probability-row bound shows \(\|T_*v-T_*w\|_\infty\le\gamma\|v-w\|_\infty\). Thus the discounted operator has a unique fixed point \(u\), with the same convergence and residual argument as policy evaluation.</p>
+<p>Why is \(u\) an optimal value rather than merely a fixed point? Choose at each state an admissible action attaining \((T_*u)(s)\), and call this deterministic stationary policy \(\pi_*\). Then \(T^{\pi_*}u=u\); uniqueness of its discounted evaluation makes \(u=V^{\pi_*}\). For any other choices, including history-dependent choices, the inequality \(u(S_t)\ge\mathbb E[R_{t+1}+\gamma u(S_{t+1})\mid H_t]\) holds. Starting from \(S_0=s\), repeated conditioning yields \(u(s)\ge\mathbb E[\sum_{t=0}^{k-1}\gamma^tR_{t+1}+\gamma^ku(S_k)\mid S_0=s]\). Since \(u\) is bounded and \(\gamma\lt1\), the last term vanishes. Therefore \(u\) dominates every policy value and is \(V^*\). The proof uses a complete state model and the stated horizon/discount conditions.</p>
+<p>For proper undiscounted tram travel we can solve the self-loop exactly while working backwards over increasing locations. If the continuation values beyond state \(s\) are known, let \(w=-1+V(s+1)\) be the walk value and \(z=V(2s)\). The optimality equation is \(V(s)=\max\{w,-2+(1-p)z+pV(s)\}\). Solving the tram branch gives \(t=-2/(1-p)+z\). Setting \(V(s)=\max(w,t)\) satisfies the original equation: if \(w\ge t\), the tram expression at \(w\) is at most \(w\); if \(t\ge w\), it equals \(t\). This branch argument justifies comparing a one-minute walk with a whole geometric retry cost.</p>
+<table><thead><tr><th>Location</th><th>Optimal value (negative minutes)</th><th>One optimal action</th></tr></thead><tbody><tr><td>10</td><td>0</td><td>terminal</td></tr><tr><td>9</td><td>−1</td><td>walk</td></tr><tr><td>8</td><td>−2</td><td>walk</td></tr><tr><td>7</td><td>−3</td><td>walk</td></tr><tr><td>6</td><td>−4</td><td>walk</td></tr><tr><td>5</td><td>−10/3</td><td>tram</td></tr><tr><td>4</td><td>−13/3</td><td>walk</td></tr><tr><td>3</td><td>−16/3</td><td>walk</td></tr><tr><td>2</td><td>−19/3</td><td>walk</td></tr><tr><td>1</td><td>−22/3</td><td>walk</td></tr></tbody></table>
+<p>At location 4, tram would give \(-10/3+V(8)=-16/3\), worse than walking's \(-13/3\). At 2 it gives \(-10/3+V(4)=-23/3\), worse than \(-19/3\). At 1 it gives \(-10/3+V(2)=-29/3\), worse than \(-22/3\). The optimal route therefore walks through 1, 2, 3, 4 to 5 and retries the tram there. To certify global optimality at discount one, repeat the dominance argument above until termination. The artificial tail term now vanishes by uniform properness, and expected reward tails vanish by finite expected duration. The displayed Bellman solution then dominates every admissible policy, not merely the two comparison policies.</p>
+<p>The resulting exact ranking at the start is \(-22/3&gt;-9&gt;-12\): optimal is better than always walking, which is better than tram-if-possible. One ASR ranking sentence orders the last two oppositely; the actual arithmetic resolves it. This is an engineering check of the specified model. It does not assert that walking beats a real tram service whose reliability and travel times have not been measured.</p>
+<p>The optimal journey duration is \(C_*=4+2K\) for \(K\) geometric with success probability \(3/5\). Its mean is \(22/3\) and its variance \(40/9\) square minutes. Always walking takes exactly nine minutes, whereas the optimal expected-duration policy can take longer on an unlucky day. For example, arrival within nine minutes requires \(K\le2\), with probability \(1-(2/5)^2=21/25\). A hard nine-minute deadline would therefore favor walking over the mean-optimal rule. Changing the decision criterion can change the policy without any implementation error.</p>
+</section>
+<section id="ties">
+<h2>14. Deterministic optima, ties and the next learning problem <a class="timestamp" href="https://www.youtube.com/watch?v=2ZtF1j3n6XE&amp;t=4644s">[77:24–80:14]</a></h2>
+<p>For a finite fully observed discounted MDP, the preceding proof constructs a deterministic stationary optimum. It establishes existence, not uniqueness. If several actions attain the same optimal backup, any stationary mixture supported on those maximizers has the same optimal value, because its policy operator also fixes \(V^*\). A program can resolve exact computed ties by declaration order; a float comparison does not certify that an analytically near tie is exact.</p>
+<p>In the dice game, the optimality equation is \(v=\max\{10,4+(2\gamma/3)v\}\). Staying becomes optimal when its fixed value \(4/(1-2\gamma/3)\) is at least 10, equivalently \(\gamma\ge9/10\). At equality, let \(\alpha\in[0,1]\) be the probability of staying on each visit. Its value is</p>
+\[v_\alpha=\frac{10(1-\alpha)+4\alpha}{1-(2\gamma/3)\alpha}.\]
+<p>The denominator is positive even at \(\gamma=1\). At \(\gamma=9/10\), the numerator is \(10-6\alpha\) and the denominator \(1-(3/5)\alpha\), so every such mixture has value 10. Differentiating with respect to \(\alpha\) gives numerator \(-6+20\gamma/3\) divided by the squared denominator. The sign proves that, below the threshold, quitting maximizes this stationary family; above it, always staying does. The Bellman verification extends that conclusion beyond enumerating this family.</p>
+<p>Stationarity is conditional on the problem specification. With exactly two decisions left, consider a state with “cash” giving 5 and ending, and “prepare” giving 0 and moving to a state where “collect” gives 10 and ends. At the first state, preparation is best with two decisions remaining and cash is best with one. A policy depending only on the unaugmented state cannot express both. Adding remaining time to the state makes the finite-horizon problem Markov again. Partial observation, game opponents and risk constraints require their own models and guarantees.</p>
+<p>This chapter assumes the transition and reward model is known. Model-based planning computes complete expectations from those rows. The next chapter's reinforcement-learning problem instead obtains experience and must estimate values or improve actions from it. A simulated sample is useful for checking a known model; it does not show that a model learned from real experience has correct probabilities, covers rare failures or yields safe exploration.</p>
+</section>
+<section id="implementation">
+<h2>15. An original finite implementation</h2>
+<p>The downloadable <a href="programs/chapter07.py">chapter program</a> uses only the Python standard library and has no file, network or device effects. Run it from this book directory with <code>python programs/chapter07.py</code>. <code>Model</code> stores named state rows, named admissible actions and <code>Outcome</code> records. Empty action rows mean terminal states. It copies input containers into immutable tuples; a later edit to an input list cannot change the retained model. Probabilities are positive exact <code>Fraction</code> values or integer one, with denominator at most \(10^{12}\), and must sum to exactly one for each action. Zero-probability outcomes are omitted. This deliberate rational contract avoids silently accepting a malformed probability row.</p>
+<p>The model permits 1–64 distinct nonempty string state names, at most 16 distinct action names per state and 1–64 outcomes per action. Every successor must be declared. Rewards are finite binary64 numbers of magnitude at most \(10^6\); discounts lie in \([0,1]\). Numeric scalar inputs accept integers or floats, exclude booleans, and convert overflow and nonfinite inputs to <code>ValueError</code>. Continuation arrays have exactly the state keys, finite values of magnitude at most \(10^{100}\), and zero at terminal states. Policies have exactly the nonterminal keys and admissible actions. These are computational bounds, not universal restrictions on MDP theory.</p>
+<p><code>sweep</code> computes a synchronous policy or maximum backup from one copied array. <code>iterate</code> starts from zero, requires \(\gamma&lt;1\), installs each new array, and evaluates its own numerical residual. It stops when residual divided by \(1-\gamma\) is at most the requested positive tolerance, or raises <code>RuntimeError</code> after its finite iteration budget. Returned action choices are greedy with respect to the returned values; if a policy was supplied for evaluation, this greedy dictionary is a possible improvement proposal, not a replacement for that supplied policy. The float bound approximates the real-arithmetic theorem and does not include certified roundoff. Extremely demanding tolerances can exhaust the budget.</p>
+<p><code>exact_tram</code> instead solves the proper undiscounted route using exact rational arithmetic and backward self-loop elimination. It accepts 2–50 locations and a rational failure probability in \([0,1)\) with the same denominator bound. It rejects failure probability one rather than claim a finite route value. The generic model constructor can represent continuing or improper tasks; the special route solver and generic discounted iterator each enforce their own sufficient domain.</p>
+<p><code>rollout</code> uses a supplied local <code>random.Random</code> generator and an explicit step limit. Reaching the terminal state on the last permitted transition succeeds; exhausting the budget while still traveling raises <code>RuntimeError</code>. It samples rational probabilities after conversion to binary64, so finite sampling granularity remains. <code>mean_and_se</code> requires 2–100,000 complete finite returns of magnitude at most \(10^6\). It accumulates exact rational representations of those binary64 returns, computes their mean and centered squared deviations exactly, and takes the standard-error square root with 80-digit decimal arithmetic before binary64 conversion. This avoids losing a small residual through cancellation and avoids squaring tiny returns in binary64 before taking a representable square root. A nonzero mean or standard error that rounds to zero is rejected. Equal inputs give zero sample variance. Its sample standard error is a statistical estimate, not a certified confidence interval or interval-arithmetic certificate.</p>
+<p>The source below is the exact downloadable program. Its output is an original seeded fixture, not the lecture's sample sequence. The analytic optimal standard deviation \(\sqrt{40/9}\) is a population quantity; the printed sample standard error estimates uncertainty of a 2,000-episode mean. The favorable sample mean does not establish a deployment guarantee.</p>
+<pre><code class="language-python" id="program-source">&quot;&quot;&quot;Original finite MDP examples for Chapter 7; Python standard library only.
+
+Exact rational probabilities; binary64 rewards/iterates; bounded finite inputs.
+Invalid inputs raise ValueError. Exhausted iteration/rollout budgets raise
+RuntimeError, never a silently completed episode. No file/network effects.
+&quot;&quot;&quot;
+from dataclasses import dataclass
+from decimal import Decimal, localcontext
+from fractions import Fraction
+from math import fsum, isfinite, sqrt
+from random import Random
+
+
+def finite_real(value, name, bound=1e100):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(name + &quot; must be an int or float, excluding bool&quot;)
+    try:
+        result = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError(name + &quot; must be representable in binary64&quot;) from exc
+    if not isfinite(result) or abs(result) &gt; bound:
+        raise ValueError(name + &quot; is outside the finite documented range&quot;)
+    return result
+
+
+def count(value, name, lower, upper):
+    if type(value) is not int or not lower &lt;= value &lt;= upper:
+        raise ValueError(f&quot;{name} must be an integer in [{lower}, {upper}]&quot;)
+    return value
+
+
+def probability(value):
+    if type(value) is int:
+        value = Fraction(value)
+    if not isinstance(value, Fraction) or not 0 &lt; value &lt;= 1:
+        raise ValueError(&quot;outcome probabilities must be positive int/Fraction&quot;)
+    if value.denominator &gt; 10**12:
+        raise ValueError(&quot;probability denominator exceeds 10**12&quot;)
+    return value
+
+
+@dataclass(frozen=True)
+class Outcome:
+    probability: Fraction
+    reward: float
+    successor: str
+
+
+@dataclass(frozen=True)
+class Model:
+    # rows: (state, ((action, (Outcome, ...)), ...)); terminal rows are empty.
+    rows: tuple
+    discount: float
+
+    def __post_init__(self):
+        gamma = finite_real(self.discount, &quot;discount&quot;, 1)
+        if gamma &lt; 0:
+            raise ValueError(&quot;discount must be in [0, 1]&quot;)
+        if not isinstance(self.rows, (tuple, list)):
+            raise ValueError(&quot;rows must be a tuple/list&quot;)
+        count(len(self.rows), &quot;state count&quot;, 1, 64)
+        canonical, names = [], set()
+        for row in self.rows:
+            if not isinstance(row, (tuple, list)) or len(row) != 2:
+                raise ValueError(&quot;each row must contain state and actions&quot;)
+            state, actions = row
+            if not isinstance(state, str) or not state or state in names:
+                raise ValueError(&quot;state names must be distinct nonempty strings&quot;)
+            names.add(state)
+            if not isinstance(actions, (tuple, list)) or len(actions) &gt; 16:
+                raise ValueError(&quot;actions must be a tuple/list of at most 16 entries&quot;)
+            fixed_actions, action_names = [], set()
+            for entry in actions:
+                if not isinstance(entry, (tuple, list)) or len(entry) != 2:
+                    raise ValueError(&quot;action entries must contain name and outcomes&quot;)
+                action, outcomes = entry
+                if not isinstance(action, str) or not action or action in action_names:
+                    raise ValueError(&quot;action names must be distinct nonempty strings&quot;)
+                action_names.add(action)
+                if not isinstance(outcomes, (tuple, list)):
+                    raise ValueError(&quot;outcomes must be a tuple/list&quot;)
+                count(len(outcomes), &quot;outcome count&quot;, 1, 64)
+                fixed = []
+                for outcome in outcomes:
+                    if not isinstance(outcome, Outcome):
+                        raise ValueError(&quot;each outcome must be an Outcome&quot;)
+                    prob = probability(outcome.probability)
+                    reward = finite_real(outcome.reward, &quot;reward&quot;, 1e6)
+                    if not isinstance(outcome.successor, str):
+                        raise ValueError(&quot;successor must be a state name&quot;)
+                    fixed.append(Outcome(prob, reward, outcome.successor))
+                if sum((o.probability for o in fixed), Fraction()) != 1:
+                    raise ValueError(&quot;each action&#x27;s exact probability mass must be one&quot;)
+                fixed_actions.append((action, tuple(fixed)))
+            canonical.append((state, tuple(fixed_actions)))
+        for _, actions in canonical:
+            for _, outcomes in actions:
+                if any(o.successor not in names for o in outcomes):
+                    raise ValueError(&quot;every successor must be a declared state&quot;)
+        object.__setattr__(self, &quot;rows&quot;, tuple(canonical))
+        object.__setattr__(self, &quot;discount&quot;, gamma)
+
+    def table(self):
+        return {state: dict(actions) for state, actions in self.rows}
+
+
+def values_for(model, values):
+    table = model.table()
+    if not isinstance(values, dict) or set(values) != set(table):
+        raise ValueError(&quot;values must have exactly the model&#x27;s state keys&quot;)
+    fixed = {s: finite_real(values[s], &quot;value&quot;) for s in table}
+    if any(fixed[s] != 0 for s in table if not table[s]):
+        raise ValueError(&quot;terminal continuation values must be zero&quot;)
+    return fixed
+
+
+def policy_for(model, policy):
+    table = model.table()
+    required = {s for s in table if table[s]}
+    if not isinstance(policy, dict) or set(policy) != required:
+        raise ValueError(&quot;policy must contain exactly the nonterminal states&quot;)
+    if any(not isinstance(policy[s], str) or policy[s] not in table[s]
+           for s in required):
+        raise ValueError(&quot;policy selects an inadmissible action&quot;)
+    return dict(policy)
+
+
+def action_backup(model, state, action, values):
+    fixed = values_for(model, values)
+    table = model.table()
+    if (not isinstance(state, str) or not isinstance(action, str)
+            or state not in table or action not in table[state]):
+        raise ValueError(&quot;unknown state or inadmissible action&quot;)
+    terms = [float(o.probability) *
+             (o.reward + model.discount * fixed[o.successor])
+             for o in table[state][action]]
+    return finite_real(fsum(terms), &quot;backup&quot;)
+
+
+def sweep(model, values, policy=None):
+    fixed = values_for(model, values)
+    selected = None if policy is None else policy_for(model, policy)
+    updated, greedy = {}, {}
+    for state, actions in model.rows:
+        if not actions:
+            updated[state] = 0.0
+            continue
+        pairs = [(a, action_backup(model, state, a, fixed)) for a, _ in actions]
+        action, score = max(pairs, key=lambda pair: pair[1])
+        greedy[state] = action  # exact float ties retain declaration order
+        updated[state] = score if selected is None else dict(pairs)[selected[state]]
+    return updated, greedy
+
+
+@dataclass(frozen=True)
+class Iteration:
+    values: tuple
+    policy: tuple
+    iterations: int
+    residual: float
+    error_bound: float
+
+
+def iterate(model, policy=None, tolerance=1e-10, max_iterations=10000):
+    if model.discount == 1:
+        raise ValueError(&quot;generic iteration requires discount &lt; 1&quot;)
+    tolerance = finite_real(tolerance, &quot;tolerance&quot;, 1e6)
+    if tolerance &lt;= 0:
+        raise ValueError(&quot;tolerance must be positive&quot;)
+    count(max_iterations, &quot;max_iterations&quot;, 1, 10000)
+    selected = None if policy is None else policy_for(model, policy)
+    values = {s: 0.0 for s, _ in model.rows}
+    for iteration in range(1, max_iterations + 1):
+        values, _ = sweep(model, values, selected)
+        checked, greedy = sweep(model, values, selected)
+        residual = max(abs(checked[s] - values[s]) for s in values)
+        bound = finite_real(residual / (1 - model.discount), &quot;error bound&quot;)
+        if bound &lt;= tolerance:
+            return Iteration(tuple(values.items()), tuple(greedy.items()),
+                             iteration, residual, bound)
+    raise RuntimeError(&quot;iteration budget exhausted before numerical residual test&quot;)
+
+
+def tram_model(n=10, failure=Fraction(2, 5), discount=1):
+    count(n, &quot;n&quot;, 2, 50)
+    if not isinstance(failure, Fraction) or not 0 &lt;= failure &lt; 1:
+        raise ValueError(&quot;failure must be a Fraction in [0, 1)&quot;)
+    if failure.denominator &gt; 10**12:
+        raise ValueError(&quot;failure denominator exceeds 10**12&quot;)
+    rows = []
+    for i in range(1, n + 1):
+        actions = []
+        if i &lt; n:
+            actions.append((&quot;walk&quot;, (Outcome(Fraction(1), -1, str(i + 1)),)))
+            if 2 * i &lt;= n:
+                outcomes = [Outcome(1 - failure, -2, str(2 * i))]
+                if failure:
+                    outcomes.append(Outcome(failure, -2, str(i)))
+                actions.append((&quot;tram&quot;, tuple(outcomes)))
+        rows.append((str(i), tuple(actions)))
+    return Model(tuple(rows), discount)
+
+
+def exact_tram(n=10, failure=Fraction(2, 5), mode=&quot;optimal&quot;):
+    tram_model(n, failure)  # validate the same proper undiscounted model
+    if mode not in (&quot;walk&quot;, &quot;tram&quot;, &quot;optimal&quot;):
+        raise ValueError(&quot;mode must be walk, tram, or optimal&quot;)
+    values, policy = {n: Fraction(0)}, {}
+    for state in range(n - 1, 0, -1):
+        choices = [(&quot;walk&quot;, -1 + values[state + 1])]
+        if 2 * state &lt;= n:
+            choices.append((&quot;tram&quot;, -Fraction(2) / (1 - failure) + values[2 * state]))
+        if mode == &quot;walk&quot;:
+            action, value = choices[0]
+        elif mode == &quot;tram&quot;:
+            action, value = choices[-1]
+        else:
+            action, value = max(choices, key=lambda pair: pair[1])
+        policy[state], values[state] = action, value
+    return values, policy
+
+
+def dice_model(discount=1):
+    return Model(((&quot;in&quot;, ((&quot;quit&quot;, (Outcome(Fraction(1), 10, &quot;end&quot;),)),
+                          (&quot;stay&quot;, (Outcome(Fraction(1, 3), 4, &quot;end&quot;),
+                                    Outcome(Fraction(2, 3), 4, &quot;in&quot;))))),
+                  (&quot;end&quot;, ())), discount)
+
+
+def rollout(model, policy, start, rng, max_steps=10000):
+    selected = policy_for(model, policy)
+    table = model.table()
+    if not isinstance(start, str) or start not in table or not isinstance(rng, Random):
+        raise ValueError(&quot;start must be declared and rng must be random.Random&quot;)
+    count(max_steps, &quot;max_steps&quot;, 1, 100000)
+    state, weight, rewards = start, 1.0, []
+    for _ in range(max_steps):
+        if not table[state]:
+            return finite_real(fsum(rewards), &quot;return&quot;)
+        draw, cumulative = rng.random(), 0.0
+        outcomes = table[state][selected[state]]
+        chosen = outcomes[-1]
+        for outcome in outcomes:
+            cumulative += float(outcome.probability)
+            if draw &lt; cumulative:
+                chosen = outcome
+                break
+        rewards.append(weight * chosen.reward)
+        weight *= model.discount
+        state = chosen.successor
+    if not table[state]:
+        return finite_real(fsum(rewards), &quot;return&quot;)
+    raise RuntimeError(&quot;rollout budget exhausted before terminal arrival&quot;)
+
+
+def mean_and_se(returns):
+    if not isinstance(returns, (tuple, list)):
+        raise ValueError(&quot;returns must be a tuple/list&quot;)
+    count(len(returns), &quot;return count&quot;, 2, 100000)
+    xs = [finite_real(x, &quot;return&quot;, 1e6) for x in returns]
+    exact = [Fraction.from_float(x) for x in xs]
+    exact_mean = sum(exact, Fraction()) / len(xs)
+    mean = float(exact_mean)
+    if exact_mean and mean == 0:
+        raise ValueError(&quot;nonzero mean is below binary64 representability&quot;)
+    squares = sum(((x - exact_mean)**2 for x in exact), Fraction())
+    exact_se_squared = squares / (len(xs) * (len(xs) - 1))
+    with localcontext() as context:
+        context.prec = 80
+        decimal_variance = (Decimal(exact_se_squared.numerator) /
+                            Decimal(exact_se_squared.denominator))
+        se = float(decimal_variance.sqrt())
+    if exact_se_squared and se == 0:
+        raise ValueError(&quot;nonzero standard error is below binary64 representability&quot;)
+    return mean, se
+
+
+def main():
+    tram = tram_model()
+    initial = {str(i): (-100.0 if i &lt; 10 else 0.0) for i in range(1, 11)}
+    print(f&quot;first tram backup at state 5: {action_backup(tram, &#x27;5&#x27;, &#x27;tram&#x27;, initial):.6f}&quot;)
+    for mode in (&quot;walk&quot;, &quot;tram&quot;, &quot;optimal&quot;):
+        values, _ = exact_tram(mode=mode)
+        print(f&quot;{mode} start value: {values[1]} ({float(values[1]):.6f})&quot;)
+    values, policy = exact_tram()
+    print(&quot;optimal actions:&quot;, &quot; &quot;.join(f&quot;{s}:{policy[s]}&quot; for s in sorted(policy)))
+    for gamma in (0, 0.5, 0.9, 1):
+        stay = 4 / (1 - 2 * gamma / 3)
+        print(f&quot;dice discount {gamma}: stay={stay:.6f}, quit=10.000000&quot;)
+    result = iterate(dice_model(0.5), {&quot;in&quot;: &quot;stay&quot;})
+    print(f&quot;discounted evaluation: V={dict(result.values)[&#x27;in&#x27;]:.9f}, bound={result.error_bound:.3e}&quot;)
+    rng = Random(7)
+    fixed_policy = {str(s): a for s, a in policy.items()}
+    returns = [rollout(tram, fixed_policy, &quot;1&quot;, rng) for _ in range(2000)]
+    mean, se = mean_and_se(returns)
+    print(f&quot;2000 original optimal rollouts: mean={mean:.6f}, sample SE={se:.6f}&quot;)
+    print(f&quot;analytic optimal return SD: {sqrt(40 / 9):.6f}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<pre><code class="language-text" id="program-output">first tram backup at state 5: -42.000000
+walk start value: -9 (-9.000000)
+tram start value: -12 (-12.000000)
+optimal start value: -22/3 (-7.333333)
+optimal actions: 1:walk 2:walk 3:walk 4:walk 5:tram 6:walk 7:walk 8:walk 9:walk
+dice discount 0: stay=4.000000, quit=10.000000
+dice discount 0.5: stay=6.000000, quit=10.000000
+dice discount 0.9: stay=10.000000, quit=10.000000
+dice discount 1: stay=12.000000, quit=10.000000
+discounted evaluation: V=6.000000000, bound=8.498e-11
+2000 original optimal rollouts: mean=-7.328000, sample SE=0.047237
+analytic optimal return SD: 2.108185
+</code></pre>
+</section>
+<section id="exercises">
+<h2>16. Six worked exercises</h2>
+<div class="exercise"><h3>Exercise 1 — One chance row, several objectives</h3><p>At location 5, use provisional continuation values \(v(5)=-100\), \(v(6)=-4\), \(v(10)=0\) and discount one. Compute the walk and tram backups. Explain why replacing the two tram outcomes by a deterministic reward \(-2\) with a deterministic terminal successor is invalid. Then compare the true optimal mean-duration rule with walking under a nine-minute deadline from location 1.</p><details class="solution"><summary>Solution</summary><p>Walking has one successor, so its backup is \(-1-4=-5\). Tram gives \((2/5)(-2-100)+(3/5)(-2)=-42\). These values use the provisional continuation, so they are not yet the true policy action values. The immediate tram reward is always \(-2\), but its continuation is random. Replacing its row by an immediate terminal transition discards repeated costs and changes the transition model. Replacing only a random reward by its conditional mean would preserve a linear expectation; replacing the successor is a different operation.</p><p>From location 1 the mean-optimal policy walks four times and then retries tram at 5. Its duration is \(4+2K\), with \(\Pr(K=k)=(2/5)^{k-1}(3/5)\). Its mean is \(4+2/(3/5)=22/3&lt;9\). Arrival by minute nine requires \(K\le2\), hence probability \(3/5+(2/5)(3/5)=21/25\). Always walking takes nine minutes with probability one. Thus mean duration and deadline reliability select different rules. A chance row plus a stated objective is required; the word “optimal” without that objective is incomplete.</p></details></div>
+<div class="exercise"><h3>Exercise 2 — Derive the sampling budget</h3><p>For tram-if-possible from location 1, derive its return variance and the standard error of an average of \(N\) independent episodes. Use Chebyshev's inequality to give a sufficient \(N\) for absolute mean error less than one minute with probability at least 0.95. Does a sample of 20 episodes have a guaranteed error below its standard error?</p><details class="solution"><summary>Solution</summary><p>There are three independent geometric waiting times with \(q=3/5\). Each has variance \((1-q)/q^2=(2/5)/(9/25)=10/9\). The return is minus twice their sum minus two, so the additive constant disappears from variance and the scale squares: \(\sigma^2=4\cdot3\cdot10/9=40/3\). Independent episode returns give \(\operatorname{Var}(\widehat V_N)=40/(3N)\), hence standard error \(\sqrt{40/(3N)}\) minutes. With \(N=20\) this is \(\sqrt{2/3}\approx0.8165\).</p><p>Chebyshev's inequality follows by applying Markov's nonnegative-variable inequality to \((\widehat V_N-V)^2\): \(\Pr(|\widehat V_N-V|\ge1)\le40/(3N)\). To make this upper bound at most \(1/20\), choose \(N\ge800/3\), so the smallest sufficient integer is 267. This is a distribution-free sufficient budget using the known variance, not the smallest possible budget for this geometric model. A standard error is a standard deviation, not a maximum error. Even at \(N=20\), unusually many failures have positive probability and can produce error greater than 0.8165. A normal approximation would need additional justification and would still be probabilistic.</p></details></div>
+<div class="exercise"><h3>Exercise 3 — Residuals and the returned array</h3><p>Prove the residual error bound for a discounted policy operator. For the scalar model \(T v=1+(1/2)v\), start at zero, compute three synchronous iterates, and compare the old-array and new-array bounds at the third sweep. Explain the stale-return defect when a loop breaks before assignment.</p><details class="solution"><summary>Solution</summary><p>For finite normalized rows and \(\gamma&lt;1\), probability averaging gives \(\|Tv-Tw\|_\infty\le\gamma\|v-w\|_\infty\). Let its unique fixed point be \(V\). Then \(\|v-V\|\le\|v-Tv\|+\|Tv-TV\|\le\rho(v)+\gamma\|v-V\|\). Moving the last term left yields \(\|v-V\|\le\rho(v)/(1-\gamma)\). The denominator is positive by hypothesis. Applying contraction once more bounds the new iterate's error by \(\gamma\rho(v)/(1-\gamma)\).</p><p>Here \(V=2\), and \(v_1=1\), \(v_2=3/2\), \(v_3=7/4\). The third old-to-new change is \(1/4\). The bound for the old array \(v_2\) is \((1/4)/(1/2)=1/2\), exactly its error. The sharper bound for \(v_3\) is \((1/2)(1/4)/(1/2)=1/4\), again exact. Its own residual is \(T(7/4)-7/4=1/8\), giving the same \(1/4\) bound. A loop that accepts the third change but returns \(v_2\) must not claim the new-array bound. Assigning before testing, or explicitly returning the new array, closes this mismatch. Binary64 computation additionally needs roundoff qualifications.</p></details></div>
+<div class="exercise"><h3>Exercise 4 — Discount changes both choices and representations</h3><p>Find the discount at which the dice quit and stay actions tie. Derive the value of a stationary mixture with stay probability \(\alpha\). At the tie, analyze a policy that stays exactly \(k\) times unless forced to terminate, then quits if still in the game. Finally, show how inserting a zero-reward dummy transition can change a discounted payment.</p><details class="solution"><summary>Solution</summary><p>Always-stay value is \(4/(1-2\gamma/3)\). Equating it to 10 gives \(4=10-20\gamma/3\), hence \(\gamma=9/10\). A mixture earns immediate expected reward \(10(1-\alpha)+4\alpha\); it continues with probability \((2/3)\alpha\). Solving \(v=10(1-\alpha)+4\alpha+(2\gamma/3)\alpha v\) gives the stated ratio. At the tie, numerator \(10-6\alpha\) is ten times denominator \(1-(3/5)\alpha\), so every \(\alpha\) gives 10.</p><p>For the bounded-stay policy, let \(c=2\gamma/3\). Expected reward from each successive stay is \(4c^j\); survival and discount multiply the later quit payment by \(c^k\). Thus value is \(4\sum_{j=0}^{k-1}c^j+10c^k\). At the tie \(c=3/5\), the sum is \(10(1-c^k)\), and the total is exactly 10, including \(k=0\). This proves these nonstationary hybrids are also tied in this particular problem; it does not prove stationarity for all finite-horizon tasks. An immediate payment 4 has return 4. Moving it after a dummy transition with reward zero gives \(\gamma4\), which is 2 at discount \(1/2\). The total undiscounted payment is unchanged, but the discounted objective is altered unless timing is compensated.</p></details></div>
+<div class="exercise"><h3>Exercise 5 — An undiscounted fixed point can be wrong</h3><p>Analyze the zero-reward wait/quit MDP at discount one. Give its true policy values and all scalar Bellman optimality fixed points. Construct a different example in which the best action depends on the remaining horizon, and specify a state augmentation that restores a stationary description. Explain why neither example contradicts the discounted stationary-optimum theorem.</p><details class="solution"><summary>Solution</summary><p>Every wait or quit reward is zero. Hence every well-defined return is zero, whether the policy quits or waits forever; here the infinite sum of zeros is defined. The operator is \(T_*v=\max(v,0)\). Every nonnegative \(v\) satisfies \(T_*v=v\), and no negative \(v\) does. True optimal value is zero, but an initialization of 100 has residual zero while its value error is 100. Discount one removes the strict contraction hypothesis, and waiting is not a proper terminating policy.</p><p>For the horizon example, at state \(s\), cash gives 5 and terminates; prepare gives zero and moves to \(b\). At \(b\), collect gives 10 and terminates. With one decision left, prepare gives zero before the horizon ends and cash gives 5, so cash wins. With two decisions left and discount one, prepare followed by collect gives 10 and wins. Add the remaining count \(h\) to the state, use states \((s,h),(b,h)\), decrement \(h\) on each transition, and make \(h=0\) terminal. A stationary rule on this augmented state can choose prepare at \((s,2)\) and cash at \((s,1)\). The original theorem concerns a specified fully observed infinite-horizon discounted MDP; these examples change its discount or omit an essential clock coordinate.</p></details></div>
+<div class="exercise"><h3>Exercise 6 — Verify an optimum and audit the implementation</h3><p>At failure probability \(2/5\), compute optimal tram values at locations 5, 4, 2 and 1. Explain why self-loop elimination supports an optimum over all admissible histories in this finite route. Then give meaningful checks for invalid probability mass, terminal continuation, synchronous order and rollout truncation.</p><details class="solution"><summary>Solution</summary><p>Beyond 5 only walking is admissible, so \(V(6)=-4,V(8)=-2,V(10)=0\). At 5, walk gives \(-5\) and retrying tram gives \(-2/(3/5)+0=-10/3\); choose tram. At 4, walk gives \(-1-10/3=-13/3\), while tram gives \(-10/3-2=-16/3\); choose walk. State 3 then gives \(-16/3\). At 2, walking gives \(-19/3\), tram gives \(-10/3-13/3=-23/3\); choose walk. At 1, walking gives \(-22/3\), tram gives \(-10/3-19/3=-29/3\); again walk.</p><p>For each state the branch formula \(V=\max(w,-2/(1-p)+z)\) satisfies the original self-loop equation, as verified by substituting each maximizing branch. It supplies a greedy policy attaining equality. For any other admissible decision, it supplies an upper bound on expected immediate reward plus continuation. Iterating that inequality until a finite horizon gives an upper bound on accumulated reward plus the candidate terminal payoff. Positive progress probability implies finite expected completion time uniformly across histories; the unused reward tail and bounded candidate payoff vanish as the horizon grows. The candidate therefore dominates all admissible history-dependent policies, while its greedy proper policy attains it.</p><p>Construct an action row with masses \(1/2\) and \(1/3\): the constructor must reject mass \(5/6\), rather than normalize it silently. Pass a nonzero value at a terminal state: backup validation must reject it, because it would add invented post-arrival reward. On the chain \(a\to b\to\text{end}\), zero initialization must give \((-1,-1,0)\) after one synchronous sweep and \((-1-\gamma,-1,0)\) after two; this distinguishes the update order. Finally, limit a rollout of a continuing self-loop to one step: it must raise a budget error rather than return a complete episode. A deterministic terminal transition on exactly the last permitted step must succeed. These checks test distinct mathematical boundaries; reproducing a single favorable default output would not exercise them.</p></details></div>
+</section>
+<section id="references">
+<h2>17. Sources and scope</h2>
+<ul><li><a href="https://www.youtube.com/watch?v=2ZtF1j3n6XE">CS221 Lecture 7 recording</a>: substantive sequence, flaky tram, dice game, policy evaluation and value iteration. The local machine transcript supplies timing and coverage, not human-certified wording. Sampling means and convergence-curve observations remain attributed demonstrations.</li>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/mdp.py">Official CS221 executable lecture, mdp.py at retained commit f70063773fe9e04ddcbc248059501837053b810a</a>: inspected transition tables, policy definitions and update structure. The original program here is independently written and corrects the action-mask, arithmetic and stale-return differences discussed above.</li>
+<li><a href="https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf">Sutton and Barto, Reinforcement Learning: An Introduction, second edition in progress (frontmatter 2014, 2015)</a>: PDF pp.76–78 controlled Markov condition; pp.84–86 policy values, expectation equation and backup diagram; pp.89–91 optimality equation and choice-node diagram; pp.104–105 policy-evaluation update order; pp.112,114 max backup; pp.128–129 return averaging. This is the retained draft, not an attestation of a later edition or a full-book review.</li></ul>
+<p>The probability model, exact values, proofs, counterexamples, six exercises and original program are teaching constructions. No official deck or recording frames were inspected; only the specified primary backup diagrams support diagram-dependent discussion. Historical priority, empirical transport reliability, safety, causal effects and a universal undiscounted convergence theorem are not established here. Known-model planning, numerical agreement and model validity remain separate. Root reader integration and human accessibility testing are separate checks from this chapter's mathematical development.</p>
+</section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-06-uniform-cost-and-a-star-search.html">Previous available chapter</a><a href="index.html">Lecture index</a><span>Further chapters pending</span></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>
