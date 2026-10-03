@@ -16,8 +16,7 @@
   "worked_solutions": 6,
   "limits": [
     "Automatic transcription is not human source certification",
-    "Human keyboard/screen-reader audit unperformed",
-    "No publication performed"
+    "Human keyboard/screen-reader audit unperformed"
   ],
   "pass_9": {
     "status": "passed within pilot scope",
@@ -38,5 +37,6 @@
     "status": "passed within complete 20-chapter reading edition",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
-  }
+  },
+  "publication": "Public reading edition authorized; remote delivery verified separately"
 }

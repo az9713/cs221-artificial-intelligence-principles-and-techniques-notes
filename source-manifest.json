@@ -4,7 +4,7 @@
   "slug": "cs221-artificial-intelligence-principles-and-techniques-notes",
   "playlist": "PLoROMvodv4rMeDqwS1yFl3j3sR_-MQNEN",
   "format": "HTML",
-  "publication": "local only; publication not authorized for CS221",
+  "publication": "User-authorized public GitHub reading edition; remote verification recorded separately",
   "status": "All 20 chapters independently reviewed; final local reading edition validation recorded separately; human accessibility audit pending",
   "lectures": [
     {
@@ -561,5 +561,7 @@
     "recordings_expected": 20,
     "raw_sources_in_repository": false
   },
-  "course_title": "Artificial Intelligence: Principles and Techniques"
+  "course_title": "Artificial Intelligence: Principles and Techniques",
+  "repository_url": "https://github.com/az9713/cs221-artificial-intelligence-principles-and-techniques-notes",
+  "reading_url": "https://az9713.github.io/cs221-artificial-intelligence-principles-and-techniques-notes/"
 }

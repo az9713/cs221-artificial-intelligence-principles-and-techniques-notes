@@ -9,8 +9,7 @@
   "worked_solutions": 6,
   "limits": [
     "Automatic transcription is not human source certification",
-    "Human keyboard/screen-reader audit unperformed",
-    "No publication performed"
+    "Human keyboard/screen-reader audit unperformed"
   ],
   "independent_review": {
     "gate_6b": "accepted",
@@ -22,5 +21,6 @@
     "status": "passed within complete 20-chapter reading edition",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
-  }
+  },
+  "publication": "Public reading edition authorized; remote delivery verified separately"
 }

@@ -188,10 +188,12 @@
   "programs_executed": 20,
   "rendered_paragraphs_per_viewport": 2125,
   "human_accessibility": "not performed",
-  "publication": "not performed; local delivery",
+  "publication": "Public reading edition authorized; remote delivery verified separately",
   "limits": [
     "Required human keyboard/screen-reader audit remains unperformed",
     "Source speech recognition is automatic, not human certified",
     "Finite teaching checks do not establish deployment performance or safety"
-  ]
+  ],
+  "repository_url": "https://github.com/az9713/cs221-artificial-intelligence-principles-and-techniques-notes",
+  "reading_url": "https://az9713.github.io/cs221-artificial-intelligence-principles-and-techniques-notes/"
 }
