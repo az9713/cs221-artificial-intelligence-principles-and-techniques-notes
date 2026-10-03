@@ -1,0 +1,443 @@
+{
+  "title": "Learning with hidden variables and expectation maximization",
+  "number": 14,
+  "video_id": "4d9V6Sxa6gU",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "Draft: author checks complete; different-agent science-editor review required",
+  "sections": [
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Movie-service joint-prediction case; future unseen-rating and hidden-genre decisions.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite IID training and prediction task, fixed graph and domains",
+          "origin": "Original formal teaching case"
+        }
+      ]
+    },
+    {
+      "section": "review",
+      "start": 5.33,
+      "end": 805.68,
+      "lecture_material": "Bayesian-network factorization, exact/rejection/Gibbs inference and chain/fork/collider separation review.",
+      "research_extension": null,
+      "teaching_construction": "Topological normalization; guaranteed graph independence versus numerical accidental independence and causal scope.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "DAG, parent tuple, local rows and inference mechanisms",
+          "origin": "Recording; original explicit domains"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite joint normalization by reverse topological summation",
+          "origin": "Original proof"
+        },
+        {
+          "class": "definition",
+          "claim": "Graph-implied independence versus additional numerical independence and causality",
+          "origin": "Original qualification of recorded graph discussion"
+        }
+      ]
+    },
+    {
+      "section": "categorical",
+      "start": 805.68,
+      "end": 1077.14,
+      "lecture_material": "Single rating domain and ten-rating count/normalize example.",
+      "research_extension": null,
+      "teaching_construction": "All categories retained; empty-row interpretation deferred to its explicit likelihood proof.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Categorical count and normalization rule",
+          "origin": "Recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Counts (1,0,1,5,3) and row (1/10,0,1/10,1/2,3/10)",
+          "origin": "Actual official example and original arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "conditional",
+      "start": 1077.14,
+      "end": 1328.06,
+      "lecture_material": "Genre-conditioned rating rows and their separate denominators.",
+      "research_extension": null,
+      "teaching_construction": "Unobserved parent row versus zero child count distinction.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Separate conditional probability rows",
+          "origin": "Recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Five-film root and conditional rows",
+          "origin": "Actual official assignments and original arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "parents",
+      "start": 1328.06,
+      "end": 1602.67,
+      "lecture_material": "Genre and award roots as joint parents of rating.",
+      "research_extension": null,
+      "teaching_construction": "Joint-parent tuple counting and fitted-family versus empirical-root-independence distinction.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Joint parent indexing and graph family",
+          "origin": "Recording; actual official collider visual"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Drama/no-award half-mass ratings1/3 and other point-mass rows",
+          "origin": "Actual official assignments and original arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "separate",
+      "start": 1603.95,
+      "end": 1790.8,
+      "lecture_material": "Two users with distinct conditional rating tables.",
+      "research_extension": null,
+      "teaching_construction": "Conditional independence does not assert equal response kernels.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Separate random variables and kernels",
+          "origin": "Recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Separate drama rows",
+          "origin": "Actual official data and original arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "tying",
+      "start": 1790.8,
+      "end": 2271.41,
+      "lecture_material": "One rating table shared across both users; counts pooled and flexibility/data tradeoff.",
+      "research_extension": null,
+      "teaching_construction": "Shared factor occurrences versus independent films;17-versus9 free parameters and parameter connections versus graph arrows.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Parameter tying and pooled occurrences",
+          "origin": "Recording; actual official sharing diagram"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Drama/comedy pooled counts and17-versus9 dimensions",
+          "origin": "Original exact arithmetic"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Fewer parameters can help under suitable modeling assumptions",
+          "origin": "Recording motivation with explicit qualification, not a universal generalization result"
+        }
+      ]
+    },
+    {
+      "section": "hmm",
+      "start": 2271.41,
+      "end": 2640.18,
+      "lecture_material": "Start/transition/emission parameter sharing in fully observed binary HMM.",
+      "research_extension": null,
+      "teaching_construction": "Independent sequence boundaries and posterior transition requirement when hidden.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Time-homogeneous HMM factorization and table families",
+          "origin": "Recording; actual official HMM visual"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Two-sequence counts, five normalized rows and five free parameters",
+          "origin": "Actual official data and original arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "general",
+      "start": 2640.18,
+      "end": 3172.99,
+      "lecture_material": "Node-to-parameter table map and generic complete-assignment counting; fixed graph.",
+      "research_extension": null,
+      "teaching_construction": "Declared domains, ordered signatures, all row initialization and explicit pooled count formula.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Table identity map and local count algorithm",
+          "origin": "Recording; original formalization"
+        }
+      ]
+    },
+    {
+      "section": "mle",
+      "start": 3172.99,
+      "end": 3578.45,
+      "lecture_material": "Maximum likelihood, log objective, one/two-variable grouping and count/normalize closed form.",
+      "research_extension": null,
+      "teaching_construction": "Closed-simplex KL proof, positive-support convention, empty-row nonuniqueness and coupled-parameter limits.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Independent complete-data likelihood",
+          "origin": "Recording topic; original explicit assumptions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Rowwise unique empirical-frequency optimum for positive total; every row optimal for zero total",
+          "origin": "Original support-aware proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Three ratings and three genre/rating assignments",
+          "origin": "Recorded examples and original exact arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "smoothing",
+      "start": 3578.45,
+      "end": 3886.86,
+      "lecture_material": "Additive pseudocounts and small/large smoothing and large-data limits.",
+      "research_extension": "Dempster PDF7/printed6: prior modifies M-step and corresponding objective.",
+      "teaching_construction": "Fixed-lambda discrepancy, augmented-count objective, raw likelihood decrease and structural-zero scope.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Additive smoothing and structural support",
+          "origin": "Recording mechanism; original explicit domains"
+        },
+        {
+          "class": "theorem",
+          "claim": "Augmented-count optimum and fixed-lambda limits under stated premises",
+          "origin": "Original derivations"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Add-one row and raw likelihood4/49 versus1/4",
+          "origin": "Original arithmetic for recorded data"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Suggested small pseudocounts",
+          "origin": "Attributed recording advice, no universal optimality claim"
+        }
+      ]
+    },
+    {
+      "section": "observed",
+      "start": 3887.41,
+      "end": 4217.1,
+      "lecture_material": "Partially observed data, marginal likelihood and posterior-weighted completions.",
+      "research_extension": "Dempster PDF2/printed1 incomplete-data marginalization; PDF7/printed6 conditional Q definition.",
+      "teaching_construction": "Observed-data product/log-sum formula, positive-evidence requirement and missingness-model boundary.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Observed objective and exact posterior responsibility",
+          "origin": "Recording mechanisms; verified primary formulation and original finite notation"
+        }
+      ]
+    },
+    {
+      "section": "em-case",
+      "start": 4217.3,
+      "end": 4585.18,
+      "lecture_material": "Tied binary-rating E/M demonstration and weighted count/normalize.",
+      "research_extension": "Dempster PDF5/printed4 expected sufficient statistics; PDF7/printed6 E/M definition.",
+      "teaching_construction": "Exact fractions instead of spoken rounding, two factor occurrences per film and whole data likelihood comparison.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Exact posterior E-step and expected complete-log-likelihood M-step",
+          "origin": "Recording; verified Dempster primary definition"
+        },
+        {
+          "class": "engineering check",
+          "claim": "9/13 and4/13 responsibilities;169/2500 to9409/114244 full likelihood",
+          "origin": "Original exact calculation of actual official example"
+        }
+      ]
+    },
+    {
+      "section": "monotonicity",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "Dempster PDF7–8/printed6–7 Q, generalized-EM definition, Theorem1 and equation3.10; penalty scope.",
+      "teaching_construction": "Complete finite support-aware KL bound proof and exact-versus-approximate and unused-row limits.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Exact positive-evidence unsmoothed Q-increase implies observed-likelihood nondecrease",
+          "origin": "Original finite proof of inspected Dempster mechanism"
+        },
+        {
+          "class": "definition",
+          "claim": "Support failure, nonunique empty M-step rows and changed/approximate objectives",
+          "origin": "Original operational qualifications of verified primary definitions"
+        }
+      ]
+    },
+    {
+      "section": "limits",
+      "start": 4585.18,
+      "end": 4734.93,
+      "lecture_material": "Iterations, heterogeneous data, likelihood/convergence claims, nonuniform initialization and label permutation.",
+      "research_extension": "Dempster PDF8 neighboring convergence theorem has additional hypotheses; no universal local-maximality result is imported.",
+      "teaching_construction": "Symmetric saddle proof, mixing-only asymmetry counterexample and nonidentifiability beyond label exchange.",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Recorded convergence and initialization discussion",
+          "origin": "Recording, narrowed by explicit mathematical counterexample"
+        },
+        {
+          "class": "theorem",
+          "claim": "Bounded nondecreasing likelihood values converge; the symmetric fixture is a saddle",
+          "origin": "Original proofs, not parameter-convergence claim"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Matching-pair perturbation formulas and unequal mixing fixed response",
+          "origin": "Original exact counterexamples"
+        },
+        {
+          "class": "definition",
+          "claim": "Label symmetry and additional identifiability limitation",
+          "origin": "Recorded label issue and original finite example"
+        }
+      ]
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Original exact-rational finite DAG estimator and specialized EM program with precise size/type/support/failure contract.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Executable domains, effects and arithmetic boundaries",
+          "origin": "Original implementation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact stdout, expanded-mixture and independent-count author oracles",
+          "origin": "Actual author validation; independent review pending"
+        }
+      ]
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Six developed proofs, numerical derivations, counterexamples and implementation/objective questions with full solutions.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Simplex, tying, smoothing and saddle proof statements under explicit finite assumptions",
+          "origin": "Original solutions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact counts, parameters, objectives and posterior updates",
+          "origin": "Original solutions"
+        }
+      ]
+    },
+    {
+      "section": "synthesis",
+      "start": 4734.93,
+      "end": 4824.78,
+      "lecture_material": "Learning summary and transition to quantified logic.",
+      "research_extension": null,
+      "teaching_construction": "Estimated zero, unidentified row, regularized probability and latent component distinguished.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Learning/inference/objective synthesis",
+          "origin": "Recording and original case interpretation"
+        }
+      ]
+    },
+    {
+      "section": "references",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "Pinned official bayes_learning.py notation/fact source and Dempster primary reference, with claim-specific checked scopes.",
+      "teaching_construction": null,
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Bibliographic identities and used claim scopes of the official executable lecture and primary EM paper",
+          "origin": "Complete retained 596-line official module; pinned commit matches after explicitly identified newline normalization; actually opened Dempster primary PDF and inspected pages"
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Maximum Likelihood from Incomplete Data via the EM Algorithm",
+      "authors": "A. P. Dempster; N. M. Laird; D. B. Rubin",
+      "year": 1977,
+      "url": "https://math.pku.edu.cn/teachers/xirb/Courses/QR2013/ReadingForFinal/MCMC/dempsterlairdandrubin1977.pdf",
+      "supports": "PDF2 incomplete-data marginalization; PDF5/7 expected statistics/Q/E-M; PDF7 changed penalized objective; PDF8 GEM Theorem1 nondecrease and decomposition. No unconditional local-maximality or parameter-convergence claim."
+    },
+    {
+      "title": "Stanford CS221 executable lecture: bayes_learning.py",
+      "authors": "Stanford CS221",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/bayes_learning.py",
+      "version": "f70063773fe9e04ddcbc248059501837053b810a",
+      "supports": "Pinned 596-line executable lecture: categorical and conditional count examples; joint parent indexing; distinct and tied rating tables; fully observed time-homogeneous HMM examples; generic complete-assignment counting; recorded maximum-likelihood and smoothing mechanisms; tied binary-rating posterior-weighted E/M example. Used as a notation/fact source; book code, proofs and exercises are original."
+    }
+  ],
+  "program": "programs/chapter14.py",
+  "body_sha256": "c9e25f793ab3c49d1e805050ebbeaabfaaa1f72a3551386268e8120a482f5515",
+  "implementation": {
+    "language": "Python3 standard library",
+    "program_sha256": "cfe74841e3ccb1eec1ce5222ea0c266e6424b136ef5fc771a668ea29bb920a61",
+    "stdout_sha256_lf": "377b2d420a4e14d13bf71c66d39d4da27b1c5415fa57cf023171a4125316ff98",
+    "numeric_contract": "Nonnegative int/Fraction inputs and explicitly checked results have numerator/denominator<=4096bits; finite declared domains; exact normalization; floats/bools rejected; temporary Fraction intermediates can exceed the limit before the next explicit check, so no universal intermediate-allocation or peak-memory bound is claimed",
+    "independent_review": "pending; author checks do not supply gate6b"
+  }
+}

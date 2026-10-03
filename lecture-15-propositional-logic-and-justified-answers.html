@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="02ba88e1491d36f31dd3460abfd797242c75b2285e59f21d07b9241107a9823d"><title>Propositional logic: assumptions, witnesses and justified answers · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><h1>Propositional logic: assumptions, witnesses and justified answers</h1>
+<p class="subtitle">Chapter 15 · A consistent explanation is not necessarily a true one.</p>
+<section id="permission-question">
+<h2>What would justify opening the gate?</h2>
+<p>A small permission system stores three statements: a token is present; a token implies clearance; clearance implies permission. It should answer that permission follows. If someone instead reports permission, the system should not conclude that a token is present. Several explanations satisfy the rules. If the stored statements contradict one another, confidently answering every question would hide the defect.</p>
+<p>We use this stipulated system to separate three tasks: evaluating a formula in one world, asking what follows in every world compatible with assumptions, and generating a syntactic proof. None verifies that a physical token or a human clearance actually exists. The chapter builds these distinctions from the recording's syntax–semantics–rules sequence, then supplies exact witnesses and an original bounded program.</p>
+<p>Chapters 12–14 treated probability distributions and incomplete observations. Here we initially keep a set of admissible worlds without assigning probabilities to them. Later we put probabilities on those same worlds to identify exactly when probability one agrees with logical entailment. A solver's inability to answer will remain separate from either kind of uncertainty.</p>
+</section>
+<section id="motivation">
+<h2>1. Symbolic manipulation changes the search question <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=5">[00:05–03:52]</a></h2>
+<p>The recording begins with two equations. For real numbers \(a,b\), suppose \(a+b=10\) and \(a-b=4\). Adding them gives \(2a=14\), hence \(a=7\); substitution gives \(b=3\). Each step preserves the solutions because addition and division by the nonzero real number two are valid in this domain. Enumerating all real pairs is unnecessary.</p>
+<p>This example motivates reasoning by transformations, but the transformations depend on their semantics. Over a different algebraic structure, division by two might be unavailable. We will study a finite Boolean language rather than claim that the next algorithm solves arbitrary symbolic mathematics.</p>
+<p>The lecture's broader motivation is compact knowledge representation. A short formula can constrain many possible worlds. Compact representation, tractable inference and accurate premises are three separate properties; success at one does not establish the others.</p>
+</section>
+<section id="formal-language">
+<h2>2. Fix the language before trusting a substitution <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=232">[03:52–08:19]</a></h2>
+<p>Natural-language substitutions can silently change a relation. “A penny is better than nothing” compares having a penny with having no money. “Nothing is better than world peace” denies that any alternative outranks peace. The word “nothing” is doing different work. A transitivity rule for a single specified relation does not license substituting across those meanings.</p>
+<p>A logic therefore needs syntax, semantics and inference rules. Syntax specifies allowed expressions. Semantics assigns their meaning. Inference rules specify permitted transformations of expressions. Different expressions can have the same meaning; conversely, one printed expression can have different meanings under different language conventions.</p>
+<p>For the permission case, write \(T\) for the token statement, \(C\) for clearance and \(O\) for permission. These are atomic symbols. Their identifiers do not supply truth values or a policy's factual accuracy. The stipulated implications describe assumptions of this example, not a verified access-control design.</p>
+</section>
+<section id="grammar">
+<h2>3. Formulas are finite trees <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=499">[08:19–12:17]</a></h2>
+<p>Fix a finite vocabulary \(S\) of atomic symbols. A formula is an atom, a negation of a formula, or a binary conjunction, disjunction, implication or equivalence of formulas. We also include constants \(\top\) and \(\bot\), meaning true and false, to give empty conjunctions and impossible constraints explicit representations. These constants are an extension of the recording's displayed grammar.</p>
+\[
+ f ::= \top\mid\bot\mid P\mid\neg f\mid(f\land f)\mid(f\lor f)
+       \mid(f\to f)\mid(f\leftrightarrow f),\qquad P\in S.
+\]
+<p>The repeated \(f\) positions may contain different formulas. Thus \((T\land C)\to O\) has an implication at its root, a conjunction as its left child and an atom as its right child. The tree makes grouping unambiguous. Grouping parentheses are allowed; the predicate application \(P(A)\) belongs to a different grammar and is not an atomic formula of this one.</p>
+<p>Finite trees support structural recursion and induction. A formula's size is its expanded node count; shared references in the implementation do not turn two printed occurrences into one semantic operation. Our program limits size and depth explicitly instead of accepting an unbounded nested object and hoping recursion will finish.</p>
+</section>
+<section id="worlds">
+<h2>4. A logical model assigns every atom <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=737">[12:17–14:46]</a></h2>
+<p>A world, also called a logical model, is a total assignment \(w:S\to\{0,1\}\). The value one means true. The assignment space is \(\Omega=\{0,1\}^{S}\). With \(d=|S|\) atoms there are \(2^d\) worlds, since each atom independently has two assignment choices. This is a counting statement, not a claim that the physical facts are independent random variables.</p>
+<p>For \(S=(T,C,O)\), the program uses this tuple order and lists false before true on each axis. The first world is \((0,0,0)\), the last \((1,1,1)\). A tuple changes its meaning if the axis order changes; a witness must therefore travel with its vocabulary. A missing atom is not automatically false.</p>
+<p>The recording's hundred-atom example has \(2^{100}\) assignments. A short formula such as its first atom being true accepts \(2^{99}\) of them. That example demonstrates compactness, not a feasible explicit enumeration. Our executable stops at eight atoms and enumerates at most 256 worlds.</p>
+</section>
+<section id="interpretation">
+<h2>5. Interpretation computes truth in one supplied world <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=886">[14:46–20:12]</a></h2>
+<p>Define the interpretation \(\mathcal I_w(f)\in\{0,1\}\) recursively. At an atom \(P\), it is \(w(P)\). At the constants it is one or zero. Negation complements the value; conjunction requires both operands true; disjunction requires at least one. Material implication is false exactly when its antecedent is true and its consequent is false.</p>
+\[
+ \mathcal I_w(f\to g)=\neg\mathcal I_w(f)\lor\mathcal I_w(g),\qquad
+ \mathcal I_w(f\leftrightarrow g)=1\ \Longleftrightarrow\
+ \mathcal I_w(f)=\mathcal I_w(g).
+\]
+<p>At \(A=1,B=1,C=0\), the expression \((\neg A\land B)\leftrightarrow C\) is true: \(\neg A=0\), the conjunction is zero, and the two equivalence operands are both zero. The formula's truth does not imply that its conjunction is true.</p>
+<p>Material implication does not assert a causal mechanism. In a world with no token, \(T\to C\) is true whether clearance is true or false. Inferring the antecedent from a true consequent reverses the direction and is generally invalid. The permission system will expose a concrete counterworld.</p>
+<p>A tree evaluation visits a number of nodes proportional to the expanded tree size when Boolean lookup is constant-time. That statement concerns one supplied assignment. Finding an assignment or proving a statement across all assignments is a different task.</p>
+</section>
+<section id="model-sets">
+<h2>6. A formula selects a set of worlds <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=1212">[20:12–25:20]</a></h2>
+<p>The models of a formula are \(\mathcal M(f)=\{w\in\Omega:\mathcal I_w(f)=1\}\). This converts a piece of syntax into the worlds it permits. On the two-atom vocabulary \((T,C)\), the truth table shows the difference between conjunction, disjunction and implication.</p>
+<table><thead><tr><th>\(T\)</th><th>\(C\)</th><th>\(T\land C\)</th><th>\(T\lor C\)</th><th>\(T\to C\)</th></tr></thead><tbody>
+<tr><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+<tr><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+<tr><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+<tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+</tbody></table>
+<p>Conjunction has one model, disjunction three and implication three. The last two formulas nevertheless select different sets. A model count is not enough to determine meaning; the actual assignments matter.</p>
+<p>Adding a previously unused atom \(O\) to this vocabulary gives two extensions of each row. The formulas above ignore its value. We always compare formulas relative to a declared common vocabulary rather than silently treating a two-coordinate witness as a three-coordinate world.</p>
+</section>
+<section id="knowledge-base">
+<h2>7. A knowledge base intersects the permitted worlds <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=1520">[25:20–29:36]</a></h2>
+<p>A knowledge base \(K\) is a finite collection of formulas. Its admissible worlds satisfy all of them, so \(\mathcal M(K)=\bigcap_{f\in K}\mathcal M(f)\). Equivalently, interpret their conjunction. Repeated formulas do not alter this intersection. For the empty collection, the intersection is \(\Omega\), represented by \(\top\).</p>
+<p>Return to the three-atom vocabulary. The rules \(T\to C\) and \(C\to O\) permit exactly \((0,0,0),(0,0,1),(0,1,1),(1,1,1)\). Adding the fact \(T\) leaves only \((1,1,1)\). Adding instead the fact \(O\) leaves the last three listed worlds. Permission can therefore hold without a token.</p>
+<p>We call \(K\) consistent, or satisfiable, when \(\mathcal M(K)\ne\varnothing\). This is consistency with the chosen semantics, not correspondence with reality. A set of false physical claims can be internally consistent. Conversely, inconsistency identifies an incompatible collection but does not identify which claim should be withdrawn.</p>
+</section>
+<section id="classification">
+<h2>8. Three answers require consistent assumptions <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=1776">[29:36–38:46]</a></h2>
+<p>For a query formula \(f\), write \(A=\mathcal M(K)\), \(A_+=A\cap\mathcal M(f)\) and \(A_-=A\cap\mathcal M(\neg f)\). These last two sets partition \(A\): each world assigns exactly one Boolean truth value to \(f\).</p>
+<p>The notation \(K\models f\) means semantic entailment: \(A\subseteq\mathcal M(f)\). Equivalently, \(A_-=\varnothing\) or adding \(f\) does not shrink \(A\). Contradiction of \(f\) means \(A_+=\varnothing\), equivalently entailment of \(\neg f\). Contingency means that both \(A_+\) and \(A_-\) are nonempty.</p>
+<p>If \(A\) is nonempty, exactly one of these three cases holds. If both parts were empty, their union \(A\) would be empty; if both are nonempty, neither entailment nor contradiction holds. This gives a complete classification under the explicit consistency precondition.</p>
+<p>If \(K\) is inconsistent, however, it entails both \(f\) and \(\neg f\) in classical semantics: the empty set is a subset of every model set. The two semantic properties overlap. Our interface reports an inconsistent knowledge base before presenting an ordinary yes/no answer. This diagnostic does not change the mathematical definition of entailment.</p>
+</section>
+<section id="ask">
+<h2>9. Ask needs witnesses, not a changed database <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=2326">[38:46–44:04]</a></h2>
+<p>Ask evaluates a query against the current assumptions without inserting it. An entailed answer has no admissible counterworld. A contradicted answer has no admissible supporting world. A contingent answer supplies one of each, making the limitation inspectable.</p>
+<p>With the token fact and both rules, permission is entailed and the sole world is \((1,1,1)\). With observed permission and both rules, a token is contingent: \((1,1,1)\) supports it, while \((0,0,1)\) refutes it. The second witness satisfies both implications. This is the exact failure of reversing an implication, not a lack of computing effort.</p>
+<p>Our finite enumerator checks every world in its declared domain, so its absent-witness conclusion is exhaustive within that domain. A single observed supporting world would only establish satisfiability, not entailment. A physical sensor reading likewise needs an explicit mapping into assumptions; the truth table does not supply that mapping's reliability.</p>
+</section>
+<section id="tell">
+<h2>10. Tell preserves consistency, not truth <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=2644">[44:04–48:14]</a></h2>
+<p>Tell first classifies the candidate formula. If it is entailed, the program returns the original knowledge base with “already-known.” If it is contradicted, it returns the original with “rejected.” If it is contingent, it returns a new immutable knowledge base with the formula added. The old object remains available.</p>
+<p>Why does the last case preserve consistency? Contingency means \(A_+\) is nonempty, and \(A_+\) is exactly the updated model set. It also means \(A_-\) is nonempty, so the addition removes some worlds and really adds information relative to these assumptions.</p>
+<p>Starting with just the rules, telling \(T\) reduces four worlds to one. Starting with that result, telling \(O\) changes nothing, while telling \(\neg C\) is rejected. If the initial knowledge base is already inconsistent, our Tell raises an explicit error instead of treating every candidate as already known.</p>
+<p>An accepted addition is not certified factually correct. The program knows only the formulas supplied. Its vocabulary, representation and capacity errors are also separate from a logical rejection: exceeding the 64-formula bound raises a domain error rather than declaring a true statement false.</p>
+</section>
+<section id="revision">
+<h2>11. Monotonic consequence does not implement belief revision <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=2894">[48:14–52:17]</a></h2>
+<p>If \(K\subseteq K'\), then \(\mathcal M(K')\subseteq\mathcal M(K)\). Every world satisfying all the larger collection's constraints satisfies the smaller collection's constraints. Consequently, any formula entailed by \(K\) remains entailed by \(K'\). This is the monotonicity of classical consequence when premises are added.</p>
+<p>It does not forbid replacing a stored collection. If a token report is withdrawn, reconstructing the knowledge base without that fact can expand its model set and remove previously justified conclusions. Which report to withdraw requires a revision policy or outside evidence; the intersection operation does not decide it.</p>
+<p>Time can be represented using distinct atoms such as yesterday's token and today's token, with explicitly chosen connecting rules. Reusing one symbol while silently changing what time it refers to changes the semantics. Likewise, a classical rule “absence of proof means false” has not been supplied here: lack of entailment can mean contingency.</p>
+<p>The next probability example shows why shrinking a model set need not monotonically increase every query probability. Renormalization changes relative mass. Set inclusion and probability comparison answer different questions.</p>
+</section>
+<section id="probability">
+<h2>12. Probability one and entailment need a support condition <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=3137">[52:17–57:30]</a></h2>
+<p>On a fixed finite \(\Omega\), let \(\pi(w)\ge0\) be a probability mass with \(\sum_w\pi(w)=1\). For any formula, sum the masses of its models. If the evidence collection \(K\) has positive probability, arbitrary formula conditioning is available:</p>
+\[
+ \Pr_\pi(f\mid K)=
+ \frac{\sum_{w\in\mathcal M(K)\cap\mathcal M(f)}\pi(w)}
+      {\sum_{w\in\mathcal M(K)}\pi(w)}.
+\]
+<p>The recording's two-variable table uses \((\mathrm{Rain},\mathrm{Wet})\) in false/true product order with masses \((1/2,1/10,1/10,3/10)\). Rain has probability \(2/5\); wet also has probability \(2/5\); both have probability \(3/10\). Thus rain given wet is \(3/4\), while rain given not wet is \((1/10)/(3/5)=1/6\).</p>
+<p>Both conditioning events select fewer worlds than the empty evidence collection. One raises rain's probability above its prior and the other lowers it. A Bayesian joint can also condition on a compound event such as rain or wet; a particular API that accepts only variable assignments has an interface restriction, not a mathematical prohibition on formula events.</p>
+<p>When \(K\models f\) and the denominator is positive, numerator and denominator coincide, so the conditional probability is one. For the converse, suppose every world in \(\mathcal M(K)\) has strictly positive mass. A counterworld would then contribute positive mass to the denominator but not the numerator. Probability one therefore rules out every counterworld and entails \(f\).</p>
+<p>Without that support condition, the converse fails. Give probability one to \((0,0)\) and zero to the other three worlds, while keeping the knowledge base empty. The formula not rain and not wet has probability one but is contingent: the logically admissible world \((1,0)\) refutes it. A zero estimated probability is not automatically logical impossibility. Zero-probability evidence has no ratio conditional in this finite model.</p>
+</section>
+<section id="satisfiability">
+<h2>13. Reduce questions to satisfiability without misreading unknown <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=3450">[57:30–63:43]</a></h2>
+<p>A satisfiability procedure asks whether any assignment satisfies a collection. For a query \(f\), test the two collections \(K\cup\{f\}\) and \(K\cup\{\neg f\}\). Their witnesses are exactly \(A_+\) and \(A_-\). The complete decision table also handles an inconsistent current knowledge base.</p>
+<table><thead><tr><th>Positive branch</th><th>Negative branch</th><th>Logical status</th></tr></thead><tbody>
+<tr><td>satisfiable</td><td>unsatisfiable</td><td>entailed</td></tr>
+<tr><td>unsatisfiable</td><td>satisfiable</td><td>contradicted</td></tr>
+<tr><td>satisfiable</td><td>satisfiable</td><td>contingent</td></tr>
+<tr><td>unsatisfiable</td><td>unsatisfiable</td><td>inconsistent</td></tr>
+</tbody></table>
+<p>If consistency is already established, the recording's early return on an unsatisfiable negative branch is safe. Without that precondition, it cannot distinguish ordinary entailment from inconsistency. Testing both branches or explicitly checking the current collection repairs the missing premise.</p>
+<p><a href="https://microsoft.github.io/z3guide/docs/logic/propositional-logic/">The official Z3 guide, “Satisfiability and Validity,”</a> explains validity through unsatisfiability of the negated claim. Its <a href="https://microsoft.github.io/z3guide/docs/logic/basiccommands/">“Basic Commands” discussion of check-sat and get-model</a> distinguishes satisfiable, unsatisfiable and inability to decide; model retrieval follows a satisfiable result. Our chapter program uses exhaustive finite enumeration, not a Z3 dependency.</p>
+<p>A solver's unknown response is computational uncertainty. It does not supply the two witnesses needed for logical contingency. Our response-table helper therefore returns “solver-unknown” whenever either purported branch is unknown; it does not run a solver or certify that externally supplied responses are correct.</p>
+<p>The two-branch construction uses at most two Boolean decisions once inputs and semantics are fixed. This is not a universal lower bound on reasoning: additional information, richer certificates or a restricted query can change what one call tells us. Nor does calling a solver establish an efficiency guarantee. Evaluating a formula in one model, finding a satisfying model and checking a transition system are distinct tasks, even though the recording groups satisfiability under model checking.</p>
+</section>
+<section id="inference">
+<h2>14. A proof operates on the formulas <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=3823">[63:43–68:09]</a></h2>
+<p>Modus ponens is the rule \(p,p\to q\vdash q\), where \(p,q\) may be formulas. The single-turnstile notation means syntactic derivation under a specified calculus. It differs from the semantic double-turnstile relation \(\models\), which quantifies over models.</p>
+<p>In the permission example, the stored formula \(T\) matches the antecedent of \(T\to C\), yielding \(C\). That new formula matches the antecedent of \(C\to O\), yielding \(O\). The proof trace names the exact matched antecedent and rule for each conclusion. It need not enumerate all eight worlds to perform these matches.</p>
+<p>The rule is sound. In any world where \(p\) and \(p\to q\) are true, \(q\) cannot be false: that combination would make the implication false. Reverse reasoning from \(q,p\to q\) to \(p\) is unsound; the assignment \(p=0,q=1\) satisfies its premises and refutes its conclusion.</p>
+<p>Our MP-only saturation repeatedly adds matching conclusions. Every added formula is a subformula of an already present implication and ultimately of an initial formula. The candidate universe is finite. Deduplicating formulas and checking every active rule until no addition is possible therefore reaches a fixed point, within the executable's explicit output bound. Arbitrary formula-generating inference systems do not inherit that termination argument.</p>
+</section>
+<section id="soundness">
+<h2>15. Soundness and completeness belong to a specified calculus <a class="timestamp" href="https://youtu.be/Q7V13XriJEc?t=4089">[68:09–73:19]</a></h2>
+<p>A calculus is sound relative to these semantics if every formula it derives from \(K\) is entailed by \(K\). The MP-only procedure has this property by induction on its trace: initial formulas hold in every model of \(K\), and the sound rule preserves that invariant at each addition.</p>
+<p>Completeness is the other inclusion: every entailed formula can be derived. MP alone is not complete for arbitrary propositional consequences. From \(T,T\to C,C\to O\), the shortcut \(T\to O\) is entailed, but saturation adds only \(C\) and \(O\); no rule creates the new implication. Even with no premises, \(T\lor\neg T\) is entailed and MP alone generates nothing.</p>
+<p>A useful restricted rescue is finite positive definite-Horn reasoning. A rule has a finite collection of positive atomic premises and a positive atomic head. It fires when every premise is known; an empty premise collection fires unconditionally. Repeatedly adding new head atoms terminates after at most \(|S|\) additions. This matcher is more capable than requiring an entire conjunction formula to be syntactically present for MP.</p>
+<p>For positive atomic queries, this restricted rule procedure is complete. Let \(H\) be its final set of known atoms and form a world that makes exactly those atoms true. It satisfies the facts. It satisfies every Horn rule: if all premises are in \(H\), saturation has put the head there; otherwise the material implication is true with a false antecedent. Thus this world is itself a model of the Horn knowledge base.</p>
+<p>Soundness says every atom in \(H\) holds in all models. Conversely, an entailed positive atom must hold in the particular world just constructed and hence belong to \(H\). This proves the claimed restricted completeness. It does not extend to negative queries, arbitrary disjunctions or unrestricted first-order logic. The original program exposes both MP-only and Horn matchers so their contracts cannot be confused.</p>
+</section>
+<section id="implementation">
+<h2>16. Execute a bounded model with inspectable failures</h2>
+<p>The downloadable <a href="programs/chapter15.py">chapter program</a> uses only the standard library on Python 3.10 or later. Its immutable formula grammar supports the operators defined above. A vocabulary is an ordered tuple of at most eight unique ASCII atom names; a knowledge base is a tuple of at most 64 formulas. Each formula has at most 128 expanded nodes and depth 32. Total supplied worlds contain exactly those keys with exact Boolean values.</p>
+<p>World enumeration returns immutable tuples. Ask returns its status, the first supporting and refuting worlds when they exist, and the admissible-world count. Tell preserves the original object for a redundant or rejected statement and constructs a new object for an informative consistent addition. An inconsistent current collection, invalid input or exceeded capacity raises ValueError; it does not silently become a contingent answer.</p>
+<p>Exact conditioning accepts a tuple of nonnegative built-in integers or Fraction masses, each within 128-bit numerator/denominator bounds, that sum exactly to one in the declared world order. It rejects zero-probability evidence. MP saturation has bounded rule checks and a 64-formula output limit; the separate Horn matcher accepts at most 64 rules over the same eight-atom vocabulary. Both return explicit derivation traces.</p>
+<p>Library calls have no network, file, clipboard or device effects and do not mutate inputs. Running the file writes only the example stdout. The following small snippet imports the actual original program from the book directory; it is followed by the complete source and actual output.</p>
+<pre id="runnable-example"><code>from programs.chapter15 import Knowledge, atom, binary, ask
+T, C = atom('T'), atom('C')
+kb = Knowledge(('T', 'C'), (T, binary('implies', T, C)))
+print(ask(kb, C).status)
+</code></pre>
+<pre id="example-output"><code>entailed
+</code></pre>
+<pre id="program-source"><code>&quot;&quot;&quot;Original finite propositional reasoning: exact worlds and explicit limits.
+
+Python 3.10+, standard library. Library calls have no external effects. The
+command-line example writes stdout only. Bounds: eight atoms, 64 KB formulas,
+128 expanded nodes per formula, depth 32, and 200000 MP rule checks.
+&quot;&quot;&quot;
+
+from dataclasses import dataclass
+from fractions import Fraction
+from itertools import product
+import re
+
+
+def name(value):
+    if (
+        type(value) is not str
+        or re.fullmatch(r&quot;[A-Za-z][A-Za-z0-9_]{0,31}&quot;, value) is None
+    ):
+        raise ValueError(
+            &quot;Atom names must be ASCII identifiers of length 1..32&quot;
+        )
+    return value
+
+
+@dataclass(frozen=True)
+class Formula:
+    op: str
+    args: tuple
+
+    def __post_init__(self):
+        validate_formula(self)
+
+
+def validate_formula(formula):
+    (
+        &#x27;Validate the complete expanded tree, including shared-s&#x27;
+        &#x27;ubtree budgets.&#x27;
+    )
+    count = 0
+    atoms = set()
+
+    def visit(node, depth):
+        nonlocal count
+        count += 1
+        if count &gt; 128 or depth &gt; 32:
+            raise ValueError(&quot;Formula exceeds node/depth budget&quot;)
+        if (
+            type(node) is not Formula
+            or type(node.op) is not str
+            or type(node.args) is not tuple
+        ):
+            raise ValueError(&quot;Use an exact Formula with a tuple of operands&quot;)
+        if node.op == &quot;atom&quot; and len(node.args) == 1:
+            atoms.add(name(node.args[0]))
+        elif (
+            node.op == &quot;constant&quot;
+            and len(node.args) == 1
+            and type(node.args[0]) is bool
+        ):
+            pass
+        elif node.op == &quot;not&quot; and len(node.args) == 1:
+            visit(node.args[0], depth + 1)
+        elif (
+            node.op in (&quot;and&quot;, &quot;or&quot;, &quot;implies&quot;, &quot;iff&quot;) and len(node.args) == 2
+        ):
+            for child in node.args:
+                visit(child, depth + 1)
+        else:
+            raise ValueError(&quot;Unsupported operator or operand arity&quot;)
+
+    visit(formula, 1)
+    return frozenset(atoms)
+
+
+def atom(identifier):
+    return Formula(&quot;atom&quot;, (identifier,))
+
+
+def neg(formula):
+    return Formula(&quot;not&quot;, (formula,))
+
+
+def binary(op, left, right):
+    if op not in (&quot;and&quot;, &quot;or&quot;, &quot;implies&quot;, &quot;iff&quot;):
+        raise ValueError(&quot;Unsupported binary operator&quot;)
+    return Formula(op, (left, right))
+
+
+TRUE = Formula(&quot;constant&quot;, (True,))
+FALSE = Formula(&quot;constant&quot;, (False,))
+
+
+def vocabulary(symbols):
+    if type(symbols) is not tuple or len(symbols) &gt; 8:
+        raise ValueError(&quot;Vocabulary must be a tuple of at most eight atoms&quot;)
+    for symbol in symbols:
+        name(symbol)
+    if len(set(symbols)) != len(symbols):
+        raise ValueError(&quot;Vocabulary names must be unique&quot;)
+    return symbols
+
+
+def _interpret(formula, world):
+    op, args = formula.op, formula.args
+    if op == &quot;atom&quot;:
+        return world[args[0]]
+    if op == &quot;constant&quot;:
+        return args[0]
+    if op == &quot;not&quot;:
+        return not _interpret(args[0], world)
+    left, right = (_interpret(child, world) for child in args)
+    if op == &quot;and&quot;:
+        return left and right
+    if op == &quot;or&quot;:
+        return left or right
+    if op == &quot;implies&quot;:
+        return not left or right
+    return left == right
+
+
+def interpret(formula, symbols, world):
+    &quot;&quot;&quot;Require a total, exact-Boolean world over the supplied vocabulary.&quot;&quot;&quot;
+    vocabulary(symbols)
+    if not validate_formula(formula) &lt;= set(symbols):
+        raise ValueError(&quot;Formula uses an undeclared atom&quot;)
+    if type(world) is not dict or set(world) != set(symbols):
+        raise ValueError(
+            &quot;World must be a dict with exactly the vocabulary keys&quot;
+        )
+    if any(type(value) is not bool for value in world.values()):
+        raise ValueError(&quot;World values must be exact booleans&quot;)
+    return _interpret(formula, world)
+
+
+@dataclass(frozen=True)
+class Knowledge:
+    symbols: tuple
+    formulas: tuple = ()
+
+    def __post_init__(self):
+        vocabulary(self.symbols)
+        if type(self.formulas) is not tuple or len(self.formulas) &gt; 64:
+            raise ValueError(
+                &quot;Knowledge must contain a tuple of at most 64 formulas&quot;
+            )
+        for formula in self.formulas:
+            if not validate_formula(formula) &lt;= set(self.symbols):
+                raise ValueError(&quot;Knowledge uses an undeclared atom&quot;)
+
+
+def validate_query(kb, query):
+    if type(kb) is not Knowledge:
+        raise ValueError(&quot;Use an exact Knowledge instance&quot;)
+    kb.__post_init__()
+    if not validate_formula(query) &lt;= set(kb.symbols):
+        raise ValueError(&quot;Query uses an undeclared atom&quot;)
+
+
+def worlds(symbols):
+    (
+        &#x27;Immutable tuples in False-before-True product order; ze&#x27;
+        &#x27;ro atoms has one world.&#x27;
+    )
+    vocabulary(symbols)
+    return tuple(product((False, True), repeat=len(symbols)))
+
+
+def models(kb):
+    validate_query(kb, TRUE)
+    return tuple(
+        values
+        for values in worlds(kb.symbols)
+        if all(
+            _interpret(f, dict(zip(kb.symbols, values))) for f in kb.formulas
+        )
+    )
+
+
+@dataclass(frozen=True)
+class Answer:
+    status: str
+    positive: tuple | None
+    negative: tuple | None
+    model_count: int
+
+
+def ask(kb, query):
+    (
+        &#x27;Return a logical status and first counter/support witne&#x27;
+        &#x27;sses; never mutate KB.&#x27;
+    )
+    validate_query(kb, query)
+    positive = negative = None
+    admissible = models(kb)
+    for values in admissible:
+        value = _interpret(query, dict(zip(kb.symbols, values)))
+        if value and positive is None:
+            positive = values
+        if not value and negative is None:
+            negative = values
+    if not admissible:
+        status = &quot;inconsistent&quot;
+    elif negative is None:
+        status = &quot;entailed&quot;
+    elif positive is None:
+        status = &quot;contradicted&quot;
+    else:
+        status = &quot;contingent&quot;
+    return Answer(status, positive, negative, len(admissible))
+
+
+def tell(kb, formula):
+    &quot;&quot;&quot;Return a new immutable KB only for consistent informative additions.&quot;&quot;&quot;
+    answer = ask(kb, formula)
+    if answer.status == &quot;inconsistent&quot;:
+        raise ValueError(&quot;Tell requires a consistent current knowledge base&quot;)
+    if answer.status == &quot;entailed&quot;:
+        return kb, &quot;already-known&quot;
+    if answer.status == &quot;contradicted&quot;:
+        return kb, &quot;rejected&quot;
+    return Knowledge(kb.symbols, kb.formulas + (formula,)), &quot;learned&quot;
+
+
+def classify_sat_answers(positive, negative):
+    (
+        &#x27;Classify two genuine SAT decisions; unknown is computat&#x27;
+        &#x27;ional, not contingent.\n\n    Positive refers to KB and q&#x27;
+        &#x27;uery; negative to KB and negated query. This\n    helper&#x27;
+        &quot; does not run a solver or validate a claimed solver&#x27;s c&quot;
+        &#x27;ertificates.\n    &#x27;
+    )
+    allowed = (&quot;sat&quot;, &quot;unsat&quot;, &quot;unknown&quot;)
+    if (
+        type(positive) is not str
+        or type(negative) is not str
+        or positive not in allowed
+        or negative not in allowed
+    ):
+        raise ValueError(&quot;SAT responses must be sat, unsat or unknown&quot;)
+    if &quot;unknown&quot; in (positive, negative):
+        return &quot;solver-unknown&quot;
+    return {
+        (&quot;sat&quot;, &quot;sat&quot;): &quot;contingent&quot;,
+        (&quot;sat&quot;, &quot;unsat&quot;): &quot;entailed&quot;,
+        (&quot;unsat&quot;, &quot;sat&quot;): &quot;contradicted&quot;,
+        (&quot;unsat&quot;, &quot;unsat&quot;): &quot;inconsistent&quot;,
+    }[(positive, negative)]
+
+
+def condition(kb, query, masses):
+    (
+        &#x27;Exact formula-event posterior and evidence mass in the &#x27;
+        &#x27;worlds() order.&#x27;
+    )
+    validate_query(kb, query)
+    assignments = worlds(kb.symbols)
+    if type(masses) is not tuple or len(masses) != len(assignments):
+        raise ValueError(&quot;Mass tuple must have one entry per ordered world&quot;)
+    converted = []
+    for value in masses:
+        if type(value) not in (int, Fraction):
+            raise ValueError(&quot;Use built-in integers or exact Fraction masses&quot;)
+        value = Fraction(value)
+        if (
+            value &lt; 0
+            or value.numerator.bit_length() &gt; 128
+            or value.denominator.bit_length() &gt; 128
+        ):
+            raise ValueError(
+                &quot;Mass must be nonnegative and within 128-bit fraction bounds&quot;
+            )
+        converted.append(value)
+    if sum(converted) != 1:
+        raise ValueError(&quot;Masses must sum exactly to one&quot;)
+    denominator = numerator = Fraction(0)
+    for values, mass in zip(assignments, converted):
+        world = dict(zip(kb.symbols, values))
+        if all(_interpret(f, world) for f in kb.formulas):
+            denominator += mass
+            if _interpret(query, world):
+                numerator += mass
+    if denominator == 0:
+        raise ValueError(&quot;Evidence has zero probability; no ratio conditional&quot;)
+    return numerator / denominator, denominator
+
+
+def mp_closure(kb):
+    (
+        &#x27;Saturate syntactically present modus-ponens premises; n&#x27;
+        &#x27;ot a complete calculus.\n\n    Conclusions stay in the in&#x27;
+        &quot;itial formulas&#x27; finite subformula universe.\n    The ret&quot;
+        &#x27;urned KB retains the 64-formula bound; overflow raises &#x27;
+        &#x27;ValueError\n    without modifying the input. At most 200&#x27;
+        &#x27;000 active rule checks are made.\n    &#x27;
+    )
+    validate_query(kb, TRUE)
+    known = list(dict.fromkeys(kb.formulas))
+    seen = set(known)
+    trace = []
+    checks = 0
+    changed = True
+    while changed:
+        changed = False
+        for rule in tuple(known):
+            checks += 1
+            if checks &gt; 200000:
+                raise ValueError(&quot;MP rule-check budget exceeded&quot;)
+            if (
+                rule.op == &quot;implies&quot;
+                and rule.args[0] in seen
+                and rule.args[1] not in seen
+            ):
+                if len(known) == 64:
+                    raise ValueError(
+                        &quot;MP closure exceeds the 64-formula output budget&quot;
+                    )
+                conclusion = rule.args[1]
+                known.append(conclusion)
+                seen.add(conclusion)
+                trace.append((rule.args[0], rule, conclusion))
+                changed = True
+    return Knowledge(kb.symbols, tuple(known)), tuple(trace)
+
+
+def horn_closure(symbols, facts, rules):
+    &quot;&quot;&quot;Saturate finite positive definite-Horn rules, including empty bodies.
+
+    Each rule is (antecedent-name tuple, consequent name). At most eight atoms
+    and 64 rules are allowed. This rule matcher checks all body atoms; it is
+    distinct from the general formula MP-only implementation above.
+    &quot;&quot;&quot;
+    vocabulary(symbols)
+    if type(facts) is not tuple or len(facts) &gt; len(symbols):
+        raise ValueError(&quot;Facts must be a tuple within the vocabulary size&quot;)
+    for fact in facts:
+        name(fact)
+    if len(set(facts)) != len(facts) or not set(facts) &lt;= set(symbols):
+        raise ValueError(&quot;Facts must be unique declared atoms&quot;)
+    if type(rules) is not tuple or len(rules) &gt; 64:
+        raise ValueError(&quot;Use a tuple of at most 64 Horn rules&quot;)
+    for rule in rules:
+        if type(rule) is not tuple or len(rule) != 2:
+            raise ValueError(&quot;Horn rules are (body tuple, head name)&quot;)
+        body, head = rule
+        if type(body) is not tuple or len(body) &gt; len(symbols):
+            raise ValueError(&quot;Horn body must be a bounded tuple of names&quot;)
+        name(head)
+        for identifier in body:
+            name(identifier)
+        if len(set(body)) != len(body) or not (set(body) | {head}) &lt;= set(
+            symbols
+        ):
+            raise ValueError(&quot;Horn body/head must use unique declared atoms&quot;)
+    known = set(facts)
+    trace = []
+    changed = True
+    while changed:
+        changed = False
+        for body, head in rules:
+            if set(body) &lt;= known and head not in known:
+                known.add(head)
+                trace.append((body, head))
+                changed = True
+    return tuple(
+        identifier for identifier in symbols if identifier in known
+    ), tuple(trace)
+
+
+def main():
+    t, c, o = map(atom, (&quot;T&quot;, &quot;C&quot;, &quot;O&quot;))
+    rules = (binary(&quot;implies&quot;, t, c), binary(&quot;implies&quot;, c, o))
+    kb = Knowledge((&quot;T&quot;, &quot;C&quot;, &quot;O&quot;), (t,) + rules)
+    print(&quot;permission:&quot;, ask(kb, o).status, &quot;models:&quot;, models(kb))
+    unchanged, outcome = tell(kb, neg(c))
+    print(&quot;tell not C:&quot;, outcome, &quot;unchanged:&quot;, unchanged is kb)
+    open_only = Knowledge(kb.symbols, (o,) + rules)
+    answer = ask(open_only, t)
+    print(
+        &quot;observed permission:&quot;,
+        answer.status,
+        &quot;positive:&quot;,
+        answer.positive,
+        &quot;negative:&quot;,
+        answer.negative,
+    )
+    closure, trace = mp_closure(kb)
+    shortcut = binary(&quot;implies&quot;, t, o)
+    print(
+        &quot;MP added:&quot;,
+        len(trace),
+        &quot;shortcut entailed:&quot;,
+        ask(kb, shortcut).status,
+        &quot;shortcut generated:&quot;,
+        shortcut in closure.formulas,
+    )
+    horn, horn_trace = horn_closure(
+        kb.symbols, (&quot;T&quot;,), (((&quot;T&quot;,), &quot;C&quot;), ((&quot;T&quot;, &quot;C&quot;), &quot;O&quot;))
+    )
+    print(&quot;Horn closure:&quot;, horn, &quot;new atoms:&quot;, len(horn_trace))
+    r, w = map(atom, (&quot;Rain&quot;, &quot;Wet&quot;))
+    weather = Knowledge((&quot;Rain&quot;, &quot;Wet&quot;), (w,))
+    masses = (
+        Fraction(1, 2),
+        Fraction(1, 10),
+        Fraction(1, 10),
+        Fraction(3, 10),
+    )
+    posterior, evidence = condition(weather, r, masses)
+    print(&quot;rain given wet:&quot;, posterior, &quot;evidence:&quot;, evidence)
+    empty = Knowledge((&quot;Rain&quot;, &quot;Wet&quot;))
+    event = binary(&quot;and&quot;, neg(r), neg(w))
+    p, _ = condition(empty, event, (1, 0, 0, 0))
+    print(&quot;zero-support gap:&quot;, p, &quot;logical status:&quot;, ask(empty, event).status)
+    inconsistent = Knowledge((&quot;Rain&quot;, &quot;Wet&quot;), (r, neg(r)))
+    print(&quot;inconsistent:&quot;, ask(inconsistent, w).status)
+    print(&quot;solver response:&quot;, classify_sat_answers(&quot;unknown&quot;, &quot;sat&quot;))
+    print(
+        &quot;Finite witnesses certify stated assumptions; &quot;
+        &quot;they do not verify facts about the world.&quot;
+    )
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<pre id="program-output"><code>permission: entailed models: ((True, True, True),)
+tell not C: rejected unchanged: True
+observed permission: contingent positive: (True, True, True) negative: (False, False, True)
+MP added: 2 shortcut entailed: entailed shortcut generated: False
+Horn closure: (&#x27;T&#x27;, &#x27;C&#x27;, &#x27;O&#x27;) new atoms: 2
+rain given wet: 3/4 evidence: 2/5
+zero-support gap: 1 logical status: contingent
+inconsistent: inconsistent
+solver response: solver-unknown
+Finite witnesses certify stated assumptions; they do not verify facts about the world.
+</code></pre>
+<p>The numerical and witness checks validate these declared finite contracts. They do not certify the physical assumptions, unrestricted SAT performance, a complete general proof calculus or the reliability of an external solver. A model witness is useful precisely because its scope is explicit.</p>
+</section>
+<section id="exercises">
+<h2>17. Six worked exercises</h2>
+<h3>Exercise 1 — Truth and meaning are different levels</h3>
+<p>On \((T,C,O)\), evaluate \((\neg T\land C)\leftrightarrow O\) at \((1,1,0)\). List its model tuples. Does the count of its models determine which worlds it accepts?</p>
+<details class="solution"><summary>Solution</summary>
+<p>The negation is zero and the conjunction is zero, equal to \(O=0\), so the value is one. For each of the four \((T,C)\) assignments, the equivalence forces \(O\) to equal \(\neg T\land C\). The models are \((0,0,0),(0,1,1),(1,0,0),(1,1,0)\).</p>
+<p>There are four models. The atom \(T\) also has four models in this vocabulary, but accepts \((1,0,1)\), which our formula refutes. Equal counts therefore do not imply equal model sets or semantic equivalence.</p>
+</details>
+<h3>Exercise 2 — Ask and Tell need a consistent starting point</h3>
+<p>With rules \(T\to C,C\to O\) and fact \(O\), classify \(T\) and supply both witnesses if appropriate. Then Tell \(T\), followed by Tell \(\neg C\). Explain what changes if the starting collection also includes \(\neg O\).</p>
+<details class="solution"><summary>Solution</summary>
+<p>The initial models are \((0,0,1),(0,1,1),(1,1,1)\). The first refutes \(T\) and the last supports it, so the query is contingent. Tell \(T\) keeps just \((1,1,1)\), a nonempty proper subset, and returns a new collection. Tell \(\neg C\) is then rejected because its intersection is empty; the previous collection remains unchanged.</p>
+<p>Including both \(O\) and \(\neg O\) leaves no model. Classical entailment then holds for both \(T\) and \(\neg T\), while the ordinary three-way classification loses its exclusivity. The implementation reports inconsistency and refuses Tell until the assumptions are revised externally.</p>
+</details>
+<h3>Exercise 3 — Two branch witnesses and one solver failure</h3>
+<p>For the four possible sat/unsat pairs in the positive and negative branches, derive the status table. If the negative branch is unsatisfiable but the positive branch is unknown, may a consistency-unchecked interface report ordinary entailment? What if a single returned model makes the query true?</p>
+<details class="solution"><summary>Solution</summary>
+<p>The branches partition the admissible set. A nonempty positive and empty negative part gives entailment; empty positive and nonempty negative gives contradiction; two nonempty parts give contingency; two empty parts give inconsistency. These set statements derive every table row.</p>
+<p>An unsatisfiable negative branch does establish classical entailment, but without established consistency the positive branch might also be empty. It cannot justify presenting an ordinary consistent yes answer. Our conservative protocol helper reports solver-unknown when either branch is unknown. With a previously certified consistent current collection, the negative unsatisfiability alone suffices for the ordinary entailed answer.</p>
+<p>A single satisfying model with a true query establishes a supporting witness. It says nothing about the absence of a counterworld. It therefore cannot by itself certify entailment or contingency. A certificate must match the conclusion's quantifier.</p>
+</details>
+<h3>Exercise 4 — Probability one can hide a logical counterworld</h3>
+<p>Use the recording's rain/wet mass table to compute rain given rain or wet and rain given not wet. Prove the support condition for probability-one equivalence, then give its failure when masses can vanish.</p>
+<details class="solution"><summary>Solution</summary>
+<p>Rain or wet excludes only the false/false world, so its probability is \(1/2\). The rain numerator is \(2/5\), giving \(4/5\). Not wet has mass \(1/2+1/10=3/5\); its rainy mass is \(1/10\), giving \(1/6\). Both evidence masses are positive.</p>
+<p>Entailment makes the numerator equal the denominator whenever that denominator is positive. For the reverse, if every admissible world has positive mass, any counterworld creates a strictly positive gap between denominator and numerator. Probability one rules out that gap and hence every counterworld.</p>
+<p>Under empty evidence, put mass one on false/false. The formula not rain and not wet has probability one, but the admissible rainy/dry world refutes it. The same mass table also gives zero probability to evidence Rain, even though Rain is logically satisfiable; conditioning on that event has no finite ratio posterior.</p>
+</details>
+<h3>Exercise 5 — A sound rule need not generate every consequence</h3>
+<p>From \(T,T\to C,C\to O\), prove that \(T\to O\) is entailed and explain why MP-only saturation does not generate it. Next replace the last rule by \((T\land C)\to O\). Compare MP-only saturation with the positive Horn matcher.</p>
+<details class="solution"><summary>Solution</summary>
+<p>Any model of the original premises has \(T=1\); its first implication forces \(C=1\), and the second forces \(O=1\). Therefore \(T\to O\) is true in every such model. MP-only saturation generates \(C\) then \(O\), but no present implication has the new formula \(T\to O\) as a consequent. The limited rule never invents that formula.</p>
+<p>With the replaced rule, MP still generates \(C\). It does not construct \(T\land C\): there is no conjunction-introduction rule. The last implication cannot syntactically match its antecedent, even though its semantic premises hold. The Horn matcher checks both atomic premises directly and adds \(O\). This compares two specified calculi, not two different definitions of entailment.</p>
+</details>
+<h3>Exercise 6 — The least Horn model gives a restricted completeness proof</h3>
+<p>On atoms \((A,B,C,D)\), start with fact \(A\) and Horn rules \(A\to B\), \(A\land B\to C\), \(D\to D\). Compute closure, classify positive query \(D\), and prove termination and completeness for positive atomic queries. Does failure to derive \(D\) entail \(\neg D\)?</p>
+<details class="solution"><summary>Solution</summary>
+<p>Closure adds \(B\) then \(C\). The self-rule does not start \(D\), so the final set is \(\{A,B,C\}\). Both worlds \((1,1,1,0)\) and \((1,1,1,1)\) satisfy the rules and facts. Thus \(D\) is contingent and \(\neg D\) is not entailed.</p>
+<p>Each successful firing adds a previously absent atom. With four atoms there are at most four additions, and checking all rules until a pass makes no change reaches saturation. This bound requires the fixed finite vocabulary and positive-head rule contract; it does not bound arbitrary first-order term generation.</p>
+<p>Every added atom is true in all premise models by the sound firing rule. The world that makes exactly the closure atoms true is itself a model: any rule with an all-true body has its head in closure; every other implication has a false antecedent. An entailed positive atom must be true in this particular model, so it must be in closure. That proves the restricted completeness and simultaneously explains why a missing positive atom can remain unknown.</p>
+</details>
+</section>
+<section id="sources">
+<h2>18. Sources and limits</h2>
+<p>The recording supplies the subject sequence and the original rain/wet, Ask/Tell and MP examples. The <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/propositional_logic.py">pinned official executable lecture</a> supplies its notation, formula-tree demonstration and source rule behavior. The book's permission model, exact program, proof boundaries, Horn completeness argument and exercises are original teaching constructions.</p>
+<p>The checked official Z3 guide sections support Boolean syntax, refutation-based validity, solver statuses and model retrieval. They are documentation, not an assertion of the exact solver version used in the recording. This program does not run Z3, reproduce its internal algorithms or certify a historical performance claim. The general formulas and finite proofs are developed locally rather than attributed to an unchecked historical theorem source.</p>
+<p>Logical validity is relative to a language and premises; consistency does not supply observational truth. Probability-one equivalence requires the stated support condition. MP-only and Horn procedures have distinct completeness scopes. No finite example here proves unrestricted solver efficiency, first-order termination, causal identification or a deployed permission system's security.</p>
+</section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-14-learning-with-hidden-variables-and-expectation-maximization.html">Previous available chapter</a><a href="index.html">Lecture index</a><a rel="next" href="lecture-16-first-order-logic-and-structured-inference.html">Next available chapter</a></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

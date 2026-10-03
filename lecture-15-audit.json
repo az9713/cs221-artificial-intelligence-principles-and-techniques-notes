@@ -1,11 +1,11 @@
 {
-  "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+  "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
   "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
   "status": "independently reviewed and locally validated chapter",
-  "accepted_scientific_body_sha256": "490588343d92b9dd7f16fcbcaeeca7ba0a09c3fe77b5df831eddcdc85ddea1ba",
-  "accepted_metadata_sha256": "98caf53a552efa6c6c50bc4f37a1e6c16f5999f6f8e008ce50793d20ea687f2f",
-  "accepted_program_sha256": "678724cc79aaadb945801bd455f4411dab756858e69a1d19970e018b3c44edf9",
-  "integrated_html_sha256": "ddd99cd1b1900ad216f253739616625ee53662eb85d56eb39e63d6b1571e264e",
+  "accepted_scientific_body_sha256": "02ba88e1491d36f31dd3460abfd797242c75b2285e59f21d07b9241107a9823d",
+  "accepted_metadata_sha256": "890fb6379b146949837e3f31aed8119b3e0293576b724d0ff6d3a72bd21a6f1f",
+  "accepted_program_sha256": "c390eb2111c50d322d261f7662699376449d74266c3dd284469d0eeaf198c12b",
+  "integrated_html_sha256": "c9b2542b569d6494e107a863644139b3feee93bffbe38184a22466f8f7c512f8",
   "worked_solutions": 6,
   "current_reader_gate": {
     "status": "passed within accepted Chapters1-16 reader scope",
@@ -23,8 +23,7 @@
     "gate_6b": "accepted",
     "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "da4e5a0527b1b9310683721e0167238dbc948d1305ce68064de8e095eeb0de97",
-    "independent_numerical_checks": 5200,
-    "independent_bounded_closure_checks": 141
+    "review_report_sha256": "7a2d801426584f62dd64718a891bd2dbf1751ec6368107d115c701f74ff2ae32",
+    "independent_numerical_checks": 8224
   }
 }

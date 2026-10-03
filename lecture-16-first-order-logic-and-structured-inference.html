@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="b19746ad0dd4da0c5590ee473c8eca0647a47bc8c04c5d2e0c6f9e7ee968382c"><title>First-order logic and structured inference · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><header class="chapter-header">
+<p class="eyebrow">Chapter 16 · Logic II</p>
+<h1>First-order logic and structured inference</h1>
+<p class="subtitle">Objects, quantifier scope, finite models and the assumptions behind a derived permission.</p>
+<p>Independent textbook development from <a href="https://www.youtube.com/watch?v=x9Mbqu06OVo">Stanford CS221, Autumn 2025, Lecture 16</a>. Recording order and timestamps come from local machine transcription; mathematical definitions, examples, proofs, program and exercises are developed here.</p>
+</header>
+
+<section id="case">
+<h2>1. When does a rule justify an access decision? <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=5">0:05</a></h2>
+<p>A training access controller must decide whether Anna may enter a restricted exercise. Its records say which staff attended which courses, which concepts those courses cover, and which qualifications the policy requires. A list of unrelated yes/no flags can answer a previously encoded question, but it cannot express a reusable rule about every staff member and every course. Adding a new staff record should not require rewriting the entire policy.</p>
+<p>We will use a deliberately stipulated policy: attending a course that covers a concept gives a qualification in that concept; qualification in both Logic and Safety gives permission. This is a formal rule system, not measured evidence that attendance causes competence or that permission makes a real activity safe. The distinction matters: logical inference preserves the consequences of the supplied policy, including any mistaken assumptions in that policy.</p>
+<p>The recording motivates the same need for structured reasoning with Alice, Phoenix and snow. Student(alice), From(alice,phoenix), Hot(phoenix) and City(phoenix), together with rules that students are people and cities are places, establish Person(alice) and Place(phoenix). A further rule says that a person from a hot place is unhappy when it snows. Thus Snowing would imply the negation of Happy(alice). Before any happiness assertion, snowing and nonsnowing can both fit the information. After Happy(alice) is added, Snowing would produce a contradiction, so its negation follows. This conclusion depends on the asserted universal rule and a consistent knowledge base; it is not meteorological evidence.</p>
+<p>Our controller will expose three different questions. Is a sentence true in one fully specified interpretation? Is it true in every interpretation compatible with the records? Can a particular rule procedure derive it? The answers coincide only under stated assumptions. First-order logic gives us the objects and quantifiers needed to state those assumptions precisely.</p>
+</section>
+
+<section id="review">
+<h2>2. Keep syntax, satisfaction and derivation separate <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=232">3:52</a></h2>
+<p>A <strong>formula</strong> is an expression allowed by the language's grammar. A <strong>structure</strong>, written \(\mathfrak A\), supplies a domain and interpretations of the language's symbols. An <strong>assignment</strong> \(g\) supplies objects for free variables. The notation \(\mathfrak A,g\models F\) means that formula \(F\) is satisfied under that structure and assignment. A <strong>sentence</strong> has no free variables; its truth does not depend on an external assignment. A structure satisfying every sentence in a knowledge base \(K\) is a model of \(K\).</p>
+<p>Write \(\operatorname{Mod}(K)\) for those models. The knowledge base is <strong>satisfiable</strong> when this set is nonempty. It <strong>entails</strong> a sentence \(F\), written \(K\models F\), when every model of \(K\) satisfies \(F\). This is a universal claim over compatible structures, not evaluation in a selected one. By contrast, \(K\vdash_{\mathcal R}F\) means that a finite sequence of applications of a specified inference-rule collection \(\mathcal R\) produces \(F\) from \(K\). It is a syntactic claim about a derivation.</p>
+<p>For a consistent knowledge base, satisfiability checks characterize the familiar three query outcomes:</p>
+<table><thead><tr><th>Models of \(K\cup\{F\}\)</th><th>Models of \(K\cup\{\neg F\}\)</th><th>Conclusion</th></tr></thead><tbody><tr><td>Nonempty</td><td>Empty</td><td>\(F\) is entailed.</td></tr><tr><td>Empty</td><td>Nonempty</td><td>\(\neg F\) is entailed.</td></tr><tr><td>Nonempty</td><td>Nonempty</td><td>The query is contingent: both possibilities have witnesses.</td></tr></tbody></table>
+<p>If both model sets are empty, the original knowledge base is inconsistent. Classical entailment is then vacuous: it entails every sentence because it has no countermodel. A controller should report the inconsistency rather than turn that mathematical convention into affirmative evidence. This preserves Chapter 15's consistency guard.</p>
+<p><strong>Soundness</strong> of a rule system means that every derivable sentence is entailed; <strong>completeness</strong> means that every entailed sentence in its stated target class is derivable. Neither definition promises that an implementation will finish searching on every input. A solver's <em>unknown</em> result also differs from contingency: unknown need not supply either witness. The <a href="https://microsoft.github.io/z3guide/docs/logic/Quantifiers/">official Z3 Quantifiers introduction and final warning</a> explicitly bound general quantified reasoning and discuss incomplete instantiation and possible divergence. Those implementation limits are not a fourth logical truth value.</p>
+</section>
+
+<section id="expressivity">
+<h2>3. Replace repeated flags by reusable object structure <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=806">13:26</a></h2>
+<p>In propositional logic, AnnaAttendedIntro and BeaAttendedAdvanced are separate atomic symbols. Their spellings do not give an inference system access to a shared relation called attendance. If there are \(n\) staff members and \(m\) courses, naming each potential pair introduces \(nm\) distinct flags; a general policy must be separately instantiated for the relevant combinations.</p>
+<p>First-order syntax instead exposes a binary predicate Attends, applied to a staff term and a course term. A variable can stand for any object, and a quantifier specifies how its values are considered. A single sentence can constrain arbitrarily many attendance tuples in an interpretation. Compactness of the written sentence does not imply cheap inference: the size of the domain, predicate extensions and proof search still matters.</p>
+<p>The recording's arithmetic example is useful because enumeration may be infinite. With an intended integer interpretation of Even, GreaterThan, Prime, the constant two and the function add, the statement “every even integer greater than two is a sum of two primes” has the form</p>
+\[\forall x\,\bigl((\mathrm{Even}(x)\land\mathrm{GreaterThan}(x,\mathrm{two}))\to
+\exists y\exists z\,(\mathrm{Prime}(y)\land\mathrm{Prime}(z)\land\mathrm{add}(y,z)=x)\bigr).\]
+<p>This is a representation of a mathematical statement, not a proof of it or a claim about its current research status. The intended arithmetic meanings are additional semantic commitments. Merely naming a predicate Prime or a function add does not force those meanings in an arbitrary structure.</p>
+</section>
+
+<section id="terms">
+<h2>4. Terms denote objects, not truth values <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=1010">16:50</a></h2>
+<p>A <strong>signature</strong> lists the language's constant, function and predicate symbols, together with their arities, the numbers of arguments they take. We use a single sort: every term denotes an object in one domain. A constant such as anna is a term. A variable such as \(x\) is a term. If mentor is a unary function symbol and \(t\) is a term, mentor(\(t\)) is another term. Recursion permits mentor(mentor(anna)) without changing the grammatical category.</p>
+<p>Function application is syntactic construction at this stage. It does not yet compute a person, require a different object on every application or assert any fact about real mentorship. Those meanings arrive with an interpretation. The distinction lets us use the same formula across different candidate worlds.</p>
+<p>For the controller, use constants anna, bea, intro, advanced, logic and safety. Lowercase is a naming convention for terms, not the definition of a term. A variable's status is part of the syntax tree; an implementation must not decide that every identifier spelled x is a variable and every other identifier is a constant. That convention would fail when a second rule legitimately uses another variable name.</p>
+<p>Ordinary first-order function symbols take object arguments and return an object. They do not return a callable language-level function to be applied as a predicate, and quantifiers here range over objects rather than predicate extensions. A richer typed or higher-order language can have other forms, but mixing their grammar into this single-sort language without declarations changes the formal problem.</p>
+</section>
+
+<section id="grammar">
+<h2>5. Build formulas from predicates and binders <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=1163">19:23</a></h2>
+<p>An <strong>atomic formula</strong> applies a predicate symbol to the required number of terms. Staff(anna) is unary; Attends(anna,intro) is binary. A zero-arity predicate such as Snowing has no object arguments and behaves like a propositional atom. Predicates return truth values after interpretation, whereas mentor(anna) denotes an object.</p>
+<p>Connectives combine formulas: \(\neg F\), \(F\land G\), \(F\lor G\) and \(F\to G\) have the same truth-functional meanings as in propositional logic. Quantifiers bind variables in formulas: \(\forall x\,F\) requires the body for every object, and \(\exists x\,F\) requires a witness. Equality \(t=u\), when included in the language, is an atomic formula comparing the objects denoted by two terms.</p>
+<p>The typing distinction rejects Attends(Staff,intro): the bare predicate symbol Staff is not an object term. It also rejects mentor(Staff(anna)) in this grammar because its argument is a formula. Staff(anna) itself is perfectly valid. The official module makes the distinction explicit; ambiguous machine-caption wording around this example should not reverse it. Many-sorted SMT languages can declare Boolean-valued arguments, so this restriction belongs to the specified Object grammar, not to every language that uses a solver.</p>
+<p>A variable occurrence is <strong>bound</strong> if it lies under a quantifier for that occurrence's variable; otherwise it is <strong>free</strong>. In \(\forall x\,\mathrm{Attends}(x,y)\), \(x\) is bound and \(y\) remains free. Asking whether this open formula is true requires a course assignment for \(y\). In \(\forall x\exists y\,\mathrm{Attends}(x,y)\), both are bound. Parentheses and binder scopes are substantive parts of the policy.</p>
+</section>
+
+<section id="coherence">
+<h2>6. Different terms may name the same object <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=1544">25:44</a></h2>
+<p>A tempting model is a dictionary assigning truth independently to every ground atom, where a <strong>ground</strong> expression contains no variables. Functions produce infinitely many syntactically different terms such as mentor(anna), mentor(mentor(anna)) and so on. An infinite mathematical assignment is not inherently illegitimate; the problem is that a finite dictionary no longer represents it completely, and independent truth assignments can ignore relationships among denotations.</p>
+<p>Suppose bea and mentor(anna) denote the same object. Then Qualified(bea,logic) and Qualified(mentor(anna),logic) must have the same truth value in that structure. Assigning one true and the other false violates the intended semantics. Predicates are relations on objects, so substituting a co-denoting term in an argument cannot change relation membership. The same principle makes function values agree on equal inputs.</p>
+<p>An alias record called anna_record can likewise denote Anna's object. Nothing about the two spellings prevents aliasing. In the actual official <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/first_order_logic.py">first-order lecture module</a>, the inspected object diagram similarly lets bob and robert point to one object. Our own controller makes the consequence concrete: Permit(anna) and Permit(anna_record) cannot disagree in a structure where those constants co-denote. Independent flags would need an extra coherence constraint to enforce this.</p>
+<p>There are therefore two distinct notions of equality ahead. Semantic equality compares denoted objects in a structure. Syntactic unification tries to make expression trees identical by replacing variables. It does not replace arbitrary distinct constant symbols merely because some possible structure might alias them.</p>
+</section>
+
+<section id="structures">
+<h2>7. Specify a nonempty domain and total interpretations <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=1800">30:00</a></h2>
+<p>A first-order structure \(\mathfrak A\) has a nonempty domain \(D\). Each constant \(c\) is interpreted as an object \(c^{\mathfrak A}\in D\). Each arity-\(k\) function symbol \(f\) is interpreted as a total map \(f^{\mathfrak A}:D^k\to D\). Each arity-\(k\) predicate \(R\) is interpreted as a relation \(R^{\mathfrak A}\subseteq D^k\). Equality, when used, is identity of domain objects. These choices determine atomic truth coherently.</p>
+<p>Here is one complete finite teaching interpretation. The integer labels are object identifiers, not numeric quantities; using 0 for Anna does not make Anna false.</p>
+<table><thead><tr><th>Object</th><th>Constant</th><th>Unary memberships</th></tr></thead><tbody><tr><td>0</td><td>anna; optionally anna_record</td><td>Staff, Permit</td></tr><tr><td>1</td><td>bea</td><td>Staff</td></tr><tr><td>2</td><td>intro</td><td>Course</td></tr><tr><td>3</td><td>advanced</td><td>Course</td></tr><tr><td>4</td><td>logic</td><td>Concept</td></tr><tr><td>5</td><td>safety</td><td>Concept</td></tr></tbody></table>
+<p>Declare Attends to contain \((0,2),(1,3)\), Covers to contain \((2,4),(2,5),(3,4)\), and Qualified to contain \((0,4),(0,5),(1,4)\). In this particular structure every omitted relation tuple is false. This is a complete-model table convention, not a rule that missing facts in a partially known knowledge base are false. Those two uses of a table must remain separate.</p>
+<p>If we include mentor, a complete table can map 0 and 1 to 1 and each of 2, 3, 4 and 5 to itself. Its behavior on course and concept objects may be unnatural, but totality demands an output for each domain object in this single-sort structure. A typed modeling language could instead give mentor a restricted staff input sort. A partial dictionary containing only the entry for Anna is not a complete interpretation of a first-order unary function.</p>
+<p>The <a href="https://microsoft.github.io/z3guide/docs/logic/Uninterpreted-functions-and-constants/">official Z3 article on uninterpreted functions and constants</a> makes totality and flexibility explicit: interpretations must respect constraints, and equal arguments give equal function values. It does not require distinct constants to denote different objects. To impose that requirement one must add disequalities or choose a restricted model class.</p>
+</section>
+
+<section id="evaluation">
+<h2>8. Evaluate recursively under a variable assignment <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=2174">36:14</a></h2>
+<p>Let \(g\) map free variables to objects in \(D\). Write \(\lbrack t\rbrack_{\mathfrak A,g}\) for a term's denotation. The recursion follows its syntax tree:</p>
+\[\lbrack c\rbrack_{\mathfrak A,g}=c^{\mathfrak A},\qquad
+\lbrack x\rbrack_{\mathfrak A,g}=g(x),\qquad
+\lbrack f(t_1,\ldots,t_k)\rbrack_{\mathfrak A,g}
+=f^{\mathfrak A}(\lbrack t_1\rbrack_{\mathfrak A,g},\ldots,\lbrack t_k\rbrack_{\mathfrak A,g}).\]
+<p>An atomic relation is true exactly when the resulting object tuple belongs to its interpreted relation. Thus evaluating Qualified(mentor(anna),logic) first maps anna to 0, mentor(0) to 1 and logic to 4, then checks \((1,4)\) in Qualified. It is true in our table. An atomic formula is not evaluated by treating its term arguments as smaller Boolean formulas.</p>
+<p>Quantifiers update the assignment for one variable. The notation \(g[x\mapsto d]\) means an assignment identical to \(g\) except that \(x\) receives object \(d\). Satisfaction is defined by</p>
+\[\mathfrak A,g\models\forall x\,F
+\quad\longleftrightarrow\quad
+\forall d\in D: \mathfrak A,g[x\mapsto d]\models F,
+\qquad
+\mathfrak A,g\models\exists x\,F
+\quad\longleftrightarrow\quad
+\exists d\in D: \mathfrak A,g[x\mapsto d]\models F.\]
+<p>In our structure, \(\forall x\,(\mathrm{Staff}(x)\to\mathrm{Qualified}(x,\mathrm{logic}))\) is true. At objects 0 and 1 the qualification is present; at 2 through 5 the antecedent is false, so the implication holds. Replacing implication by conjunction makes the sentence false because the course and concept objects are not staff. This is the reason a single shared domain needs category restrictions inside formulas.</p>
+<p>Nested binders require separate environments. In \(\forall x\exists y\,R(x,y)\), the inner search must retain the outer value of \(x\). In \(\forall x\exists x\,R(x,x)\), the inner \(x\) shadows the outer variable: each occurrence in the body belongs to the inner binder. Updating a copied environment and returning to the caller restores the enclosing scope. Reusing a single mutable binding without restoration can silently change the sentence.</p>
+<p>The recursion also explains why a sentence is assignment-independent. At a variable leaf, denotation depends only on that variable's assignment. Functions and connectives depend only on their children's denotations. A quantifier supplies its bound variable's value itself. Induction on the syntax therefore shows that two assignments agreeing on a formula's free variables give the same truth value. With no free variables there is no remaining external dependence.</p>
+<p>Enumerating a finite domain computes these truth conditions exactly for one finite structure. It does not decide satisfiability over arbitrary domains. The retained official evaluator is an instructional sketch with a warning about nested quantifiers; our program will validate total functions, distinguish term/formula categories and preserve nested scope explicitly.</p>
+</section>
+
+<section id="grounding">
+<h2>9. Finite grounding needs a declared model class <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=2696">44:56</a></h2>
+<p><strong>Grounding</strong> replaces quantified variables by terms naming domain objects. Suppose a finite list of constants \(C=\{c_1,\ldots,c_N\}\) names every object in the structures being considered. This <strong>domain-closure assumption</strong> says that there are no unnamed objects. If distinct listed constants must also denote different objects, we add the <strong>unique-name assumption</strong>. Together they give a bijection between this constant list and the domain.</p>
+<p>Under domain closure, a universal sentence can be expanded into a finite conjunction, and an existential sentence into a finite disjunction:</p>
+\[\forall x\,F(x) \longleftrightarrow \bigwedge_{i=1}^{N}F(c_i),\qquad
+\exists x\,F(x) \longleftrightarrow \bigvee_{i=1}^{N}F(c_i).\]
+<p>The hinge is coverage. Every domain object is denoted by at least one listed constant, so checking all those instances checks every quantified value. Repeated names for one object only repeat a truth value; unique names are a convenient simplification, not necessary for this semantic identity. If an independent propositional encoding permits aliases, however, it must enforce their equality and predicate coherence rather than assign contradictory flags to co-denoting arguments.</p>
+<p>A countermodel shows exactly what domain closure contributes. Let the only listed constant anna denote 0, let the domain be \(\{0,1\}\), and make Staff true only at 0. The single instance Staff(anna) is true; \(\forall x\,\mathrm{Staff}(x)\) is false at the unnamed object 1. Distinct names alone would not prevent this failure. Conversely, with two aliased constants and a one-object domain, expansion still works when equality is respected.</p>
+<p>In a function-free, equality-free language over a fixed finite named domain, each ground predicate tuple can be represented by a propositional variable. Expand every quantifier, preserve the connectives and use Chapter 15's finite Boolean methods. A function table can also be encoded on a fixed finite domain, but every input tuple must have exactly one output, and all compound terms must respect that table. Equality requires its own coherence constraints. Flattening every compound atom into an unrelated Boolean symbol omits these requirements.</p>
+<p>Even finite grounding can be expensive. With \(N\) domain objects and \(k\) nested quantifiers, a direct expansion can have \(N^k\) body instances. Short-circuit evaluation may inspect fewer values in a particular structure, but it does not improve this worst-case expansion bound. Grounding trades quantifier syntax for a potentially large finite problem; it does not establish a general reduction for arbitrary first-order structures.</p>
+</section>
+
+<section id="clauses">
+<h2>10. A definite clause must use one shared substitution <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=2966">49:26</a></h2>
+<p>A <strong>definite clause</strong> is a universally quantified implication whose body is a conjunction of positive atomic premises and whose head is one positive atom. “Positive” means no negation of an atom. With variables \(x_1,\ldots,x_k\), premises \(A_1,\ldots,A_j\) and head \(B\), its form is</p>
+\[\forall x_1\cdots\forall x_k\,((A_1\land\cdots\land A_j)\to B).\]
+<p>An empty body is an unconditional fact or universal assertion. A disjunctive head such as Qualified(anna,logic) or Qualified(bea,logic) is not this form. An existential conclusion is not a universally quantified positive head either. Restricting the language buys a simple closure procedure, but also restricts which conclusions that procedure can express.</p>
+<p>Our training rule includes the category restrictions needed by the single-sort domain:</p>
+\[\forall x\forall y\forall z,\bigl(
+\mathrm{Staff}(x)\land\mathrm{Attends}(x,y)\land\mathrm{Course}(y)
+\land\mathrm{Covers}(y,z)\land\mathrm{Concept}(z)
+\to\mathrm{Qualified}(x,z)\bigr).\]
+<p>For Anna, Intro and Safety, the shared substitution is \(\theta=\{x\mapsto\mathrm{anna},y\mapsto\mathrm{intro},z\mapsto\mathrm{safety}\}\). Every premise under that same substitution appears among the declared records, so the instantiated implication yields Qualified(anna,safety). A second instance derives her Logic qualification; the permission rule then derives Permit(anna).</p>
+<p>Matching premises independently would be unsound. Attends(bea,advanced) and Covers(intro,safety) cannot support Qualified(bea,safety), because the common variable \(y\) would need to denote both advanced and intro. The interpreter can construct a finite countermodel with those facts true and Bea's Safety qualification false while the correctly shared rule remains true. A rule application must join its premises through one coherent binding.</p>
+<p>This clarifies the recording's Takes/Covers example: the logical license is a universal instance, not approximate textual similarity between a ground fact and a variable template. Substitution expresses the instance; unification helps discover a compatible substitution.</p>
+</section>
+
+<section id="substitution">
+<h2>11. Substitution changes syntax; binding changes scope <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=3324">55:24</a></h2>
+<p>A <strong>substitution</strong> \(\theta\) is a finite mapping from variable symbols to terms. Write \(t\theta\) for simultaneous replacement in a term: replace each occurrence of a mapped variable by its assigned term, without recursively substituting again inside that inserted replacement during the same operation. Constants and function names remain fixed, and function arguments are rebuilt recursively.</p>
+<p>For \(\theta=\{x\mapsto y,y\mapsto\mathrm{anna}\}\), \(x\theta=y\), not anna. Applying \(\theta\) again gives anna. This distinction matters because unification implementations often maintain and dereference a solved binding environment, which is a different operation from applying an arbitrary simultaneous substitution once.</p>
+<p>Define composition \(\theta\circ\sigma\) here to mean first apply \(\theta\), then \(\sigma\): \(t(\theta\circ\sigma)=(t\theta)\sigma\). This order is explicit because composition notation varies. If \(\theta=\{x\mapsto y\}\) and \(\sigma=\{y\mapsto\mathrm{anna}\}\), the composition maps both \(x\) and \(y\) to anna. For a variable in the first mapping, apply the second mapping to its replacement; for other variables retain the second mapping. Induction through function applications proves the displayed identity for every finite term. <a href="https://web.stanford.edu/class/linguist289/robinson65.pdf">Robinson's original paper, PDF page 9, sections 5.2–5.5</a>, distinguishes substitution, instantiation, standardization and composition in this way.</p>
+<p>Extending substitution to quantified formulas requires <strong>capture avoidance</strong>: replace free occurrences only, and rename a bound variable when an inserted term would otherwise become bound. Consider \(\exists y\,R(x,y)\) and substitute \(x\mapsto y\). The correct result is \(\exists z\,R(y,z)\) with fresh \(z\). Naive replacement produces \(\exists y\,R(y,y)\), which has lost the free input variable and made a different assertion.</p>
+<p>For an exact counterexample take domain \(\{0,1\}\), relation \(R=\{(0,1)\}\) and free assignment \(g(y)=0\). The correct substituted formula is true with witness \(z=1\); the captured formula is false because there is no diagonal edge. Renaming a binder while preserving the occurrences it binds is called <strong>alpha-renaming</strong>. It changes spelling without changing meaning. Our delivered substitution routine acts only on terms and atoms; it deliberately does not pretend to implement capture-safe substitution on arbitrary quantified formulas.</p>
+</section>
+
+<section id="unification">
+<h2>12. Unification must respect existing bindings and finite terms <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=3511">58:31</a></h2>
+<p>A <strong>unifier</strong> of two terms or atoms is a substitution that makes their resulting syntax trees identical. Unifying Attends(\(x,y\)) with Attends(anna,intro) can produce \(x\mapsto\mathrm{anna}\) and \(y\mapsto\mathrm{intro}\). Unifying Attends(anna,\(y\)) with Attends(bea,\(z\)) fails syntactically because neither distinct constant can be changed by a variable substitution. This remains true even if a separately chosen semantic structure aliases anna and bea.</p>
+<p>The algorithm maintains a worklist of expression pairs and a binding environment. Dereference both sides through existing bindings. Equal expressions need no action. Matching compound symbols generate pairs of their corresponding arguments. Distinct fixed symbols or mismatched arities fail. When one side is an unbound variable, bind it to the other term only after the occurrence test described below. Later equations must respect that binding.</p>
+<p>Repeated variables supply a decisive check. Unifying R(\(x,x\)) with R(anna,bea) first binds \(x\) to anna. The second pair is then anna versus bea and must fail. Overwriting \(x\) with bea would leave R(bea,bea) and R(anna,bea) unequal, so it would not satisfy the definition of a unifier. A returned mapping must always be checked by applying it to both original inputs.</p>
+<p>The <strong>occurs check</strong> rejects a binding in which a variable occurs inside its proposed replacement after dereferencing. The equation \(x=\mathrm{mentor}(x)\) has no finite-tree unifier: if a substituted finite term \(t\) equaled mentor(\(t\)), the right tree would have height one greater than the left. An indirect cycle, \(x=y\) followed by \(y=\mathrm{mentor}(x)\), is rejected for the same reason after following \(x\)'s binding. This is about finite syntax trees; a semantic structure can certainly satisfy mentor(anna)=anna, and systems with cyclic rational-tree terms solve a different unification problem.</p>
+<p>A <strong>most general unifier</strong> makes no unnecessary commitments: any other unifier can be obtained by further substitution. For Attends(anna,\(y\)) and Attends(\(x,z\)), binding \(x\) to anna and \(y\) to \(z\) leaves the course unconstrained. Also binding \(z\) to intro would still unify these inputs but discard valid alternatives. Robinson's <a href="https://web.stanford.edu/class/linguist289/robinson65.pdf">PDF pages 10–11, sections 5.7–5.9 and the unification theorem statement</a>, supplies the original definition, nonoccurrence condition and generality statement. The retained next scan page has a clipped margin; this chapter does not treat that scan as a verified full transcription of the theorem's proof.</p>
+<p>The elementary transformations explain the operational result. Decomposing equal compound symbols preserves their solution set; different fixed symbols have no syntactic solution. For an equation \(x=t\) with \(x\) absent from \(t\), every solution must give \(x\) the instantiated value of \(t\), so eliminating that variable and substituting through the remaining equations loses no alternatives. Occurrence failure has the finite-height contradiction just shown. A finite problem has finitely many variables to eliminate, and decomposition between eliminations reduces the remaining compound equations. This justifies the finite-term procedure; an implementation may impose tighter expression-size limits and must report those limits as errors rather than logical failure.</p>
+<p>Variables from different rule applications must be <strong>standardized apart</strong>, meaning consistently renamed to fresh symbols before combining their constraints. Two different rules may each spell a local variable \(x\) without requiring the same object. Accidental sharing can rule out legitimate joins. Our finite Horn implementation instead enumerates a fresh local assignment for each rule application, giving the same independence without storing cross-rule variable bindings.</p>
+</section>
+
+<section id="closure">
+<h2>13. Finite closure is sound and complete for a restricted query class <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=3825">1:03:45</a></h2>
+<p>Fix a finite nonempty constant vocabulary \(C\) of size \(c\), finitely many predicates \(R_j\) of arities \(r_j\), positive definite clauses, and ground facts. There are no positive-arity function symbols, equality axioms or negated premises in this rule fragment. A candidate ground atom uses one predicate and a tuple of constants, so the total ground-atom universe has size</p>
+\[B_{\mathrm{atoms}}=\sum_j c^{r_j}.\]
+<p>Zero-arity predicates contribute one atom each. The predicate count matters: \(c^{\max_j r_j}\) alone is not the total universe when several predicates are present. If there are no constants, a nonempty domain still needs an object; a formal treatment can introduce a fresh constant. Our program instead requires at least one declared constant and states this input boundary explicitly.</p>
+<p>Let \(H_0\) be the initial ground facts. Form \(H_{t+1}\) by keeping \(H_t\) and adding every ground rule head whose instantiated premises all lie in \(H_t\). Here \(t\) is the nonnegative round index. Each round uses a snapshot, so newly added heads become premises in the next round. The sequence is monotone. A growing round adds at least one previously absent atom, and only \(B_{\mathrm{atoms}}\) atoms exist. Thus growth ends at a finite fixed set \(H_*\), the least closure containing the facts and respecting the ground rules.</p>
+<p>The training vocabulary has four unary predicates Staff, Course, Concept and Permit, and three binary predicates Attends, Covers and Qualified. Six constants give \(4\cdot6+3\cdot6^2=132\) potential atoms. The 11 initial records generate three Qualified facts in the first growing round and Permit(anna) in the second, giving 15 final atoms. Permit(bea) is absent. This is an exact teaching computation, not an empirical qualification rate.</p>
+<p><strong>Soundness</strong> follows by induction on rounds. Initial facts hold in every model of the knowledge base. If all premises of a ground instance already hold in every such model, its universally asserted implication makes the ground head hold too. Hence every member of \(H_*\) is entailed. Aliasing of constants in another model does not invalidate this induction: a ground rule instance is still a permissible universal instance.</p>
+<p>For <strong>completeness of ground atomic queries in this fragment</strong>, suppose a ground atom \(A\) is absent from \(H_*\). Construct a structure whose domain is the constant symbols themselves, interpreting each constant as itself and each predicate by its tuples in \(H_*\). Every assignment is then represented by a ground constant substitution. Closure ensures that each true rule body has a true head, so this structure satisfies all rules and facts. It makes \(A\) false, providing a countermodel to \(K\models A\). Together with soundness, this proves \(A\in H_*\) exactly when \(K\models A\) for the specified positive, function-free, equality-free fragment. The constructed distinct-name structure is one allowed countermodel; we have not silently imposed unique names on every model of the knowledge base.</p>
+<p>Absence does not entail negation. The same positive knowledge base also has a structure making every predicate tuple true, including Permit(bea). Therefore a missing ground permission is not a theorem that Bea lacks permission. A practical deny-by-default policy can use absence as a separate action rule, but it must state that rule rather than identify operational denial with classical logical negation.</p>
+<p>The atom bound is not a full runtime bound. A naive round scans rule substitutions; a rule with \(v\) variables has \(c^v\) ground assignments, each requiring its premise checks. Predicate indexes and join algorithms can reduce work without changing the fixed set. With functions, the rule Qualified(\(x\),logic) implies Qualified(mentor(\(x\)),logic) can generate terms of unbounded depth and never reach finite closure. Soundness does not imply termination.</p>
+<p>The recording points to resolution beyond this rule fragment but does not develop its calculus. A <strong>refutation</strong> derives a contradiction from assumed premises; proving \(K\models F\) by this route begins with \(K\) and \(\neg F\). Robinson's paper states and develops a resolution completeness result, but its complete proof is outside the pages checked for this chapter. Our program supplies no general refutation procedure or quantified-to-clausal preprocessing. This chapter proves a finite Horn ground-atomic result, whereas a general refutation calculus must handle broader sentence forms and additional hypotheses. A fair proof search can have a completeness property without being a terminating decision procedure on all inputs.</p>
+</section>
+
+<section id="translation">
+<h2>14. Quantifier order changes who may choose the witness <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=4045">1:07:25</a></h2>
+<p>“Every staff member attended a course” and “there is one course that every staff member attended” impose different constraints. In the first, the course witness can depend on the staff member. In the second, one course must work for everyone. Using the controller's category predicates, write</p>
+\[
+F_{\mathrm{individual}}=\forall x\,(\mathrm{Staff}(x)\to
+\exists y\,(\mathrm{Course}(y)\land\mathrm{Attends}(x,y))),
+\]
+\[
+F_{\mathrm{common}}=\exists y\,(\mathrm{Course}(y)\land
+\forall x\,(\mathrm{Staff}(x)\to\mathrm{Attends}(x,y))).
+\]
+<p>Our finite structure satisfies the individual sentence: Intro witnesses Anna's attendance and Advanced witnesses Bea's. It falsifies the common sentence: neither course has both staff members attending. The common sentence always implies the individual sentence, because its one chosen course can serve as each individual witness. The reverse implication fails in this exact two-staff counterexample. The new formulas are sentences, so their results do not depend on the caller's variable assignment.</p>
+<p>The category restrictions matter. Without Course(\(y\)), a witness could be an object never declared to be a course. Without Staff(\(x\)) in an implication, “everyone” would include the domain's concept and course objects. The single-sort language expresses typing information with predicates; leaving it out changes the statement rather than merely shortening notation.</p>
+<p>Universal implication and existential conjunction are useful patterns for restricted natural-language assertions. “Every staff member is qualified” uses \(\forall x\,(\mathrm{Staff}(x)\to\mathrm{Qualified}(x,\mathrm{logic}))\); “some staff member is qualified” uses \(\exists x\,(\mathrm{Staff}(x)\land\mathrm{Qualified}(x,\mathrm{logic}))\). If Staff has an empty extension, the universal statement is vacuously true and the existential statement false. An existential implication can instead be true merely because a nonstaff object exists. These are truth conditions, not a universal grammar rule or a measured percentage of translation tasks.</p>
+<p>Translation is a specification exercise. Confirm the intended population, relation direction, witness dependencies and background assertions before evaluating or proving anything. A logically valid conclusion from a mistranslated policy remains the wrong answer to the original access question.</p>
+</section>
+
+<section id="limits">
+<h2>15. Expressivity claims require a specified population <a class="timestamp" href="https://www.youtube.com/watch?v=x9Mbqu06OVo&amp;t=4382">1:13:02</a></h2>
+<p>First-order quantifiers range over domain objects. In higher-order languages a quantifier can range over predicates, relations or functions, depending on the language. That increases the available forms of specification, but a particular sentence does not require higher-order syntax merely because ordinary language mentions a group or percentage.</p>
+<p>The recording's closing “70% of students know machine learning” example needs a population boundary. If exactly ten students are stipulated, ordinary first-order logic with equality can express the desired count. Introduce a unary predicate Student and a unary predicate Knower for the property. Exactly ten students is expressed by ten existentially named, pairwise-distinct student witnesses \(a_1,\ldots,a_{10}\), together with \(\forall x\,(\mathrm{Student}(x)\to\bigvee_{i=1}^{10}x=a_i)\). Here the witnesses are bound variables, not additions to the constant signature.</p>
+<p>Exactly seven knowing students is expressed by seven pairwise-distinct witnesses \(b_1,\ldots,b_7\) satisfying Student and Knower, together with \(\forall x\,((\mathrm{Student}(x)\land\mathrm{Knower}(x))\to\bigvee_{i=1}^{7}x=b_i)\). The distinct witnesses give the lower counts and the universal coverage clauses give the upper counts. Conjoining the two constructions therefore expresses exactly seven out of ten, or 70%, without quantifying over a set of students.</p>
+<p>There are \(2^{10}=1024\) possible Knower subsets of this fixed population; exactly \(\binom{10}{7}=120\) have seven members. This finite check confirms the intended cardinality example. It does not settle whether a single fixed first-order sentence can express the same ratio over all variable-size populations in a chosen vocabulary. Such an inexpressibility claim needs a precisely defined structure class and a proof. We make no blanket claim that every percentage requires higher-order logic.</p>
+<p>The boundaries now line up. A finite interpreter decides truth in one supplied finite structure. Finite grounding decides a declared finite structure class with coherent encodings. Positive Horn closure decides ground atomic consequence in its specified fragment. Unification solves finite syntactic equations. General quantified solver outcomes and broader proof calculi have different guarantees. Choosing the appropriate tool starts by deciding which of these questions the access controller actually needs answered.</p>
+</section>
+
+<section id="implementation">
+<h2>16. An original finite interpreter and rule laboratory</h2>
+<p>The downloadable <a href="programs/chapter16.py">chapter16.py</a> implements the model developed above using only the Python standard library. It includes a finite structure evaluator, simultaneous substitution on terms and atoms, finite-term unification with an occurs check, and function-free positive Horn closure. It does not call an external solver or claim arbitrary first-order satisfiability.</p>
+<p>Syntax trees are immutable tuples with explicit tags: <code>('v', 'x')</code> is a variable, <code>('c', 'anna')</code> a constant, <code>('f', 'mentor', args)</code> a function application and <code>('p', 'Staff', args)</code> an atom. An argument collection is itself a tuple. Formula tags are <code>eq</code>, <code>not</code>, <code>and</code>, <code>or</code>, <code>implies</code>, <code>all</code> and <code>exists</code>. The two quantifier tags store the bound variable name and body. The tag determines the syntactic category; a variable is never inferred from its spelling.</p>
+<p><code>make_structure</code> takes a domain size, constant map, total function tables and predicate extensions. Objects are the integers from zero through size minus one; the size is between one and eight. Functions have arities one through three and predicates zero through three, with at most twelve symbols of each category. A function table must include exactly every domain input tuple and return a domain object. Predicate extensions are sets of true object tuples; every omitted tuple is false in this complete interpretation. The returned nested tuple/frozenset representation is immutable and detached from the caller's dictionaries.</p>
+<p><code>evaluate</code> returns a Boolean for one formula in that structure. Its optional environment supplies free-variable object assignments. It validates the entire syntax, signature, complete structure and environment before evaluation, including branches that later short-circuit. An undeclared symbol or missing free-variable assignment is therefore an error even under a false conjunction. Nested quantifiers use new environments; returning from them preserves the outer binding. Formula depth is at most sixteen and a syntax tree has at most 512 nodes. More than 200,000 truth or term visits raises a resource error even for a well-formed finite sentence. The mathematical evaluation terminates on all finite inputs, while this teaching implementation intentionally accepts a bounded computation contract.</p>
+<p><code>substitute</code> applies one simultaneous mapping of at most sixteen variables to finite terms. It accepts terms and atoms; it rejects quantified formulas rather than implement an unsafe binder replacement. <code>unify</code> accepts two terms or two atoms, with at most sixteen distinct variables. It returns a new solved, idempotent variable map when successful and <code>None</code> when there is no finite-tree unifier. It checks its own success certificate by applying the result to both original inputs. A10,000term-visit budget and expanded-tree bounds can instead raise <code>ValueError</code>; that resource outcome is not nonunifiability.</p>
+<p><code>horn_closure</code> takes a nonempty tuple of at most eight distinct constant symbols, a predicate-signature dictionary, ground facts and positive rule pairs. There are at most eight predicates of arity zero through three, sixteen rules, six premises per rule and four variables per rule. It returns the immutable final set and a tuple of sets newly added in each growing round. Each rule receives its own assignment, shared across that rule's premises and head. It enumerates ground instances rather than use the general unifier for joins; this makes its finite semantics inspectable. More than200,000ground assignments raises a resource error. Such a cutoff is not a certificate that a missing query fails to follow.</p>
+<p>Malformed shapes, wrong categories, Boolean objects where integers are required, out-of-domain values, incomplete function tables and resource violations raise <code>ValueError</code>. No function mutates an input or performs network/file access; only running the script's <code>main</code> prints. The procedures are exact finite computations, but the code neither checks real training evidence nor runs a physical access device. Its Horn constants are distinct syntactic names in the constructed least model; the semantic evaluator separately supports aliasing.</p>
+<p>A small additional scope test can be run from this repository's root. There is an edge from object 0 to object 1 but no diagonal edge. The correctly capture-avoided formula is true under the free assignment, while the captured formula is false:</p>
+<pre><code class="language-python" data-kind="snippet">from programs.chapter16 import evaluate, make_structure
+
+world = make_structure(2, {}, {}, {"R": (2, {(0, 1)})})
+
+
+def v(name):
+    return "v", name
+
+
+correct = ("exists", "z", ("p", "R", (v("y"), v("z"))))
+captured = ("exists", "y", ("p", "R", (v("y"), v("y"))))
+assert evaluate(correct, world, {"y": 0}) is True
+assert evaluate(captured, world) is False
+</code></pre>
+<p>Running <code>python programs/chapter16.py</code> produces the exact output printed after the complete source below. “Derived” labels set membership in the restricted Horn closure; the false value for Bea is not an assertion of classical negation. The layer sizes expose the two-step qualification-to-permission chain, and the atom count records the whole candidate universe rather than the number of actual facts.</p>
+<pre><code class="language-python" id="chapter-program">"""Original bounded finite first-order semantics and positive Horn laboratory.
+
+ASTs are tuples: ('v', name), ('c', name), ('f', name, args),
+('p', name, args), ('eq', left, right), ('not', formula),
+('and'/'or'/'implies', left, right), ('all'/'exists', name, body).
+All public computations validate complete inputs, return new values, and
+perform no I/O. Only main prints. Bounds are resource contracts, not logic.
+"""
+from itertools import product
+import re
+
+
+def _name(value):
+    if type(value) is not str or not re.fullmatch(
+            r"[A-Za-z][A-Za-z0-9_]{0,23}", value):
+        raise ValueError("Names must be ASCII identifiers of length 1..24.")
+    return value
+
+
+def _integer(value, lower, upper):
+    if type(value) is not int or not lower &lt;= value &lt;= upper:
+        raise ValueError("Integer outside its declared range.")
+    return value
+
+
+def _sequence(value, limit):
+    if type(value) is not tuple or len(value) &gt; limit:
+        raise ValueError("Expected a tuple within its length bound.")
+    return value
+
+
+def _dictionary(value, limit):
+    if type(value) is not dict or len(value) &gt; limit:
+        raise ValueError("Expected a plain dictionary within its size bound.")
+    return value
+
+
+def make_structure(size, constants, functions, predicates):
+    """Return an immutable canonical structure on objects 0..size-1.
+
+    constants: name -&gt; object. functions: name -&gt; (arity, total table).
+    predicates: name -&gt; (arity, set/frozenset of true object tuples).
+    size 1..8, at most 12 symbols per category, function arity 1..3,
+    predicate arity 0..3. Every omitted predicate tuple is false.
+    """
+    _integer(size, 1, 8)
+    for mapping in (constants, functions, predicates):
+        _dictionary(mapping, 12)
+        for name in mapping:
+            _name(name)
+    if (set(constants) &amp; set(functions) or set(constants) &amp; set(predicates)
+            or set(functions) &amp; set(predicates)):
+        raise ValueError("Symbol categories must be disjoint.")
+    for obj in constants.values():
+        _integer(obj, 0, size - 1)
+    function_rows = []
+    for name, record in sorted(functions.items()):
+        _sequence(record, 2)
+        if len(record) != 2:
+            raise ValueError("Function record needs arity and table.")
+        arity, table = record
+        _integer(arity, 1, 3)
+        _dictionary(table, 512)
+        for key, obj in table.items():
+            _sequence(key, 3)
+            if len(key) != arity:
+                raise ValueError("Function input arity mismatch.")
+            for value in key:
+                _integer(value, 0, size - 1)
+            _integer(obj, 0, size - 1)
+        if set(table) != set(product(range(size), repeat=arity)):
+            raise ValueError("Function table is not total.")
+        function_rows.append((name, arity, tuple(sorted(table.items()))))
+    predicate_rows = []
+    for name, record in sorted(predicates.items()):
+        _sequence(record, 2)
+        if len(record) != 2:
+            raise ValueError("Predicate record needs arity and extension.")
+        arity, extension = record
+        _integer(arity, 0, 3)
+        if type(extension) not in (set, frozenset) or len(extension) &gt; 512:
+            raise ValueError("Expected a bounded set of object tuples.")
+        for key in extension:
+            _sequence(key, 3)
+            if len(key) != arity:
+                raise ValueError("Predicate tuple arity mismatch.")
+            for value in key:
+                _integer(value, 0, size - 1)
+        predicate_rows.append((name, arity, frozenset(extension)))
+    return (size, tuple(sorted(constants.items())),
+            tuple(function_rows), tuple(predicate_rows))
+
+
+def _pairs(rows):
+    _sequence(rows, 512)
+    result = {}
+    for row in rows:
+        _sequence(row, 2)
+        if len(row) != 2:
+            raise ValueError("Malformed canonical table row.")
+        key, value = row
+        if type(key) is str:
+            _name(key)
+        elif type(key) is tuple:
+            for obj in key:
+                _integer(obj, 0, 7)
+        else:
+            raise ValueError("Malformed canonical table key.")
+        if key in result:
+            raise ValueError("Duplicate canonical table key.")
+        result[key] = value
+    return result
+
+
+def _tables(world):
+    _sequence(world, 4)
+    if len(world) != 4:
+        raise ValueError("Malformed structure.")
+    size, constants, functions, predicates = world
+    constants = _pairs(constants)
+    function_map, predicate_map = {}, {}
+    for rows, target, function in (
+            (functions, function_map, True),
+            (predicates, predicate_map, False)):
+        _sequence(rows, 12)
+        for row in rows:
+            _sequence(row, 3)
+            if len(row) != 3:
+                raise ValueError("Malformed symbol row.")
+            name, arity, table = row
+            _name(name)
+            if name in target:
+                raise ValueError("Duplicate symbol row.")
+            if not function and type(table) is not frozenset:
+                raise ValueError("Canonical predicate extension is immutable.")
+            target[name] = (arity, _pairs(table) if function else table)
+    canonical = make_structure(size, constants, function_map, predicate_map)
+    if canonical != world:
+        raise ValueError("Structure must have the factory's canonical form.")
+    return size, constants, function_map, predicate_map
+
+
+def _shape(node, category="formula", count=None, depth=0):
+    count = [0] if count is None else count
+    count[0] += 1
+    if count[0] &gt; 512 or depth &gt; 16:
+        raise ValueError("AST exceeds 512 nodes or depth 16.")
+    if type(node) is not tuple or not node or type(node[0]) is not str:
+        raise ValueError("Malformed AST node.")
+    tag = node[0]
+    if tag in ("v", "c") and category in ("term", "expression"):
+        if len(node) != 2:
+            raise ValueError("Variable/constant node needs a name.")
+        _name(node[1])
+    elif ((tag == "f" and category in ("term", "expression"))
+          or (tag == "p" and category in ("formula", "expression"))):
+        if len(node) != 3:
+            raise ValueError("Application needs name and argument tuple.")
+        _name(node[1])
+        _sequence(node[2], 3)
+        if tag == "f" and not node[2]:
+            raise ValueError("Functions have positive arity; use a constant.")
+        for child in node[2]:
+            _shape(child, "term", count, depth + 1)
+    elif category == "formula" and tag == "eq" and len(node) == 3:
+        for child in node[1:]:
+            _shape(child, "term", count, depth + 1)
+    elif category == "formula" and tag == "not" and len(node) == 2:
+        _shape(node[1], "formula", count, depth + 1)
+    elif (category == "formula" and tag in ("and", "or", "implies")
+          and len(node) == 3):
+        for child in node[1:]:
+            _shape(child, "formula", count, depth + 1)
+    elif (category == "formula" and tag in ("all", "exists")
+          and len(node) == 3):
+        _name(node[1])
+        _shape(node[2], "formula", count, depth + 1)
+    else:
+        raise ValueError("AST category, tag or node length mismatch.")
+
+
+def _variables(node):
+    tag = node[0]
+    if tag == "v":
+        return {node[1]}
+    if tag == "c":
+        return set()
+    if tag in ("p", "f"):
+        children = node[2]
+    elif tag in ("all", "exists"):
+        return _variables(node[2]) - {node[1]}
+    else:
+        children = node[1:]
+    return set().union(*(_variables(child) for child in children))
+
+
+def evaluate(formula, world, environment=None):
+    """Exact Boolean truth in one finite structure, not satisfiability.
+
+    A supplied environment is a plain dict of at most 16 variable/object
+    bindings. All free variables need bindings, even in a skipped branch.
+    More than 200,000 truth/term visits raises a resource ValueError.
+    """
+    _shape(formula)
+    size, constants, functions, predicates = _tables(world)
+    environment = {} if environment is None else environment
+    _dictionary(environment, 16)
+    for name, obj in environment.items():
+        _name(name)
+        _integer(obj, 0, size - 1)
+    if not _variables(formula) &lt;= set(environment):
+        raise ValueError("A free variable lacks an assignment.")
+
+    def signature(node):
+        tag = node[0]
+        if tag == "c":
+            if node[1] not in constants:
+                raise ValueError("Undeclared constant.")
+        elif tag in ("p", "f"):
+            table = predicates if tag == "p" else functions
+            if node[1] not in table or table[node[1]][0] != len(node[2]):
+                raise ValueError("Undeclared symbol or arity mismatch.")
+            for child in node[2]:
+                signature(child)
+        elif tag in ("all", "exists"):
+            signature(node[2])
+        elif tag != "v":
+            for child in node[1:]:
+                signature(child)
+
+    signature(formula)
+
+    visits = [0]
+
+    def visit():
+        visits[0] += 1
+        if visits[0] &gt; 200000:
+            raise ValueError("Finite interpretation visit budget exceeded.")
+
+    def term(node, env):
+        visit()
+        if node[0] == "v":
+            return env[node[1]]
+        if node[0] == "c":
+            return constants[node[1]]
+        return functions[node[1]][1][tuple(term(t, env) for t in node[2])]
+
+    def truth(node, env):
+        visit()
+        tag = node[0]
+        if tag == "p":
+            arguments = tuple(term(t, env) for t in node[2])
+            return arguments in predicates[node[1]][1]
+        if tag == "eq":
+            return term(node[1], env) == term(node[2], env)
+        if tag == "not":
+            return not truth(node[1], env)
+        if tag == "and":
+            return truth(node[1], env) and truth(node[2], env)
+        if tag == "or":
+            return truth(node[1], env) or truth(node[2], env)
+        if tag == "implies":
+            return not truth(node[1], env) or truth(node[2], env)
+        values = (truth(node[2], env | {node[1]: obj}) for obj in range(size))
+        return all(values) if tag == "all" else any(values)
+
+    return truth(formula, dict(environment))
+
+
+def substitute(expression, substitution):
+    """One simultaneous substitution on a term or atom, not binders."""
+    _shape(expression, "expression")
+    _dictionary(substitution, 16)
+    for name, term in substitution.items():
+        _name(name)
+        _shape(term, "term")
+
+    def visit(node):
+        if node[0] == "v":
+            return substitution.get(node[1], node)
+        if node[0] == "c":
+            return node
+        return (node[0], node[1], tuple(visit(t) for t in node[2]))
+
+    result = visit(expression)
+    _shape(result, "expression")
+    return result
+
+
+def unify(left, right):
+    """Return a solved idempotent dict, or None for no finite-tree unifier.
+
+    Both inputs must be terms or both atoms, each within AST bounds, with
+    at most 16 distinct variables together. 10,000 internal term visits
+    and AST expansion bounds raise ValueError rather than logical failure.
+    """
+    for expression in (left, right):
+        _shape(expression, "expression")
+    if (left[0] == "p") != (right[0] == "p"):
+        raise ValueError("Unification categories differ.")
+    if len(_variables(left) | _variables(right)) &gt; 16:
+        raise ValueError("At most 16 variables in a unification problem.")
+    bindings, pending, visits = {}, [(left, right)], [0]
+
+    def resolve(node):
+        visits[0] += 1
+        if visits[0] &gt; 10000:
+            raise ValueError("Unification term-visit budget exceeded.")
+        if node[0] == "v" and node[1] in bindings:
+            return resolve(bindings[node[1]])
+        if node[0] in ("v", "c"):
+            return node
+        result = (node[0], node[1], tuple(resolve(t) for t in node[2]))
+        _shape(result, "expression")
+        return result
+
+    while pending:
+        a, b = (resolve(t) for t in pending.pop())
+        if a == b:
+            continue
+        if b[0] == "v" and a[0] != "v":
+            a, b = b, a
+        if a[0] == "v":
+            if a[1] in _variables(b):
+                return None
+            bindings[a[1]] = b
+        elif a[:2] != b[:2] or len(a[2]) != len(b[2]):
+            return None
+        else:
+            pending.extend(zip(a[2], b[2]))
+    solved = {name: resolve(term) for name, term in sorted(bindings.items())}
+    if substitute(left, solved) != substitute(right, solved):
+        raise AssertionError("Internal unification certificate failed.")
+    return solved
+
+
+def horn_closure(constants, signatures, facts, rules):
+    """Positive function-free/equality-free closure and growing-round layers.
+
+    At most 8 distinct constants, 8 predicates of arity 0..3, 4096 atoms,
+    16 rules, 6 premises/rule and 4 variables/rule. Facts are a tuple/set/
+    frozenset of ground atoms; rules are tuple (premise_tuple, head) pairs.
+    Up to 200,000 ground rule assignments are checked. Bounds raise
+    ValueError. The returned frozenset/layers never encode logical negation.
+    """
+    _sequence(constants, 8)
+    unique_constants = set(_name(c) for c in constants)
+    if not constants or len(unique_constants) != len(constants):
+        raise ValueError("Constants must be nonempty and distinct.")
+    _dictionary(signatures, 8)
+    for name, arity in signatures.items():
+        _name(name)
+        _integer(arity, 0, 3)
+    if set(constants) &amp; set(signatures):
+        raise ValueError("Constant and predicate names must differ.")
+    if type(facts) not in (tuple, set, frozenset) or len(facts) &gt; 4096:
+        raise ValueError("Malformed bounded fact collection.")
+    _sequence(rules, 16)
+
+    def atom(node, ground):
+        _shape(node, "formula")
+        if (node[0] != "p" or node[1] not in signatures
+                or len(node[2]) != signatures[node[1]]):
+            raise ValueError("Horn predicate/signature mismatch.")
+        for term in node[2]:
+            if term[0] == "c" and term[1] in constants:
+                continue
+            if term[0] == "v" and not ground:
+                continue
+            raise ValueError("Horn arguments must be constants or variables.")
+
+    for fact in facts:
+        atom(fact, True)
+    prepared = []
+    for rule in rules:
+        _sequence(rule, 2)
+        if len(rule) != 2:
+            raise ValueError("Rule needs premises and head.")
+        premises, head = rule
+        _sequence(premises, 6)
+        for node in premises + (head,):
+            atom(node, False)
+        variables = set().union(*(_variables(n) for n in premises + (head,)))
+        if len(variables) &gt; 4:
+            raise ValueError("Rule has more than four variables.")
+        prepared.append((premises, head, tuple(sorted(variables))))
+    current, layers, visits = set(facts), [], 0
+    while True:
+        additions = set()
+        for premises, head, variables in prepared:
+            for values in product(constants, repeat=len(variables)):
+                visits += 1
+                if visits &gt; 200000:
+                    raise ValueError("Horn grounding budget exceeded.")
+                assignment = dict(zip(variables, (("c", c) for c in values)))
+                if all(substitute(p, assignment) in current for p in premises):
+                    additions.add(substitute(head, assignment))
+        additions -= current
+        if not additions:
+            return frozenset(current), tuple(layers)
+        layers.append(frozenset(additions))
+        current |= additions
+
+
+def main():
+    def v(name):
+        return "v", name
+
+    def c(name):
+        return "c", name
+
+    def p(name, *args):
+        return "p", name, args
+
+    x, y, z = v("x"), v("y"), v("z")
+    names = ("anna", "bea", "intro", "advanced", "logic", "safety")
+    constants = dict(zip(names, range(6))) | {"anna_record": 0}
+    relations = {
+        "Staff": (1, {(0,), (1,)}),
+        "Course": (1, {(2,), (3,)}),
+        "Concept": (1, {(4,), (5,)}),
+        "Permit": (1, {(0,)}),
+        "Attends": (2, {(0, 2), (1, 3)}),
+        "Covers": (2, {(2, 4), (2, 5), (3, 4)}),
+        "Qualified": (2, {(0, 4), (0, 5), (1, 4)}),
+    }
+    mentor = {(i,): 1 if i in (0, 1) else i for i in range(6)}
+    world = make_structure(6, constants, {"mentor": (1, mentor)}, relations)
+    individual = ("all", "x", ("implies", p("Staff", x),
+                  ("exists", "y",
+                   ("and", p("Course", y), p("Attends", x, y)))))
+    common = ("exists", "y", ("and", p("Course", y),
+              ("all", "x", ("implies", p("Staff", x), p("Attends", x, y)))))
+    print("Individual/common course:", evaluate(individual, world),
+          evaluate(common, world))
+    alias = ("eq", c("anna"), c("anna_record"))
+    print("Alias equality:", evaluate(alias, world))
+    print("Simultaneous x:", substitute(x, {"x": y, "y": c("anna")}))
+    print("Repeated-variable mismatch:",
+          unify(p("R", x, x), p("R", c("anna"), c("bea"))))
+    print("Occurs-check cycle:", unify(x, ("f", "mentor", (x,))))
+    signatures = {name: row[0] for name, row in relations.items()}
+    facts = tuple(p(name, *(c(names[i]) for i in key))
+                  for name, (arity, extension) in relations.items()
+                  if name not in ("Qualified", "Permit")
+                  for key in sorted(extension))
+    training = ((p("Staff", x), p("Attends", x, y), p("Course", y),
+                 p("Covers", y, z), p("Concept", z)), p("Qualified", x, z))
+    permission = ((p("Qualified", x, c("logic")),
+                   p("Qualified", x, c("safety"))), p("Permit", x))
+    closure, layers = horn_closure(
+        names, signatures, facts, (training, permission))
+    print("Horn initial/final/layer sizes:", len(facts), len(closure),
+          tuple(len(layer) for layer in layers))
+    print("Derived Permit(anna)/Permit(bea):",
+          p("Permit", c("anna")) in closure,
+          p("Permit", c("bea")) in closure)
+    print("Ground-atom bound:",
+          sum(len(names) ** r for r in signatures.values()))
+
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+<pre><code class="language-text" id="chapter-output">Individual/common course: True False
+Alias equality: True
+Simultaneous x: ('v', 'y')
+Repeated-variable mismatch: None
+Occurs-check cycle: None
+Horn initial/final/layer sizes: 11 15 (3, 1)
+Derived Permit(anna)/Permit(bea): True False
+Ground-atom bound: 132
+</code></pre>
+</section>
+
+<section id="exercises">
+<h2>17. Exercises with fully worked solutions</h2>
+<div class="exercise" id="exercise-1"><h3>Exercise 1. Grammar, aliases and coherent predicates</h3>
+<p>In the six-object structure, mentor(anna) and bea denote object 1; anna_record and anna denote object 0. Classify Staff(anna), mentor(anna), Attends(Staff,intro), mentor(Staff(anna)) and mentor(anna)=bea as a term, formula or malformed expression in the chapter's grammar. Derive the truth of Qualified(mentor(anna),logic), then explain whether a unifier can make the distinct constants anna and anna_record identical.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Staff(anna) is a formula: a unary predicate takes one object term. mentor(anna) is a term: a unary function produces an object denotation. Attends(Staff,intro) is malformed because a bare predicate symbol is not an object term. mentor(Staff(anna)) is malformed because its argument is a Boolean formula rather than an object term in this single-sort language. mentor(anna)=bea is an equality formula between two terms.</p>
+<p>The term evaluator maps anna to0, mentor(0) to1 and logic to4. The predicate extension contains \((1,4)\), so Qualified(mentor(anna),logic) is true. The result is forced to agree with Qualified(bea,logic), because both predicates are applied to the same interpreted object tuple. One cannot independently set those two ground atoms to different truth values while retaining these symbol interpretations.</p>
+<p>The equation anna=anna_record is true in this structure. Syntactic unification of those two constants nevertheless fails: neither expression contains a variable to replace, and their syntax trees remain distinct under every variable substitution. This is not an inconsistency. The two procedures answer different questions, semantic identity in a chosen structure and syntactic identity after replacing variables. An inference engine with equality reasoning would need additional machinery to use semantic equalities in rule matching.</p>
+</details></div>
+
+<div class="exercise" id="exercise-2"><h3>Exercise 2. Quantifier order, scope and exact finite counts</h3>
+<p>Let \(D=\{0,1\}\) and let \(R\) be any binary relation on \(D\). Compare \(F=\forall x\exists y\,R(x,y)\) with \(G=\exists y\forall x\,R(x,y)\). Prove one implication, supply a countermodel to its converse, and count how many of the 16 relations satisfy each sentence. Then evaluate \(\forall x\exists x\,R(x,x)\) on the diagonal relation.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>If \(G\) holds, choose its one witness \(y_0\). For every \(x\), that same \(y_0\) witnesses the existential in \(F\). Thus \(G\) implies \(F\), without requiring a finite domain. For the converse take \(R=\{(0,0),(1,1)\}\). Each row has a witness, namely its diagonal object, so \(F\) is true. Neither column contains both rows, so \(G\) is false.</p>
+<p>A binary relation on two objects is a2×2Boolean table, giving \(2^4=16\) possibilities. For \(F\), each row must be a nonempty subset of the two columns. There are three nonempty row subsets independently, hence \(3^2=9\) relations. For \(G\), at least one column must be full. Fixing the first column full leaves four choices for the second; fixing the second full leaves four choices for the first. The all-full table is counted twice, so there are \(4+4-1=7\). The two relations satisfying \(F\) but not \(G\) are the diagonal and off-diagonal permutation relations.</p>
+<p>In \(\forall x\exists x\,R(x,x)\), both body occurrences belong to the inner binder. For each outer assignment the inner existential can choose a diagonal object, so the sentence is true on the diagonal relation. Alpha-renaming the inner binder gives \(\forall x\exists z\,R(z,z)\); the outer variable does no work. This example detects an evaluator that mistakenly carries the outer \(x\) into an occurrence bound by the inner quantifier.</p>
+</details></div>
+
+<div class="exercise" id="exercise-3"><h3>Exercise 3. Grounding without losing unnamed objects</h3>
+<p>Only the constant anna is listed. Its denotation is0, but the domain is \(\{0,1\}\), and Staff holds exactly at0. Compare Staff(anna) with \(\forall x\,\mathrm{Staff}(x)\). Does a unique-name assumption fix the discrepancy? Give a separate one-object alias example in which grounding is exact despite failure of unique names. Finally count the total unary-function tables and binary-predicate extensions over a fixed two-object domain.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Staff(anna) is true because anna denotes 0. The universal sentence is false at object 1. There is only one constant, so unique names is already satisfied; it does nothing to eliminate the unnamed counterexample. Domain closure, not just distinct-name constraints, is the missing hypothesis. One must either include a name for 1 or explicitly restrict the domain to the named objects.</p>
+<p>For the alias example take \(D=\{0\}\), constants anna and anna_record both denoting0, and Staff true at0. The universal sentence is true and its expansion Staff(anna) and Staff(anna_record) is true. If Staff is instead empty, both expressions are false. The constants are not unique names, but every object is named, and redundant instances preserve quantified truth. An independent Boolean encoding would need to identify or constrain the alias flags consistently.</p>
+<p>A total unary function on a two-object domain chooses one of two outputs for each of two inputs, giving \(2^2=4\) tables. A binary predicate independently chooses membership for each of four input tuples, giving \(2^4=16\) extensions. With these fixed domain objects and fixed constant denotations there are \(4\cdot16=64\) combinations. Omitting a function input entry is not a fifth table option: it violates totality. These are counts of finite interpretations, not a complete enumeration of all first-order structures.</p>
+</details></div>
+
+<div class="exercise" id="exercise-4"><h3>Exercise 4. Simultaneous substitution, capture and unification</h3>
+<p>Apply \(\theta=\{x\mapsto y,y\mapsto\mathrm{anna}\}\) once to \(R(x,y)\), then apply it again. Substitute \(x\mapsto y\) into \(\exists y\,R(x,y)\) correctly, and compare with naive capture on \(R=\{(0,1)\}\), \(D=\{0,1\}\), \(g(y)=0\). Find a unifier of \(f(x,y)\) and \(f(y,\mathrm{anna})\), and diagnose the equations \(x=y,\ y=f(x)\).</p>
+<details class="solution"><summary>Full solution</summary>
+<p>One simultaneous application gives \(R(y,\mathrm{anna})\). The inserted \(y\) replacing \(x\) is not replaced again in that same operation. A second application gives \(R(\mathrm{anna},\mathrm{anna})\). Chasing all bindings in one call would perform a different operation; the program's substitution function intentionally distinguishes these behaviors.</p>
+<p>Rename the bound \(y\) to a fresh \(z\), preserving the occurrence it binds, before replacing the free \(x\). The result is \(\exists z\,R(y,z)\). With free \(y\) assigned0, witness \(z=1\) makes it true. Naive replacement gives \(\exists y\,R(y,y)\), false because the relation has no diagonal tuple. The naive result both loses a free variable and changes the truth condition. A term-only substitution function should reject the original quantified formula, not claim that recursive string replacement has solved capture avoidance.</p>
+<p>For the term equation \(f(x,y)=f(y,\mathrm{anna})\), decomposing the same function gives \(x=y\) and \(y=\mathrm{anna}\). Resolve the first binding through the second to return \(x\mapsto\mathrm{anna},y\mapsto\mathrm{anna}\). Applying this solved map to each original term gives \(f(\mathrm{anna},\mathrm{anna})\), the success certificate. In the cyclic system \(x=y,\ y=f(x)\), dereferencing the first binding turns the second into \(y=f(y)\). The occurs check rejects it. A finite substituted term cannot equal a strict function wrapping of itself, so this is genuine finite-tree nonunifiability, unlike an implementation's resource cutoff.</p>
+</details></div>
+
+<div class="exercise" id="exercise-5"><h3>Exercise 5. Permission closure, joins and work counts</h3>
+<p>Compute the training controller's initial facts, growing layers and final closure size. Why does Covers(intro,safety) fail to give Bea a Safety qualification from Attends(bea,advanced)? Add Attends(bea,intro), recompute the layers, and compare the132atom universe with the number of rule assignments scanned by the supplied snapshot implementation on the original fixture.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Initially there are two Staff facts, two Course facts, two Concept facts, two Attends facts and three Covers facts:11in total. In the first growing round Anna's Intro attendance gives Logic and Safety, while Bea's Advanced attendance gives Logic. The new layer has three Qualified atoms. In the second, Anna has both required qualifications, so Permit(anna) is added. The final no-growth round confirms closure, with \(11+3+1=15\) atoms.</p>
+<p>Combining Bea's Advanced attendance with Intro's Safety coverage would assign the same rule variable \(y\) two different constants. No shared substitution supports those premises. The semantic countermodel in the chapter already has both facts true and Bea's Safety qualification false, so the invalid join would also violate soundness.</p>
+<p>Adding Attends(bea,intro) gives12initial records. The first layer now contains four Qualified atoms: both concepts for each staff member. Bea's Logic qualification is generated by two course instances but appears only once in a set. The second layer contains both Permit atoms. Final size is \(12+4+2=18\). The output universe stays \(4\cdot6+3\cdot6^2=132\) because its vocabulary has not changed.</p>
+<p>The training rule has three variables, so its naive ground scan checks \(6^3=216\) assignments per round. The permission rule has one variable, giving6more. Two growing rounds plus one stopping round scan \(3(216+6)=666\) ground assignments. Premise evaluation and tuple construction add work within each scan. Thus132potential output atoms and666scanned instances are different cost measures. Join indexes could reduce scans while preserving the closure.</p>
+</details></div>
+
+<div class="exercise" id="exercise-6"><h3>Exercise 6. Restricted completeness and honest failure outcomes</h3>
+<p>In the positive Horn fragment, prove why a missing ground atom has a countermodel and why its negation need not be entailed. Contrast this with a knowledge base consisting of the disjunction \(P(a)\lor Q(a)\). Design four tests that distinguish malformed input, ordinary unification failure, finite-evaluator resource exhaustion and solver unknown.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>After closure, interpret the constant symbols as distinct domain objects and each predicate by exactly its closure tuples. Every ground rule body whose premises are true has its head in the closed set. Every variable assignment corresponds to a ground instance, so all universally quantified Horn rules hold. Initial facts also hold. If atom \(A\) is absent, this structure satisfies the knowledge base and falsifies \(A\), proving that the knowledge base does not entail it. This construction relies on the nonempty, function-free, equality-free positive fragment and addresses a ground atomic query.</p>
+<p>To see that absence does not entail \(\neg A\), instead interpret every predicate as its full domain relation. All positive facts and implications hold, and \(A\) is true. These two models witness contingency for an absent ground atom. Denying access on absence is an added action policy, not a negative theorem from the positive rule base.</p>
+<p>For the disjunctive knowledge base, the sentence \(P(a)\lor Q(a)\) is entailed because it is asserted. Neither atom is forced: a model can make only \(P(a)\) true, and another only \(Q(a)\) true. A rule procedure producing only positive atomic heads is not complete for arbitrary formula conclusions. Its restricted theorem cannot be extended merely by changing the query type. The Horn program must reject such a disjunctive rule input.</p>
+<p>Useful tests are: an undeclared predicate under a branch that would short-circuit must still raise <code>ValueError</code>; unifying \(R(x,x)\) with \(R(a,b)\) for distinct constants must return <code>None</code>; a sufficiently deep nest of existential quantifiers over an eight-object domain with an always-false body must hit the evaluator's visit budget and raise a resource <code>ValueError</code>; and a separately identified external solver returning unknown must not be reported as a pair of satisfiable witnesses. The last case is not a behavior of this stdlib program, which invokes no solver. A result log should preserve these distinct causes instead of collapse them to False or “not entailed.”</p>
+</details></div>
+</section>
+
+<section id="references">
+<h2>18. Primary sources and evidence boundaries</h2>
+<ol>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/first_order_logic.py">Stanford CS221, first_order_logic.py, retained commit f700637</a>: official executable lecture material used for sequence, notation, definite-clause examples and inspected object/alias diagrams. This chapter's program is original. The source evaluator and unifier are demonstrations with boundaries, not correctness authorities for the delivered implementation.</li>
+<li><a href="https://web.stanford.edu/class/linguist289/robinson65.pdf">J. A. Robinson, A Machine-Oriented Logic Based on the Resolution Principle (1965)</a>: PDF1 identifies the paper; PDF9–11, printed31–33, define substitution, instantiation, composition, unification, its nonoccurrence condition and the generality statement. The inspected PDF12 scan clips its right margin. A full resolution-completeness proof and performance comparison were not verified for this chapter.</li>
+<li><a href="https://microsoft.github.io/z3guide/docs/logic/Uninterpreted-functions-and-constants/">Microsoft Z3 Guide, Uninterpreted Functions and Constants</a>: total classical functions, flexible interpretations and congruence; documentation retained and read October3,2026. No current benchmark or whole solver-correctness claim follows.</li>
+<li><a href="https://microsoft.github.io/z3guide/docs/logic/Quantifiers/">Microsoft Z3 Guide, Quantifiers</a>: introductory quantified reasoning limits and final infinite-model warning, read October3,2026. Internal tactic benchmarks and linked fragment papers are outside this chapter's claim scope.</li>
+</ol>
+<p>All access decisions and qualification records here are stipulated teaching constructions. The general results are proved only with their stated hypotheses; finite computational evidence is labeled separately. The recording's omitted resolution development remains omitted, and no result of this laboratory certifies physical safety, external factual accuracy or completeness of a deployed knowledge base.</p>
+</section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-15-propositional-logic-and-justified-answers.html">Previous available chapter</a><a href="index.html">Lecture index</a><span>Further chapters pending</span></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

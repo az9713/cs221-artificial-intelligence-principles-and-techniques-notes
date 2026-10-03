@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="c9e25f793ab3c49d1e805050ebbeaabfaaa1f72a3551386268e8120a482f5515"><title>Learning with hidden variables and expectation maximization · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><header class="chapter-header"><p class="eyebrow">Chapter 14</p><h1>Learning with hidden variables and expectation maximization</h1><p class="lead">A probability table can be easy to query and difficult to learn. Fully observed data gives actual local counts; hidden data gives posterior-weighted counts. The distinction determines the objective, the algorithm and the claims we can make about its result.</p></header>
+
+<section id="case"><h2>1. The rating that the model has never seen</h2>
+<p>A movie service wants the probability that two users will both like a new film. Its small training collection records a genre and two ratings for each film. At first the genre is known; later a new collection supplies only ratings. The service must learn a joint distribution, avoid declaring an unobserved rating impossible merely because its collection is small, and decide whether the two users should share a response model. These are distinct decisions. Adding pseudocounts addresses one problem; sharing parameters addresses another; inferring an unobserved genre addresses a third.</p>
+<p>The consequential output is a probability for a future event, not a genre label for every training film. If a row was never observed, an arbitrary default is a modeling choice rather than something the data estimated. If genre is hidden, a confident label can conceal substantial posterior uncertainty. We will keep those distinctions visible all the way from the likelihood to the program.</p>
+<p>Chapter 12 introduced a Bayesian network as a finite joint distribution built from local conditional tables, and Chapter 13 studied inference in that distribution. Here the graph and finite domains are given. We learn its tables. The original calculations below assume independent and identically distributed training assignments from the modeled joint distribution; observations within one assignment need not be independent. The graph is a statistical factorization, without an automatic causal interpretation.</p></section>
+
+<section id="review"><h2>2. A graph specifies factors, not their numerical estimates</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=5">Recording 00:05–13:25</a></p>
+<p>Let \(X_1,\ldots,X_n\) be random variables on declared finite domains \(\mathcal X_i\). Their graph is a directed acyclic graph, or DAG: arrows identify parents, and following arrows cannot return to the starting node. Write \(\operatorname{pa}(i)\) for the ordered list of parents of node \(i\), and \(u_i=x_{\operatorname{pa}(i)}\) for their values in a complete assignment \(x=(x_1,\ldots,x_n)\). A local probability row must be nonnegative and sum to one over the child's domain. The network defines</p>
+\[P_\theta(x)=\prod_{i=1}^{n}P_\theta(X_i=x_i\mid X_{\operatorname{pa}(i)}=u_i).\]
+<p>The subscript \(\theta\) denotes all unknown table entries. A topological ordering places each parent before its child. Summing the product in reverse topological order eliminates each normalized child factor, which verifies that the joint distribution sums to one.</p>
+<p>Inference takes these entries as given. An exact query selects the evidence, sums over unobserved variables and divides by its positive probability. Rejection sampling instead generates complete assignments and retains those matching evidence. Gibbs sampling resamples a variable conditional on current values of the others. Inference supplies the posterior that hidden-data learning will need; it does not supply the initial parameter estimates.</p>
+<p>The lecture reviews graph separation with chains, forks and colliders. Conditioning on a middle noncollider blocks a path such as \(A\to C\to B\) or \(A\leftarrow C\to B\). A collider \(A\to C\leftarrow B\) blocks the path until the collider or a descendant is observed. Every path must be blocked for graph separation to hold. These statements identify independences guaranteed by the factorization. An unblocked path need not produce dependence for every numerical choice of tables: special values can create additional, accidental independence. Likewise, statistical conditioning alone is not an intervention.</p>
+<p>For the service, the fork \(R_1\leftarrow G\to R_2\) makes the two ratings independent conditional on the genre \(G\). It permits dependence after \(G\) is marginalized. That distinction becomes the mechanism by which a hidden genre can explain a tendency toward matching ratings.</p></section>
+
+<section id="categorical"><h2>3. One categorical variable: count the entire domain</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=805">Recording 13:25–17:57</a></p>
+<p>Start with a single rating \(R\in\{1,2,3,4,5\}\). Its parameter vector is \(\theta=(\theta_1,\ldots,\theta_5)\), where \(\theta_k=P(R=k)\). These entries are dimensionless probabilities. The lecture's ten ratings are \(1,3,4,4,4,4,4,5,5,5\). Their count vector is \(c=(1,0,1,5,3)\), and normalization gives</p>
+\[\widehat\theta=(1/10,\;0,\;1/10,\;1/2,\;3/10).\]
+<p>The zero for rating 2 is a numerical estimate inside a five-category model. Omitting that category from the declared domain would instead change the model. A software dictionary containing only observed keys can blur these choices, especially when pseudocounts are subsequently added. Our estimator therefore creates every declared category before counting.</p>
+<p>With no observations, the counts are all zero and the normalization denominator is zero. There is no estimated distribution obtained by dividing them. The data likelihood is an empty product, equal to one for every normalized probability row, so it cannot prefer one row to another. A uniform fallback may be sensible, but it needs to be identified as a choice.</p></section>
+
+<section id="conditional"><h2>4. Conditional tables are separate rowwise problems</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=1077">Recording 17:57–22:08</a></p>
+<p>Add a genre \(G\in\{\mathrm d,\mathrm c\}\), with \(\mathrm d\) denoting drama and \(\mathrm c\) comedy. Write \(\pi_g=P(G=g)\) for its root probabilities and \(\theta_g(r)\) for its genre-conditioned rating kernel. The arrow \(G\to R\) gives \(P(G=g,R=r)=\pi_g\,\theta_g(r)\). The root probabilities \(\pi_g\) sum to one. For each fixed genre, the five entries of \(\theta_g\) also sum to one, separately. Normalizing all ten conditional entries together would define the wrong object.</p>
+<p>The lecture's assignments \((\mathrm d,4),(\mathrm d,4),(\mathrm d,5),(\mathrm c,1),(\mathrm c,5)\) give \(\pi=(3/5,2/5)\), drama probabilities \(2/3\) for rating 4 and \(1/3\) for rating 5, and comedy probabilities \(1/2\) for each of ratings 1 and 5. Other categories have zero count. The drama denominator is three; the comedy denominator is two. Both are conditioning-row sample sizes, rather than the total collection size.</p>
+<p>An unobserved genre row is different from an observed genre row with one missing rating. The latter identifies an unsmoothed zero entry at its optimum; the former supplies no preference among conditional distributions. Keeping the row and its denominator explicit prevents an implementation from silently confusing these situations.</p></section>
+
+<section id="parents"><h2>5. A child with two parents needs their joint values</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=1328">Recording 22:08–26:42</a></p>
+<p>Suppose an award indicator \(A\in\{0,1\}\) and genre are parents of the rating: \(G\to R\leftarrow A\). The lecture's model has independent root factors and a rating table conditioned on both parents:</p>
+\[P(G=g,A=a,R=r)=\pi_g\,\eta_a\,\theta_{g,a}(r).\]
+<p>Here \(\eta_a=P(A=a)\) is the award root row, and \(\theta_{g,a}(r)\) is the rating kernel for the joint parent tuple \((g,a)\). There are four possible parent tuples, each with a separate five-category rating row. Counting ratings conditional on genre alone pools across award values and estimates a different model. Counting one genre-conditioned row and one award-conditioned row is also insufficient: the model asks for their joint tuple.</p>
+<p>For the observed tuples \((\mathrm d,0,3),(\mathrm d,1,5),(\mathrm d,0,1),(\mathrm c,0,5),(\mathrm c,1,4)\), the drama/no-award row assigns \(1/2\) to ratings 1 and 3. Each remaining parent row has one observed assignment and a point-mass unsmoothed estimate. The root factors use all five films. These conditional estimates do not require the training genre/award counts to display perfect empirical independence; the likelihood is optimized within the stipulated graph family.</p>
+<p>Arrows here specify which values index the rating kernel. Learning does not turn the graph into proof that winning an award causes a higher rating. That additional interpretation would require causal assumptions beyond the count-and-normalize calculation.</p></section>
+
+<section id="separate"><h2>6. Two variables can have different response tables</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=1603">Recording 26:43–29:50</a></p>
+<p>Return to the service with \(G\to R_1\) and \(G\to R_2\). The ratings \(R_1,R_2\in\{1,\ldots,5\}\) refer to different users. Initially give them different kernels \(\theta^{(1)}_g\) and \(\theta^{(2)}_g\):</p>
+\[P(g,r_1,r_2)=\pi_g\,\theta^{(1)}_g(r_1)\,\theta^{(2)}_g(r_2).\]
+<p>The lecture's five films are \((\mathrm d,4,5),(\mathrm d,4,4),(\mathrm d,5,3),(\mathrm c,1,2),(\mathrm c,5,4)\). User 1's drama row has probabilities \(2/3\) at rating 4 and \(1/3\) at rating 5. User 2's drama row has probabilities \(1/3\) at each of ratings 3, 4 and 5. Their differences are permitted by the model.</p>
+<p>The phrase “conditional independence” does not mean that these conditional distributions are equal. Independence states that, given genre, the joint rating probability factors. Equality of their kernels is a separate restriction on parameters. Confusing the two removes a substantive modeling decision.</p></section>
+
+<section id="tying"><h2>7. Sharing a table pools factor occurrences</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=1790">Recording 29:50–37:51</a></p>
+<p>Parameter sharing, also called tying, uses one kernel \(\theta_g\) for both users:</p>
+\[P(g,r_1,r_2)=\pi_g\,\theta_g(r_1)\,\theta_g(r_2).\]
+<p>The two random variables remain distinct. Both occurrences of the shared factor contribute to its count. In the same five-film collection, the drama kernel sees six rating occurrences: ratings 3, 4 and 5 occur once, three times and twice. Its row is \((0,0,1/6,1/2,1/3)\). The comedy kernel sees four occurrences, one each at ratings 1, 2, 4 and 5. The root genre counts remain three drama films and two comedy films, rather than six and four.</p>
+<p>The apparent doubling of the rating denominator does not create ten independent films. There are still five independent complete assignments. Their factored likelihood contains two shared rating terms per film. Conditional on the genre, the model makes those rating draws independent and identically distributed. Pooling is justified by that declared model, not by pretending that dependence between films has vanished.</p>
+<p>For two genres and five ratings, each conditional rating table has \(2(5-1)=8\) free probabilities. The separate-user family therefore has \(1+8+8=17\) free parameters, while the tied family has \(1+8=9\). The removed degrees of freedom restrict what can be represented. Fewer estimated entries can help when the equality assumption is useful and data are scarce; they cannot guarantee better predictions if users actually have different response laws. A deployment evaluation must test that modeling assumption on data appropriate to the intended prediction task.</p>
+<p>The lecture's diagram connects both rating nodes to the same table. Those table connections identify parameter reuse; they are not extra probabilistic graph arrows between the rating variables.</p></section>
+
+<section id="hmm"><h2>8. Shared parameters across time: a fully observed HMM</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=2271">Recording 37:51–44:00</a></p>
+<p>A hidden Markov model, or HMM, has state \(H_t\) and observation \(E_t\) at time \(t\). In this example both are binary, with domain \(\{0,1\}\). “Hidden” describes the model's usual role; the present training collection observes the states as well as emissions. Write \(h_{1:3}=(h_1,h_2,h_3)\) and \(e_{1:3}=(e_1,e_2,e_3)\) for length-three value sequences. Their distribution is</p>
+\[\begin{aligned}P(h_{1:3},e_{1:3})&=s(h_1)b(e_1\mid h_1)\\&\quad{}\cdot a(h_2\mid h_1)b(e_2\mid h_2)\\&\quad{}\cdot a(h_3\mid h_2)b(e_3\mid h_3).\end{aligned}\]
+<p>The symbols \(s,a,b\) denote the start, transition and emission parameter families. Each transition reuses \(a\), and each emission reuses \(b\). This is a time-homogeneous model: its tables do not change with \(t\). It has one free start probability, two free transition probabilities and two free emission probabilities, totaling five, regardless of the sequence length. Computation and the number of factor occurrences still grow with that length.</p>
+<p>The lecture's two fully observed sequences are \((h_1,h_2,h_3)=(0,1,0)\) with \((e_1,e_2,e_3)=(0,1,0)\), and \((0,0,0)\) with \((1,1,1)\). Start counts are \((2,0)\). Transition counts out of state 0 are \((2,1)\); those out of state 1 are \((1,0)\). Emission counts at state 0 are \((2,3)\); those at state 1 are \((0,1)\). Thus</p>
+\[\begin{aligned}s&=(1,0),\\a(\cdot\mid0)&=(2/3,1/3),&a(\cdot\mid1)&=(1,0),\\b(\cdot\mid0)&=(2/5,3/5),&b(\cdot\mid1)&=(0,1).\end{aligned}\]
+<p>There is no transition from the last state of one independent training sequence to the first state of the next. Concatenating the data and counting that artificial edge would change the likelihood and bias the transition counts. With truly unobserved states, these actual counts are unavailable. The later EM argument applies, but the E-step would need posterior state and transition probabilities for the whole sequence; multiplying separate per-time marginal guesses would generally be incorrect.</p></section>
+
+<section id="general"><h2>9. One estimator for all these fully observed networks</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=2640">Recording 44:00–52:52</a></p>
+<p>Let \(d_i\) identify the table used by node \(i\). A parameter family \(d\) has rows \(\theta_d(u,k)\), with parent tuple \(u\) and child value \(k\). Sharing means that different nodes can have the same \(d_i\). Their child domains and ordered parent domains must be compatible. Equal vector lengths alone are insufficient when categories have different meanings; our numerical program deliberately uses aligned integer category indices.</p>
+<p>For \(N\) complete training assignments \(x^{(1)},\ldots,x^{(N)}\), define pooled local counts and their row totals:</p>
+\[c_d(u,k)=\sum_{j=1}^{N}\sum_{i:d_i=d}\mathbf1\{x_{\operatorname{pa}(i)}^{(j)}=u,\ x_i^{(j)}=k\}.\]
+\[C_d(u)=\sum_k c_d(u,k).\]
+<p>Here \(\mathbf1\) is an indicator, equal to one when its condition holds and zero otherwise. The outer sum visits independent complete assignments; the inner sum visits every occurrence of a shared factor. The algorithm initializes all valid \(d,u,k\), counts these occurrences and normalizes each row with positive total. It must not infer the set of variables from whichever keys happen to appear in an incomplete data dictionary.</p>
+<p>For an HMM, the start, transition and emission families are the three values of \(d\). For separate users the rating families differ; for tied users they agree. This single map makes sharing an explicit input to estimation rather than a hidden consequence of a variable name or dictionary alias.</p></section>
+
+<section id="mle"><h2>10. Why counting solves maximum likelihood</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=3172">Recording 52:52–59:38</a></p>
+<p>Maximum likelihood estimation, or MLE, chooses parameters that make the observed training data most probable under the specified family. With independent complete assignments, the likelihood is a product over assignments and their graph factors. Its logarithm groups exactly by the counts just defined:</p>
+\[L(\theta)=\prod_{j=1}^{N}\prod_i\theta_{d_i}(x_{\operatorname{pa}(i)}^{(j)},x_i^{(j)}).\]
+\[\ell(\theta)=\sum_{d,u,k}c_d(u,k)\log\theta_d(u,k).\]
+<p>We use natural logarithms. A positive count at a zero probability gives \(-\infty\) log likelihood; a zero count contributes zero even when its probability is zero. A closed probability simplex is the set of nonnegative vectors whose entries sum to one, including its boundary zeros. The feasible set is a product of these simplexes, one for each row, with no additional constraints coupling them. Shared occurrences have already been grouped. Consequently each row can be optimized separately.</p>
+<p>For one row, write \(c_k\) for its nonnegative counts, \(C=\sum_kc_k>0\), and \(f_k=c_k/C\) for empirical frequencies. Define the Kullback–Leibler divergence \(D_{\mathrm{KL}}(f\Vert\theta)=\sum_{k:f_k>0}f_k\log(f_k/\theta_k)\), with value \(+\infty\) if \(\theta_k=0\) on positive \(f_k\). The difference from the empirical row is</p>
+\[\sum_kc_k\log\theta_k-\sum_kc_k\log f_k=-C\,D_{\mathrm{KL}}(f\Vert\theta)\leq0.\]
+<p>For completeness, the inequality follows from \(\log z\leq z-1\): applying it to \(z=\theta_k/f_k\) on positive-frequency categories gives \(\sum f_k\log(\theta_k/f_k)\leq\sum_{f_k>0}\theta_k-1\leq0\). Equality requires equality in every positive-weight logarithm inequality and no probability mass outside the observed support; hence \(\theta=f\). This proves a unique row optimum on the closed simplex, including zero entries. A derivative calculation restricted to strictly positive entries would miss those boundary optima.</p>
+<p>If \(C=0\), the row contributes zero for every feasible \(\theta\), so all its rows maximize the objective. The complete likelihood cannot identify it. For \(N=0\), every row has this property. In contrast, the lecture's three ratings \(1,5,5\) have optimum \((1/3,0,0,0,2/3)\). For three complete genre/rating assignments \((\mathrm d,4),(\mathrm d,5),(\mathrm c,5)\), grouping yields a root optimum \((2/3,1/3)\), drama row split equally between 4 and 5, and comedy point mass at 5.</p>
+<p>The closed form relies on independent free rows and fully observed factor values. A neural parameterization that couples entries, a constraint tying different rows, or unobserved parents changes the optimization problem. “Count and normalize” is not a universal replacement for optimization in arbitrary probability models.</p></section>
+
+<section id="smoothing"><h2>11. Pseudocounts change the objective</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=3578">Recording 59:38–64:46</a></p>
+<p>For a row with \(K\) declared categories, symmetric additive smoothing adds a pseudocount \(\lambda>0\) to each category:</p>
+\[\widetilde\theta_k=\frac{c_k+\lambda}{C+K\lambda}.\]
+<p>Laplace smoothing commonly refers to the add-one case \(\lambda=1\). With the two ratings 1 and 4 in a five-category domain, add-one smoothing gives \((2/7,1/7,1/7,2/7,1/7)\). Rating 2 now has positive probability, yet observed ratings retain more mass.</p>
+<p>For a fixed positive \(C\), taking \(\lambda\) down to zero recovers the raw MLE. For a fixed count vector, taking \(\lambda\) to infinity gives the uniform row. With fixed finite \(\lambda\) and growing \(C\), the discrepancy from empirical frequencies vanishes: explicitly, \(\widetilde\theta_k-f_k=\lambda(1-Kf_k)/(C+K\lambda)\). This does not apply when \(\lambda\) grows proportionally with the data. For an empty row, every positive \(\lambda\) gives a uniform row, while the raw MLE remains unidentified.</p>
+<p>The same row proof shows that smoothing maximizes \(\sum_k(c_k+\lambda)\log\theta_k\). It is an augmented-count or penalized objective, not the original data likelihood. For the two observed ratings, the raw MLE likelihood is \(1/4\), while the add-one data likelihood is \((2/7)^2=4/49<1/4\). That decrease is expected: the estimator trades training likelihood for positive mass on other categories. A fixed penalty \(\lambda\sum_k\log\theta_k\) may be interpreted as a log prior up to a constant, but it must not be silently switched to a different Bayesian posterior statistic.</p>
+<p>Only categories allowed by the model receive pseudocounts. A structural zero represents an outcome excluded by a known constraint; smoothing it introduces a different support. Choosing the size of \(\lambda\) is a modeling or evaluation decision. The lecture's suggested small values are practical judgment, not a theorem that every application is improved by smoothing.</p></section>
+
+<section id="observed"><h2>12. Hidden data requires a sum inside the logarithm</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=3887">Recording 64:47–70:17</a></p>
+<p>Now the collection records \(R_1,R_2\) but omits genre. Let \(o^{(j)}\) denote the observed part of example \(j\), and \(h\) a complete assignment to its hidden variables. The observed-data likelihood and log likelihood are</p>
+\[L_{\mathrm{obs}}(\theta)=\prod_{j=1}^{N}\left[\sum_hP_\theta(o^{(j)},h)\right].\]
+\[\ell_{\mathrm{obs}}(\theta)=\sum_{j=1}^{N}\log\left[\sum_hP_\theta(o^{(j)},h)\right].\]
+<p>The sum marginalizes unknown values rather than replacing them with one guess. The log of a sum does not distribute into the sum of logs, so the earlier complete-count separation no longer applies. When genre is hidden, even the parent tuple needed for the rating count is unknown.</p>
+<p>In the tied two-genre model, one observed pair has probability \(\sum_g\pi_g\theta_g(r_1)\theta_g(r_2)\). Its posterior over genres, provided this probability is positive, is</p>
+\[q_j(g)=P_{\theta^{\mathrm{old}}}(G=g\mid r_1^{(j)},r_2^{(j)})=\frac{\pi_g^{\mathrm{old}}\theta_g^{\mathrm{old}}(r_1^{(j)})\theta_g^{\mathrm{old}}(r_2^{(j)})}{\sum_{g'}\pi_{g'}^{\mathrm{old}}\theta_{g'}^{\mathrm{old}}(r_1^{(j)})\theta_{g'}^{\mathrm{old}}(r_2^{(j)})}.\]
+<p>These posterior probabilities, called responsibilities, constitute the expectation step or E-step of expectation maximization. They depend on the current parameters and use the whole observed pair. If every joint term is zero, evidence is zero and no normalized posterior is defined. A program must reject the E-step or change its model explicitly; a zero vector is not a posterior.</p>
+<p>We optimize the stated observed-data model. If values are missing through a data-collection process whose probability depends on unknown values or parameters, ignoring that process requires a separate justification. The toy collection fixes which variables are observed in every example and introduces no additional missingness mechanism.</p></section>
+
+<section id="em-case"><h2>13. One complete EM iteration, with exact weights</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=4217">Recording 70:17–76:25</a></p>
+<p>Expectation maximization, or EM, alternates exact posterior inference, the E-step, with a complete-data optimization using expected counts, the maximization step or M-step. Its original general formulation is due to Dempster, Laird and Rubin; their paper defines the conditional expected complete log likelihood and the M-step in <a href="https://math.pku.edu.cn/teachers/xirb/Courses/QR2013/ReadingForFinal/MCMC/dempsterlairdandrubin1977.pdf#page=7">PDF page 7, printed page 6</a>. The following calculation specializes that mechanism to the lecture's tied ratings.</p>
+<p>Restrict ratings to \(\{1,2\}\). Initialize \(\pi=(1/2,1/2)\), \(\theta_0=(3/5,2/5)\), \(\theta_1=(2/5,3/5)\), where component indices 0 and 1 are provisional latent labels. The two observed films have pairs \((1,1)\) and \((2,2)\). For \((1,1)\), the component joint masses are \(9/50\) and \(4/50\), so the evidence is \(13/50\) and responsibilities are \((9/13,4/13)\). For \((2,2)\), these responsibilities reverse.</p>
+<table><thead><tr><th>Observed pair</th><th>Hidden component</th><th>Expected assignment weight</th><th>Contributions to its tied rating row</th></tr></thead><tbody><tr><td>(1,1)</td><td>0</td><td>9/13</td><td>18/13 at rating 1</td></tr><tr><td>(1,1)</td><td>1</td><td>4/13</td><td>8/13 at rating 1</td></tr><tr><td>(2,2)</td><td>0</td><td>4/13</td><td>8/13 at rating 2</td></tr><tr><td>(2,2)</td><td>1</td><td>9/13</td><td>18/13 at rating 2</td></tr></tbody></table>
+<p>Each film still contributes total expected genre mass one, because its responsibilities sum to one. The component totals are both one, so the updated mixing row remains \((1/2,1/2)\). Each rating row has total expected count two, because each film contains two occurrences of the tied rating factor. Therefore \(\theta_0^{\mathrm{new}}=(9/13,4/13)\) and \(\theta_1^{\mathrm{new}}=(4/13,9/13)\). Rounding responsibilities to .69 and .30 would lose their normalization; the exact fractions resolve the lecture's spoken rounding.</p>
+<p>The old observed-data likelihood is \((13/50)^2=169/2500\). After the update, each matching pair has probability \(\tfrac12[(9/13)^2+(4/13)^2]=97/338\), giving \(L_{\mathrm{obs}}=9409/114244\), a strict increase. No hard genre assignment was inserted. A weighted assignment represents an expectation under the old posterior, not a newly observed fact.</p>
+<p>For more heterogeneous pairs, including \((1,2)\) and \((2,1)\), the same counting rule incorporates mixed ratings. The lecture demonstrates a less sharply separated fit in such a collection. That is an illustration for that dataset and initialization; heterogeneous data does not impose a universal lower bound on every learned probability.</p></section>
+
+<section id="monotonicity"><h2>14. The hinge: why an exact EM step cannot lower its objective</h2>
+<p>We can prove the relevant finite claim without assuming that EM reaches a maximum. For each example fix an exact old posterior \(q_j(h)=P_{\theta^{\mathrm{old}}}(h\mid o^{(j)})\), with positive old evidence. Define the expected complete log likelihood and a lower bound</p>
+\[Q(\theta\mid\theta^{\mathrm{old}})=\sum_{j,h}q_j(h)\log P_\theta(o^{(j)},h).\]
+\[F(\theta;q)=Q(\theta\mid\theta^{\mathrm{old}})-\sum_{j,h}q_j(h)\log q_j(h).\]
+<p>A term with \(q_j(h)=0\) contributes zero. If \(q_j(h)>0\) but the candidate joint probability is zero, \(Q\) and \(F\) are \(-\infty\). For a candidate with positive evidence and positive joint support wherever \(q_j\) is positive, substituting its posterior into the definition of KL gives the exact identity</p>
+\[\ell_{\mathrm{obs}}(\theta)=F(\theta;q)+\sum_jD_{\mathrm{KL}}\!\left(q_j\Vert P_\theta(H\mid o^{(j)})\right)\geq F(\theta;q).\]
+<p>The algebra is simply \(\log P_\theta(o,h)=\log P_\theta(h\mid o)+\log P_\theta(o)\), summed with weights \(q_j(h)\). At the old parameters, each KL divergence is zero, so the bound is tight. The entropy term \(-\sum q\log q\) remains constant during the M-step. If the new parameters increase or preserve \(Q\), then</p>
+\[\ell_{\mathrm{obs}}(\theta^{\mathrm{new}})\geq F(\theta^{\mathrm{new}};q)\geq F(\theta^{\mathrm{old}};q)=\ell_{\mathrm{obs}}(\theta^{\mathrm{old}}).\]
+<p>This is the support-aware finite version of the generalized-EM monotonicity mechanism in <a href="https://math.pku.edu.cn/teachers/xirb/Courses/QR2013/ReadingForFinal/MCMC/dempsterlairdandrubin1977.pdf#page=8">Dempster, Laird and Rubin, PDF page 8, Theorem 1 and equation (3.10)</a>. A full maximization of \(Q\) suffices, but an increase is enough. Strict improvement need not occur: both inequalities can be equalities.</p>
+<p>In a finite table model, replacing actual counts with their posterior expectations makes \(Q\) a sum of count-weighted row log probabilities. Normalizing each positive expected-count row maximizes it by the already proved row theorem. A row with zero expected total is nonunique; retaining its old normalized entries is one valid choice. A component with zero expected mass receives mixing probability zero and its unused rating row does not affect the observed distribution. Preserving that row is not evidence that it has been learned.</p>
+<p>The guarantee applies to this exact unsmoothed objective and these valid steps. Adding a fixed log-prior penalty to both the M-step and objective gives a corresponding penalized argument, as the original paper discusses on PDF page 7; it does not establish raw-likelihood improvement. A hard assignment replaces the posterior expectation and changes the algorithm. An approximate Gibbs E-step does not automatically produce a tight bound, and finite sampling error can defeat monotonicity. Numerical rounding can also break an exact comparison. Our small program uses rational arithmetic and computes the full observed likelihood explicitly, so those particular arithmetic approximations are absent.</p></section>
+
+<section id="limits"><h2>15. A fixed point can be a saddle; labels need not be genres</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=4585">Recording 76:25–78:55</a></p>
+<p>The recording describes increasing likelihood, convergence to a local maximum, nonuniform initialization and latent-label ambiguity. Likelihood monotonicity is the proved claim above. Convergence of likelihood values, convergence of parameters, stationarity and local maximality are different claims. Since a finite dataset likelihood lies between zero and one, a nondecreasing likelihood sequence has a limit. That alone says nothing about a unique parameter limit or a locally maximal endpoint.</p>
+<p>Here is an exact counterexample to unconditional local maximality. Use the same two matching rating pairs, but initialize balanced mixing and identical component rows \((1/2,1/2)\). Responsibilities remain balanced for both examples. Each M-step returns those same rows. EM stays at a fixed point with each matching-pair probability \(1/4\) and full likelihood \(1/16\).</p>
+<p>Perturb the two kernels in opposite directions: \(\theta_0=(1/2+\delta,1/2-\delta)\), \(\theta_1=(1/2-\delta,1/2+\delta)\), with balanced mixing and \(0&lt;|\delta|&lt;1/2\). Both matching pairs have probability \(1/4+\delta^2\), so the likelihood \((1/4+\delta^2)^2\) is larger. Perturb both kernels in the same direction instead. The pair probabilities are \((1/2+\delta)^2\) and \((1/2-\delta)^2\), giving likelihood \((1/4-\delta^2)^2\), which is smaller. Arbitrarily near the fixed point there are both better and worse parameters: it is a saddle, not a local maximum.</p>
+<p>Asymmetric component response kernels can break this particular symmetry. Changing only the mixing proportions while leaving the two identical kernels does not suffice: every posterior equals the mixing row, and both kernels still update to the same pooled response distribution. “Nonuniform initialization” must identify which parameters distinguish components. Trying several initializations and comparing the intended objective is useful practice; it is not proof of a global optimum.</p>
+<p>Exchanging both component labels leaves \(\sum_g\pi_g\theta_g(r_1)\theta_g(r_2)\) unchanged. Thus the observed distribution alone cannot tell which learned component deserves the semantic name drama. Label ambiguity is not the only possible identifiability failure. If just one binary rating per film is observed, the distribution depends only on \(p=\pi_0\theta_0(1)+\pi_1\theta_1(1)\); many different mixtures have the same \(p\). Even with two ratings, additional degenerate cases can occur. A learned latent component is a device for explaining the modeled data, not a discovered real-world category without further evidence.</p></section>
+
+<section id="implementation"><h2>16. An executable estimator with explicit failure boundaries</h2>
+<p>The original standard-library program <a href="programs/chapter14.py">chapter14.py</a> implements declared-domain complete-data counting and a specialized exact EM model for two binary rating draws per film. Values in the generic DAG are integer category indices starting at zero. The two-user display labels 1 and 2 correspond to program indices 0 and 1. No dependency beyond Python 3's standard library is required.</p>
+<p><code>fit_complete</code> accepts 1–16 nodes in topological order, each with 1–8 categories; table signatures include ordered parent cardinalities and child cardinality. It allows at most 4096 distinct parameter rows and 256 complete assignments. All declared rows and categories appear in its return values. An unsmoothed zero-count row returns <code>None</code>, explicitly meaning unidentified. A positive smoothing value produces a row there by the augmented objective. It rejects incompatible sharing, duplicate or unknown parents, cycles through the topological interface, invalid category indices, and missing or extra assignment keys.</p>
+<p>The numeric interface accepts nonnegative Python integers or <code>Fraction</code> values, with at most 4096 bits in each numerator and denominator. It rejects booleans, floats and negative values, and applies the same bit limit to results explicitly passed through <code>exact</code>. Python's rational operations can create larger temporary intermediate values before the next check; this is not a bound on every intermediate allocation or on peak memory. This is a deliberately finite teaching interface, not arbitrary real-number arithmetic. Probability rows must sum exactly to one. Accepted computations retain exact rational values rather than silently replacing an extremely small positive probability with zero.</p>
+<p><code>posterior</code> requires positive evidence. <code>likelihood</code> may return zero for impossible data, because an impossible-data likelihood is defined even when its posterior is not. <code>em_step</code> reports which components have zero expected mass and retains their old unused kernels as valid nonunique M-step choices. <code>run_em</code> performs 0–5 exact updates on 1–256 pairs and compares the complete observed-data likelihood after every update. Fractions can grow rapidly under repeated EM; the iteration and bit limits are computational boundaries rather than convergence criteria.</p>
+<p>The functions return fresh structures and neither write files nor alter their arguments. Importing the module has no output. Running the file executes the following fixed demonstration. Its pooled counts, exact responsibilities, full likelihood and boundary reports provide reproducible checks of specific cases; the mathematical proof supplies the general finite monotonicity claim.</p>
+<!-- AUTHOR-PROGRAM-START -->
+<pre><code id="chapter-program" class="language-python">&quot;&quot;&quot;Exact finite parameter estimation and a tied binary-rating EM example.
+
+Run with Python 3, standard library only. Importing does not print or write.
+The bounded contract intentionally rejects floats and bools: numbers are
+Python ints or Fractions, with at most 4096 numerator/denominator bits.
+&quot;&quot;&quot;
+
+from fractions import Fraction
+from itertools import product
+
+
+MAX_BITS = 4096
+MAX_ROWS = 4096
+
+
+def exact(value):
+    &quot;&quot;&quot;Validate a bounded nonnegative exact number, without coercing floats.&quot;&quot;&quot;
+    if type(value) not in (int, Fraction):
+        raise ValueError(&quot;numbers must be ints or Fractions, not bools/floats&quot;)
+    result = Fraction(value)
+    if result &lt; 0 or max(result.numerator.bit_length(),
+                         result.denominator.bit_length()) &gt; MAX_BITS:
+        raise ValueError(&quot;negative number or exact-integer bit limit exceeded&quot;)
+    return result
+
+
+def row(values):
+    &quot;&quot;&quot;A normalized finite probability row; structural zeros are allowed.&quot;&quot;&quot;
+    if type(values) not in (tuple, list) or not 1 &lt;= len(values) &lt;= 8:
+        raise ValueError(&quot;a probability row must have 1 through 8 entries&quot;)
+    result = tuple(exact(v) for v in values)
+    if sum(result) != 1:
+        raise ValueError(&quot;a probability row must sum exactly to one&quot;)
+    return result
+
+
+def normalize(counts, smoothing=0):
+    &quot;&quot;&quot;Return a smoothed row, or None for an unidentified unsmoothed row.&quot;&quot;&quot;
+    if type(counts) not in (tuple, list) or not 1 &lt;= len(counts) &lt;= 8:
+        raise ValueError(&quot;a count row must have 1 through 8 entries&quot;)
+    lam = exact(smoothing)
+    adjusted = tuple(exact(exact(c) + lam) for c in counts)
+    total = exact(sum(adjusted))
+    return tuple(exact(c / total) for c in adjusted) if total else None
+
+
+def schema(specification):
+    &quot;&quot;&quot;Check (variable, cardinality, ordered parents, table name) records.
+
+    Values are integer indices 0,...,cardinality-1. Parent names must precede
+    their child. Shared tables need identical ordered parent cardinalities
+    and child cardinality. This topological interface excludes cycles.
+    &quot;&quot;&quot;
+    if (type(specification) not in (tuple, list)
+            or not 1 &lt;= len(specification) &lt;= 16):
+        raise ValueError(&quot;schema requires 1 through 16 nodes&quot;)
+    known, signatures, records = {}, {}, []
+    for item in specification:
+        if type(item) not in (tuple, list) or len(item) != 4:
+            raise ValueError(&quot;each node requires four fields&quot;)
+        name, size, parents, table = item
+        if (type(name) is not str or not name or name in known
+                or type(table) is not str or not table):
+            raise ValueError(&quot;unique nonempty node and nonempty table names&quot;)
+        if type(size) is not int or not 1 &lt;= size &lt;= 8:
+            raise ValueError(&quot;cardinality must be an integer from 1 to 8&quot;)
+        if (type(parents) not in (tuple, list)
+                or any(type(p) is not str for p in parents)
+                or len(set(parents)) != len(parents)
+                or any(p not in known for p in parents)):
+            raise ValueError(&quot;distinct parents must precede their child&quot;)
+        parents = tuple(parents)
+        signature = (tuple(known[p] for p in parents), size)
+        if table in signatures and signatures[table] != signature:
+            raise ValueError(&quot;shared table signatures must agree&quot;)
+        signatures[table] = signature
+        known[name] = size
+        records.append((name, size, parents, table))
+    number_rows = sum(_row_count(s[0]) for s in signatures.values())
+    if number_rows &gt; MAX_ROWS:
+        raise ValueError(&quot;schema exceeds 4096 distinct parameter rows&quot;)
+    return tuple(records), known, signatures
+
+
+def _row_count(sizes):
+    result = 1
+    for size in sizes:
+        result *= size
+    return result
+
+
+def fit_complete(specification, assignments, smoothing=0):
+    &quot;&quot;&quot;Count declared factor occurrences; return (counts, parameter rows).
+
+    Up to 256 complete assignments; every declared row/category is present
+    in the result. None means the raw likelihood leaves that row unidentified.
+    No missing keys, extra keys, bool-valued states or unknown states pass.
+    &quot;&quot;&quot;
+    records, domains, signatures = schema(specification)
+    lam = exact(smoothing)
+    if type(assignments) not in (tuple, list) or len(assignments) &gt; 256:
+        raise ValueError(&quot;assignments must be a list/tuple of length &lt;=256&quot;)
+    counts = {}
+    for table, (sizes, size) in signatures.items():
+        for parent_values in product(*(range(s) for s in sizes)):
+            counts[(table, parent_values)] = [0] * size
+    for assignment in assignments:
+        if type(assignment) is not dict or set(assignment) != set(domains):
+            raise ValueError(&quot;assignment keys must match all declared nodes&quot;)
+        for name, size in domains.items():
+            value = assignment[name]
+            if type(value) is not int or not 0 &lt;= value &lt; size:
+                raise ValueError(&quot;state must be a declared integer index&quot;)
+        for name, _, parents, table in records:
+            parent_values = tuple(assignment[p] for p in parents)
+            counts[(table, parent_values)][assignment[name]] += 1
+    counts = {key: tuple(value) for key, value in counts.items()}
+    return counts, {key: normalize(c, lam) for key, c in counts.items()}
+
+
+def model(parameters):
+    &quot;&quot;&quot;Two mixing probabilities and two tied binary-rating kernels.&quot;&quot;&quot;
+    if type(parameters) not in (tuple, list) or len(parameters) != 2:
+        raise ValueError(&quot;model is (mixing row, two component rows)&quot;)
+    mixing, kernels = parameters
+    mixing = row(mixing)
+    if (len(mixing) != 2 or type(kernels) not in (tuple, list)
+            or len(kernels) != 2):
+        raise ValueError(&quot;exactly two components are required&quot;)
+    kernels = tuple(row(k) for k in kernels)
+    if any(len(k) != 2 for k in kernels):
+        raise ValueError(&quot;each component has two rating probabilities&quot;)
+    return mixing, kernels
+
+
+def observations(data):
+    &quot;&quot;&quot;One through 256 ordered pairs of binary rating indices.&quot;&quot;&quot;
+    if type(data) not in (tuple, list) or not 1 &lt;= len(data) &lt;= 256:
+        raise ValueError(&quot;data require 1 through 256 rating pairs&quot;)
+    checked = []
+    for pair in data:
+        if (type(pair) not in (tuple, list) or len(pair) != 2
+                or any(type(v) is not int or v not in (0, 1) for v in pair)):
+            raise ValueError(&quot;ratings must be integer indices zero or one&quot;)
+        checked.append(tuple(pair))
+    return tuple(checked)
+
+
+def _joint(parameters, pair):
+    mixing, kernels = parameters
+    a, b = pair
+    return tuple(exact(mixing[g] * kernels[g][a] * kernels[g][b])
+                 for g in range(2))
+
+
+def posterior(parameters, pair):
+    &quot;&quot;&quot;Exact P(component | pair); zero evidence has no posterior.&quot;&quot;&quot;
+    parameters = model(parameters)
+    pair = observations([pair])[0]
+    joint = _joint(parameters, pair)
+    evidence = exact(sum(joint))
+    if not evidence:
+        raise ValueError(&quot;zero evidence: posterior is undefined&quot;)
+    return tuple(exact(v / evidence) for v in joint)
+
+
+def likelihood(parameters, data):
+    &quot;&quot;&quot;Full observed-data likelihood product; zero likelihood is allowed.&quot;&quot;&quot;
+    parameters, data = model(parameters), observations(data)
+    result = Fraction(1)
+    for pair in data:
+        result = exact(result * exact(sum(_joint(parameters, pair))))
+    return result
+
+
+def em_step(parameters, data):
+    &quot;&quot;&quot;One exact unsmoothed EM step and unused-component flags.
+
+    A zero expected component mass makes its rating kernel unidentified;
+    retain the old kernel as a valid maximizer, explicitly flagging this.
+    &quot;&quot;&quot;
+    parameters, data = model(parameters), observations(data)
+    masses = [Fraction(0), Fraction(0)]
+    counts = [[Fraction(0), Fraction(0)] for _ in range(2)]
+    for pair in data:
+        weights = posterior(parameters, pair)
+        for g, weight in enumerate(weights):
+            masses[g] = exact(masses[g] + weight)
+            for value in pair:
+                counts[g][value] = exact(counts[g][value] + weight)
+    mixing = tuple(exact(m / len(data)) for m in masses)
+    unused = tuple(not m for m in masses)
+    kernels = tuple(parameters[1][g] if unused[g] else normalize(counts[g])
+                    for g in range(2))
+    return model((mixing, kernels)), unused
+
+
+def run_em(parameters, data, iterations):
+    &quot;&quot;&quot;Zero through five updates, with exact full-objective comparisons.
+
+    A bit-limit violation raises ValueError rather than rounding an exact
+    probability or pretending that unsupported arithmetic has converged.
+    &quot;&quot;&quot;
+    if type(iterations) is not int or not 0 &lt;= iterations &lt;= 5:
+        raise ValueError(&quot;iterations must be an integer from zero to five&quot;)
+    parameters, data = model(parameters), observations(data)
+    history = [likelihood(parameters, data)]
+    for _ in range(iterations):
+        parameters, _ = em_step(parameters, data)
+        current = likelihood(parameters, data)
+        if current &lt; history[-1]:
+            raise AssertionError(&quot;exact unsmoothed EM decreased likelihood&quot;)
+        history.append(current)
+    return parameters, tuple(history)
+
+
+def main():
+    spec = ((&quot;G&quot;, 2, (), &quot;genre&quot;),
+            (&quot;R1&quot;, 5, (&quot;G&quot;,), &quot;rating&quot;),
+            (&quot;R2&quot;, 5, (&quot;G&quot;,), &quot;rating&quot;))
+    data = [dict(G=g, R1=a - 1, R2=b - 1) for g, a, b in
+            [(0, 4, 5), (0, 4, 4), (0, 5, 3), (1, 1, 2), (1, 5, 4)]]
+    counts, fitted = fit_complete(spec, data)
+    print(&quot;pooled drama counts:&quot;, counts[(&quot;rating&quot;, (0,))])
+    print(&quot;pooled drama row:&quot;, &quot;, &quot;.join(map(str, fitted[(&quot;rating&quot;, (0,))])))
+    print(&quot;unseen row:&quot;, normalize([0, 0]))
+    add_one = normalize([1, 0, 0, 1, 0], 1)
+    print(&quot;add-one ratings:&quot;, &quot;, &quot;.join(map(str, add_one)))
+    initial = ((Fraction(1, 2), Fraction(1, 2)),
+               ((Fraction(3, 5), Fraction(2, 5)),
+                (Fraction(2, 5), Fraction(3, 5))))
+    pairs = [(0, 0), (1, 1)]
+    first_weights = posterior(initial, pairs[0])
+    print(&quot;first posterior:&quot;, &quot;, &quot;.join(map(str, first_weights)))
+    updated, history = run_em(initial, pairs, 1)
+    print(&quot;first component:&quot;, &quot;, &quot;.join(map(str, updated[1][0])))
+    print(&quot;likelihood:&quot;, &quot; -&gt; &quot;.join(map(str, history)))
+    symmetric = ((Fraction(1, 2), Fraction(1, 2)),
+                 ((Fraction(1, 2), Fraction(1, 2)),) * 2)
+    fixed, _ = run_em(symmetric, pairs, 5)
+    print(&quot;symmetric fixed point:&quot;, fixed == symmetric)
+    print(&quot;opposite perturbation improves:&quot;,
+          likelihood(initial, pairs) &gt; likelihood(symmetric, pairs))
+    unused_model = ((1, 0), ((Fraction(1, 2), Fraction(1, 2)), (1, 0)))
+    _, unused = em_step(unused_model, [(0, 1)])
+    print(&quot;unused component flags:&quot;, unused)
+    impossible = ((1, 0), ((1, 0), (0, 1)))
+    try:
+        posterior(impossible, (1, 1))
+    except ValueError as error:
+        print(&quot;zero-evidence rejection:&quot;, error)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<!-- AUTHOR-PROGRAM-END -->
+<h3>Actual expected output</h3>
+<!-- AUTHOR-STDOUT-START -->
+<pre><code id="chapter-output" class="language-text">pooled drama counts: (0, 0, 1, 3, 2)
+pooled drama row: 0, 0, 1/6, 1/2, 1/3
+unseen row: None
+add-one ratings: 2/7, 1/7, 1/7, 2/7, 1/7
+first posterior: 9/13, 4/13
+first component: 9/13, 4/13
+likelihood: 169/2500 -&gt; 9409/114244
+symmetric fixed point: True
+opposite perturbation improves: True
+unused component flags: (False, True)
+zero-evidence rejection: zero evidence: posterior is undefined
+</code></pre>
+<!-- AUTHOR-STDOUT-END -->
+<p>Run <code>python programs/chapter14.py</code> from the course repository directory. For a zero-evidence model, the demonstration catches and prints the specified <code>ValueError</code>; callers of the function receive that exception directly. The symmetric result is intentionally unchanged, illustrating why a stable output cannot certify a maximum.</p></section>
+
+<section id="exercises"><h2>17. Exercises with complete solutions</h2>
+<div class="problem"><h3>Exercise 1. A boundary optimum and an unidentified row</h3><p>A three-category row has counts \((2,0,1)\). Find all raw-likelihood maximizers on the closed simplex, prove your answer without assuming every probability is positive, and compare with counts \((0,0,0)\). What changes if the optimization is restricted to strictly positive entries?</p>
+<details class="solution"><summary>Solution</summary><p>The positive-count total is three, so the empirical row is \(f=(2/3,0,1/3)\). For any candidate with positive probabilities at categories 1 and 3, the log-likelihood difference from this row is \(-3D_{\mathrm{KL}}(f\Vert\theta)\leq0\). A zero probability at either positive-count category gives likelihood zero and cannot maximize it. Equality in the KL proof forces \(\theta_1=2/3,\theta_3=1/3\); normalization then forces \(\theta_2=0\). This is the unique closed-simplex optimum. Its likelihood is \((2/3)^2(1/3)=4/27\).</p><p>For zero counts every likelihood is the empty product one, and every log likelihood is zero. Every feasible row maximizes it; no data-based normalization is available. For the positive-count row on the strictly positive simplex, the closed optimum is excluded. Rows approaching it attain likelihoods approaching \(4/27\), but no positive row attains that supremum because it wastes positive mass on category 2. Thus a gradient calculation seeking an interior maximizer would fail to characterize the actual boundary solution.</p></details></div>
+
+<div class="problem"><h3>Exercise 2. Two kinds of pooling that must not be confused</h3><p>For \(G\to R\leftarrow A\), use the five assignments in Section 5 to find the drama/no-award row and explain why dropping \(A\) changes the estimate. Then use the two-user collection in Section 6 to compare the two separate drama rows with their tied row. Does tying make \(R_1=R_2\) almost surely?</p>
+<details class="solution"><summary>Solution</summary><p>Among drama/no-award assignments the ratings are 3 and 1. The row is \((1/2,0,1/2,0,0)\). Pooling across award values adds a rating 5, producing the genre-only row \((1/3,0,1/3,0,1/3)\). It no longer answers the same conditional question. The correct row index is the ordered pair of parent values \((G,A)\).</p><p>The two separate drama rows are \((0,0,0,2/3,1/3)\) for user 1 and \((0,0,1/3,1/3,1/3)\) for user 2. Tying pools their three occurrences each, giving counts \((0,0,1,3,2)\) and row \((0,0,1/6,1/2,1/3)\). This is a shared conditional law, not equality of random outcomes. Under the tied model the conditional probability of different ratings is \(1-\sum_k\theta_{\mathrm d}(k)^2=1-(1/36+1/4+1/9)=11/18\), strictly positive. The variables are conditionally independent draws with the same law.</p></details></div>
+
+<div class="problem"><h3>Exercise 3. Learn an HMM without creating a false transition</h3><p>Recover the start, transition and emission counts from the two sequences in Section 8. Find their normalized rows and the number of free parameters. If the sequences are concatenated before transition counting, which false count is introduced? Does extending each sequence to length 100 increase the number of time-homogeneous binary parameters?</p>
+<details class="solution"><summary>Solution</summary><p>Both sequences start at state 0, giving \((2,0)\). The first path contributes \(0\to1\) and \(1\to0\); the second contributes two \(0\to0\) moves. Thus transition rows have counts \((2,1)\) from 0 and \((1,0)\) from 1, normalizing to \((2/3,1/3)\) and \((1,0)\). At state 0 the first sequence has two emissions 0, while the second has three emissions 1. The state-0 emission counts are \((2,3)\), giving \((2/5,3/5)\). State 1 occurs once and emits 1, giving \((0,1)\). The start row is \((1,0)\).</p><p>Concatenation adds an artificial \(0\to0\) transition from the first sequence's last state to the next sequence's first state. The erroneous state-0 row becomes counts \((3,1)\), hence \((3/4,1/4)\). Independent sequences are each governed by a fresh start factor, not this transition. There are five free parameters: one start simplex coordinate, two transition-row coordinates and two emission-row coordinates. A longer time-homogeneous sequence reuses these five parameters while adding states, observations, factor occurrences and inference work.</p></details></div>
+
+<div class="problem"><h3>Exercise 4. Smoothing is neither new data nor raw MLE</h3><p>Five rating categories have counts \((1,0,0,1,0)\). Compute the add-one row and compare its raw training likelihood with the raw MLE. Derive the fixed-\(\lambda\) discrepancy from empirical frequencies. If \(\lambda=\alpha C\), with constant \(\alpha>0\), does increasing \(C\) wash out the pseudocounts?</p>
+<details class="solution"><summary>Solution</summary><p>Adding one to each category gives \((2,1,1,2,1)\) with total seven, hence \((2/7,1/7,1/7,2/7,1/7)\). The two observed probabilities multiply to \(4/49\). The raw MLE puts \(1/2\) at each observed category and zero elsewhere, giving likelihood \(1/4\), which is larger since \(16&lt;49\). The smoothed row maximizes the augmented count objective, not raw likelihood. Its positive unseen probabilities represent the estimator's imposed regularization.</p><p>For \(f_k=c_k/C\), subtraction gives \((c_k+\lambda)/(C+K\lambda)-c_k/C=\lambda(1-Kf_k)/(C+K\lambda)\), tending to zero at fixed finite \(\lambda\) as \(C\) grows. If \(\lambda=\alpha C\), the row is \((f_k+\alpha)/(1+K\alpha)\); a fixed share of uniform regularization remains. Even with an empirical limiting distribution, the estimate generally approaches this modified distribution rather than the same limit. “More data washes it out” therefore needs the fixed-pseudocount premise.</p></details></div>
+
+<div class="problem"><h3>Exercise 5. Do the whole E-step and M-step</h3><p>Using the initialization and two matching pairs in Section 13, derive both posterior rows, all expected component/rating counts, the new parameters and both full likelihoods. Explain how to handle a component with zero expected mass. Finally identify the inequality that makes the likelihood proof work, and one reason an approximate E-step might invalidate it.</p>
+<details class="solution"><summary>Solution</summary><p>For \((1,1)\), the two joint masses are \((1/2)(3/5)^2=9/50\) and \((1/2)(2/5)^2=4/50\); divide by their sum \(13/50\) to get \((9/13,4/13)\). For \((2,2)\), they reverse to \((4/13,9/13)\). Expected component masses are \(9/13+4/13=1\) each, so the mixing row remains \((1/2,1/2)\). Component 0's expected rating counts are \((18/13,8/13)\), and component 1's are \((8/13,18/13)\). Their totals are two, producing rows \((9/13,4/13)\) and \((4/13,9/13)\).</p><p>The old full observed likelihood is \((13/50)^2=169/2500\). The new matching-pair evidence is \((81+16)/(2\cdot169)=97/338\), so the new full likelihood is \(9409/114244\). The latter is larger because each evidence is larger: \(97\cdot50=4850&gt;13\cdot338=4394\). This compares the original observed-data objective, not the posterior weights or Q values alone.</p><p>A zero expected component mass makes its mixing probability zero. Its rating row has zero expected counts, so every normalized row maximizes that part of Q; retaining the old row is valid and explicitly nonunique. Zero evidence for a whole observed pair instead makes the posterior undefined and prevents this E-step.</p><p>The hinge is \(\ell_{\mathrm{obs}}(\theta)\geq F(\theta;q)\), tight at the old parameters when q is the exact old posterior. Increasing Q increases F with that q held fixed. An approximate E-step may give a q for which the bound is not tight at the old parameters; merely increasing that approximate bound need not surpass the old true likelihood. Hard assignments and finite Gibbs approximations therefore do not inherit the exact argument without additional control.</p></details></div>
+
+<div class="problem"><h3>Exercise 6. Stable EM output is not an identified maximum</h3><p>Show that balanced mixing and two identical \((1/2,1/2)\) kernels form an EM fixed point for \((1,1),(2,2)\). Classify the point using perturbations of both kernels. Would mixing weights \((3/4,1/4)\) alone break the component-response symmetry? Explain label ambiguity and give a nonidentifiability example beyond swapping labels.</p>
+<details class="solution"><summary>Solution</summary><p>With identical kernels, both observed pairs have the same conditional likelihood in either component. The posterior equals the mixing row. Balanced mixing gives responsibility \(1/2\) per component per film, expected component total one and expected rating counts \((1,1)\) in each component. Normalizing returns the initial parameters. The full likelihood is \(1/16\).</p><p>Opposite response perturbations \((1/2+\delta,1/2-\delta)\) and \((1/2-\delta,1/2+\delta)\) give likelihood \((1/4+\delta^2)^2&gt;1/16\). Equal response perturbations give \((1/4-\delta^2)^2&lt;1/16\), for any nonzero \(|\delta|&lt;1/2\). Better and worse parameters occur arbitrarily close, so this fixed point is a saddle. Monotonicity is satisfied by remaining there and does not imply local maximality.</p><p>With mixing \((3/4,1/4)\) but identical kernels, each posterior remains \((3/4,1/4)\). The component totals are \(3/2\) and \(1/2\), preserving the mixing row. Each component's weighted ratings remain equally split between 1 and 2, so both kernels remain identical. Mixing asymmetry alone fails to break the response symmetry in this case.</p><p>A simultaneous exchange of component weights and kernels leaves the observed joint distribution unchanged, so latent names are not identified. With only one binary rating observed per film, balanced mixing with kernels \((1,0),(0,1)\) and balanced mixing with both kernels \((1/2,1/2)\) give the same marginal \((1/2,1/2)\). These models are not related solely by label swapping. Observed data must contain enough structure to distinguish the parameters of interest; an algorithm cannot create that information.</p></details></div>
+</section>
+
+<section id="synthesis"><h2>18. The question that precedes the algorithm</h2><p class="timestamp"><a href="https://www.youtube.com/watch?v=4d9V6Sxa6gU&amp;t=4734">Recording 78:54–80:24</a></p>
+<p>Before learning a probability table, specify what is observed, which factors reuse a table, which categories are possible, and which objective is being optimized. Fully observed independent assignments give exact local counts and a rowwise MLE. Tying pools factor occurrences and restricts the family. Pseudocounts fill unobserved categories by changing the objective. Hidden variables require posterior uncertainty over completions; exact EM converts that uncertainty into expected counts and preserves the corresponding likelihood through a tight-bound argument.</p>
+<p>The movie service can now distinguish an estimated zero, an unidentified row, a regularized positive probability and an inferred latent component. Those are different outputs with different justification. None by itself proves a semantic genre or a global optimum. The lecture next turns to logic and quantified statements such as “every student has a teaching assistant,” introducing a different formal vocabulary for reasoning.</p></section>
+
+<section id="references"><h2>Sources and primary reference</h2><p>Stanford CS221, <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/bayes_learning.py"><code>bayes_learning.py</code> at commit <code>f70063773fe9e04ddcbc248059501837053b810a</code></a>, is the official executable lecture used as a notation and fact source. It supplies the categorical and conditional count examples, parameter-sharing and fully observed HMM examples, complete-data learning mechanism, and tied binary-rating EM example. The chapter's formal qualifications, developed proofs, original program and exercises are teaching constructions.</p><p>A. P. Dempster, N. M. Laird and D. B. Rubin (1977), <a href="https://math.pku.edu.cn/teachers/xirb/Courses/QR2013/ReadingForFinal/MCMC/dempsterlairdandrubin1977.pdf">Maximum Likelihood from Incomplete Data via the EM Algorithm</a>, <em>Journal of the Royal Statistical Society, Series B</em> 39(1), 1–38. The chapter uses the incomplete-data marginalization, conditional expected complete log likelihood, generalized-EM monotonicity and distinction between likelihood and a penalized objective; its finite cases, proofs, implementation and exercises are original teaching constructions.</p></section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-13-conditional-inference-and-gibbs-sampling.html">Previous available chapter</a><a href="index.html">Lecture index</a><a rel="next" href="lecture-15-propositional-logic-and-justified-answers.html">Next available chapter</a></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

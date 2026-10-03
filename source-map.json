@@ -5520,6 +5520,1435 @@
       "chapter": "lecture-13-conditional-inference-and-gibbs-sampling.html",
       "video_id": "Dk7Kqqehzjk",
       "duration": 4554
+    },
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Movie-service joint-prediction case; future unseen-rating and hidden-genre decisions.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite IID training and prediction task, fixed graph and domains",
+          "origin": "Original formal teaching case"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "review",
+      "start": 5.33,
+      "end": 805.68,
+      "lecture_material": "Bayesian-network factorization, exact/rejection/Gibbs inference and chain/fork/collider separation review.",
+      "research_extension": null,
+      "teaching_construction": "Topological normalization; guaranteed graph independence versus numerical accidental independence and causal scope.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "DAG, parent tuple, local rows and inference mechanisms",
+          "origin": "Recording; original explicit domains"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite joint normalization by reverse topological summation",
+          "origin": "Original proof"
+        },
+        {
+          "class": "definition",
+          "claim": "Graph-implied independence versus additional numerical independence and causality",
+          "origin": "Original qualification of recorded graph discussion"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "categorical",
+      "start": 805.68,
+      "end": 1077.14,
+      "lecture_material": "Single rating domain and ten-rating count/normalize example.",
+      "research_extension": null,
+      "teaching_construction": "All categories retained; empty-row interpretation deferred to its explicit likelihood proof.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Categorical count and normalization rule",
+          "origin": "Recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Counts (1,0,1,5,3) and row (1/10,0,1/10,1/2,3/10)",
+          "origin": "Actual official example and original arithmetic"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "conditional",
+      "start": 1077.14,
+      "end": 1328.06,
+      "lecture_material": "Genre-conditioned rating rows and their separate denominators.",
+      "research_extension": null,
+      "teaching_construction": "Unobserved parent row versus zero child count distinction.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Separate conditional probability rows",
+          "origin": "Recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Five-film root and conditional rows",
+          "origin": "Actual official assignments and original arithmetic"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "parents",
+      "start": 1328.06,
+      "end": 1602.67,
+      "lecture_material": "Genre and award roots as joint parents of rating.",
+      "research_extension": null,
+      "teaching_construction": "Joint-parent tuple counting and fitted-family versus empirical-root-independence distinction.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Joint parent indexing and graph family",
+          "origin": "Recording; actual official collider visual"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Drama/no-award half-mass ratings1/3 and other point-mass rows",
+          "origin": "Actual official assignments and original arithmetic"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "separate",
+      "start": 1603.95,
+      "end": 1790.8,
+      "lecture_material": "Two users with distinct conditional rating tables.",
+      "research_extension": null,
+      "teaching_construction": "Conditional independence does not assert equal response kernels.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Separate random variables and kernels",
+          "origin": "Recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Separate drama rows",
+          "origin": "Actual official data and original arithmetic"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "tying",
+      "start": 1790.8,
+      "end": 2271.41,
+      "lecture_material": "One rating table shared across both users; counts pooled and flexibility/data tradeoff.",
+      "research_extension": null,
+      "teaching_construction": "Shared factor occurrences versus independent films;17-versus9 free parameters and parameter connections versus graph arrows.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Parameter tying and pooled occurrences",
+          "origin": "Recording; actual official sharing diagram"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Drama/comedy pooled counts and17-versus9 dimensions",
+          "origin": "Original exact arithmetic"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Fewer parameters can help under suitable modeling assumptions",
+          "origin": "Recording motivation with explicit qualification, not a universal generalization result"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "hmm",
+      "start": 2271.41,
+      "end": 2640.18,
+      "lecture_material": "Start/transition/emission parameter sharing in fully observed binary HMM.",
+      "research_extension": null,
+      "teaching_construction": "Independent sequence boundaries and posterior transition requirement when hidden.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Time-homogeneous HMM factorization and table families",
+          "origin": "Recording; actual official HMM visual"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Two-sequence counts, five normalized rows and five free parameters",
+          "origin": "Actual official data and original arithmetic"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "general",
+      "start": 2640.18,
+      "end": 3172.99,
+      "lecture_material": "Node-to-parameter table map and generic complete-assignment counting; fixed graph.",
+      "research_extension": null,
+      "teaching_construction": "Declared domains, ordered signatures, all row initialization and explicit pooled count formula.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Table identity map and local count algorithm",
+          "origin": "Recording; original formalization"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "mle",
+      "start": 3172.99,
+      "end": 3578.45,
+      "lecture_material": "Maximum likelihood, log objective, one/two-variable grouping and count/normalize closed form.",
+      "research_extension": null,
+      "teaching_construction": "Closed-simplex KL proof, positive-support convention, empty-row nonuniqueness and coupled-parameter limits.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Independent complete-data likelihood",
+          "origin": "Recording topic; original explicit assumptions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Rowwise unique empirical-frequency optimum for positive total; every row optimal for zero total",
+          "origin": "Original support-aware proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Three ratings and three genre/rating assignments",
+          "origin": "Recorded examples and original exact arithmetic"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "smoothing",
+      "start": 3578.45,
+      "end": 3886.86,
+      "lecture_material": "Additive pseudocounts and small/large smoothing and large-data limits.",
+      "research_extension": "Dempster PDF7/printed6: prior modifies M-step and corresponding objective.",
+      "teaching_construction": "Fixed-lambda discrepancy, augmented-count objective, raw likelihood decrease and structural-zero scope.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Additive smoothing and structural support",
+          "origin": "Recording mechanism; original explicit domains"
+        },
+        {
+          "class": "theorem",
+          "claim": "Augmented-count optimum and fixed-lambda limits under stated premises",
+          "origin": "Original derivations"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Add-one row and raw likelihood4/49 versus1/4",
+          "origin": "Original arithmetic for recorded data"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Suggested small pseudocounts",
+          "origin": "Attributed recording advice, no universal optimality claim"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "observed",
+      "start": 3887.41,
+      "end": 4217.1,
+      "lecture_material": "Partially observed data, marginal likelihood and posterior-weighted completions.",
+      "research_extension": "Dempster PDF2/printed1 incomplete-data marginalization; PDF7/printed6 conditional Q definition.",
+      "teaching_construction": "Observed-data product/log-sum formula, positive-evidence requirement and missingness-model boundary.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Observed objective and exact posterior responsibility",
+          "origin": "Recording mechanisms; verified primary formulation and original finite notation"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "em-case",
+      "start": 4217.3,
+      "end": 4585.18,
+      "lecture_material": "Tied binary-rating E/M demonstration and weighted count/normalize.",
+      "research_extension": "Dempster PDF5/printed4 expected sufficient statistics; PDF7/printed6 E/M definition.",
+      "teaching_construction": "Exact fractions instead of spoken rounding, two factor occurrences per film and whole data likelihood comparison.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Exact posterior E-step and expected complete-log-likelihood M-step",
+          "origin": "Recording; verified Dempster primary definition"
+        },
+        {
+          "class": "engineering check",
+          "claim": "9/13 and4/13 responsibilities;169/2500 to9409/114244 full likelihood",
+          "origin": "Original exact calculation of actual official example"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "monotonicity",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "Dempster PDF7\u20138/printed6\u20137 Q, generalized-EM definition, Theorem1 and equation3.10; penalty scope.",
+      "teaching_construction": "Complete finite support-aware KL bound proof and exact-versus-approximate and unused-row limits.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Exact positive-evidence unsmoothed Q-increase implies observed-likelihood nondecrease",
+          "origin": "Original finite proof of inspected Dempster mechanism"
+        },
+        {
+          "class": "definition",
+          "claim": "Support failure, nonunique empty M-step rows and changed/approximate objectives",
+          "origin": "Original operational qualifications of verified primary definitions"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "limits",
+      "start": 4585.18,
+      "end": 4734.93,
+      "lecture_material": "Iterations, heterogeneous data, likelihood/convergence claims, nonuniform initialization and label permutation.",
+      "research_extension": "Dempster PDF8 neighboring convergence theorem has additional hypotheses; no universal local-maximality result is imported.",
+      "teaching_construction": "Symmetric saddle proof, mixing-only asymmetry counterexample and nonidentifiability beyond label exchange.",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Recorded convergence and initialization discussion",
+          "origin": "Recording, narrowed by explicit mathematical counterexample"
+        },
+        {
+          "class": "theorem",
+          "claim": "Bounded nondecreasing likelihood values converge; the symmetric fixture is a saddle",
+          "origin": "Original proofs, not parameter-convergence claim"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Matching-pair perturbation formulas and unequal mixing fixed response",
+          "origin": "Original exact counterexamples"
+        },
+        {
+          "class": "definition",
+          "claim": "Label symmetry and additional identifiability limitation",
+          "origin": "Recorded label issue and original finite example"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Original exact-rational finite DAG estimator and specialized EM program with precise size/type/support/failure contract.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Executable domains, effects and arithmetic boundaries",
+          "origin": "Original implementation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact stdout, expanded-mixture and independent-count author oracles",
+          "origin": "Actual author validation; independent review pending"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Six developed proofs, numerical derivations, counterexamples and implementation/objective questions with full solutions.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Simplex, tying, smoothing and saddle proof statements under explicit finite assumptions",
+          "origin": "Original solutions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact counts, parameters, objectives and posterior updates",
+          "origin": "Original solutions"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "synthesis",
+      "start": 4734.93,
+      "end": 4824.78,
+      "lecture_material": "Learning summary and transition to quantified logic.",
+      "research_extension": null,
+      "teaching_construction": "Estimated zero, unidentified row, regularized probability and latent component distinguished.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Learning/inference/objective synthesis",
+          "origin": "Recording and original case interpretation"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "references",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "Pinned official bayes_learning.py notation/fact source and Dempster primary reference, with claim-specific checked scopes.",
+      "teaching_construction": null,
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Bibliographic identities and used claim scopes of the official executable lecture and primary EM paper",
+          "origin": "Complete retained 596-line official module; pinned commit matches after explicitly identified newline normalization; actually opened Dempster primary PDF and inspected pages"
+        }
+      ],
+      "chapter": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "video_id": "4d9V6Sxa6gU",
+      "duration": 4831
+    },
+    {
+      "section": "permission-question",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "What would justify opening the gate?",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Stipulated token/clearance/permission assumptions; evaluation, entailment and proof are different tasks",
+          "origin": "Original permission teaching construction"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "motivation",
+      "start": 5.23,
+      "end": 232.13,
+      "lecture_material": "motivation",
+      "research_extension": null,
+      "teaching_construction": "1. Symbolic manipulation changes the search question",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Adding the two stated real equations yields a=7,b=3 under valid real arithmetic",
+          "origin": "Recording example with original domain qualification"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Compact representation does not establish efficient inference or correct premises",
+          "origin": "Recording motivation with original scope distinction"
+        }
+      ],
+      "evidence_class": "theorem",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "formal-language",
+      "start": 232.13,
+      "end": 499.33,
+      "lecture_material": "language and formal semantics",
+      "research_extension": null,
+      "teaching_construction": "2. Fix the language before trusting a substitution",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Syntax, semantics, inference rules and atomic permission vocabulary",
+          "origin": "Recording concepts with original permission variables"
+        },
+        {
+          "class": "engineering check",
+          "claim": "The two uses of nothing do not supply a common relation for transitive substitution",
+          "origin": "Recording example with original semantic explanation"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "grammar",
+      "start": 499.33,
+      "end": 737.3,
+      "lecture_material": "recursive grammar",
+      "research_extension": null,
+      "teaching_construction": "3. Formulas are finite trees",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite recursive Boolean grammar, grouping and explicit true/false constants",
+          "origin": "Recording grammar; constants and program budgets are original extensions"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "worlds",
+      "start": 737.3,
+      "end": 886.16,
+      "lecture_material": "truth assignments",
+      "research_extension": null,
+      "teaching_construction": "4. A logical model assigns every atom",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Total Boolean worlds over a fixed ordered vocabulary",
+          "origin": "Recording definition with original API axis convention"
+        },
+        {
+          "class": "theorem",
+          "claim": "d independent assignment choices give 2^d worlds, irrespective of probabilistic dependence",
+          "origin": "Original counting argument"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Three atoms have eight worlds; executable eight-atom bound gives256",
+          "origin": "Original finite domain check"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "interpretation",
+      "start": 886.16,
+      "end": 1212.8,
+      "lecture_material": "interpretation",
+      "research_extension": null,
+      "teaching_construction": "5. Interpretation computes truth in one supplied world",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Recursive interpretation and material implication/equivalence",
+          "origin": "Recording definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "One supplied-world evaluation visits nodes proportional to expanded formula size under constant-time lookup",
+          "origin": "Original bounded tree mechanism"
+        },
+        {
+          "class": "engineering check",
+          "claim": "The displayed negation/conjunction/equivalence tree evaluates true at1,1,0; reverse implication has a0,1counterworld",
+          "origin": "Recording example recomputed and original boundary check"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "model-sets",
+      "start": 1212.8,
+      "end": 1520.86,
+      "lecture_material": "formula model sets",
+      "research_extension": null,
+      "teaching_construction": "6. A formula selects a set of worlds",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Formula meaning as its model set in the declared universe",
+          "origin": "Recording semantic definition"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Conjunction/disjunction/implication truth-table sets and two extensions per added unused Boolean atom",
+          "origin": "Original exact assignments"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "knowledge-base",
+      "start": 1520.86,
+      "end": 1776.43,
+      "lecture_material": "knowledge bases",
+      "research_extension": null,
+      "teaching_construction": "7. A knowledge base intersects the permitted worlds",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Knowledge as a formula collection; satisfiability is nonempty admissible set",
+          "origin": "Recording definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Knowledge model sets intersect; the empty conjunction permits the entire fixed universe",
+          "origin": "Original set argument and explicit empty-base repair"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Permission rules permit000,001,011,111; addingT selects111",
+          "origin": "Original enumeration"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "classification",
+      "start": 1776.46,
+      "end": 2326.53,
+      "lecture_material": "relative semantic classification",
+      "research_extension": null,
+      "teaching_construction": "8. Three answers require consistent assumptions",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Entailment, contradiction and contingency using positive/negative selected worlds",
+          "origin": "Recording concepts with explicit consistency contract"
+        },
+        {
+          "class": "theorem",
+          "claim": "The cases are exclusive/exhaustive for a satisfiable current base; inconsistent bases classically entail both sides",
+          "origin": "Original partition proof"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "ask",
+      "start": 2326.53,
+      "end": 2644.42,
+      "lecture_material": "Ask",
+      "research_extension": null,
+      "teaching_construction": "9. Ask needs witnesses, not a changed database",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Nonmutating query with ordered supporting/refuting witnesses",
+          "origin": "Recording Ask interface with original certificate API"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Observed permission permits both111and001, preventing reverse token entailment",
+          "origin": "Original countermodels"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "tell",
+      "start": 2644.42,
+      "end": 2894.59,
+      "lecture_material": "Tell",
+      "research_extension": null,
+      "teaching_construction": "10. Tell preserves consistency, not truth",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Immutable Tell reports already-known,rejected,learned and separately rejects inconsistent inputs/capacity violations",
+          "origin": "Recording Tell with original typed API conventions"
+        },
+        {
+          "class": "theorem",
+          "claim": "A contingent addition preserves a nonempty proper subset of current admissible worlds",
+          "origin": "Original set proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "T addition learns, O is redundant, notC is rejected under token/rules",
+          "origin": "Original exact state changes"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "revision",
+      "start": 2894.59,
+      "end": 3137.68,
+      "lecture_material": "revision and monotonicity",
+      "research_extension": null,
+      "teaching_construction": "11. Monotonic consequence does not implement belief revision",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Adding classical premises shrinks the model set and preserves existing entailments",
+          "origin": "Original inclusion proof of recording mechanism"
+        },
+        {
+          "class": "definition",
+          "claim": "External retraction, temporal atoms and absent proof are separate semantic choices",
+          "origin": "Recording discussion with original boundary clarification"
+        }
+      ],
+      "evidence_class": "theorem",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "probability",
+      "start": 3137.68,
+      "end": 3450.06,
+      "lecture_material": "probability over worlds",
+      "research_extension": null,
+      "teaching_construction": "12. Probability one and entailment need a support condition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Normalized finite world mass and positive-evidence arbitrary formula conditioning",
+          "origin": "Recording bridge with original exact domain"
+        },
+        {
+          "class": "theorem",
+          "claim": "Entailment implies defined probability one; converse requires positive mass at every admissible world",
+          "origin": "Original support proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Rain/wet posteriors3/4,1/6; compound evidence4/5; concentratedFFmass defeats converse and can make satisfiable evidence zero-probability",
+          "origin": "Recording table recomputed plus original counterexamples"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "satisfiability",
+      "start": 3450.06,
+      "end": 3823.97,
+      "lecture_material": "SAT reductions",
+      "research_extension": "Checked Microsoft Z3 documentation sections; no solver runtime attested",
+      "teaching_construction": "13. Reduce questions to satisfiability without misreading unknown",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "SAT/UNSAT/UNKNOWN and valid successful model retrieval",
+          "origin": "Microsoft Z3 retained Propositional Logic and Basic Commands articles, stated sections"
+        },
+        {
+          "class": "theorem",
+          "claim": "Positive/negative SAT branches classify all four logical states; source early return needs consistent current premises",
+          "origin": "Original finite partition reduction"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Protocol treats computational unknown separately and does not validate an external solver certificate",
+          "origin": "Original program scope; no Z3 execution"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "inference",
+      "start": 3823.97,
+      "end": 4089.52,
+      "lecture_material": "forward inference",
+      "research_extension": null,
+      "teaching_construction": "14. A proof operates on the formulas",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Specified calculus, syntactic derivation and semantic entailment",
+          "origin": "Recording rules/notation"
+        },
+        {
+          "class": "theorem",
+          "claim": "Modus ponens is sound; bounded MP-only saturation has a finite initial-subformula universe",
+          "origin": "Original Boolean and termination arguments"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Permission trace addsCthenO; reverse implication fails at false antecedent/true consequent",
+          "origin": "Original exact trace and recording rule counterexample"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "soundness",
+      "start": 4089.52,
+      "end": 4399.95,
+      "lecture_material": "soundness and completeness",
+      "research_extension": null,
+      "teaching_construction": "15. Soundness and completeness belong to a specified calculus",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Soundness/completeness are opposite inclusions relative to a specified calculus and semantics",
+          "origin": "Recording definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Trace induction proves MP soundness; shortcut/excluded-middle consequences prove MP incompleteness; finite positive Horn saturation is complete for positive atomic queries via its least model",
+          "origin": "Original proofs under explicitly restricted Horn contract"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "16. Execute a bounded model with inspectable failures",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Immutable bounded formula/world/KB/conditioning/MP/Horn and solver-response contracts",
+          "origin": "Original standard-library teaching APIs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Actual standalone and snippet output; all Boolean-function/ordered-world/conditioning/Horn and invalid-input author oracles",
+          "origin": "Original executed finite checks; independent acceptance pending"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "17. Six worked exercises",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Support, SAT partition and Horn least-model arguments in fully worked solutions",
+          "origin": "Original locally derived proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "All six complete truth-table/model/Tell/conditional/MP/Horn calculations and counterworlds",
+          "origin": "Original exact solution fixtures"
+        }
+      ],
+      "evidence_class": "theorem",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "sources",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "18. Sources and limits",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Checked recording/official module/documentation scope and excluded solver/physical/historical claims",
+          "origin": "Original provenance scope note"
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-15-propositional-logic-and-justified-answers.html",
+      "video_id": "Q7V13XriJEc",
+      "duration": 4406
+    },
+    {
+      "section": "case",
+      "lecture_material": "Alice/Phoenix knowledge base and Snowing query before and after asserting Happy(alice).",
+      "research_extension": "Official module motivating_example inspected in full.",
+      "teaching_construction": "Stipulated training access controller; source query's conditional contradiction argument and distinction from external evidence.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Training records and permission policy are stipulated, not measured competence or safety",
+          "origin": "Original persistent teaching case"
+        },
+        {
+          "class": "theorem",
+          "claim": "The source premises with Happy(alice) entail not Snowing; before that assertion both possibilities have models",
+          "origin": "Original conditional reasoning through actual lecture and official premises"
+        }
+      ],
+      "start": 5.2,
+      "end": 232.16,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "review",
+      "lecture_material": "Syntax, models, entailment, Ask/Tell, satisfiability reduction, soundness and completeness review.",
+      "research_extension": "Z3 Quantifiers introductory and final-warning paragraphs; no solver benchmark or general termination certification.",
+      "teaching_construction": "Explicit consistency guard and two-witness contingency versus solver unknown; separate structure truth and proof relation.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Satisfaction, models, satisfiability, entailment, derivation, soundness and target-scoped completeness",
+          "origin": "Actual recording review developed with local definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "The consistent-KB model-set query table and empty-model vacuity",
+          "origin": "Original direct consequence of semantic definitions"
+        },
+        {
+          "class": "definition",
+          "claim": "General quantified solver unknown/incomplete instantiation is distinct from semantic contingency",
+          "origin": "Retained official Z3 Quantifiers introduction and final warning"
+        }
+      ],
+      "start": 232.16,
+      "end": 806.88,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "expressivity",
+      "lecture_material": "Repeated student knowledge propositions and the infinite-domain arithmetic sentence motivate internal structure.",
+      "research_extension": "No current claim about the arithmetic conjecture's research status.",
+      "teaching_construction": "Attendance flag count and intended-arithmetic interpretation boundary.",
+      "claim_provenance": [
+        {
+          "class": "engineering check",
+          "claim": "n staff by m courses gives nm separate attendance flags",
+          "origin": "Original finite representation count"
+        },
+        {
+          "class": "definition",
+          "claim": "The displayed arithmetic sentence is a formula with intended symbol meanings, not a proof",
+          "origin": "Actual lecture example and full official translation; local semantic boundary"
+        }
+      ],
+      "start": 806.88,
+      "end": 1010.19,
+      "evidence_class": "engineering check",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "terms",
+      "lecture_material": "Constants, variables and nested function terms denote objects.",
+      "research_extension": "No separate external theorem claimed.",
+      "teaching_construction": "Controller signature and typed AST distinction; naming conventions do not establish variable category.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Signature, arity, constant/variable/function term grammar and first-order object return category",
+          "origin": "Actual lecture and full official first_order_logic_syntax"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Explicit syntax tags avoid hardcoded x/y/z-only variable recognition",
+          "origin": "Original program design motivated by inspected official source boundary"
+        }
+      ],
+      "start": 1010.19,
+      "end": 1162.74,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "grammar",
+      "lecture_material": "Predicate arities, connectives, quantifiers, valid/nonvalid examples and restrictive-language questions.",
+      "research_extension": "Restriction is the declared single-sort grammar, not all many-sorted SMT languages.",
+      "teaching_construction": "Correct Student(x) formula category; free/bound occurrence and equality definitions.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Atomic formula, zero-arity predicate, connectives, equality and quantifier scope",
+          "origin": "Actual lecture/official grammar, local first-use definitions"
+        },
+        {
+          "class": "definition",
+          "claim": "Passing a predicate or Boolean formula as an Object term is invalid, while Student(x) is valid",
+          "origin": "Actual official non-formulas list resolves ambiguous ASR wording"
+        }
+      ],
+      "start": 1163.12,
+      "end": 1544.08,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "coherence",
+      "lecture_material": "Naive atomic truth dictionaries, infinitely many function terms and possible co-denotation.",
+      "research_extension": "Official fol-example image actually viewed; coherent denotations rather than independent compound atoms.",
+      "teaching_construction": "Mentor/Bea and Anna/record alias examples; infinite mathematical assignments are not inherently invalid.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Co-denoting arguments give identical predicate truth in a structure",
+          "origin": "Original direct relation-membership argument"
+        },
+        {
+          "class": "definition",
+          "claim": "Syntactic unification and semantic identity answer distinct questions",
+          "origin": "Actual lecture topic plus original alias construction"
+        }
+      ],
+      "start": 1544.08,
+      "end": 1800.48,
+      "evidence_class": "theorem",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "structures",
+      "lecture_material": "Domain, constant/function/predicate interpretations, object graph and bob/robert aliases.",
+      "research_extension": "Official Z3 Uninterpreted Functions and Constants article; inspected official object diagram.",
+      "teaching_construction": "Complete six-object tables, explicit false-omitted relation convention and total mentor function.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Nonempty domain, total function interpretation, predicate relation and identity equality",
+          "origin": "Actual lecture model developed with primary Z3 semantic documentation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Six-object table and total mentor map with optional Anna alias",
+          "origin": "Original complete finite structure"
+        },
+        {
+          "class": "definition",
+          "claim": "Distinct names need not denote distinct objects; totality and congruence are semantic constraints",
+          "origin": "Retained official article and actual fol-example diagram"
+        }
+      ],
+      "start": 1800.48,
+      "end": 2173.94,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "evaluation",
+      "lecture_material": "Recursive term/formula interpretation and quantified assignment updates; questions about connective versus predicate arguments.",
+      "research_extension": "Official interpreter read in full, including its nested-quantifier warning; no claim that source sketch handles all grammar.",
+      "teaching_construction": "Scope-safe environment recursion, function denotation trace and structural induction on assignment dependence.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Recursive term denotation, atomic satisfaction and all/exists environment updates",
+          "origin": "Actual lecture mechanism with explicit local semantics"
+        },
+        {
+          "class": "theorem",
+          "claim": "Assignments agreeing on free variables give identical truth; sentences are assignment-independent",
+          "origin": "Original structural induction in exposition"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Mentor/qualification and nested shadowing finite examples",
+          "origin": "Original finite table calculations and exact relation oracles"
+        }
+      ],
+      "start": 2174.38,
+      "end": 2696.42,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "grounding",
+      "lecture_material": "Unique names, domain closure and finite propositionalization by conjunction/disjunction.",
+      "research_extension": "Official unique-names-domain-closure image inspected; no unrestricted first-order reduction claimed.",
+      "teaching_construction": "Coverage proof, unnamed-object countermodel, coherent alias expansion and function/equality encoding limits.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Domain closure and unique-name assumptions are distinct constraints",
+          "origin": "Actual lecture and inspected official diagram"
+        },
+        {
+          "class": "theorem",
+          "claim": "Quantifier expansion is exact under name coverage, with alias coherence; unique names alone is insufficient",
+          "origin": "Original semantic proof and countermodels"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Direct expansion with k quantifiers over N objects may require N^k body instances",
+          "origin": "Original finite expansion count, not universal solver runtime"
+        }
+      ],
+      "start": 2696.42,
+      "end": 2966.86,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "clauses",
+      "lecture_material": "Definite clauses, Takes/Covers/Knows rule and failure of literal template matching.",
+      "research_extension": "No separate empirical or algorithm-efficiency claim.",
+      "teaching_construction": "Category-restricted training rule, shared-substitution proof and mismatched-course countermodel.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Universally quantified positive definite-clause grammar",
+          "origin": "Actual recording and official rule template"
+        },
+        {
+          "class": "theorem",
+          "claim": "A coherent shared universal instance justifies its head; independently matched premises can be unsound",
+          "origin": "Original controller derivation and explicit finite countermodel"
+        }
+      ],
+      "start": 2966.86,
+      "end": 3324.59,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "substitution",
+      "lecture_material": "Recursive substitutions on Knows/Student atoms and variable-to-variable replacements.",
+      "research_extension": "Robinson1965 PDF9 sections5.2\u20135.5 define substitution, instantiation, standardization and composition.",
+      "teaching_construction": "One simultaneous replacement versus chasing bindings, stated composition order, capture avoidance and relation countermodel.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite simultaneous substitution and explicit first-then-second composition convention",
+          "origin": "Actual lecture examples; Robinson PDF9; local notation declaration"
+        },
+        {
+          "class": "theorem",
+          "claim": "Composition implements sequential substitution on finite terms",
+          "origin": "Original structural induction and checked original definition"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Captured existential differs from alpha-renamed replacement on R={(0,1)}",
+          "origin": "Original exact two-object countermodel"
+        }
+      ],
+      "start": 3324.59,
+      "end": 3508.05,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "unification",
+      "lecture_material": "Unification examples, fixed constant failure and grounded Takes/Covers join.",
+      "research_extension": "Robinson PDF10 sections5.7\u20135.8 and PDF11 theorem statement; PDF12 proof scan has clipped margin.",
+      "teaching_construction": "Worklist constraints, dereferencing, repeated-variable failure, finite-height occurs proof, fresh-rule variables and implementation cap distinction.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite syntactic unifier and most-general factorization meaning",
+          "origin": "Actual lecture and Robinson PDF10\u201311 definitions/theorem statement; full scanned proof not certified"
+        },
+        {
+          "class": "theorem",
+          "claim": "Occurs-check failure has no finite-tree solution; elementary transformations preserve possible solutions",
+          "origin": "Original finite-height and equation-elimination arguments"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Repeated binding disagreement, indirect cycle and solved-map certificates",
+          "origin": "Original program fixtures and independent finite witness enumeration"
+        },
+        {
+          "class": "definition",
+          "claim": "Standardizing apart separates variables of different rule applications",
+          "origin": "Robinson PDF9 section5.4 and original fresh-local-assignment implementation"
+        }
+      ],
+      "start": 3511.7,
+      "end": 3825.25,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "closure",
+      "lecture_material": "Ground atom count, infinite function-term growth, soundness and limited conclusions of modus ponens; undeveloped resolution pointer.",
+      "research_extension": "Robinson PDF1 records paper's resolution scope; no full refutation-completeness proof or benchmark certified here.",
+      "teaching_construction": "Summed predicate universe, least finite closure, in-place soundness/restricted atomic completeness proof, negative-query boundary and scan count.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Function-free positive Horn closure terminates and exactly characterizes ground atomic entailment under declared hypotheses",
+          "origin": "Original finite-universe, induction and constructed countermodel proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "132potential atoms,11initial facts,3/1growth layers,15final facts; atom bound is not full runtime",
+          "origin": "Original controller arithmetic and exact program trace"
+        },
+        {
+          "class": "theorem",
+          "claim": "Missing atom does not entail its negation; function terms can prevent finite closure",
+          "origin": "Original all-true model and explicit infinite term-generation example"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Recording points to resolution beyond its developed calculus",
+          "origin": "Actual segments127\u2013130; undeveloped topic not promoted to a proved general result"
+        }
+      ],
+      "start": 3825.25,
+      "end": 4045.04,
+      "evidence_class": "theorem",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "translation",
+      "lecture_material": "Universal implication, existential conjunction, one course for all students, arithmetic sentence and category-restricted knowledge rule.",
+      "research_extension": "No certified99percent frequency or general natural-language translation algorithm.",
+      "teaching_construction": "Individual/common course witness countermodel, one-way implication and vacuity analysis.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Common course implies individual courses; converse fails on the diagonal attendance case",
+          "origin": "Original witness proof and controller countermodel"
+        },
+        {
+          "class": "definition",
+          "claim": "Category restrictions and vacuous truth determine translation meaning",
+          "origin": "Actual recording examples developed through local truth conditions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Empty Staff and existential-implication finite truth cases",
+          "origin": "Original exact relation tables"
+        }
+      ],
+      "start": 4045.04,
+      "end": 4382.69,
+      "evidence_class": "theorem",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "limits",
+      "lecture_material": "Syntax/semantics/grounding/inference summary, higher-order discussion and70percent example.",
+      "research_extension": "No general variable-population percentage inexpressibility theorem or uninspected resolution proof.",
+      "teaching_construction": "Fixed-ten cardinality/equality construction,120of1024knower subsets and distinction of computational questions.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Exactly ten students and exactly seven knowing students are expressible by finite first-order witnesses, distinctness and coverage",
+          "origin": "Original fixed-population construction; no blanket higher-order necessity claim"
+        },
+        {
+          "class": "engineering check",
+          "claim": "There are120seven-member subsets among1024subsets",
+          "origin": "Original binomial count and exhaustive finite check"
+        },
+        {
+          "class": "definition",
+          "claim": "Individual-object quantification differs from predicate/function quantification",
+          "origin": "Actual closing topic with precise language boundary"
+        }
+      ],
+      "start": 4382.69,
+      "end": 4541.94,
+      "evidence_class": "theorem",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "implementation",
+      "lecture_material": "No recording span: original supporting implementation.",
+      "research_extension": "No external solver or operational correctness certification.",
+      "teaching_construction": "Original bounded immutable-structure evaluator, simultaneous term/atom substitution, unifier and positive Horn closure with exact stdout and scope snippet.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Public grammar, input/effect/output/failure/resource contract",
+          "origin": "Original delivered program"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact displayed code/stdout, scoped snippet and substantive finite/model-set/input-boundary checks",
+          "origin": "Actual author execution; different-agent acceptance remains pending"
+        }
+      ],
+      "start": null,
+      "end": null,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "exercises",
+      "lecture_material": "No recording span: original exercises and complete solutions.",
+      "research_extension": "No new empirical or unrestricted solver claim.",
+      "teaching_construction": "Six varied solutions on grammar/aliases, quantifier order, grounding, capture/unification, permission layers and restricted completeness.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Witness implication, finite-term occurs argument and positive-Horn missing-atom countermodel reasoning",
+          "origin": "Original worked proofs with local hypotheses"
+        },
+        {
+          "class": "engineering check",
+          "claim": "9/7relation counts,64structure combinations,15/18closure sizes,132atoms and666scans",
+          "origin": "Original arithmetic and independently designed author oracles"
+        },
+        {
+          "class": "definition",
+          "claim": "Four honest input/failure outcome test roles",
+          "origin": "Original implementation/evaluation exercise"
+        }
+      ],
+      "start": null,
+      "end": null,
+      "evidence_class": "theorem",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
+    },
+    {
+      "section": "references",
+      "lecture_material": "No recording span: primary reference descriptions and source/computational boundaries.",
+      "research_extension": "Exact inspected claim scope is stated separately for each original.",
+      "teaching_construction": "Distinguish stipulated policy, proved fragment and finite checks from operational evidence.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Reference identity, actual checked scope and exclusions",
+          "origin": "Actual retained primary sources and full official module"
+        }
+      ],
+      "start": null,
+      "end": null,
+      "evidence_class": "definition",
+      "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
+      "video_id": "x9Mbqu06OVo",
+      "duration": 4547
     }
   ]
 }

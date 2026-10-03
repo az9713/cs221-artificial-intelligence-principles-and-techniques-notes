@@ -1,9 +1,9 @@
 {
-  "checked_at_utc": "2026-10-03T13:55:03.813488+00:00",
+  "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
   "course": "CS221",
-  "chapter_count": 13,
+  "chapter_count": 16,
   "selected_recordings": 20,
-  "status": "Thirteen independently reviewed chapters locally validated; full course in development",
+  "status": "Sixteen independently reviewed chapters locally validated; full course in development",
   "course_complete": false,
   "human_accessibility": "not performed",
   "reader_report": "reader-validation.json",
@@ -132,7 +132,7 @@
       "CODE": "e15e74642f7b2231e9652eac3bf4d24f6de1aaa3304c3d17558e22b981bdfb3a",
       "HTML": "0327786a7d3aa54d47b48d4db62291e55b596bd7e7faadf331fdf15098262757",
       "review": "reviews/lecture-12-round2.md",
-      "before_HTML": "e05c9347f514952636c0a3e413796e24a41f3ac5147d849f8de43ee56bf918ae",
+      "before_HTML": "9dafd989e26989598d7cc902bd0f6804382249e31267fa324aea72a21b56c446",
       "review_sha256": "c295c6e6c404ec1287ba533927cb348f9f719f285cc6e71c12a8b2e02d6afabf",
       "path": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
       "after_HTML": "9dafd989e26989598d7cc902bd0f6804382249e31267fa324aea72a21b56c446"
@@ -143,14 +143,47 @@
       "CODE": "e052e74fe0c71911756fcad24362b419179a7bea0ae2d91b8ad18e7f06cda018",
       "HTML": "f4292ac73042f8eba13637bfab33c4bc92b9f0e0aa4d3d336b7a2156535b4786",
       "review": "reviews/lecture-13-round1.md",
-      "before_HTML": "f4292ac73042f8eba13637bfab33c4bc92b9f0e0aa4d3d336b7a2156535b4786",
+      "before_HTML": "6f2508fe1aa5cc9eafe05ba07ce8cf390d5ae0559eeeb6b4a0cc99e1c7c25e2d",
       "review_sha256": "0944b5275d2bc175ee464e808d66c39661cfc056156736ca9939ced79fe779be",
       "path": "lecture-13-conditional-inference-and-gibbs-sampling.html",
-      "after_HTML": "6f2508fe1aa5cc9eafe05ba07ce8cf390d5ae0559eeeb6b4a0cc99e1c7c25e2d"
+      "after_HTML": "7ef163c4d77c106b06306ccb2a8938c634c4ccfe787ea8817c0c0ecf2aef68d0"
+    },
+    "14": {
+      "BODY": "c9e25f793ab3c49d1e805050ebbeaabfaaa1f72a3551386268e8120a482f5515",
+      "META": "990ddbce69673b13a7b11b2330314a5b457bb5e9113a765fa681025034ee1ad3",
+      "CODE": "cfe74841e3ccb1eec1ce5222ea0c266e6424b136ef5fc771a668ea29bb920a61",
+      "HTML": "ff73b1408ee9782d285bd95b05e762397859a358f58d95d63db48f47caab5fd2",
+      "review": "reviews/lecture-14-round2.md",
+      "before_HTML": "ff73b1408ee9782d285bd95b05e762397859a358f58d95d63db48f47caab5fd2",
+      "review_sha256": "f159cf59fd082dd3cca253022e99026a1dc15a49787ce8f45c1462a35e6c8f46",
+      "path": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+      "after_HTML": "51d4e66fc0f997665835d6af75c25719213c657659e30ff989f8b9db688ab24d"
+    },
+    "15": {
+      "BODY": "02ba88e1491d36f31dd3460abfd797242c75b2285e59f21d07b9241107a9823d",
+      "META": "890fb6379b146949837e3f31aed8119b3e0293576b724d0ff6d3a72bd21a6f1f",
+      "CODE": "c390eb2111c50d322d261f7662699376449d74266c3dd284469d0eeaf198c12b",
+      "HTML": "718403ba7eba541066584bba32b0d7c25b2a621ede683b4a6f9e2232f6730743",
+      "review": "reviews/lecture-15-round2.md",
+      "before_HTML": "718403ba7eba541066584bba32b0d7c25b2a621ede683b4a6f9e2232f6730743",
+      "review_sha256": "7a2d801426584f62dd64718a891bd2dbf1751ec6368107d115c701f74ff2ae32",
+      "path": "lecture-15-propositional-logic-and-justified-answers.html",
+      "after_HTML": "c9b2542b569d6494e107a863644139b3feee93bffbe38184a22466f8f7c512f8"
+    },
+    "16": {
+      "BODY": "b19746ad0dd4da0c5590ee473c8eca0647a47bc8c04c5d2e0c6f9e7ee968382c",
+      "META": "c0cf3a63e38832ca4e454dc025f1e91c5eb4bc8f0c706b527acb4f6a5aea8ef2",
+      "CODE": "1cbd3d0c91c987cbe8873c4dd320805f20bfa02be3134bffe4abc14b0a0936c1",
+      "HTML": "444cfa264a26b738655315aafcab88fe5a154a67209b8db16eed00781b6253fe",
+      "review": "reviews/lecture-16-round1.md",
+      "before_HTML": "444cfa264a26b738655315aafcab88fe5a154a67209b8db16eed00781b6253fe",
+      "review_sha256": "df3ef458ab3cd58e3e8c5a385a021234ab662a3ca8dbeef768b6cb54808dd30c",
+      "path": "lecture-16-first-order-logic-and-structured-inference.html",
+      "after_HTML": "444cfa264a26b738655315aafcab88fe5a154a67209b8db16eed00781b6253fe"
     }
   },
   "limits": [
-    "Chapters14-20, cumulative course lab, public learning-route integration and book-wide review pending",
+    "Chapters17-20 independent acceptance/integration and book-wide review pending; reviewed course lab and learning route integrated",
     "No publication performed"
   ]
 }

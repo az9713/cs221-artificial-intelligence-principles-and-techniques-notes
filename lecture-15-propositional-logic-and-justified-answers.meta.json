@@ -1,0 +1,460 @@
+{
+  "title": "Propositional logic: assumptions, witnesses and justified answers",
+  "number": 15,
+  "video_id": "Q7V13XriJEc",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "Round1 B1/B2 author repairs applied; independent round2 pending",
+  "sections": [
+    {
+      "section": "permission-question",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "What would justify opening the gate?",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Stipulated token/clearance/permission assumptions; evaluation, entailment and proof are different tasks",
+          "origin": "Original permission teaching construction"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "motivation",
+      "start": 5.23,
+      "end": 232.13,
+      "lecture_material": "motivation",
+      "research_extension": null,
+      "teaching_construction": "1. Symbolic manipulation changes the search question",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Adding the two stated real equations yields a=7,b=3 under valid real arithmetic",
+          "origin": "Recording example with original domain qualification"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Compact representation does not establish efficient inference or correct premises",
+          "origin": "Recording motivation with original scope distinction"
+        }
+      ],
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "formal-language",
+      "start": 232.13,
+      "end": 499.33,
+      "lecture_material": "language and formal semantics",
+      "research_extension": null,
+      "teaching_construction": "2. Fix the language before trusting a substitution",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Syntax, semantics, inference rules and atomic permission vocabulary",
+          "origin": "Recording concepts with original permission variables"
+        },
+        {
+          "class": "engineering check",
+          "claim": "The two uses of nothing do not supply a common relation for transitive substitution",
+          "origin": "Recording example with original semantic explanation"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "grammar",
+      "start": 499.33,
+      "end": 737.3,
+      "lecture_material": "recursive grammar",
+      "research_extension": null,
+      "teaching_construction": "3. Formulas are finite trees",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite recursive Boolean grammar, grouping and explicit true/false constants",
+          "origin": "Recording grammar; constants and program budgets are original extensions"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "worlds",
+      "start": 737.3,
+      "end": 886.16,
+      "lecture_material": "truth assignments",
+      "research_extension": null,
+      "teaching_construction": "4. A logical model assigns every atom",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Total Boolean worlds over a fixed ordered vocabulary",
+          "origin": "Recording definition with original API axis convention"
+        },
+        {
+          "class": "theorem",
+          "claim": "d independent assignment choices give 2^d worlds, irrespective of probabilistic dependence",
+          "origin": "Original counting argument"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Three atoms have eight worlds; executable eight-atom bound gives256",
+          "origin": "Original finite domain check"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "interpretation",
+      "start": 886.16,
+      "end": 1212.8,
+      "lecture_material": "interpretation",
+      "research_extension": null,
+      "teaching_construction": "5. Interpretation computes truth in one supplied world",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Recursive interpretation and material implication/equivalence",
+          "origin": "Recording definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "One supplied-world evaluation visits nodes proportional to expanded formula size under constant-time lookup",
+          "origin": "Original bounded tree mechanism"
+        },
+        {
+          "class": "engineering check",
+          "claim": "The displayed negation/conjunction/equivalence tree evaluates true at1,1,0; reverse implication has a0,1counterworld",
+          "origin": "Recording example recomputed and original boundary check"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "model-sets",
+      "start": 1212.8,
+      "end": 1520.86,
+      "lecture_material": "formula model sets",
+      "research_extension": null,
+      "teaching_construction": "6. A formula selects a set of worlds",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Formula meaning as its model set in the declared universe",
+          "origin": "Recording semantic definition"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Conjunction/disjunction/implication truth-table sets and two extensions per added unused Boolean atom",
+          "origin": "Original exact assignments"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "knowledge-base",
+      "start": 1520.86,
+      "end": 1776.43,
+      "lecture_material": "knowledge bases",
+      "research_extension": null,
+      "teaching_construction": "7. A knowledge base intersects the permitted worlds",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Knowledge as a formula collection; satisfiability is nonempty admissible set",
+          "origin": "Recording definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Knowledge model sets intersect; the empty conjunction permits the entire fixed universe",
+          "origin": "Original set argument and explicit empty-base repair"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Permission rules permit000,001,011,111; addingT selects111",
+          "origin": "Original enumeration"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "classification",
+      "start": 1776.46,
+      "end": 2326.53,
+      "lecture_material": "relative semantic classification",
+      "research_extension": null,
+      "teaching_construction": "8. Three answers require consistent assumptions",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Entailment, contradiction and contingency using positive/negative selected worlds",
+          "origin": "Recording concepts with explicit consistency contract"
+        },
+        {
+          "class": "theorem",
+          "claim": "The cases are exclusive/exhaustive for a satisfiable current base; inconsistent bases classically entail both sides",
+          "origin": "Original partition proof"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "ask",
+      "start": 2326.53,
+      "end": 2644.42,
+      "lecture_material": "Ask",
+      "research_extension": null,
+      "teaching_construction": "9. Ask needs witnesses, not a changed database",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Nonmutating query with ordered supporting/refuting witnesses",
+          "origin": "Recording Ask interface with original certificate API"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Observed permission permits both111and001, preventing reverse token entailment",
+          "origin": "Original countermodels"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "tell",
+      "start": 2644.42,
+      "end": 2894.59,
+      "lecture_material": "Tell",
+      "research_extension": null,
+      "teaching_construction": "10. Tell preserves consistency, not truth",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Immutable Tell reports already-known,rejected,learned and separately rejects inconsistent inputs/capacity violations",
+          "origin": "Recording Tell with original typed API conventions"
+        },
+        {
+          "class": "theorem",
+          "claim": "A contingent addition preserves a nonempty proper subset of current admissible worlds",
+          "origin": "Original set proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "T addition learns, O is redundant, notC is rejected under token/rules",
+          "origin": "Original exact state changes"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "revision",
+      "start": 2894.59,
+      "end": 3137.68,
+      "lecture_material": "revision and monotonicity",
+      "research_extension": null,
+      "teaching_construction": "11. Monotonic consequence does not implement belief revision",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Adding classical premises shrinks the model set and preserves existing entailments",
+          "origin": "Original inclusion proof of recording mechanism"
+        },
+        {
+          "class": "definition",
+          "claim": "External retraction, temporal atoms and absent proof are separate semantic choices",
+          "origin": "Recording discussion with original boundary clarification"
+        }
+      ],
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "probability",
+      "start": 3137.68,
+      "end": 3450.06,
+      "lecture_material": "probability over worlds",
+      "research_extension": null,
+      "teaching_construction": "12. Probability one and entailment need a support condition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Normalized finite world mass and positive-evidence arbitrary formula conditioning",
+          "origin": "Recording bridge with original exact domain"
+        },
+        {
+          "class": "theorem",
+          "claim": "Entailment implies defined probability one; converse requires positive mass at every admissible world",
+          "origin": "Original support proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Rain/wet posteriors3/4,1/6; compound evidence4/5; concentratedFFmass defeats converse and can make satisfiable evidence zero-probability",
+          "origin": "Recording table recomputed plus original counterexamples"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "satisfiability",
+      "start": 3450.06,
+      "end": 3823.97,
+      "lecture_material": "SAT reductions",
+      "research_extension": "Checked Microsoft Z3 documentation sections; no solver runtime attested",
+      "teaching_construction": "13. Reduce questions to satisfiability without misreading unknown",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "SAT/UNSAT/UNKNOWN and valid successful model retrieval",
+          "origin": "Microsoft Z3 retained Propositional Logic and Basic Commands articles, stated sections"
+        },
+        {
+          "class": "theorem",
+          "claim": "Positive/negative SAT branches classify all four logical states; source early return needs consistent current premises",
+          "origin": "Original finite partition reduction"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Protocol treats computational unknown separately and does not validate an external solver certificate",
+          "origin": "Original program scope; no Z3 execution"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "inference",
+      "start": 3823.97,
+      "end": 4089.52,
+      "lecture_material": "forward inference",
+      "research_extension": null,
+      "teaching_construction": "14. A proof operates on the formulas",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Specified calculus, syntactic derivation and semantic entailment",
+          "origin": "Recording rules/notation"
+        },
+        {
+          "class": "theorem",
+          "claim": "Modus ponens is sound; bounded MP-only saturation has a finite initial-subformula universe",
+          "origin": "Original Boolean and termination arguments"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Permission trace addsCthenO; reverse implication fails at false antecedent/true consequent",
+          "origin": "Original exact trace and recording rule counterexample"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "soundness",
+      "start": 4089.52,
+      "end": 4399.95,
+      "lecture_material": "soundness and completeness",
+      "research_extension": null,
+      "teaching_construction": "15. Soundness and completeness belong to a specified calculus",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Soundness/completeness are opposite inclusions relative to a specified calculus and semantics",
+          "origin": "Recording definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Trace induction proves MP soundness; shortcut/excluded-middle consequences prove MP incompleteness; finite positive Horn saturation is complete for positive atomic queries via its least model",
+          "origin": "Original proofs under explicitly restricted Horn contract"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "16. Execute a bounded model with inspectable failures",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Immutable bounded formula/world/KB/conditioning/MP/Horn and solver-response contracts",
+          "origin": "Original standard-library teaching APIs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Actual standalone and snippet output; all Boolean-function/ordered-world/conditioning/Horn and invalid-input author oracles",
+          "origin": "Original executed finite checks; independent acceptance pending"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "17. Six worked exercises",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Support, SAT partition and Horn least-model arguments in fully worked solutions",
+          "origin": "Original locally derived proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "All six complete truth-table/model/Tell/conditional/MP/Horn calculations and counterworlds",
+          "origin": "Original exact solution fixtures"
+        }
+      ],
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "sources",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "18. Sources and limits",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Checked recording/official module/documentation scope and excluded solver/physical/historical claims",
+          "origin": "Original provenance scope note"
+        }
+      ],
+      "evidence_class": "definition"
+    }
+  ],
+  "authored_body_sha256": "02ba88e1491d36f31dd3460abfd797242c75b2285e59f21d07b9241107a9823d",
+  "references": [
+    {
+      "title": "Official propositional_logic.py at retained snapshot f70063773fe9e04ddcbc248059501837053b810a",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/propositional_logic.py",
+      "supports": "Full598-line module, four inspected formula/rule diagrams and source topic/order context; book code is original."
+    },
+    {
+      "title": "Microsoft Z3 Guide: Propositional Logic",
+      "url": "https://microsoft.github.io/z3guide/docs/logic/propositional-logic/",
+      "supports": "Retained complete article text; Boolean syntax and Satisfiability and Validity section. Interactive Run examples not executed."
+    },
+    {
+      "title": "Microsoft Z3 Guide: Basic Commands",
+      "url": "https://microsoft.github.io/z3guide/docs/logic/basiccommands/",
+      "supports": "Retained complete article text; check-sat/get-model and Using Scopes. Status distinctions, no recording-version/runtime certification."
+    }
+  ],
+  "program": {
+    "path": "programs/chapter15.py",
+    "sha256": "c390eb2111c50d322d261f7662699376449d74266c3dd284469d0eeaf198c12b",
+    "stdout_sha256": "a9f16e16d191ea79e918bdc53d60c472ee3b244f91bc16e14053c0fd4f67bd52",
+    "contract": "Bounded original exact worlds, immutable Ask/Tell, formula conditioning, MP-only and positive Horn traces; stdlib",
+    "implementation_evidence": "11613 meaningful author assertions and actual snippet; independent review pending"
+  },
+  "limits": [
+    "Machine transcript is not human-verified captioning",
+    "Consistent assumptions do not verify real-world truth",
+    "MP-only calculus is incomplete; Horn completeness is positive-atomic and finite",
+    "No unrestricted SAT efficiency or first-order termination claim",
+    "No Z3 runtime or historical solver performance attestation"
+  ]
+}

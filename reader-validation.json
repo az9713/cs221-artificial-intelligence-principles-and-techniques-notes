@@ -1,12 +1,12 @@
 {
   "course": "CS221",
-  "checked_at_utc": "2026-10-03T13:55:03.813488+00:00",
-  "scope": "Accepted Chapters1-13 and four reader support pages; full20chapter course incomplete",
+  "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
+  "scope": "Accepted Chapters1-16 and four reader support pages; full20chapter course incomplete",
   "static": {
     "status": "passed",
-    "html_files": 18,
-    "local_links_checked": 218,
-    "timestamps_checked": 165,
+    "html_files": 21,
+    "local_links_checked": 260,
+    "timestamps_checked": 209,
     "chapter_pages_with_dollar_math": 0,
     "failures": [],
     "warnings": []
@@ -268,6 +268,60 @@
       },
       {
         "mathErrors": 0,
+        "mathNodes": 279,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 279,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 196,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-15-propositional-logic-and-justified-answers.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 196,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-15-propositional-logic-and-justified-answers.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 246,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-16-first-order-logic-and-structured-inference.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 246,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-16-first-order-logic-and-structured-inference.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
         "mathNodes": 0,
         "horizontalOverflow": false,
         "controls": true,
@@ -326,6 +380,7 @@
     "network": "HTTP and HTTPS requests blocked during browser checks"
   },
   "renderer": "Explicit disposable headless Chromium; no user session",
+  "validator_adapter": "Reviewed TeX-free lab does not require MathJax; all other DOM/control/print checks retained",
   "human_accessibility": "not performed",
   "other_course_files_unchanged": 345,
   "privacy_findings": []

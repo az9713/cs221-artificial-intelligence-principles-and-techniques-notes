@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-10-games-opponent-models-and-search.html",
-  "checked_at_utc": "2026-10-03T13:55:03.813488+00:00",
+  "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
   "status": "independently reviewed and locally validated chapter",
   "accepted_scientific_body_sha256": "dacecac97ded7a9a05b6c7a584c86f2fd71134ec432e90656d2bf9ab6fe8093a",
   "accepted_metadata_sha256": "f81f795b23400104f0640dacc7e1746bf1dee6eee63f648d5e20fec0661454a0",
@@ -8,7 +8,7 @@
   "integrated_html_sha256": "d803a5190a7b9fc389b13ed3947c652dc1bf7e491100bde5e1355d7d9e5c8cbd",
   "worked_solutions": 6,
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-13 reader scope",
+    "status": "passed within accepted Chapters1-16 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   },

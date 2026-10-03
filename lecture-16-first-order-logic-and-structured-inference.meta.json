@@ -1,0 +1,493 @@
+{
+  "title": "First-order logic and structured inference",
+  "number": 16,
+  "video_id": "x9Mbqu06OVo",
+  "source_type": "Local machine transcription; not publisher captions",
+  "status": "Author draft; different-agent gate6b pending",
+  "program": "programs/chapter16.py",
+  "sections": [
+    {
+      "section": "case",
+      "lecture_material": "Alice/Phoenix knowledge base and Snowing query before and after asserting Happy(alice).",
+      "research_extension": "Official module motivating_example inspected in full.",
+      "teaching_construction": "Stipulated training access controller; source query's conditional contradiction argument and distinction from external evidence.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Training records and permission policy are stipulated, not measured competence or safety",
+          "origin": "Original persistent teaching case"
+        },
+        {
+          "class": "theorem",
+          "claim": "The source premises with Happy(alice) entail not Snowing; before that assertion both possibilities have models",
+          "origin": "Original conditional reasoning through actual lecture and official premises"
+        }
+      ],
+      "start": 5.2,
+      "end": 232.16,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "review",
+      "lecture_material": "Syntax, models, entailment, Ask/Tell, satisfiability reduction, soundness and completeness review.",
+      "research_extension": "Z3 Quantifiers introductory and final-warning paragraphs; no solver benchmark or general termination certification.",
+      "teaching_construction": "Explicit consistency guard and two-witness contingency versus solver unknown; separate structure truth and proof relation.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Satisfaction, models, satisfiability, entailment, derivation, soundness and target-scoped completeness",
+          "origin": "Actual recording review developed with local definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "The consistent-KB model-set query table and empty-model vacuity",
+          "origin": "Original direct consequence of semantic definitions"
+        },
+        {
+          "class": "definition",
+          "claim": "General quantified solver unknown/incomplete instantiation is distinct from semantic contingency",
+          "origin": "Retained official Z3 Quantifiers introduction and final warning"
+        }
+      ],
+      "start": 232.16,
+      "end": 806.88,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "expressivity",
+      "lecture_material": "Repeated student knowledge propositions and the infinite-domain arithmetic sentence motivate internal structure.",
+      "research_extension": "No current claim about the arithmetic conjecture's research status.",
+      "teaching_construction": "Attendance flag count and intended-arithmetic interpretation boundary.",
+      "claim_provenance": [
+        {
+          "class": "engineering check",
+          "claim": "n staff by m courses gives nm separate attendance flags",
+          "origin": "Original finite representation count"
+        },
+        {
+          "class": "definition",
+          "claim": "The displayed arithmetic sentence is a formula with intended symbol meanings, not a proof",
+          "origin": "Actual lecture example and full official translation; local semantic boundary"
+        }
+      ],
+      "start": 806.88,
+      "end": 1010.19,
+      "evidence_class": "engineering check"
+    },
+    {
+      "section": "terms",
+      "lecture_material": "Constants, variables and nested function terms denote objects.",
+      "research_extension": "No separate external theorem claimed.",
+      "teaching_construction": "Controller signature and typed AST distinction; naming conventions do not establish variable category.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Signature, arity, constant/variable/function term grammar and first-order object return category",
+          "origin": "Actual lecture and full official first_order_logic_syntax"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Explicit syntax tags avoid hardcoded x/y/z-only variable recognition",
+          "origin": "Original program design motivated by inspected official source boundary"
+        }
+      ],
+      "start": 1010.19,
+      "end": 1162.74,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "grammar",
+      "lecture_material": "Predicate arities, connectives, quantifiers, valid/nonvalid examples and restrictive-language questions.",
+      "research_extension": "Restriction is the declared single-sort grammar, not all many-sorted SMT languages.",
+      "teaching_construction": "Correct Student(x) formula category; free/bound occurrence and equality definitions.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Atomic formula, zero-arity predicate, connectives, equality and quantifier scope",
+          "origin": "Actual lecture/official grammar, local first-use definitions"
+        },
+        {
+          "class": "definition",
+          "claim": "Passing a predicate or Boolean formula as an Object term is invalid, while Student(x) is valid",
+          "origin": "Actual official non-formulas list resolves ambiguous ASR wording"
+        }
+      ],
+      "start": 1163.12,
+      "end": 1544.08,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "coherence",
+      "lecture_material": "Naive atomic truth dictionaries, infinitely many function terms and possible co-denotation.",
+      "research_extension": "Official fol-example image actually viewed; coherent denotations rather than independent compound atoms.",
+      "teaching_construction": "Mentor/Bea and Anna/record alias examples; infinite mathematical assignments are not inherently invalid.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Co-denoting arguments give identical predicate truth in a structure",
+          "origin": "Original direct relation-membership argument"
+        },
+        {
+          "class": "definition",
+          "claim": "Syntactic unification and semantic identity answer distinct questions",
+          "origin": "Actual lecture topic plus original alias construction"
+        }
+      ],
+      "start": 1544.08,
+      "end": 1800.48,
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "structures",
+      "lecture_material": "Domain, constant/function/predicate interpretations, object graph and bob/robert aliases.",
+      "research_extension": "Official Z3 Uninterpreted Functions and Constants article; inspected official object diagram.",
+      "teaching_construction": "Complete six-object tables, explicit false-omitted relation convention and total mentor function.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Nonempty domain, total function interpretation, predicate relation and identity equality",
+          "origin": "Actual lecture model developed with primary Z3 semantic documentation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Six-object table and total mentor map with optional Anna alias",
+          "origin": "Original complete finite structure"
+        },
+        {
+          "class": "definition",
+          "claim": "Distinct names need not denote distinct objects; totality and congruence are semantic constraints",
+          "origin": "Retained official article and actual fol-example diagram"
+        }
+      ],
+      "start": 1800.48,
+      "end": 2173.94,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "evaluation",
+      "lecture_material": "Recursive term/formula interpretation and quantified assignment updates; questions about connective versus predicate arguments.",
+      "research_extension": "Official interpreter read in full, including its nested-quantifier warning; no claim that source sketch handles all grammar.",
+      "teaching_construction": "Scope-safe environment recursion, function denotation trace and structural induction on assignment dependence.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Recursive term denotation, atomic satisfaction and all/exists environment updates",
+          "origin": "Actual lecture mechanism with explicit local semantics"
+        },
+        {
+          "class": "theorem",
+          "claim": "Assignments agreeing on free variables give identical truth; sentences are assignment-independent",
+          "origin": "Original structural induction in exposition"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Mentor/qualification and nested shadowing finite examples",
+          "origin": "Original finite table calculations and exact relation oracles"
+        }
+      ],
+      "start": 2174.38,
+      "end": 2696.42,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "grounding",
+      "lecture_material": "Unique names, domain closure and finite propositionalization by conjunction/disjunction.",
+      "research_extension": "Official unique-names-domain-closure image inspected; no unrestricted first-order reduction claimed.",
+      "teaching_construction": "Coverage proof, unnamed-object countermodel, coherent alias expansion and function/equality encoding limits.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Domain closure and unique-name assumptions are distinct constraints",
+          "origin": "Actual lecture and inspected official diagram"
+        },
+        {
+          "class": "theorem",
+          "claim": "Quantifier expansion is exact under name coverage, with alias coherence; unique names alone is insufficient",
+          "origin": "Original semantic proof and countermodels"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Direct expansion with k quantifiers over N objects may require N^k body instances",
+          "origin": "Original finite expansion count, not universal solver runtime"
+        }
+      ],
+      "start": 2696.42,
+      "end": 2966.86,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "clauses",
+      "lecture_material": "Definite clauses, Takes/Covers/Knows rule and failure of literal template matching.",
+      "research_extension": "No separate empirical or algorithm-efficiency claim.",
+      "teaching_construction": "Category-restricted training rule, shared-substitution proof and mismatched-course countermodel.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Universally quantified positive definite-clause grammar",
+          "origin": "Actual recording and official rule template"
+        },
+        {
+          "class": "theorem",
+          "claim": "A coherent shared universal instance justifies its head; independently matched premises can be unsound",
+          "origin": "Original controller derivation and explicit finite countermodel"
+        }
+      ],
+      "start": 2966.86,
+      "end": 3324.59,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "substitution",
+      "lecture_material": "Recursive substitutions on Knows/Student atoms and variable-to-variable replacements.",
+      "research_extension": "Robinson1965 PDF9 sections5.2–5.5 define substitution, instantiation, standardization and composition.",
+      "teaching_construction": "One simultaneous replacement versus chasing bindings, stated composition order, capture avoidance and relation countermodel.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite simultaneous substitution and explicit first-then-second composition convention",
+          "origin": "Actual lecture examples; Robinson PDF9; local notation declaration"
+        },
+        {
+          "class": "theorem",
+          "claim": "Composition implements sequential substitution on finite terms",
+          "origin": "Original structural induction and checked original definition"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Captured existential differs from alpha-renamed replacement on R={(0,1)}",
+          "origin": "Original exact two-object countermodel"
+        }
+      ],
+      "start": 3324.59,
+      "end": 3508.05,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "unification",
+      "lecture_material": "Unification examples, fixed constant failure and grounded Takes/Covers join.",
+      "research_extension": "Robinson PDF10 sections5.7–5.8 and PDF11 theorem statement; PDF12 proof scan has clipped margin.",
+      "teaching_construction": "Worklist constraints, dereferencing, repeated-variable failure, finite-height occurs proof, fresh-rule variables and implementation cap distinction.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite syntactic unifier and most-general factorization meaning",
+          "origin": "Actual lecture and Robinson PDF10–11 definitions/theorem statement; full scanned proof not certified"
+        },
+        {
+          "class": "theorem",
+          "claim": "Occurs-check failure has no finite-tree solution; elementary transformations preserve possible solutions",
+          "origin": "Original finite-height and equation-elimination arguments"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Repeated binding disagreement, indirect cycle and solved-map certificates",
+          "origin": "Original program fixtures and independent finite witness enumeration"
+        },
+        {
+          "class": "definition",
+          "claim": "Standardizing apart separates variables of different rule applications",
+          "origin": "Robinson PDF9 section5.4 and original fresh-local-assignment implementation"
+        }
+      ],
+      "start": 3511.7,
+      "end": 3825.25,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "closure",
+      "lecture_material": "Ground atom count, infinite function-term growth, soundness and limited conclusions of modus ponens; undeveloped resolution pointer.",
+      "research_extension": "Robinson PDF1 records paper's resolution scope; no full refutation-completeness proof or benchmark certified here.",
+      "teaching_construction": "Summed predicate universe, least finite closure, in-place soundness/restricted atomic completeness proof, negative-query boundary and scan count.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Function-free positive Horn closure terminates and exactly characterizes ground atomic entailment under declared hypotheses",
+          "origin": "Original finite-universe, induction and constructed countermodel proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "132potential atoms,11initial facts,3/1growth layers,15final facts; atom bound is not full runtime",
+          "origin": "Original controller arithmetic and exact program trace"
+        },
+        {
+          "class": "theorem",
+          "claim": "Missing atom does not entail its negation; function terms can prevent finite closure",
+          "origin": "Original all-true model and explicit infinite term-generation example"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Recording points to resolution beyond its developed calculus",
+          "origin": "Actual segments127–130; undeveloped topic not promoted to a proved general result"
+        }
+      ],
+      "start": 3825.25,
+      "end": 4045.04,
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "translation",
+      "lecture_material": "Universal implication, existential conjunction, one course for all students, arithmetic sentence and category-restricted knowledge rule.",
+      "research_extension": "No certified99percent frequency or general natural-language translation algorithm.",
+      "teaching_construction": "Individual/common course witness countermodel, one-way implication and vacuity analysis.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Common course implies individual courses; converse fails on the diagonal attendance case",
+          "origin": "Original witness proof and controller countermodel"
+        },
+        {
+          "class": "definition",
+          "claim": "Category restrictions and vacuous truth determine translation meaning",
+          "origin": "Actual recording examples developed through local truth conditions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Empty Staff and existential-implication finite truth cases",
+          "origin": "Original exact relation tables"
+        }
+      ],
+      "start": 4045.04,
+      "end": 4382.69,
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "limits",
+      "lecture_material": "Syntax/semantics/grounding/inference summary, higher-order discussion and70percent example.",
+      "research_extension": "No general variable-population percentage inexpressibility theorem or uninspected resolution proof.",
+      "teaching_construction": "Fixed-ten cardinality/equality construction,120of1024knower subsets and distinction of computational questions.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Exactly ten students and exactly seven knowing students are expressible by finite first-order witnesses, distinctness and coverage",
+          "origin": "Original fixed-population construction; no blanket higher-order necessity claim"
+        },
+        {
+          "class": "engineering check",
+          "claim": "There are120seven-member subsets among1024subsets",
+          "origin": "Original binomial count and exhaustive finite check"
+        },
+        {
+          "class": "definition",
+          "claim": "Individual-object quantification differs from predicate/function quantification",
+          "origin": "Actual closing topic with precise language boundary"
+        }
+      ],
+      "start": 4382.69,
+      "end": 4541.94,
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "implementation",
+      "lecture_material": "No recording span: original supporting implementation.",
+      "research_extension": "No external solver or operational correctness certification.",
+      "teaching_construction": "Original bounded immutable-structure evaluator, simultaneous term/atom substitution, unifier and positive Horn closure with exact stdout and scope snippet.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Public grammar, input/effect/output/failure/resource contract",
+          "origin": "Original delivered program"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact displayed code/stdout, scoped snippet and substantive finite/model-set/input-boundary checks",
+          "origin": "Actual author execution; different-agent acceptance remains pending"
+        }
+      ],
+      "start": null,
+      "end": null,
+      "evidence_class": "definition"
+    },
+    {
+      "section": "exercises",
+      "lecture_material": "No recording span: original exercises and complete solutions.",
+      "research_extension": "No new empirical or unrestricted solver claim.",
+      "teaching_construction": "Six varied solutions on grammar/aliases, quantifier order, grounding, capture/unification, permission layers and restricted completeness.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Witness implication, finite-term occurs argument and positive-Horn missing-atom countermodel reasoning",
+          "origin": "Original worked proofs with local hypotheses"
+        },
+        {
+          "class": "engineering check",
+          "claim": "9/7relation counts,64structure combinations,15/18closure sizes,132atoms and666scans",
+          "origin": "Original arithmetic and independently designed author oracles"
+        },
+        {
+          "class": "definition",
+          "claim": "Four honest input/failure outcome test roles",
+          "origin": "Original implementation/evaluation exercise"
+        }
+      ],
+      "start": null,
+      "end": null,
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "references",
+      "lecture_material": "No recording span: primary reference descriptions and source/computational boundaries.",
+      "research_extension": "Exact inspected claim scope is stated separately for each original.",
+      "teaching_construction": "Distinguish stipulated policy, proved fragment and finite checks from operational evidence.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Reference identity, actual checked scope and exclusions",
+          "origin": "Actual retained primary sources and full official module"
+        }
+      ],
+      "start": null,
+      "end": null,
+      "evidence_class": "definition"
+    }
+  ],
+  "references": [
+    {
+      "title": "Official CS221 first_order_logic.py at retained commit f70063773fe9e04ddcbc248059501837053b810a",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/first_order_logic.py",
+      "supports": "Full715-line notation/fact source; Alice/Phoenix example, Object grammar, model/alias diagrams, finite grounding, definite clauses and translation. Original book implementation is independently written.",
+      "role": "Full715-line notation/fact source; Alice/Phoenix example, Object grammar, model/alias diagrams, finite grounding, definite clauses and translation. Original book implementation is independently written."
+    },
+    {
+      "title": "J. A. Robinson, A Machine-Oriented Logic Based on the Resolution Principle (1965)",
+      "url": "https://web.stanford.edu/class/linguist289/robinson65.pdf",
+      "supports": "PDF1identity; PDF9–11/printed31–33 substitution, instantiation, standardization, composition, unifier definition, nonoccurrence test and theorem statement. Inspected PDF12margin clips text: no full theorem-proof transcription, resolution-completeness proof or efficiency certification.",
+      "role": "PDF1identity; PDF9–11/printed31–33 substitution, instantiation, standardization, composition, unifier definition, nonoccurrence test and theorem statement. Inspected PDF12margin clips text: no full theorem-proof transcription, resolution-completeness proof or efficiency certification."
+    },
+    {
+      "title": "Microsoft Z3 Guide, Uninterpreted Functions and Constants",
+      "url": "https://microsoft.github.io/z3guide/docs/logic/Uninterpreted-functions-and-constants/",
+      "supports": "Retained article read October3,2026: total classical functions, flexible interpretations and congruence. No solver benchmark claim.",
+      "role": "Retained article read October3,2026: total classical functions, flexible interpretations and congruence. No solver benchmark claim."
+    },
+    {
+      "title": "Microsoft Z3 Guide, Quantifiers",
+      "url": "https://microsoft.github.io/z3guide/docs/logic/Quantifiers/",
+      "supports": "Retained introduction and final warning read October3,2026: general quantified reasoning is not a decision procedure, instantiation may be incomplete and infinite-model cases can diverge. Internal tactic examples/benchmarks and linked fragment papers not separately certified.",
+      "role": "Retained introduction and final warning read October3,2026: general quantified reasoning is not a decision procedure, instantiation may be incomplete and infinite-model cases can diverge. Internal tactic examples/benchmarks and linked fragment papers not separately certified."
+    }
+  ],
+  "authored_body_sha256": "b19746ad0dd4da0c5590ee473c8eca0647a47bc8c04c5d2e0c6f9e7ee968382c",
+  "transcript_sha256": "d9af0d8a638709f5c04f37dfdff21d45291ae27f32a466329d9a72081d52a648",
+  "implementation_evidence": {
+    "program_sha256": "1cbd3d0c91c987cbe8873c4dd320805f20bfa02be3134bffe4abc14b0a0936c1",
+    "stdout_lf_sha256": "5d162c5fd9cb79113dda3c9ea75d7d47b0cb62fe3eb8a52a65a051e4e92d48db",
+    "stdlib_only": true,
+    "author_checks": 14290,
+    "invalid_boundaries": 62,
+    "limitations": "Bounded finite semantics, finite-term unification and positive function-free Horn closure; no external solver, general refutation, physical safety or independent editorial acceptance."
+  },
+  "visual_scope": {
+    "official_deck": "No matched separate slide deck; retained executable lecture module is used.",
+    "official_images_inspected": [
+      "fol-example.png",
+      "unique-names-domain-closure.png"
+    ],
+    "primary_pdf_pages_inspected": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "limit": "Robinson PDF12 has clipped right margin; full proof transcription and resolution completeness not certified."
+  }
+}
