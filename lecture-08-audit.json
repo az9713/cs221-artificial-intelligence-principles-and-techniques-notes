@@ -1,11 +1,11 @@
 {
-  "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+  "chapter": "lecture-08-reinforcement-learning.html",
   "checked_at_utc": "2026-10-03T11:44:57.158119+00:00",
   "status": "independently reviewed and locally validated chapter",
-  "accepted_scientific_body_sha256": "fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4",
-  "accepted_metadata_sha256": "ecafcb9b0e2a7df34748cc7a6498aac771323e4d6616ce3c9af18b1dcfcd0e60",
-  "accepted_program_sha256": "a6d99d5484b432d2b29b79efe6e5ffa4178d8a5267e63a2f8b867e4b3e9d86dd",
-  "integrated_html_sha256": "89cac3a604977f187d71e00c0562b3f61fca912a5bb55944d853baf72cb3a645",
+  "accepted_scientific_body_sha256": "9fd41d0061718308556e055bc9274835173b855916e51e0b192ab5fca918a87c",
+  "accepted_metadata_sha256": "d367a27e4257b8969fe0feb4cefcb88ed6c4a663933f91c2fa45fa43beade7c4",
+  "accepted_program_sha256": "873e3db06116bad3f834cfd108de29fec4105dee30cc117c406c733e1fc4bfb2",
+  "integrated_html_sha256": "7a67f7648b28128c072234e9a57c3c3bee5e96b755f11c267a612b826487874e",
   "worked_solutions": 6,
   "current_reader_gate": {
     "status": "passed within accepted Chapters1-8 reader scope",
@@ -23,8 +23,7 @@
     "gate_6b": "accepted",
     "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "edd159004065d5536c2734d64fe26f8afb2d8054d185b9e45162d69c8341b24f",
-    "independent_numerical_checks": 7488,
-    "extra_nan_boundary_checks": 4
+    "review_report_sha256": "14f09638bfa24950a5152d6d0b98a56892c0f0a460d072b1d5f9a6c6115d0bcb",
+    "independent_numerical_checks": 1559
   }
 }

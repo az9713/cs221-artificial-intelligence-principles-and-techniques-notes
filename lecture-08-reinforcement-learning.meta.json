@@ -1,0 +1,480 @@
+{
+  "title": "Reinforcement learning",
+  "number": 8,
+  "video_id": "34Hk2v2kwg4",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "author draft; independent science-editor6b/7/8 pending",
+  "authored_body_sha256": "9fd41d0061718308556e055bc9274835173b855916e51e0b192ab5fca918a87c",
+  "sections": [
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recording span assigned.",
+      "research_extension": "Only individually cited support applies.",
+      "teaching_construction": "Stipulated unknown-reliability route and held-out true model",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Stipulated unknown-reliability route and held-out true model",
+          "provenance": "original teaching model"
+        }
+      ]
+    },
+    {
+      "section": "recap",
+      "start": 5.42,
+      "end": 364.7,
+      "lecture_material": "MDP/tram/policy/rollout/utility/evaluation/optimum recap; partial-application Q&A.",
+      "research_extension": "No external additional result imported.",
+      "teaching_construction": "Chapter7 exact undiscounted−22/3,−9,−12 reference values",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Finite route, valid actions, terminal/reward/discount convention",
+          "provenance": "recording; actual official mdp.py"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Chapter7 exact undiscounted−22/3,−9,−12 reference values",
+          "provenance": "original rational arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "values",
+      "start": 364.7,
+      "end": 660.21,
+      "lecture_material": "Policy and optimal state/action values, expectation/max recurrences and greedy extraction.",
+      "research_extension": "SB-draft PDF84–85,89–91 supports policy/optimal definitions.",
+      "teaching_construction": "Bellman first-reward conditioning identity under integrable return",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Policy versus optimal V/Q and continuation semantics",
+          "provenance": "recording; SB-draft PDF84–85,89–91"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Bellman first-reward conditioning identity under integrable return",
+          "provenance": "original derivation"
+        }
+      ]
+    },
+    {
+      "section": "feedback",
+      "start": 660.5,
+      "end": 937.01,
+      "lecture_material": "Unknown-model agent/environment setting, exploration and full/partial observation distinction.",
+      "research_extension": "No external additional result imported.",
+      "teaching_construction": "Transition feedback versus full distribution; full observation versus sufficient latent state",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Transition feedback versus full distribution; full observation versus sufficient latent state",
+          "provenance": "recording; original Markov explanation"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Known model with large state space also motivates sampled approximation",
+          "provenance": "actual official td_learning.py"
+        },
+        {
+          "evidence_class": "speaker judgment",
+          "claim": "Life analogy is recording-attributed motivation, not theorem",
+          "provenance": "recording segments25–26"
+        }
+      ]
+    },
+    {
+      "section": "agent",
+      "start": 937.01,
+      "end": 1478.22,
+      "lecture_material": "Static agent/action-feedback interface, simulation, sparse rewards and changing-policy Q&A.",
+      "research_extension": "No external additional result imported.",
+      "teaching_construction": "Training-run performance versus frozen policy evaluation; truncation differs from arrival",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Fixed policy versus learning interface, terminal entry and sparse rewards",
+          "provenance": "recording; actual official implementation"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Training-run performance versus frozen policy evaluation; truncation differs from arrival",
+          "provenance": "original protocol boundary"
+        }
+      ]
+    },
+    {
+      "section": "estimate",
+      "start": 1478.22,
+      "end": 2058.45,
+      "lecture_material": "Four-method roadmap; model-based exploration, transition counts, reward storage and planning/exploitation.",
+      "research_extension": "No external additional result imported.",
+      "teaching_construction": "Transition count and conditional reward-mean estimators; positive denominators; Weighted conditional reward means equal pair sample mean; Latest reward overwrite valid only for deterministic toy;0/4 observations mean2; Missing-pair coverage handling and zero observed successor count limits",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Transition count and conditional reward-mean estimators; positive denominators",
+          "provenance": "recording; original generalized estimator"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Weighted conditional reward means equal pair sample mean",
+          "provenance": "original cancellation identity"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Latest reward overwrite valid only for deterministic toy;0/4 observations mean2",
+          "provenance": "actual official code; original counterexample"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Missing-pair coverage handling and zero observed successor count limits",
+          "provenance": "original computational/statistical contract"
+        }
+      ]
+    },
+    {
+      "section": "modelerror",
+      "start": 2058.45,
+      "end": 2532.37,
+      "lecture_material": "Small-sample empirical fractions, estimated versus true model/policy and finite demonstration results.",
+      "research_extension": "No external additional result imported.",
+      "teaching_construction": "Recorded2failure/5success empirical row and true-row differences4/35,8/35; Discounted value/Q perturbation bound and unique-action gap greater than2eta; Arbitrarily small near-tie model errors can reverse argmax",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "evidence_class": "engineering check",
+          "claim": "Recorded2failure/5success empirical row and true-row differences4/35,8/35",
+          "provenance": "recording; original rational check"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Discounted value/Q perturbation bound and unique-action gap greater than2eta",
+          "provenance": "original operator/triangle inequality derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Arbitrarily small near-tie model errors can reverse argmax",
+          "provenance": "original one-step counterexample"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Recorded seeds/small exploitation mean are attributed finite demonstrations, not reproduced comparison",
+          "provenance": "recording segments65–79"
+        }
+      ]
+    },
+    {
+      "section": "coverage",
+      "start": 2532.37,
+      "end": 2727.25,
+      "lecture_material": "Full observation, continued refinement, valid actions and unseen-state/fallback Q&A.",
+      "research_extension": "No external additional result imported.",
+      "teaching_construction": "Two-stage epsilon_j=1/j counterexample gives finite deeper visit count almost surely; Known finite catalogue is explicit program restriction",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Fully observed does not mean known catalogue; original code lacks unseen-state fallback",
+          "provenance": "recording; actual official implementation"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Two-stage epsilon_j=1/j counterexample gives finite deeper visit count almost surely",
+          "provenance": "original finite-expectation argument"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Known finite catalogue is explicit program restriction",
+          "provenance": "original implementation contract"
+        }
+      ]
+    },
+    {
+      "section": "returns",
+      "start": 2734.0,
+      "end": 3024.11,
+      "lecture_material": "Model-free route to Q; full/suffix return example and backwards recurrence.",
+      "research_extension": "SB-draft PDF133 action-value evaluation; imprecise rate wording excluded.",
+      "teaching_construction": "Backward suffix-return recurrence and fixed-policy individual return expectation; Artificial terminal4 suffixes at discounts1and1/2; Action-value evaluation differs from control and generative transition estimation",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Backward suffix-return recurrence and fixed-policy individual return expectation",
+          "provenance": "original split/conditioning derivations"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Artificial terminal4 suffixes at discounts1and1/2",
+          "provenance": "recording; original finite arithmetic"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Action-value evaluation differs from control and generative transition estimation",
+          "provenance": "SB-draft PDF133; original explanation"
+        }
+      ]
+    },
+    {
+      "section": "montecarlo",
+      "start": 3025.01,
+      "end": 3601.74,
+      "lecture_material": "Epsilon-greedy, buffered episode, artificial terminal4, every-visit return statistics and readout.",
+      "research_extension": "SB-draft PDF128–129,133 visit semantics; no finite every-visit unbiasedness inferred.",
+      "teaching_construction": "epsilon.2 produces.9/.1; observed-only maximization changes rule; Dice one-episode every-visit expectation8 versus true12; pooled independent-episode ratio tends12; Changing behavior mixes return distributions; fixed-policy evaluation boundary",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Epsilon-greedy mixture, complete admissible table, first/every-visit distinction",
+          "provenance": "recording; actual official behavior; SB-draft PDF128–129,133"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "epsilon.2 produces.9/.1; observed-only maximization changes rule",
+          "provenance": "original arithmetic/counterexample"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Dice one-episode every-visit expectation8 versus true12; pooled independent-episode ratio tends12",
+          "provenance": "original geometric moment/LLN proof"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Changing behavior mixes return distributions; fixed-policy evaluation boundary",
+          "provenance": "original statistical scope"
+        }
+      ]
+    },
+    {
+      "section": "improvement",
+      "start": 3601.74,
+      "end": 3971.04,
+      "lecture_material": "Q versus MDP/world-model discussion, correction from Qstar to Qpi and policy improvement.",
+      "research_extension": "SB-draft PDF108 policy-improvement criterion.",
+      "teaching_construction": "Exact discounted policy improvement by monotone contraction; Noisy action reversal and two distinct dynamics with identical Q2",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Exact discounted policy improvement by monotone contraction",
+          "provenance": "original proof; SB-draft PDF108 criterion"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Noisy action reversal and two distinct dynamics with identical Q2",
+          "provenance": "original counterexamples"
+        },
+        {
+          "evidence_class": "speaker judgment",
+          "claim": "Model-free intuition and foundation/world-model prospects remain attributed judgments",
+          "provenance": "recording segments115–119"
+        }
+      ]
+    },
+    {
+      "section": "sarsa",
+      "start": 3971.04,
+      "end": 4347.34,
+      "lecture_material": "Online bootstrapping, SARSA quintuple, learning-rate update, exploratory continuation and on-policy meaning.",
+      "research_extension": "SB-draft PDF168–169 cached-action/terminal algorithm; Sutton1988 PDF7–9 successive predictions/actually viewed intuition diagram.",
+      "teaching_construction": "Conditional fixed-table target equals policy backup; frozen scalar-target loss derivative; Target4/5/update19/10; terminal−1/update1; stale terminal99 yields911/20; full versus semi-gradient",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "SARSA quintuple, behavior target, terminal zero and cached next-action execution",
+          "provenance": "recording; SB-draft PDF168–169 Figure6.9"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Conditional fixed-table target equals policy backup; frozen scalar-target loss derivative",
+          "provenance": "original derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Target4/5/update19/10; terminal−1/update1; stale terminal99 yields911/20; full versus semi-gradient",
+          "provenance": "original fixtures"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Official source independently resamples next action and ignores terminal flag; original loop repairs both",
+          "provenance": "actual full official implementation comparison"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "TD successive-prediction mechanism and inspected historical Figure1intuition",
+          "provenance": "Sutton1988 PDF1,7–9; no universal efficiency/control claim"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Retained SARSA convergence note is unpublished historical communication, not verified published theorem",
+          "provenance": "actual SB-draft PDF169"
+        }
+      ]
+    },
+    {
+      "section": "qlearning",
+      "start": 4347.34,
+      "end": 4611.28,
+      "lecture_material": "Q-learning sampled transition with max continuation, off-policy target and formula/code comparison.",
+      "research_extension": "WD1992 PDF1–5 finite discounted convergence premises and viewed theorem equation; SB-draft PDF171–172 max-target algorithm box.",
+      "teaching_construction": "Conditional mean target and discounted action-operator contraction; Target31/5/update23/5; rate.7 sum criteria versus constant and exponent2; Paper transition-stage episode convention and restricted inspected proof mechanism",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Sampled max target, off-policy target/behavior and admissible/terminal semantics",
+          "provenance": "recording; WD1992 PDF2–3; SB-draft PDF171–172 Figure6.12"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Conditional mean target and discounted action-operator contraction",
+          "provenance": "original derivation"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Primary tabular almost-sure convergence under finite Markov/bounded reward/discount/coverage/per-pair step sums",
+          "provenance": "WD1992 PDF2–4; exact theorem equation visually inspected; detailed appendix not attested"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Target31/5/update23/5; rate.7 sum criteria versus constant and exponent2",
+          "provenance": "original arithmetic/series checks"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Paper transition-stage episode convention and restricted inspected proof mechanism",
+          "provenance": "WD1992 PDF3–5; original scope"
+        }
+      ]
+    },
+    {
+      "section": "synthesis",
+      "start": 4611.28,
+      "end": 4689.78,
+      "lecture_material": "Four-method recap, small tabular-state limitation and next representation topic.",
+      "research_extension": "No external additional result imported.",
+      "teaching_construction": "Four methods, tabular storage and function-approximation boundary",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Four methods, tabular storage and function-approximation boundary",
+          "provenance": "recording; original comparative table"
+        }
+      ]
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recording span assigned.",
+      "research_extension": "Only individually cited support applies.",
+      "teaching_construction": "Original finite catalogue/counts/MC/TD/planning/simulation/oracle code, explicit numeric/budget domains and exact stdout; Frozen evaluation is distinct from cumulative training and true-Q or asymptotic certification",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "evidence_class": "engineering check",
+          "claim": "Original finite catalogue/counts/MC/TD/planning/simulation/oracle code, explicit numeric/budget domains and exact stdout",
+          "provenance": "original program; author evidence pending independent review"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Frozen evaluation is distinct from cumulative training and true-Q or asymptotic certification",
+          "provenance": "original experiment protocol"
+        }
+      ]
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recording span assigned.",
+      "research_extension": "Only individually cited support applies.",
+      "teaching_construction": "Count/reward identity, every-visit bias/pooled limit, model perturbation and action gap; step-series and reach-count arguments; Suffix/TD/terminal arithmetic, cached-action repair and finite evaluation design",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Count/reward identity, every-visit bias/pooled limit, model perturbation and action gap; step-series and reach-count arguments",
+          "provenance": "original complete worked derivations"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Suffix/TD/terminal arithmetic, cached-action repair and finite evaluation design",
+          "provenance": "original worked fixtures/protocol"
+        }
+      ]
+    },
+    {
+      "section": "references",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recording span assigned.",
+      "research_extension": "Only individually cited support applies.",
+      "teaching_construction": "Actual original identities, claim-page/visual scopes and computational/asymptotic boundaries",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Actual original identities, claim-page/visual scopes and computational/asymptotic boundaries",
+          "provenance": "actual retained sources; original provenance statement"
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Official CS221 reinforcement_learning.py at retained commit f70063773fe9e04ddcbc248059501837053b810a",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/reinforcement_learning.py",
+      "supports": "Actual agent/feedback, count/reward storage, MC/SARSA/Q targets and source implementation boundaries."
+    },
+    {
+      "title": "Official CS221 td_learning.py at retained commit f70063773fe9e04ddcbc248059501837053b810a",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/td_learning.py",
+      "supports": "Known-model/large-state motivation only; later games/history content is not Lecture8 coverage."
+    },
+    {
+      "title": "Sutton and Barto, Reinforcement Learning: An Introduction, second edition in progress (frontmatter2014,2015)",
+      "url": "https://web.stanford.edu/class/psych209/Readings/SuttonBartoIPRLBook2ndEd.pdf",
+      "supports": "PDF84–85,89–91,108 policy/optimum/improvement context;128–129,133 visit/action-value semantics;158–159,168–169,171–172 TD/SARSA/Q mechanism and viewed algorithm boxes. Historical communication and rate wording excluded."
+    },
+    {
+      "title": "Sutton (1988), Learning to Predict by the Methods of Temporal Differences",
+      "url": "https://jmvidal.cse.sc.edu/library/sutton88a.pdf",
+      "supports": "PDF1identity/scope,7–8incremental successive predictions,9actually viewed Figure1intuition; no universal efficiency/nonlinear-control theorem."
+    },
+    {
+      "title": "Watkins and Dayan (1992), Q-learning",
+      "url": "https://www.gatsby.ucl.ac.uk/~dayan/papers/cjch.pdf",
+      "supports": "PDF1–5identity, finite controlled discounted task, sampled max update, per-pair convergence premises and proof mechanism. Exact theorem equation onPDF4viewed; detailed appendix and absorbing extensions not attested."
+    }
+  ],
+  "implementation": {
+    "program": "programs/chapter08.py",
+    "sha256": "873e3db06116bad3f834cfd108de29fec4105dee30cc117c406c733e1fc4bfb2",
+    "dependencies": "Python standard library",
+    "evidence": "Exact embedded source/stdout and original finite fixtures; author-only checks are distinct from independent review."
+  },
+  "limitations": [
+    "All148 machine-ASR segments and full official modules read; source timing/coverage does not certify human audio wording.",
+    "No official deck or recording frames/random plots inspected; only specified primary diagrams/algorithm/theorem pages.",
+    "Retained SB source is2014/2015in-progress draft, not later edition; unpublished SARSA communication not promoted into primary theorem.",
+    "WD1992checked discounted finite tabular premises; detailed appendix/absorbing extensions not fully verified.",
+    "Known finite catalogue is a declared program restriction; unseen states reject, not open-world robustness.",
+    "Numerical residual bound concerns estimated model, not statistical model accuracy or certified roundoff interval.",
+    "Finite seeded results and positive finite visit counts do not attest asymptotic convergence/safety or model validity.",
+    "Human accessibility and root reader/pass9 remain separate."
+  ]
+}
