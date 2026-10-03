@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
-  "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
+  "checked_at_utc": "2026-10-03T13:55:03.813488+00:00",
   "status": "independently reviewed and locally validated chapter",
   "accepted_scientific_body_sha256": "fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4",
   "accepted_metadata_sha256": "ecafcb9b0e2a7df34748cc7a6498aac771323e4d6616ce3c9af18b1dcfcd0e60",
@@ -8,7 +8,7 @@
   "integrated_html_sha256": "89cac3a604977f187d71e00c0562b3f61fca912a5bb55944d853baf72cb3a645",
   "worked_solutions": 6,
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-12 reader scope",
+    "status": "passed within accepted Chapters1-13 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   },

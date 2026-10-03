@@ -1,9 +1,9 @@
 {
-  "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
+  "checked_at_utc": "2026-10-03T13:55:03.813488+00:00",
   "course": "CS221",
-  "chapter_count": 12,
+  "chapter_count": 13,
   "selected_recordings": 20,
-  "status": "Twelve independently reviewed chapters locally validated; full course in development",
+  "status": "Thirteen independently reviewed chapters locally validated; full course in development",
   "course_complete": false,
   "human_accessibility": "not performed",
   "reader_report": "reader-validation.json",
@@ -121,7 +121,7 @@
       "CODE": "678724cc79aaadb945801bd455f4411dab756858e69a1d19970e018b3c44edf9",
       "HTML": "20e41a97ed246b67d02c591475ac16741b5d771c38dfeca55ad13d08861d6332",
       "review": "reviews/lecture-11-round2.md",
-      "before_HTML": "8c27728f3f8b63543f25740cf3b1e21484aeacc4865bfbeda47a3da15f5ef4ce",
+      "before_HTML": "ddd99cd1b1900ad216f253739616625ee53662eb85d56eb39e63d6b1571e264e",
       "review_sha256": "da4e5a0527b1b9310683721e0167238dbc948d1305ce68064de8e095eeb0de97",
       "path": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
       "after_HTML": "ddd99cd1b1900ad216f253739616625ee53662eb85d56eb39e63d6b1571e264e"
@@ -132,14 +132,25 @@
       "CODE": "e15e74642f7b2231e9652eac3bf4d24f6de1aaa3304c3d17558e22b981bdfb3a",
       "HTML": "0327786a7d3aa54d47b48d4db62291e55b596bd7e7faadf331fdf15098262757",
       "review": "reviews/lecture-12-round2.md",
-      "before_HTML": "0327786a7d3aa54d47b48d4db62291e55b596bd7e7faadf331fdf15098262757",
+      "before_HTML": "e05c9347f514952636c0a3e413796e24a41f3ac5147d849f8de43ee56bf918ae",
       "review_sha256": "c295c6e6c404ec1287ba533927cb348f9f719f285cc6e71c12a8b2e02d6afabf",
       "path": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
-      "after_HTML": "e05c9347f514952636c0a3e413796e24a41f3ac5147d849f8de43ee56bf918ae"
+      "after_HTML": "9dafd989e26989598d7cc902bd0f6804382249e31267fa324aea72a21b56c446"
+    },
+    "13": {
+      "BODY": "d1571093d0496f7860926404a9fd28e39c7d91bd9257ffeac05b7f76957e24b8",
+      "META": "2c8d5989babb8c3df481978bd257371e11e7e8f6c761a7251d6a414e1c6a66f0",
+      "CODE": "e052e74fe0c71911756fcad24362b419179a7bea0ae2d91b8ad18e7f06cda018",
+      "HTML": "f4292ac73042f8eba13637bfab33c4bc92b9f0e0aa4d3d336b7a2156535b4786",
+      "review": "reviews/lecture-13-round1.md",
+      "before_HTML": "f4292ac73042f8eba13637bfab33c4bc92b9f0e0aa4d3d336b7a2156535b4786",
+      "review_sha256": "0944b5275d2bc175ee464e808d66c39661cfc056156736ca9939ced79fe779be",
+      "path": "lecture-13-conditional-inference-and-gibbs-sampling.html",
+      "after_HTML": "6f2508fe1aa5cc9eafe05ba07ce8cf390d5ae0559eeeb6b4a0cc99e1c7c25e2d"
     }
   },
   "limits": [
-    "Chapters13-20, cumulative course lab, independent learning-route review and book-wide review pending",
+    "Chapters14-20, cumulative course lab, public learning-route integration and book-wide review pending",
     "No publication performed"
   ]
 }

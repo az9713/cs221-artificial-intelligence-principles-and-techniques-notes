@@ -1,12 +1,12 @@
 {
   "course": "CS221",
-  "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
-  "scope": "Accepted Chapters1-12 and four reader support pages; full20chapter course incomplete",
+  "checked_at_utc": "2026-10-03T13:55:03.813488+00:00",
+  "scope": "Accepted Chapters1-13 and four reader support pages; full20chapter course incomplete",
   "static": {
     "status": "passed",
-    "html_files": 17,
-    "local_links_checked": 204,
-    "timestamps_checked": 153,
+    "html_files": 18,
+    "local_links_checked": 218,
+    "timestamps_checked": 165,
     "chapter_pages_with_dollar_math": 0,
     "failures": [],
     "warnings": []
@@ -246,6 +246,24 @@
         "controls": true,
         "emptyToc": false,
         "file": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 192,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-13-conditional-inference-and-gibbs-sampling.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 192,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-13-conditional-inference-and-gibbs-sampling.html",
         "viewport": 390
       },
       {

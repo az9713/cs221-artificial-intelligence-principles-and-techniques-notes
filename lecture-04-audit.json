@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-04-neural-networks-and-training.html",
-  "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
+  "checked_at_utc": "2026-10-03T13:55:03.813488+00:00",
   "status": "independently reviewed and locally validated chapter",
   "independent_review": {
     "rounds": 1,
@@ -29,7 +29,7 @@
     "No publication performed"
   ],
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-12 reader scope",
+    "status": "passed within accepted Chapters1-13 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   }

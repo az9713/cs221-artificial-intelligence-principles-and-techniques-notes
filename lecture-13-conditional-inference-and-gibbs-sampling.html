@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="d1571093d0496f7860926404a9fd28e39c7d91bd9257ffeac05b7f76957e24b8"><title>Conditional inference and Gibbs sampling · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START -->
+<h1>Conditional inference and Gibbs sampling</h1>
+<p class="subtitle">Chapter 13 · A sampler can preserve the correct distribution while never reaching most of it.</p>
+<section id="case"><h2>An alarm changes the question, not the model</h2>
+<p>An alarm has sounded. How much should that change your belief that a burglary occurred? An earthquake can also trigger the alarm, and the model must account for that competing explanation. A simulation that spends most of its time generating quiet buildings answers this conditional question inefficiently. A simulation that keeps the alarm on avoids those rejected trials, but can introduce a different failure: successive states may barely move.</p>
+<p>Use the lecture's stipulated binary alarm model throughout: independent burglary and earthquake probabilities are both \(1/20\), and the alarm is their logical OR. These numbers are teaching assumptions, not measured risks or an operational alarm system. We will calculate the exact posterior, build dependent transitions targeting it and ask which structural assumptions allow those transitions to explore the answer. A noisy telephone chain supplies a fully positive comparison where every candidate assignment has a defined local update.</p>
+<p>Chapter 12 introduced a Bayesian network as a factored joint probability model. This chapter refreshes that definition locally, then separates three tasks: computing a conditional distribution, estimating it by simulation and identifying independence guaranteed by the graph. Correct computation cannot establish that the model describes a real building. A posterior probability alone is also not a response policy; an action would require its own losses and constraints.</p></section>
+<section id="inference"><h2>1. Slice, sum and normalize the declared joint <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=5s">[00:05–10:18]</a></h2>
+<p>Let \(X=(X_1,\ldots,X_n)\) be a finite collection of random variables. Variable \(X_i\) takes values in a nonempty finite domain \(\mathcal X_i\). A directed acyclic graph, or DAG, gives each variable a parent set \(\operatorname{pa}(i)\); acyclic means no sequence of directed edges returns to its starting node. A local kernel \(p_i(x_i\mid x_{\operatorname{pa}(i)})\) is a nonnegative probability row summing to one over \(x_i\) for every parent assignment. The Bayesian network defines</p>
+\[P(x)=\prod_{i=1}^n p_i(x_i\mid x_{\operatorname{pa}(i)}).\]
+<p>This product is normalized because a finite DAG has a topological order, with every parent preceding its child. Sum the last variable first. It appears only in its own remaining childless factor, whose row sums to one. Remove that factor and repeat in reverse topological order. The final sum is one. This argument uses normalized local kernels rather than assuming an arbitrary product must be a probability distribution.</p>
+<p>For the alarm, let \(B,E,A\in\{0,1\}\) denote burglary, earthquake and alarm. The graph is \(B\to A\leftarrow E\). The joint is \(P(b,e,a)=p_B(b)p_E(e)p_A(a\mid b,e)\), where the root probabilities of 1 are \(1/20\) and \(p_A(a\mid b,e)=1\) exactly when \(a=b\lor e\). Other alarm rows have probability zero. The actually inspected official alarm image fixes these arrows; it does not supply empirical causation or calibrated parameter values.</p>
+<p>An inference query asks about a specified subset of variables given an assignment to another disjoint subset. Write the evidence assignment as \(e_{\mathrm{obs}}\), and let \(Z_e=P(e_{\mathrm{obs}})\) be its probability. Restrict the joint to matching rows, sum the unqueried variables and divide by \(Z_e\). Conditioning is defined only if \(Z_e&gt;0\). Restricting rows without normalizing gives joint evidence mass, not a posterior.</p>
+<table><thead><tr><th>Burglary B</th><th>Earthquake E</th><th>Joint mass with A=1</th><th>Conditional mass given A=1</th></tr></thead><tbody>
+<tr><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>0</td><td>1</td><td>19/400</td><td>19/39</td></tr>
+<tr><td>1</td><td>0</td><td>19/400</td><td>19/39</td></tr>
+<tr><td>1</td><td>1</td><td>1/400</td><td>1/39</td></tr></tbody></table>
+<p>The evidence mass is \(Z_e=39/400\). Summing the final two burglary rows gives \(P(B=1,A=1)=20/400\), so \(P(B=1\mid A=1)=20/39\), about 0.513. The alarm increases the burglary probability from 0.05 but does not make burglary certain. The two explanations compete, and the simultaneous-event row remains possible.</p>
+<p>A tensor implementation must preserve semantic axes. The joint above has axes [burglary, earthquake, alarm], each of size two. Slicing the alarm axis at 1 leaves [burglary, earthquake]; summing the earthquake axis leaves burglary evidence masses; their scalar sum is \(Z_e\). A transpose or wrong-axis reduction can produce a normalized array answering another question. Normalization is not a check of query correctness.</p>
+<p>Full enumeration costs \(\prod_i|\mathcal X_i|\) assignments, with up to \(n\) factor evaluations per assignment. One hundred binary variables already require \(2^{100}\) joint entries. This is a limitation of materializing the full joint, not proof that every exact inference problem needs that storage: structure can permit other algorithms. Our finite program uses enumeration as a small-model oracle, then compares the local sampler against it.</p></section>
+<section id="rejection"><h2>2. Ancestral generation uses the prior before seeing evidence <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=618s">[10:18–15:17]</a></h2>
+<p>An ancestral simulation follows a topological order, drawing each variable from its kernel after its parents have been drawn. The probability of generating complete assignment \(x\) is the product of these successive conditional probabilities, hence \(P(x)\). Independent random inputs across runs yield independent joint draws. This probabilistic program defines the same distribution as the factored table, without storing every assignment.</p>
+<p>Rejection sampling retains only generated assignments satisfying the evidence. For any supported query value \(q\), the probability that a retained draw has that value is \(P(q,e_{\mathrm{obs}})/P(e_{\mathrm{obs}})=P(q\mid e_{\mathrm{obs}})\). The conditioning event supplies the denominator; it is not an extra sampling approximation. What is approximate is estimating this probability from finitely many retained draws.</p>
+<p>Let \(N\) be a positive integer proposal count and \(M\) the number accepted. Under independent ideal proposals, \(M\) has a binomial distribution with acceptance probability \(Z_e\). Therefore \(\mathbb E M=NZ_e\) and \(P(M=0)=(1-Z_e)^N\). For the alarm, 300 proposals yield expected retained count \(300(39/400)=117/4=29.25\). The spoken classroom estimate near 0.44 is an attributed finite demonstration, not the exact 20/39 posterior and not our program's output.</p>
+<p>Conditional on \(M=m&gt;0\), the retained query indicators are independent posterior draws. If \(p\) is the true posterior probability of a selected query event, their mean has variance \(p(1-p)/m\). This calculation uses accepted count \(m\), not total proposals \(N\). When \(M=0\), the ratio is undefined. Returning zero would claim the event is impossible; returning a normalized empty dictionary would conceal the missing estimate. Our program returns accepted count zero and an explicit absent estimate.</p>
+<p>The expected number of ideal proposals to obtain one acceptance is \(1/Z_e\), from the geometric waiting-time law. Rare evidence can therefore consume almost all computation before posterior information appears. This diagnosis motivates a transition that incorporates evidence from the start, but does not prove the resulting transition mixes quickly.</p></section>
+<section id="chain"><h2>3. A dependent sequence needs both a target and an exploration argument <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=917s">[15:17–18:48]</a></h2>
+<p>Fix supported evidence and let \(\Omega_e\) be the set of complete matching assignments with strictly positive joint probability. Its target distribution is \(\pi(x)=P(x)/Z_e\) on \(\Omega_e\). Here \(\pi\) denotes a sampling target, not the control policy of earlier chapters. Support excludes states that merely match evidence but violate a deterministic constraint. For the alarm evidence \(A=1\), assignment 001 is excluded because its joint probability is zero.</p>
+<p>A Markov chain is a sequence of random assignments \(Y_0,Y_1,\ldots\) whose next conditional distribution depends only on its present assignment. A homogeneous chain has one fixed transition matrix \(K(x,y)=P(Y_{t+1}=y\mid Y_t=x)\), with nonnegative rows summing to one. We will define \(t\) as completed sweeps of all free coordinates, so one matrix describes each time step.</p>
+<p>The target is stationary, or invariant, if \(\sum_x\pi(x)K(x,y)=\pi(y)\) for every destination \(y\). Starting in law \(\pi\) then leaves each later state in law \(\pi\). This algebra does not say that a chain started at a chosen assignment reaches \(\pi\). The identity matrix preserves every distribution and never changes its initial state.</p>
+<p>Markov chain Monte Carlo, abbreviated MCMC, estimates target expectations with averages along a chain designed to preserve that target. Gibbs sampling constructs its transitions by resampling selected coordinates from full conditional distributions. Adjacent assignments usually share most values, making the computation incremental. Dependence means the number of saved rows is not automatically an independent sample count.</p>
+<p>For a stationary scalar observation \(H_t=h(Y_t)\), its average over \(N\) sweeps satisfies</p>
+\[\operatorname{Var}\!\left(\frac1N\sum_{t=1}^N H_t\right)=
+\frac1{N^2}\left[N\operatorname{Var}_\pi(h)+2\sum_{k=1}^{N-1}(N-k)\operatorname{Cov}(H_1,H_{1+k})\right].\]
+<p>Expand the square of the centered sum: diagonal terms give the first contribution, and each lag \(k\) occurs in \(N-k\) pairs. Positive covariances can greatly inflate variance; negative covariances can reduce it. Dependence alone does not justify the universal claim that every ten independent draws outperform every ten correlated draws. Nonstationary initialization also introduces bias not described by this stationary variance identity.</p>
+<p>The useful comparison is posterior information per unit of computation under explicit assumptions. Rejection may waste most proposals; a Gibbs chain may revisit essentially the same supported region. Neither a trace with changing values nor an invariant target resolves both issues.</p></section>
+<section id="telephone"><h2>4. A full conditional resamples a variable, not its prior <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=1129s">[18:49–29:51]</a></h2>
+<p>In the telephone model, \(A\to B\to C\) are binary messages. The first bit is fair, and each subsequent channel independently flips its input with probability \(1/5\), preserving it with probability \(4/5\). Condition on the last message \(C=1\). The question is the first message's posterior, while the middle message is an unobserved variable that still affects the calculation.</p>
+<p>For free-coordinate state order \((A,B)=00,01,10,11\), the joint masses with \(C=1\) are \(2/25,2/25,1/50,8/25\). They sum to \(1/2\). Dividing gives posterior masses \(4/25,4/25,1/25,16/25\), summing to one. Thus \(P(A=1\mid C=1)=17/25=0.68\). The two small-path mechanisms differ: A=0,B=1,C=1 needs one flip, while A=1,B=0,C=1 needs two. Assigning the same small weight to both would lose that distinction.</p>
+<p>To update \(B\), freeze \(A\) and \(C\) at their present values. The full conditional conditions on every other variable:</p>
+\[P(B=b\mid A=a,C=c)=
+\frac{p_A(a)p_B(b\mid a)p_C(c\mid b)}
+{\sum_{\tilde b\in\{0,1\}}p_A(a)p_B(\tilde b\mid a)p_C(c\mid\tilde b)}.\]
+<p>At \(A=C=1\), the two joint candidate weights are \(1/50\) for B=0 and \(8/25\) for B=1. The normalizer is \(17/50\), giving \(1/17\) and \(16/17\), about 0.0588 and 0.9412. These exact values refine the spoken rounded .05/.94; they are not two values that should sum to .99. The current B value need not be retained, but there is positive probability of retaining it.</p>
+<p>Using the forward channel \(p_B(b\mid a)\) alone would ignore the observed downstream message. When A=1 it gives B=1 probability 4/5, whereas the full conditional gives 16/17. The evidence explains the difference: B=1 makes C=1 likely too. Gibbs is not forward ancestral generation with observed variables simply frozen.</p>
+<p>To update A, the factor \(p_C(c\mid b)\) is common to all candidate A values and cancels when it is positive. With B=1, A's posterior row is \((1/5,4/5)\); with B=0 it is \((4/5,1/5)\). This locality is algebraic. It will become a general factor rule after the sweep algorithm is defined.</p></section>
+<section id="gibbs"><h2>5. Coordinate updates preserve the posterior; ordered sweeps need not be reversible <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=1791s">[29:51–39:24]</a></h2>
+<p>Choose an initial complete assignment in \(\Omega_e\). Fix evidence throughout. In a predetermined order, resample every free coordinate from its full conditional given the current other coordinates, immediately using the new value in later updates. A complete pass is a sweep. Our program records one assignment after each retained full sweep; the official demonstration counts after every coordinate update. Both can be described, but they have different clocks and counts.</p>
+<p>For coordinate \(i\), write \(x_{-i}\) for all other values. Its kernel is</p>
+\[K_i(x,y)=\mathbf1\{y_{-i}=x_{-i}\}\,
+\frac{\pi(y)}{\sum_{z:z_{-i}=x_{-i}}\pi(z)},\qquad x,y\in\Omega_e.\]
+<p>The indicator is one when all unmodified coordinates agree, otherwise zero. The denominator is positive because supported \(x\) itself lies in the fiber. Resampling from this row cannot jump to zero target mass. <a href="https://pages.uoregon.edu/dlevin/MARKOV/markovmixing.pdf">Levin–Peres, actual PDF pp.58–59</a>, define this conditional-fiber update for finite positive support, then select the site randomly. We use the same coordinate kernel and separately analyze an ordered composition.</p>
+<p>To prove invariance, sum \(\pi(x)K_i(x,y)\) over x. Only assignments with \(x_{-i}=y_{-i}\) contribute. Their target masses sum to the shared fiber denominator, which cancels, leaving \(\pi(y)\). For two states in that fiber,</p>
+\[\pi(x)K_i(x,y)=
+\frac{\pi(x)\pi(y)}{\sum_{z:z_{-i}=x_{-i}}\pi(z)}
+=\pi(y)K_i(y,x).\]
+<p>Outside the fiber both sides are zero. This equality is detailed balance, also called reversibility: stationary probability flow is equal in the two directions. It implies invariance by summing over origins, but it is stronger than invariance. The proof relies on full conditional normalization, not on visually plausible local moves.</p>
+<p>Using row-vector distributions, an A-then-B sweep has \(K=K_AK_B\), with matrix multiplication summing over its intermediate assignment. Since \(\pi K_A=\pi\) and \(\pi K_B=\pi\), their composition preserves \(\pi\). Detailed balance need not survive that composition: reversing a sweep reverses the order too. A random-site mixture \(\sum_i \rho_iK_i\), with fixed nonnegative weights \(\rho_i\) summing to one, remains reversible because its detailed-balance equations add linearly.</p>
+<p>For telephone state order 00,01,10,11 with fixed C=1, the exact ordered sweep is</p>
+\[K=\begin{pmatrix}
+2/5&2/5&1/85&16/85\\
+1/10&1/10&4/85&64/85\\
+2/5&2/5&1/85&16/85\\
+1/10&1/10&4/85&64/85
+\end{pmatrix},\qquad \pi=(4/25,4/25,1/25,16/25).\]
+<p>For example, from 00 the A update selects A=0 with probability 4/5. Given A=0 and C=1, B's two local weights are both 4/25 before normalization, so either B occurs with probability 1/2. Their product gives the first two entries 2/5. If A becomes 1, the B row is (1/17,16/17), giving the last two entries. Every row sums to one, every entry is positive and direct multiplication gives \(\pi K=\pi\).</p>
+<p>Nevertheless, stationary flow 00→11 is \((4/25)(16/85)=64/2125\), while 11→00 is \((16/25)(1/10)=8/125\). They differ. Calling the ordered sweep reversible because each site kernel is reversible would therefore be false. Reversibility is useful theory, not a requirement for this sweep to preserve its target.</p>
+<p>Computing every candidate's full joint naively costs about \(N n d n\) factor lookups for N sweeps, n binary or bounded-domain variables and maximum domain size d. This count assumes constant-cost factor access and no large arithmetic operands. It counts transition construction work, not independent effective samples or a mixing certificate. Local factor cancellation reduces candidate work but does not resolve dependence or disconnected support.</p></section>
+<section id="blanket"><h2>6. The Markov blanket includes a child's other parents <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=2364s">[39:24–49:26]</a></h2>
+<p>Split the joint into factors involving candidate coordinate \(x_i\) and factors not involving it. On a supported current assignment, the latter product is a positive constant \(\kappa\) across the whole candidate fiber. If \(w_i(v)\) is the former product with \(x_i=v\), then \(\kappa w_i(v)/\sum_{\tilde v}\kappa w_i(\tilde v)=w_i(v)/\sum_{\tilde v}w_i(\tilde v)\). Positivity matters: canceling a zero common factor would turn an undefined 0/0 conditional into an apparently valid row.</p>
+<p>Exactly which factors involve \(x_i\)? Its own kernel uses it as the child value. Each child's kernel uses it as a parent value. No other local kernel has it as an argument. Therefore</p>
+\[w_i(v)=p_i(v\mid x_{\operatorname{pa}(i)})
+\prod_{j:i\in\operatorname{pa}(j)}
+p_j(x_j\mid x_{\operatorname{pa}(j)\setminus\{i\}},X_i=v).\]
+<p>The other values needed to evaluate this expression are parents, children and each child's other parents. Their union, excluding i itself, is the Markov blanket. A co-parent need not share a direct edge with i: it shares an argument list in a child's kernel. The recording explicitly raises co-parents; the shortened parents-and-children summary needs this addition.</p>
+<p>In the telephone chain, A's candidate score uses \(p_A(a)p_B(b\mid a)\), B's uses \(p_B(b\mid a)p_C(c\mid b)\), and C's uses \(p_C(c\mid b)\). Their blankets are respectively {B}, {A,C}, {B}. These candidate scores can differ from the full joint by a constant, but their normalized rows are identical on supported fibers. Using the same exact categorical draw and coordinate order should then produce the same finite trace, not merely nearby final frequencies.</p>
+<p>For the alarm, B's score is \(p_B(b)p_A(a\mid b,e)\). Earthquake E is B's co-parent in the alarm factor and must be included. Given A=1,E=0, B must be 1. Given A=1,E=1, either B is compatible and its posterior is simply its prior, so \(P(B=1\mid A=1,E=1)=1/20\). Dropping E would miss this change from certainty to a rare event.</p>
+<p>If coordinate i has \(c_i\) children and domain size \(d_i\), local candidate scoring uses \(d_i(1+c_i)\) factor evaluations instead of \(d_i n\). Parent-key construction, kernel arity, table access and exact-rational bit lengths add cost. Blanket cardinality is an orientation, not a complete operation count. A high-degree variable can still be expensive. Our program deliberately verifies complete-state support before local scoring, so that validation adds full-joint work; it demonstrates the exact local weights without claiming an optimized runtime benchmark.</p></section>
+<section id="rare"><h2>7. Rare evidence and slow movement are different difficulties <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=2966s">[49:26–53:57]</a></h2>
+<p>Return to the alarm posterior. Its positive free-coordinate states 01,10,11 have probabilities \(19/39,19/39,1/39\). A coordinate sampler can move between the two common competing explanations only through the rare simultaneous-event state 11. This is connected support, but connection does not imply rapid movement. Finite frequencies such as the recording's .60 or .33 are attributed demonstrations of variation, not exact posteriors.</p>
+<p>From free state 01, updating B first gives B=1 with probability 1/20 because E already explains the alarm. If B stays 0, the following E update must stay 1. If B becomes 1, E becomes 0 with probability 19/20. Thus one B-then-E sweep moves 01→10 with probability \(19/400\), and 01→11 with probability \(1/400\). It stays 01 with probability 19/20. The sweep is legal and invariant, while most visits can repeat the same explanation.</p>
+<p>Contrast a two-variable model \(A\to B\) with fair A, \(P(B=1\mid A=0)=1/10000\) and \(P(B=1\mid A=1)=2/10000\). Evidence B=1 has mass \(3/20000\). Its A=1 posterior is \(2/3\). Rejection accepts an average of only 1.5 proposals in ten thousand; expected proposals per acceptance are \(20000/3\), about 6,667.</p>
+<p>Here there is only one free variable. Its Gibbs update draws directly from the exact two-point posterior row (1/3,2/3), regardless of its old value. With independent ideal categorical randomness, successive draws are independent posterior draws. This is an exact sampling law, not an exact histogram at every finite sample size. A single draw can only be 0 or 1, and neither equals probability 2/3. At N draws the indicator average still has variance \(2/(9N)\).</p>
+<p>The official table, rather than the garbled spoken decimal, fixes these rare-event probabilities. The lesson is conditional: holding evidence can eliminate a rejection bottleneck without creating a transition bottleneck in this one-coordinate example. A larger model can have both rare evidence and disconnected or slowly connected posterior regions.</p></section>
+<section id="convergence"><h2>8. Invariance is not arbitrary-start convergence <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=3238s">[53:58–58:47]</a></h2>
+<p>Let A be a fair bit and let B=A deterministically, with no evidence. Target support is {00,11}, with probability one half at each. At 00, resampling A given B=0 leaves A=0 with certainty; resampling B given A=0 also leaves B=0. Both supported states are absorbing, meaning they are never left. The chain is invariant but its histogram from 00 assigns probability zero to A=1 forever.</p>
+<p>This failure is topological before it is statistical. Define a support graph with one vertex for each positive-target assignment and an undirected edge between assignments differing in exactly one free coordinate. Each such edge has positive Gibbs transition probability in both directions because its fiber contains two positive target masses. Conversely a coordinate update cannot cross between components of this support graph.</p>
+<p>A full ordered sweep has a positive self-loop at every supported state: each coordinate can retain its old supported value with positive conditional probability. If the support graph is connected, any supported one-coordinate path can be followed over several sweeps by staying put at all other updates. Every finite product of these positive probabilities is positive. Thus the sweep chain is irreducible, meaning every state can reach every other in some number of steps. Its positive self-loops make it aperiodic, meaning its return times have greatest common divisor one. If support is disconnected, no sequence of full sweeps can cross components, since every intermediate coordinate state remains supported.</p>
+<p><a href="https://pages.uoregon.edu/dlevin/MARKOV/markovmixing.pdf">Levin–Peres, PDF pp.68–69, Theorem4.9</a>, give single-time convergence for a finite irreducible aperiodic chain. In total variation distance, defined by \(\|\mu-\nu\|_{\mathrm{TV}}=\frac12\sum_x|\mu(x)-\nu(x)|\), the distribution from every start approaches the unique stationary target. These hypotheses hold for the positive telephone sweep and connected alarm sweep. They fail for the deterministic equality trap.</p>
+<p>The theorem's proof also shows why a formal limit can hide an impractical time scale. For some positive integer r, all entries of \(K^r\) are positive; one can choose \(\delta\in(0,1)\) so that \(K^r(x,y)\ge\delta\pi(y)\). Let \(\Pi\) have every row equal to \(\pi\), and write \(K^r=\delta\Pi+(1-\delta)Q\) with another stochastic matrix Q. Both Q and K preserve \(\pi\). Repeated multiplication for positive integers k gives \(K^{rk}=[1-(1-\delta)^k]\Pi+(1-\delta)^kQ^k\), so worst-start distance is at most \((1-\delta)^k\). A tiny \(\delta\) can require enormous k. Existence of constants is not a selected burn-in certificate.</p>
+<p>For sample averages, a different result applies. <a href="https://pages.uoregon.edu/dlevin/MARKOV/markovmixing.pdf">PDF pp.406–407, TheoremC.1</a>, establish that a finite irreducible chain's average of any scalar state function converges almost surely to its target expectation, from any starting distribution. Aperiodicity is not required for that time-average theorem. Its return-cycle proof uses independent regenerative blocks and finite expected return time; it does not make individual saved states independent. Our homogeneous time index is full sweeps, keeping the relevant transition matrix explicit.</p>
+<p>The distinction can be tested with an alternating two-state chain. Its single-time law from 0 never settles: it alternates between 0 and 1. Its long-run fraction in each is one half. This chain is not Gibbs's positive-self-loop construction, but it isolates why histogram convergence and marginal-law convergence have different hypotheses.</p>
+<p>A block update resampling A and B jointly repairs the equality example: both 00 and 11 have probability one half on the block's conditional fiber, so one joint draw reaches the full target law. The block has four nominal assignments to evaluate rather than two single-coordinate candidates. Larger blocks can remove constraints at exponentially growing candidate cost; this finite repair is not a general cheap MCMC method.</p>
+<p>Softening equality to an error probability \(\epsilon\in(0,1)\) makes all four states supported and the chain irreducible. Starting at 00, one A-then-B sweep stays at 00 with probability \((1-\epsilon)^2\). The probability of never leaving 00 in N sweeps is \((1-\epsilon)^{2N}\). For tiny \(\epsilon\) this can remain large despite formal convergence. Burn-in, thinning and several starts can supply diagnostics, but an observed stable trace cannot prove the absence of an unvisited mode. Thinning discards saved information and earns no universal variance improvement. The source's mixing-time definition on PDF70 makes the remaining task precise: bound worst-start distance at an explicitly chosen accuracy.</p></section>
+<section id="independence"><h2>9. Edges permit dependence; factorization supplies guarantees <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=3527s">[58:47–67:43]</a></h2>
+<p>Two random variables U and V are independent when \(P(U=u,V=v)=P(U=u)P(V=v)\) for every pair of their values. Independence is a property of the full distribution, not a judgment from a few observations. For disconnected root variables, their Bayesian-network joint is the product of their root kernels, so the definition holds immediately.</p>
+<p>An edge permits the child's kernel to vary with the parent. It need not do so. If A is fair and \(p_B(1\mid A=0)=p_B(1\mid A=1)=3/10\), then \(P(a,b)=p_A(a)p_B(b)\) despite the drawn A→B edge. The graph has no separation guarantee, yet this parameter setting is independent. The lecture's broad edge-implies-dependence statement must be read as possible or generic dependence, not as a consequence for every compatible distribution.</p>
+<p>A collider is a node with two incoming arrows along a path, as in A→C←B. The joint is \(p_A(a)p_B(b)p_C(c\mid a,b)\). Summing C gives \(p_A(a)p_B(b)\sum_c p_C(c\mid a,b)=p_A(a)p_B(b)\). Its local row normalization makes the parents marginally independent even though an undirected path connects them. There is no extra \(p_B(b\mid a)\) factor in this graph; that expression would encode another edge. The original official display's inconsistent factor is corrected by the specified DAG.</p>
+<figure><svg viewBox="0 0 560 190" role="img" aria-labelledby="fig13-structure-title fig13-structure-desc" style="width:100%;max-width:560px"><title id="fig13-structure-title">Collider and fork have opposite arrow directions</title><desc id="fig13-structure-desc">Left: independent parent nodes A and B point into child C. Right: parent C points to children A and B. Directions change which conditional independence is guaranteed.</desc><defs><marker id="fig13-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="currentColor"/></marker></defs><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="70" cy="45" r="22"/><circle cx="210" cy="45" r="22"/><circle cx="140" cy="125" r="22"/><path d="M85,62 L123,105 M195,62 L157,105" marker-end="url(#fig13-arrow)"/><circle cx="420" cy="45" r="22"/><circle cx="350" cy="125" r="22"/><circle cx="490" cy="125" r="22"/><path d="M405,62 L367,105 M435,62 L473,105" marker-end="url(#fig13-arrow)"/></g><g fill="currentColor" font-family="serif" font-size="22" text-anchor="middle"><text x="70" y="53">A</text><text x="210" y="53">B</text><text x="140" y="133">C</text><text x="420" y="53">C</text><text x="350" y="133">A</text><text x="490" y="133">B</text></g><g fill="currentColor" font-family="sans-serif" font-size="15" text-anchor="middle"><text x="140" y="175">Collider: sum the child kernel to 1</text><text x="420" y="175">Fork: condition on the shared parent</text></g></svg><figcaption>Fig. 1. Original schematic: arrow direction determines which factor can disappear by normalization. These abstract dependency arrows do not by themselves establish causal intervention semantics.</figcaption></figure>
+<p>The fork C→A,C→B in Fig. 1 instead has marginal \(P(a,b)=\sum_c p_C(c)p_A(a\mid c)p_B(b\mid c)\), a mixture of products. The sum generally cannot split into a product of two sums because the same C value weights both factors. For a fair C and deterministic A=C,B=C, the children agree with probability one; \(P(A=1,B=1)=1/2\), whereas their marginal product is 1/4. The fork allows dependence, but constant child kernels could still make the children independent.</p>
+<p>The distinction between a distribution's independences and a graph's guarantees is essential for inference simplification. A graph guarantee works for every compatible parameter choice. An accidental parameter equality can create extra independence that is absent from the graph. Faithfulness is the additional assumption that the distribution has exactly the graph-implied conditional independences; no such assumption follows merely from writing normalized kernels or fitting a DAG.</p></section>
+<section id="conditional"><h2>10. Conditioning can block a fork and open a collider <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=4063s">[67:43–71:32]</a></h2>
+<p>U and V are conditionally independent given W when \(P(u,v\mid w)=P(u\mid w)P(v\mid w)\) for every supported w and every u,v. Supported means \(P(W=w)&gt;0\); an ordinary conditional at zero probability is not defined by dividing a joint table. Denote this property by \(U\perp V\mid W\). The statement can concern sets of variables as well as single nodes.</p>
+<p>For the fork, \(P(a,b,c)=p_C(c)p_A(a\mid c)p_B(b\mid c)\). Dividing by \(P(c)=p_C(c)&gt;0\) leaves \(p_A(a\mid c)p_B(b\mid c)\), exactly the two conditional marginals. Knowing the shared parent removes this source of dependence. With deterministic A=B=C, conditioning on either supported C value makes both children constants, which are conditionally independent despite their unconditional equality.</p>
+<p>For the collider, conditioning on C=c gives</p>
+\[P(a,b\mid c)=
+\frac{p_A(a)p_B(b)p_C(c\mid a,b)}
+{\sum_{\tilde a,\tilde b}p_A(\tilde a)p_B(\tilde b)p_C(c\mid\tilde a,\tilde b)}.\]
+<p>The denominator is \(P(C=c)\). Omitting it leaves a subnormalized evidence slice. The numerator's child likelihood can couple a and b, but coupling is possible rather than unavoidable for all kernels. A child independent of both parents would leave their independence intact after conditioning.</p>
+<p>The alarm gives a concrete nontrivial coupling. Burglary and earthquake are independent initially. Given A=1, \(P(B=1)=P(E=1)=20/39\), while their joint probability is \(1/39\). Their marginal product \(400/1521\) differs from \(1/39=39/1521\). Observing an earthquake changes the burglary posterior from 20/39 to 1/20 because earthquake alone explains the alarm; observing no earthquake makes burglary certain. This is explaining away: alternative explanations compete after their common effect is observed.</p>
+<p>Dependence and explanation are probability statements under the given model. They do not establish that setting an earthquake variable would change burglary incidence, or that responding to an alarm should use a particular action. Causal interventions require a separately justified causal model. Local factorization and observed conditioning do not automatically provide one.</p></section>
+<section id="separation"><h2>11. Restrict to ancestors before marrying parents <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=4292s">[71:32–74:32]</a></h2>
+<p>To decide a graph-guaranteed conditional independence, let U and V be disjoint nonempty sets of query nodes and S a third set of conditioned nodes, disjoint from both. The ancestor set \(R=\operatorname{An}(U\cup V\cup S)\) includes these nodes themselves and every node with a directed path into them. Restrict the DAG to R before changing its edges. This preserves all variables relevant to the query and evidence, including ancestors of observed descendants.</p>
+<p>Why can other nodes be removed? In reverse topological order, a node outside R has no remaining descendant among the query/evidence nodes. Summing its childless kernel over its domain yields one, eliminating it without altering the relevant marginal. This is a marginalization argument, not permission to delete any unobserved leaf. A query leaf must stay; deleting it would erase the question itself. <a href="https://web.math.ku.dk/~lauritzen/papers/gmnotes.pdf">Lauritzen's author notes, PDF p.72, Proposition2.48</a>, state ancestral marginal reduction.</p>
+<p>Form the moral graph of the retained DAG: join every pair of parents of each retained child, then replace directed arrows by undirected edges. “Marrying parents” ensures that each kernel's entire family, its child and parents, is an undirected clique. Remove S and its incident edges, and test whether any remaining path connects U to V. If there is no path, separation holds and the graph guarantees \(X_U\perp X_V\mid X_S\). A path means the guarantee fails, not that a chosen parameter setting must be dependent.</p>
+<p><a href="https://web.math.ku.dk/~lauritzen/papers/gmnotes.pdf">Actual PDF pp.61–62, Proposition2.33</a>, identify this ancestral-moral separation with DAG d-separation. D-separation is the graph criterion for blocking all relevant dependency paths with the specified evidence. The order of construction matters. Morally connecting parents before discarding an unobserved collider would create a spurious edge between parents that were marginally independent.</p>
+<p>The probabilistic implication can be proved directly for our finite kernels. After ancestral reduction, every factor's family is a clique in the moral graph. With S fixed, no factor involves unobserved nodes from two different components of the graph after S removal. Group factors by component; factors depending only on S are constants. The evidence-restricted joint is thus a product of component functions. Summing unqueried coordinates produces a product of component normalizers, and supported evidence makes the total normalizer positive. Division then gives a product of component conditional distributions. Since no component contains both U and V, their conditional marginals factor. <a href="https://web.math.ku.dk/~lauritzen/papers/gmnotes.pdf">PDF pp.70–73</a> give the global Markov implication and its connection to kernel/density factorization; the displayed finite argument shows the hinge used here.</p>
+<p>Test the collider A→C←B. Without evidence, R contains only A,B, so C disappears and no parent-marriage edge is added: the parents separate. Given C, R includes C, marriage joins A,B, and removing C leaves that edge: no guarantee. Add descendant C→D and condition on D. Ancestor closure now retains C too, so the same marriage survives. Evidence about a descendant can therefore open the collider path; merely shading and deleting D from the original undirected graph misses that mechanism.</p>
+<p>The inspected medical illustration is the abstract graph \(C\to H\leftarrow A\to I\), with labels cold, cough, allergies and itchy eyes. These are source labels, not clinical evidence. The following graph results require no disease probabilities:</p>
+<table><thead><tr><th>Queries</th><th>Conditioned nodes</th><th>Graph guarantee</th><th>Mechanism</th></tr></thead><tbody>
+<tr><td>C and A</td><td>None</td><td>Independent</td><td>Remove unobserved leaf H and I before moralizing</td></tr>
+<tr><td>C and I</td><td>None</td><td>Independent</td><td>H disappears; C is disconnected from A→I</td></tr>
+<tr><td>C and I</td><td>A</td><td>Conditionally independent</td><td>Removing A blocks the remaining connection</td></tr>
+<tr><td>C and I</td><td>A,H</td><td>Conditionally independent</td><td>H marries C and A, but A is also removed</td></tr>
+<tr><td>C and I</td><td>H only</td><td>No independence guarantee</td><td>H marries C and A; surviving C—A—I path remains</td></tr></tbody></table>
+<p>The last row distinguishes conditioning on H alone from conditioning on both A and H. A collider's observation is not an ordinary blockage of an undirected path. The source summary's “path” answer must also have the correct polarity: no surviving path is the independence guarantee. Our implementation returns True for separation, not for connectivity, and the table tests that return convention.</p></section>
+<section id="synthesis"><h2>12. Keep model, transition and estimator claims separate <a class="timestamp" href="https://www.youtube.com/watch?v=Dk7Kqqehzjk&amp;t=4472s">[74:32–75:48]</a></h2>
+<table><thead><tr><th>Method or object</th><th>What is exact</th><th>What remains to establish</th></tr></thead><tbody>
+<tr><td>Finite enumeration</td><td>Posterior from declared kernels and positive evidence</td><td>Feasible representation and a valid world model</td></tr>
+<tr><td>Rejection sampling</td><td>Accepted sample law under ideal independent proposals</td><td>Enough accepted draws and finite estimation error</td></tr>
+<tr><td>Coordinate Gibbs</td><td>Full conditional row and target invariance</td><td>Support connectivity, time scale and finite estimation error</td></tr>
+<tr><td>Ancestor-moral separation</td><td>Conditional independence guaranteed by factorization</td><td>Actual extra independences, causal meaning and fitted-model adequacy</td></tr></tbody></table>
+<p>In the alarm case, enumeration gives 20/39 exactly. Rejection spends most proposals outside A=1; Gibbs keeps evidence but can linger at one explanation. Graph structure proves burglary/earthquake independence before alarm evidence and permits their explaining-away dependence afterward. These results answer different questions about the same formal objects.</p>
+<p>The next chapter studies where the kernel parameters come from. Learning them adds sampling, objective and identifiability questions; it does not repair a wrong conditioning query or prove that a finite chain has explored all modes. A clean separation between model error, inference error and estimation error makes those additional tasks visible.</p></section>
+<section id="implementation"><h2>13. Exact finite kernels and an honest empirical histogram</h2>
+<p>The original downloadable <a href="programs/chapter13.py">chapter program</a> uses only the Python standard library. Run <code>python programs/chapter13.py</code> from this book directory. It neither reads nor writes files and performs no network or device actions. The exact model and transition calculations use rational arithmetic; the finite sampling experiments use a local seeded pseudorandom generator.</p>
+<p><code>Network</code> requires one to eight distinct nonempty variable names in a supplied topological order. Domains are integer labels 0 through size−1, with sizes one to four and at most 4,096 complete assignments. Every parent's name must precede its child. Every conditional table must provide exactly one normalized row for every parent tuple in the declared parent order, including combinations never reached under the joint. Frozen tuples copy all accepted containers, preventing later input-list or dictionary mutation from silently changing the model.</p>
+<p>Input probabilities require integers or <code>Fraction</code>, excluding booleans and floating-point numbers. Each lies in [0,1] and has denominator at most \(10^9\). Rows must sum exactly to one. Rational intermediates can have larger denominators and remain exact. The bounds constrain a finite teaching program, not all Bayesian networks. An inconsistent order, malformed table, unknown name, invalid value or budget violation raises <code>ValueError</code>.</p>
+<p>Queries are nonempty distinct tuples/lists of known variable names, disjoint from an evidence mapping. Complete assignments are checked against every domain. <code>support</code> enumerates positive matching assignments and rejects zero-probability evidence. <code>posterior</code> returns evidence mass and a query-state distribution in the declared query order, including explicit zero masses. It is the exact small-model oracle, not a scalable inference claim.</p>
+<p><code>conditional</code> checks the complete current state is supported, then evaluates only the coordinate's own factor and its children's factors for candidate weights. <code>blanket</code> returns parents, children and co-parents. This implementation retains full-joint support validation on each call; it does not claim that all its computation is local. Invalid initialization is rejected even if it agrees with evidence.</p>
+<p><code>kernel</code> constructs an exact transition matrix on at most 64 positive-support states, using any ordered sequence of nonempty disjoint free-coordinate blocks. A block can resample several variables jointly. Each coordinate can appear at most once; an empty sequence gives the identity, and a partial sequence need not explore all free coordinates. Its matrix row/column order and target vector are returned explicitly. <code>multiply</code> is an internal helper for checked square matrices, not a general validated matrix API. <code>components</code> separately inspects the single-coordinate support graph on at most 256 states; it does not report a mixing time.</p>
+<p><code>gibbs</code> visits all free coordinates in variable order, checks a supported evidence-matching initial assignment and retains one query observation per completed sweep. Retained sweeps are 1–100,000, burn sweeps are nonnegative and the combined count is at most 100,000. A seed is an integer in the signed 64-bit range. Burn count is a user-selected omission, not a theorem about stationarity. <code>rejection</code> takes 1–100,000 proposals and returns accepted count plus either normalized query frequencies or <code>None</code> if none were accepted. It rejects impossible evidence before proposing.</p>
+<p>Exact categorical draws convert a probability row to integer counts at its common denominator, then draw an integer with the local generator. Draw rows obey the same denominator limit \(10^9\) per probability, and common denominator must not exceed \(10^{12}\). A derived Gibbs row or prior row exceeding a sampling budget raises <code>ValueError</code>; exact posterior or matrix calculations can still be valid because they do not draw. Counts and probabilities are distinct. A fixed seed makes this experiment reproducible but does not certify physical randomness, independence in a deployed process or posterior accuracy of a finite histogram.</p>
+<p>The telephone's exact posterior is 17/25, while the actual 2,000-sweep histogram printed below is 331/500=0.662. Both refer to the same declared target, but one is a finite random estimate. The locked example prints zero for A=1 despite the true marginal 1/2. This is intentional evidence of the support trap, not a successful convergence test. Source and stdout blocks are byte-identical to the executed downloadable program and its actual output.</p>
+<pre><code class="language-python" id="program-source">&quot;&quot;&quot;Original finite Bayesian inference and Gibbs experiments; stdlib only.&quot;&quot;&quot;
+from dataclasses import dataclass
+from fractions import Fraction as F
+from itertools import product, combinations
+from math import lcm, prod
+from random import Random
+from collections.abc import Mapping
+
+
+def integer(value, low, high, label):
+    if type(value) is not int or not low &lt;= value &lt;= high:
+        raise ValueError(f&quot;{label} must be an integer in [{low},{high}]&quot;)
+    return value
+
+
+def probability(value):
+    if type(value) not in (int, F):
+        raise ValueError(&quot;probabilities require int/Fraction, excluding bool&quot;)
+    value = F(value)
+    if not 0 &lt;= value &lt;= 1 or value.denominator &gt; 10**9:
+        raise ValueError(&quot;probability outside [0,1] or denominator budget&quot;)
+    return value
+
+
+def draw(row, rng):
+    &quot;&quot;&quot;Exact rational categorical draw with an explicit integer budget.&quot;&quot;&quot;
+    if not isinstance(rng, Random):
+        raise ValueError(&quot;rng must be a local random.Random&quot;)
+    if not isinstance(row, (tuple, list)) or not row:
+        raise ValueError(&quot;nonempty probability row required&quot;)
+    row = tuple(probability(v) for v in row)
+    if sum(row) != 1:
+        raise ValueError(&quot;probabilities must sum exactly to one&quot;)
+    denominator = lcm(*(p.denominator for p in row))
+    if denominator &gt; 10**12:
+        raise ValueError(&quot;categorical common denominator exceeds 10**12&quot;)
+    pick = rng.randrange(denominator)
+    for i, p in enumerate(row):
+        pick -= p.numerator * (denominator // p.denominator)
+        if pick &lt; 0:
+            return i
+    raise RuntimeError(&quot;unreachable normalized categorical branch&quot;)
+
+
+@dataclass(frozen=True, init=False)
+class Network:
+    &quot;&quot;&quot;Immutable finite kernels in an explicitly supplied topological order.&quot;&quot;&quot;
+    names: tuple
+    sizes: tuple
+    parents: tuple
+    tables: tuple
+
+    def __init__(self, names, sizes, parents, tables):
+        if not all(isinstance(v, (list, tuple))
+                   for v in (names, sizes, parents, tables)):
+            raise ValueError(&quot;network fields must be lists or tuples&quot;)
+        names, sizes = tuple(names), tuple(sizes)
+        if not 1 &lt;= len(names) &lt;= 8:
+            raise ValueError(&quot;one to eight variables required&quot;)
+        if not all(type(v) is str and v for v in names):
+            raise ValueError(&quot;variable names must be nonempty strings&quot;)
+        if len(set(names)) != len(names):
+            raise ValueError(&quot;distinct variable names required&quot;)
+        if not len(sizes) == len(parents) == len(tables) == len(names):
+            raise ValueError(&quot;network field lengths differ&quot;)
+        sizes = tuple(integer(v, 1, 4, &quot;domain size&quot;) for v in sizes)
+        if prod(sizes) &gt; 4096:
+            raise ValueError(&quot;joint state budget exceeds 4096&quot;)
+        pp, tt = [], []
+        for i, (pa, table) in enumerate(zip(parents, tables)):
+            if not isinstance(pa, (tuple, list)):
+                raise ValueError(&quot;parent labels require tuple or list&quot;)
+            if not all(type(v) is str and v in names[:i] for v in pa):
+                raise ValueError(&quot;parents must precede child in given order&quot;)
+            if len(set(pa)) != len(pa):
+                raise ValueError(&quot;duplicate parent&quot;)
+            indices = tuple(names.index(v) for v in pa)
+            keys = tuple(product(*(range(sizes[j]) for j in indices)))
+            if not isinstance(table, Mapping):
+                raise ValueError(&quot;conditional table must be a mapping&quot;)
+            if not all(type(k) is tuple and len(k) == len(indices)
+                       and all(type(v) is int for v in k) for k in table):
+                raise ValueError(&quot;parent keys must be exact integer tuples&quot;)
+            if set(table) != set(keys):
+                raise ValueError(&quot;table must contain every parent assignment&quot;)
+            rows = []
+            for key in keys:
+                raw = table[key]
+                if not isinstance(raw, (list, tuple)) or len(raw) != sizes[i]:
+                    raise ValueError(&quot;conditional row has wrong domain size&quot;)
+                row = tuple(probability(v) for v in raw)
+                if sum(row) != 1:
+                    raise ValueError(&quot;conditional row not normalized&quot;)
+                rows.append((key, row))
+            pp.append(indices)
+            tt.append(tuple(rows))
+        for name, value in zip((&quot;names&quot;, &quot;sizes&quot;, &quot;parents&quot;, &quot;tables&quot;),
+                               (names, sizes, tuple(pp), tuple(tt))):
+            object.__setattr__(self, name, value)
+
+    def assignment(self, values, complete=False):
+        if not isinstance(values, Mapping):
+            raise ValueError(&quot;assignment must be a mapping&quot;)
+        if not all(type(k) is str and k in self.names for k in values):
+            raise ValueError(&quot;unknown variable&quot;)
+        if complete and set(values) != set(self.names):
+            raise ValueError(&quot;complete assignment required&quot;)
+        return {self.names.index(k): integer(v, 0,
+                self.sizes[self.names.index(k)] - 1, &quot;state value&quot;)
+                for k, v in values.items()}
+
+    def query(self, names, evidence):
+        if not isinstance(names, (tuple, list)) or not names:
+            raise ValueError(&quot;nonempty query tuple/list required&quot;)
+        if not all(type(v) is str and v in self.names for v in names):
+            raise ValueError(&quot;unknown query variable&quot;)
+        if len(set(names)) != len(names):
+            raise ValueError(&quot;duplicate query variable&quot;)
+        indices = tuple(self.names.index(v) for v in names)
+        if set(indices) &amp; set(evidence):
+            raise ValueError(&quot;query and evidence must be disjoint&quot;)
+        return indices
+
+    def states(self):
+        return tuple(product(*(range(d) for d in self.sizes)))
+
+    def factor(self, i, state):
+        key = tuple(state[j] for j in self.parents[i])
+        for k, row in self.tables[i]:
+            if key == k:
+                return row[state[i]]
+        raise RuntimeError(&quot;unreachable checked parent key&quot;)
+
+    def joint_tuple(self, state):
+        if type(state) is not tuple or len(state) != len(self.names):
+            raise ValueError(&quot;complete state tuple required&quot;)
+        for i, value in enumerate(state):
+            integer(value, 0, self.sizes[i] - 1, &quot;state value&quot;)
+        return prod((self.factor(i, state) for i in range(len(state))),
+                    start=F(1))
+
+    def support(self, evidence):
+        evidence = self.assignment(evidence)
+        weights = {s: self.joint_tuple(s) for s in self.states()
+                   if all(s[i] == v for i, v in evidence.items())}
+        weights = {s: p for s, p in weights.items() if p &gt; 0}
+        mass = sum(weights.values(), F(0))
+        if mass == 0:
+            raise ValueError(&quot;impossible evidence has zero probability&quot;)
+        return mass, {s: p / mass for s, p in weights.items()}
+
+    def posterior(self, query, evidence):
+        indices = self.query(query, self.assignment(evidence))
+        mass, target = self.support(evidence)
+        result = {s: F(0) for s in
+                  product(*(range(self.sizes[i]) for i in indices))}
+        for state, weight in target.items():
+            result[tuple(state[i] for i in indices)] += weight
+        return mass, result
+
+    def conditional(self, state, name):
+        &quot;&quot;&quot;Local factors cancel only on a supported complete assignment.&quot;&quot;&quot;
+        current_mass = self.joint_tuple(state)
+        if type(name) is not str or name not in self.names:
+            raise ValueError(&quot;unknown update variable&quot;)
+        if current_mass == 0:
+            raise ValueError(&quot;Gibbs initialization must have positive support&quot;)
+        i = self.names.index(name)
+        touched = [j for j in range(len(self.names))
+                   if j == i or i in self.parents[j]]
+        weights = []
+        for value in range(self.sizes[i]):
+            candidate = tuple(value if j == i else s
+                              for j, s in enumerate(state))
+            weights.append(prod((self.factor(j, candidate) for j in touched),
+                                start=F(1)))
+        mass = sum(weights, F(0))
+        if mass &lt;= 0:
+            raise ValueError(&quot;unsupported conditional fiber&quot;)
+        return tuple(p / mass for p in weights)
+
+    def blanket(self, name):
+        if type(name) is not str or name not in self.names:
+            raise ValueError(&quot;unknown blanket variable&quot;)
+        i = self.names.index(name)
+        children = {j for j, pa in enumerate(self.parents) if i in pa}
+        indices = set(self.parents[i]) | children
+        for child in children:
+            indices.update(self.parents[child])
+        indices.discard(i)
+        return tuple(self.names[j] for j in sorted(indices))
+
+
+def network(value):
+    if type(value) is not Network:
+        raise ValueError(&quot;a validated Network is required&quot;)
+    return value
+
+
+def kernel(model, evidence, order):
+    &quot;&quot;&quot;Exact ordered coordinate/block transition; at most 64 support states.&quot;&quot;&quot;
+    model = network(model)
+    ev = model.assignment(evidence)
+    if not isinstance(order, (tuple, list)):
+        raise ValueError(&quot;order must be tuple/list of nonempty blocks&quot;)
+    blocks, seen = [], []
+    for block in order:
+        if not isinstance(block, (tuple, list)) or not block:
+            raise ValueError(&quot;each update block must be nonempty&quot;)
+        if not all(type(v) is str and v in model.names for v in block):
+            raise ValueError(&quot;unknown block variable&quot;)
+        indices = tuple(model.names.index(v) for v in block)
+        if len(set(indices)) != len(indices) or set(indices) &amp; set(ev):
+            raise ValueError(&quot;duplicate/evidence update coordinate&quot;)
+        blocks.append(set(indices))
+        seen.extend(indices)
+    if len(set(seen)) != len(seen):
+        raise ValueError(&quot;each coordinate may appear at most once&quot;)
+    _, target = model.support(evidence)
+    states = tuple(target)
+    if len(states) &gt; 64:
+        raise ValueError(&quot;transition matrix support exceeds 64 states&quot;)
+    size = len(states)
+    result = tuple(tuple(F(i == j) for j in range(size)) for i in range(size))
+    for block in blocks:
+        rows = []
+        for x in states:
+            fiber = [y for y in states
+                     if all(x[j] == y[j] for j in range(len(x))
+                            if j not in block)]
+            mass = sum((target[y] for y in fiber), F(0))
+            rows.append(tuple(target[y] / mass if y in fiber else F(0)
+                              for y in states))
+        result = multiply(result, tuple(rows))
+    return states, tuple(target.values()), result
+
+
+def multiply(left, right):
+    &quot;&quot;&quot;Internal exact square matrix multiplication on checked kernels.&quot;&quot;&quot;
+    n = len(left)
+    return tuple(tuple(sum((left[i][k] * right[k][j] for k in range(n)), F(0))
+                       for j in range(n)) for i in range(n))
+
+
+def components(model, evidence):
+    &quot;&quot;&quot;Positive-support components under single-coordinate changes.&quot;&quot;&quot;
+    _, target = network(model).support(evidence)
+    states = tuple(target)
+    if len(states) &gt; 256:
+        raise ValueError(&quot;support graph budget exceeds 256 states&quot;)
+    unseen, result = set(states), []
+    while unseen:
+        start = min(unseen)
+        unseen.remove(start)
+        todo, found = [start], {start}
+        while todo:
+            x = todo.pop()
+            neighbors = [y for y in unseen
+                         if sum(a != b for a, b in zip(x, y)) == 1]
+            unseen.difference_update(neighbors)
+            found.update(neighbors)
+            todo.extend(neighbors)
+        result.append(tuple(sorted(found)))
+    return tuple(result)
+
+
+def gibbs(model, query, evidence, initial, sweeps, seed=0, burn=0):
+    model = network(model)
+    integer(sweeps, 1, 100000, &quot;retained sweeps&quot;)
+    integer(burn, 0, 100000 - sweeps, &quot;burn sweeps&quot;)
+    integer(seed, -(2**63), 2**63 - 1, &quot;seed&quot;)
+    ev = model.assignment(evidence)
+    indices = model.query(query, ev)
+    init = model.assignment(initial, complete=True)
+    if any(init[i] != value for i, value in ev.items()):
+        raise ValueError(&quot;initial assignment disagrees with evidence&quot;)
+    state = tuple(init[i] for i in range(len(model.names)))
+    if model.joint_tuple(state) == 0:
+        raise ValueError(&quot;Gibbs initialization must have positive support&quot;)
+    rng = Random(seed)
+    counts = {s: 0 for s in
+              product(*(range(model.sizes[i]) for i in indices))}
+    for t in range(burn + sweeps):
+        for i, name in enumerate(model.names):
+            if i not in ev:
+                value = draw(model.conditional(state, name), rng)
+                state = tuple(value if j == i else s
+                              for j, s in enumerate(state))
+        if t &gt;= burn:
+            counts[tuple(state[i] for i in indices)] += 1
+    return {q: F(n, sweeps) for q, n in counts.items()}
+
+
+def rejection(model, query, evidence, proposals, seed=0):
+    model = network(model)
+    integer(proposals, 1, 100000, &quot;proposal count&quot;)
+    integer(seed, -(2**63), 2**63 - 1, &quot;seed&quot;)
+    ev = model.assignment(evidence)
+    indices = model.query(query, ev)
+    model.support(evidence)
+    counts = {s: 0 for s in
+              product(*(range(model.sizes[i]) for i in indices))}
+    accepted, rng = 0, Random(seed)
+    for _ in range(proposals):
+        state = []
+        for i in range(len(model.names)):
+            key = tuple(state[j] for j in model.parents[i])
+            row = dict(model.tables[i])[key]
+            state.append(draw(row, rng))
+        if all(state[i] == value for i, value in ev.items()):
+            accepted += 1
+            counts[tuple(state[i] for i in indices)] += 1
+    estimate = ({q: F(n, accepted) for q, n in counts.items()}
+                if accepted else None)
+    return accepted, estimate
+
+
+def separated(model, left, right, given=()):
+    &quot;&quot;&quot;Ancestor restriction, moralization, evidence removal, connectivity.&quot;&quot;&quot;
+    model = network(model)
+    sets = []
+    for raw in (left, right, given):
+        if not isinstance(raw, (tuple, list)):
+            raise ValueError(&quot;graph query sets must be tuples/lists&quot;)
+        if not all(type(v) is str and v in model.names for v in raw):
+            raise ValueError(&quot;unknown graph query variable&quot;)
+        if len(set(raw)) != len(raw):
+            raise ValueError(&quot;duplicate graph query variable&quot;)
+        sets.append({model.names.index(v) for v in raw})
+    a, b, s = sets
+    if not a or not b or a &amp; b or a &amp; s or b &amp; s:
+        raise ValueError(&quot;nonempty disjoint queries/evidence required&quot;)
+    ancestral = a | b | s
+    todo = list(ancestral)
+    while todo:
+        i = todo.pop()
+        for parent in model.parents[i]:
+            if parent not in ancestral:
+                ancestral.add(parent)
+                todo.append(parent)
+    adjacency = {i: set() for i in ancestral}
+    for child in ancestral:
+        pa = model.parents[child]
+        for x, y in [(child, j) for j in pa] + list(combinations(pa, 2)):
+            adjacency[x].add(y)
+            adjacency[y].add(x)
+    found, todo = set(a), list(a)
+    while todo:
+        i = todo.pop()
+        for j in adjacency[i] - s - found:
+            found.add(j)
+            todo.append(j)
+    return not bool(found &amp; b)
+
+
+def telephone(error=F(1, 5)):
+    error = probability(error)
+    return Network((&quot;A&quot;, &quot;B&quot;, &quot;C&quot;), (2, 2, 2), ((), (&quot;A&quot;,), (&quot;B&quot;,)),
+                   ({(): (F(1, 2), F(1, 2))},
+                    {(0,): (1 - error, error), (1,): (error, 1 - error)},
+                    {(0,): (1 - error, error), (1,): (error, 1 - error)}))
+
+
+def alarm():
+    return Network((&quot;B&quot;, &quot;E&quot;, &quot;A&quot;), (2, 2, 2), ((), (), (&quot;B&quot;, &quot;E&quot;)),
+                   ({(): (F(19, 20), F(1, 20))},
+                    {(): (F(19, 20), F(1, 20))},
+                    {be: (F(not any(be)), F(any(be)))
+                     for be in product(range(2), repeat=2)}))
+
+
+def locked():
+    return Network((&quot;A&quot;, &quot;B&quot;), (2, 2), ((), (&quot;A&quot;,)),
+                   ({(): (F(1, 2), F(1, 2))},
+                    {(0,): (F(1), F(0)), (1,): (F(0), F(1))}))
+
+
+def rare():
+    return Network((&quot;A&quot;, &quot;B&quot;), (2, 2), ((), (&quot;A&quot;,)),
+                   ({(): (F(1, 2), F(1, 2))},
+                    {(0,): (F(9999, 10000), F(1, 10000)),
+                     (1,): (F(4999, 5000), F(1, 5000))}))
+
+
+def demo():
+    tel = telephone()
+    mass, post = tel.posterior((&quot;A&quot;,), {&quot;C&quot;: 1})
+    print(f&quot;telephone evidence={mass}, posterior A=1:{post[(1,)]}&quot;)
+    print(&quot;B | A=1,C=1:&quot;, tel.conditional((1, 0, 1), &quot;B&quot;))
+    states, pi, sweep = kernel(tel, {&quot;C&quot;: 1}, ((&quot;A&quot;,), (&quot;B&quot;,)))
+    invariant = all(sum((pi[i] * sweep[i][j] for i in range(len(pi))), F(0))
+                    == pi[j] for j in range(len(pi)))
+    reversible = all(pi[i] * sweep[i][j] == pi[j] * sweep[j][i]
+                     for i in range(len(pi)) for j in range(len(pi)))
+    print(f&quot;ordered sweep invariant={invariant}, reversible={reversible}&quot;)
+    print(&quot;telephone Gibbs A=1, 2000 sweeps:&quot;,
+          gibbs(tel, (&quot;A&quot;,), {&quot;C&quot;: 1}, {&quot;A&quot;: 0, &quot;B&quot;: 0, &quot;C&quot;: 1},
+                2000, seed=13)[(1,)])
+    print(&quot;alarm evidence/posterior:&quot;, alarm().posterior((&quot;B&quot;,), {&quot;A&quot;: 1}))
+    print(&quot;alarm support components:&quot;, components(alarm(), {&quot;A&quot;: 1}))
+    print(&quot;locked support components:&quot;, components(locked(), {}))
+    locked_hist = gibbs(locked(), (&quot;A&quot;,), {}, {&quot;A&quot;: 0, &quot;B&quot;: 0}, 100, seed=13)
+    print(&quot;locked Gibbs A=1:&quot;, locked_hist[(1,)])
+    print(&quot;rare evidence/posterior:&quot;, rare().posterior((&quot;A&quot;,), {&quot;B&quot;: 1}))
+    print(&quot;rare rejection accepted, estimate:&quot;,
+          rejection(rare(), (&quot;A&quot;,), {&quot;B&quot;: 1}, 10, seed=13))
+    print(&quot;alarm parent independence: marginal=&quot;,
+          separated(alarm(), (&quot;B&quot;,), (&quot;E&quot;,)), &quot; given alarm=&quot;,
+          separated(alarm(), (&quot;B&quot;,), (&quot;E&quot;,), (&quot;A&quot;,)), sep=&quot;&quot;)
+    print(&quot;Exact finite fixtures do not certify mixing or model accuracy.&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    demo()
+</code></pre>
+<pre><code class="language-text" id="program-output">telephone evidence=1/2, posterior A=1:17/25
+B | A=1,C=1: (Fraction(1, 17), Fraction(16, 17))
+ordered sweep invariant=True, reversible=False
+telephone Gibbs A=1, 2000 sweeps: 331/500
+alarm evidence/posterior: (Fraction(39, 400), {(0,): Fraction(19, 39), (1,): Fraction(20, 39)})
+alarm support components: (((0, 1, 1), (1, 0, 1), (1, 1, 1)),)
+locked support components: (((0, 0),), ((1, 1),))
+locked Gibbs A=1: 0
+rare evidence/posterior: (Fraction(3, 20000), {(0,): Fraction(1, 3), (1,): Fraction(2, 3)})
+rare rejection accepted, estimate: (0, None)
+alarm parent independence: marginal=True given alarm=False
+Exact finite fixtures do not certify mixing or model accuracy.
+</code></pre></section>
+<section id="exercises"><h2>14. Six worked exercises</h2>
+<div class="exercise"><h3>Exercise 1 — The two-channel posterior and the candidate fiber</h3>
+<p>For fair A and two independent channels with flip probability 1/5 A→B→C, compute all positive masses given C=1, the first-bit posterior and B's full conditional given A=C=1. Explain why the row (4/25,1/25,1/25,16/25) cannot be the posterior in state order 00,01,10,11. Would updating B from its forward channel target the desired posterior?</p>
+<details class="solution"><summary>Solution</summary><p>With fixed C=1, the joint weights are \((1/2)(4/5)(1/5)=2/25\) at 00, \((1/2)(1/5)(4/5)=2/25\) at 01, \((1/2)(1/5)(1/5)=1/50\) at 10 and \((1/2)(4/5)(4/5)=8/25\) at 11. Their sum is 1/2. The posterior is therefore (4/25,4/25,1/25,16/25), and its A=1 marginal is 17/25. In particular, 01 has only one corruption while 10 has two. The proposed faulty row sums to 22/25, so it fails normalization as well as the path calculation.</p><p>For A=C=1, freeze those two values and normalize the B candidate weights 1/50 and 8/25 by 17/50. This gives (1/17,16/17). The forward row given A=1 is (1/5,4/5), which omits the downstream C likelihood. It is therefore not B's posterior conditional. A Gibbs algorithm using it can have a different invariant law even though every row is individually normalized. A valid probability row is necessary but not sufficient for the intended inference target.</p></details></div>
+<div class="exercise"><h3>Exercise 2 — Stationarity is retained when reversibility is lost</h3>
+<p>Prove the coordinate detailed-balance identity. Derive the first row of the telephone A-then-B sweep, check one stationary component and compare its stationary flow 00↔11. Does choosing a random coordinate with fixed probabilities preserve reversibility? Distinguish a full-sweep observation from counting after every site update.</p>
+<details class="solution"><summary>Solution</summary><p>If x and y differ in more than the selected coordinate, both transition probabilities are zero. Otherwise their other-coordinate fiber is identical and has positive mass F. Thus \(\pi(x)K_i(x,y)=\pi(x)\pi(y)/F=\pi(y)K_i(y,x)\). Summing origins gives invariance. Composition preserves invariance by associativity, \(\pi K_AK_B=(\pi K_A)K_B=\pi\), but this algebra contains no detailed-balance step for the product.</p><p>From 00, A stays 0 with probability 4/5 or becomes 1 with probability 1/5. Given A=0,C=1, B's full conditional is (1/2,1/2); given A=1,C=1, it is (1/17,16/17). The first sweep row is (2/5,2/5,1/85,16/85). The first destination's stationary mass is \((4/25)(2/5)+(4/25)(1/10)+(1/25)(2/5)+(16/25)(1/10)=4/25\), as required. Flow 00→11 is 64/2125, whereas 11→00 is 8/125; their unequal values disprove sweep reversibility.</p><p>A fixed-weight mixture of coordinate kernels has detailed balance because summing their symmetric stationary flows with the same weights preserves equality. A changing or state-dependent selection rule would need its own proof. Full sweeps give one homogeneous matrix per recorded step. Counting after each site update alternates kernels, so the assignment process alone uses a phase-dependent matrix; include the phase or analyze the separate phase subsequences. It also doubles the count in a two-free-coordinate example without creating two independent draws. Neither convention should inherit the other's numerical sample count.</p></details></div>
+<div class="exercise"><h3>Exercise 3 — Repair a deterministic support trap</h3>
+<p>For fair A and deterministic B=A, form the supported target and coordinate sweep. Prove the failure from 00, then construct a joint block kernel that reaches the target. If equality is softened to error probability epsilon, compute the chance of staying at 00 for one sweep and of never leaving it for N sweeps. Explain what this says about a fixed burn count.</p>
+<details class="solution"><summary>Solution</summary><p>The joint has masses 1/2 at 00 and 11 and zero elsewhere. Each coordinate conditional is deterministic on either supported state, so the full sweep matrix in order 00,11 is the identity. Every target mixture is invariant, but a chain initialized at 00 never records A=1. It cannot satisfy the desired arbitrary-start histogram limit 1/2. Starting at 10 would not repair it: that initialization is unsupported and its ordinary conditional construction is not authorized.</p><p>A joint A,B block has no fixed free coordinates, so its fiber is the full support. Its transition matrix has both rows (1/2,1/2). One block draw has exactly the target law, and ideal independent block draws give independent target observations. Computing a general large block requires summing all its candidate assignments; this two-state-supported case is deliberately small.</p><p>With \(\epsilon\in(0,1)\), target 00 and 11 masses are \((1-\epsilon)/2\), and 01 and 10 masses are \(\epsilon/2\). From 00, keeping A=0 has probability 1−epsilon; then keeping B=0 has probability 1−epsilon. One sweep remains 00 with probability \((1-\epsilon)^2\). By the Markov property, staying 00 at every sweep for N sweeps has probability \((1-\epsilon)^{2N}\). This event is narrower than ending at 00, because paths that leave and return are excluded. For fixed N this probability tends to 1 as epsilon tends to 0. Formal connectivity at every positive epsilon does not justify a uniform practical burn count over these models.</p></details></div>
+<div class="exercise"><h3>Exercise 4 — Rare evidence, accepted counts and sample laws</h3>
+<p>For fair A and P(B=1|A=0)=1/10000 and P(B=1|A=1)=2/10000, derive evidence mass and posterior. Compare N=10,000 rejection proposals with 10,000 one-coordinate Gibbs draws under ideal randomness. State what to return after zero acceptances. Does an exact conditional row make the finite frequency exactly 2/3?</p>
+<details class="solution"><summary>Solution</summary><p>The two evidence joint masses are 1/20000 and 2/20000, totaling 3/20000. Division gives posterior A=1 equal to 2/3. The rejection accepted count has expectation \(10000(3/20000)=3/2\) and zero-count probability \((1-3/20000)^{10000}\), approximately 0.2231. A run with positive m acceptances has conditional indicator-mean variance \(2/(9m)\). Substituting the expected 1.5 into this expression is not an exact unconditional variance calculation: m is random and zero cases are undefined.</p><p>The only free-coordinate Gibbs row is (1/3,2/3), independent of the previous A. Ten thousand ideal Gibbs draws are therefore independent posterior draws, with average variance \(2/(9\cdot10000)\). Finite outcomes are still random integer counts divided by 10,000; none is exactly 2/3 because 10,000 is not divisible by 3. The sampler's law is exact while its histogram is approximate. Zero accepted proposals must return an absent estimate together with count zero, not a false posterior zero or a silently empty normalized distribution. All of this concerns the stipulated network and ideal draw mechanism, not the truth of a real rare-event model.</p></details></div>
+<div class="exercise"><h3>Exercise 5 — A co-parent is essential to the full conditional</h3>
+<p>Derive the local-factor conditional and complete blanket for burglary B in the alarm network. Compute B's row at A=1,E=0 and at A=1,E=1. Explain the support requirement and state an operation count distinguishing factor count, blanket variables, domain size and validation overhead.</p>
+<details class="solution"><summary>Solution</summary><p>The joint candidate score is \(p_B(b)p_E(e)p_A(1\mid b,e)\). Since the supported current state has a positive earthquake factor, that factor is common and cancels. The remaining score is \(p_B(b)p_A(1\mid b,e)\). Its arguments besides B are child A and co-parent E, so the blanket is {A,E}, even though E is not adjacent to B by a direct arrow.</p><p>When E=0, OR evidence forces B=1: candidate weights for B=0,1 are 0 and 1/20, giving row (0,1). When E=1, the alarm factor is 1 for both candidates, giving weights 19/20 and 1/20 and the same normalized row. This is why a generic rule containing only immediate parents and children is incomplete. The co-parent changes the child's likelihood.</p><p>Evidence matching alone does not meet the program's supported-start contract. At (B,E,A)=001 the current joint mass is zero, so the program rejects it. The B conditional given E=0,A=1 is nevertheless mathematically defined: its fiber also contains positive state 101. Thus current-state support is a sufficient checked assumption ensuring every update is defined, not a necessary condition for each individual fiber. The genuine undefined case is a zero-mass fixed-other-coordinate event; for example, an unrelated deterministic D=0 held at D=1 while updating B gives a zero common factor and cannot be repaired by cancellation.</p><p>Supported initialization makes the common factors positive and at least one candidate mass positive. With d_i candidate values and c_i children, local scoring takes \(d_i(1+c_i)\) factor evaluations, plus argument-key/access costs. Blanket size counts variables, not these evaluations. The original program's full-state support check adds n factor evaluations per call and rational arithmetic cost depends on numerator/denominator bit lengths. A faster local expression is a mathematical equality, not automatically a measured wall-clock speedup.</p></details></div>
+<div class="exercise"><h3>Exercise 6 — Graph guarantees have one-way probabilistic meaning</h3>
+<p>Apply ancestor restriction/moralization/removal to A→C←B,C→D for A,B queries with no evidence, with C and with D. Apply it to the five medical-query rows. Give a distribution with an A→B edge yet independent A,B. Finally explain why neither an unseparated graph nor a finite empirical table establishes causal intervention effects.</p>
+<details class="solution"><summary>Solution</summary><p>Without evidence, ancestors of A,B are only A,B; C,D disappear and the queries separate. Given C, ancestor closure includes A,B,C; marrying C's parents adds A—B, which survives C's removal. Given D, closure includes all four nodes; C again marries A,B and D's removal leaves a connecting path. Both conditioned cases therefore lose the graph independence guarantee. They may still be independent for a special kernel. Removing all unobserved leaves indiscriminately would incorrectly remove query nodes; moralizing the full graph before ancestral pruning would incorrectly connect unconditional collider parents.</p><p>For C→H←A→I, the unconditional C/A query retains only C,A and separates. The unconditional C/I query retains C,A,I after eliminating H, so C separates from I. Given A, removal of A also separates them. Given A,H, H's marriage first connects C,A, but both A and H are removed, leaving C disconnected from I. Given H only, the marriage C—A survives and connects to I; there is no guarantee. These steps distinguish an observed collider from an observed ordinary chain node.</p><p>Let A be fair and both B conditional rows equal (7/10,3/10). Then the A→B graph permits dependence but the actual joint factors as \(p_A(a)p_B(b)\), proving independence. This is an explicit failure of the converse for one chosen distribution. A finite frequency table can also show random discrepancies from exact independence and needs a statistical assessment rather than exact sample equality. Finally, probability kernels and conditional queries describe observational distributions; claiming an effect of setting a variable requires a justified intervention model. Neither graph connectivity nor a sampling histogram supplies that causal assumption.</p></details></div>
+</section>
+<section id="references"><h2>15. Sources, assumptions and unresolved validation boundaries</h2>
+<ul><li><a href="https://www.youtube.com/watch?v=Dk7Kqqehzjk">CS221 Lecture 13 recording</a>: actual topic/timing sequence through the inference, Gibbs and independence arguments. Local machine ASR is not human-certified wording.</li>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/gibbs_sampling.py">Official gibbs_sampling.py at retained commit f70063773fe9e04ddcbc248059501837053b810a</a>: full module checked for stipulated networks, demonstration order, candidate scoring and graph examples. Original program here has its own validated representation and sweep-recording clock.</li>
+<li><a href="https://pages.uoregon.edu/dlevin/MARKOV/markovmixing.pdf">Levin and Peres, Markov Chains and Mixing Times, second edition, with contributions by Wilmer</a>: actual PDF pp.58–60 for finite conditional-fiber/random-site dynamics, pp.68–70 for finite irreducible aperiodic convergence and mixing-time definition, pp.406–407 for the separate time-average theorem. Critical formula pages 59,68,406 were actually viewed. No continuous-state theorem, particular MCMC error estimator or fixed burn-in rule is certified.</li>
+<li><a href="https://web.math.ku.dk/~lauritzen/papers/gmnotes.pdf">Lauritzen, Lectures on Graphical Models, third edition</a>: actual PDF pp.60–63 and pp.69–73 for ancestor-moral separation, global Markov implication, ancestral reduction and kernel/density factorization. Actual 61 and 70 page images were viewed to check graph construction and theorem direction. No faithfulness or causal intervention guarantee is imported.</li></ul>
+<p>The original equations, kernels, finite counterexamples and six solutions develop the lecture's spine; they are not copied source prose or empirical certification. Only the specified actual primary pages and the two official graph images are visually checked. No full recording-board/slide review, present-day MCMC practice survey, world-model validation or independent convergence-time certificate is claimed. Numerical/program checks, a different science editor, root reader integration and human accessibility are separate gates.</p></section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-12-bayesian-networks-and-probabilistic-inference.html">Previous available chapter</a><a href="index.html">Lecture index</a><span>Further chapters pending</span></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

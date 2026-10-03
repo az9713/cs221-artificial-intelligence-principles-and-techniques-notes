@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
-  "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
+  "checked_at_utc": "2026-10-03T13:55:03.813488+00:00",
   "status": "independently reviewed and locally validated chapter",
   "accepted_scientific_body_sha256": "490588343d92b9dd7f16fcbcaeeca7ba0a09c3fe77b5df831eddcdc85ddea1ba",
   "accepted_metadata_sha256": "98caf53a552efa6c6c50bc4f37a1e6c16f5999f6f8e008ce50793d20ea687f2f",
@@ -8,7 +8,7 @@
   "integrated_html_sha256": "ddd99cd1b1900ad216f253739616625ee53662eb85d56eb39e63d6b1571e264e",
   "worked_solutions": 6,
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-12 reader scope",
+    "status": "passed within accepted Chapters1-13 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   },

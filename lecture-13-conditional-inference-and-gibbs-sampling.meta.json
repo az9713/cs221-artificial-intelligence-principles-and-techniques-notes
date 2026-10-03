@@ -1,0 +1,433 @@
+{
+  "title": "Conditional inference and Gibbs sampling",
+  "number": 13,
+  "video_id": "Dk7Kqqehzjk",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "author draft; different-editor6b/7/8 pending",
+  "authored_body_sha256": "d1571093d0496f7860926404a9fd28e39c7d91bd9257ffeac05b7f76957e24b8",
+  "sections": [
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": "No recording span assigned; original support section.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Stipulated alarm decision context and two distinct inference bottlenecks",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Stipulated alarm decision context and two distinct inference bottlenecks",
+          "provenance": "original teaching construction using recording model"
+        }
+      ]
+    },
+    {
+      "section": "inference",
+      "start": 5.14,
+      "end": 618.35,
+      "lecture_material": "Alarm DAG and stipulated kernels; slice evidence, sum irrelevant axes and normalize; materialized-joint size.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Finite DAG kernels, query/evidence axes and posterior semantics; Joint normalization by reverse topological summation; Alarm exact mass39/400 and posterior20/39; finite tensor/query trace",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Finite DAG kernels, query/evidence axes and posterior semantics",
+          "provenance": "recording and actual official module; refreshed original notation"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Joint normalization by reverse topological summation",
+          "provenance": "original finite proof"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Alarm exact mass39/400 and posterior20/39; finite tensor/query trace",
+          "provenance": "original exact rational arithmetic with source stipulated parameters"
+        }
+      ]
+    },
+    {
+      "section": "rejection",
+      "start": 618.64,
+      "end": 917.2,
+      "lecture_material": "Ancestral programs and rejection, accepted count and rarity; attributed classroom finite estimate.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Ancestral joint law, retained conditional law, binomial accepted count and conditional-m variance; Expected29.25accepted among300 and explicit absent zero-count estimate",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Ancestral joint law, retained conditional law, binomial accepted count and conditional-m variance",
+          "provenance": "original finite probability derivation"
+        },
+        {
+          "evidence_class": "speaker judgment",
+          "claim": "Classroom finite estimate near.44",
+          "provenance": "attributed recording demonstration, not independently reproduced"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Expected29.25accepted among300 and explicit absent zero-count estimate",
+          "provenance": "original finite arithmetic and contract"
+        }
+      ]
+    },
+    {
+      "section": "chain",
+      "start": 917.65,
+      "end": 1128.5,
+      "lecture_material": "Dependent incremental transitions conditioned on evidence; Markov chain Monte Carlo motivation and sample dependence.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Positive support, target, sweep time index, homogeneous matrix and invariance; Stationary average covariance identity with no universal dependence-variance ordering; Identity transition invariant without exploration",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Positive support, target, sweep time index, homogeneous matrix and invariance",
+          "provenance": "recording motivation; original formal model"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Stationary average covariance identity with no universal dependence-variance ordering",
+          "provenance": "original expansion of centered sum"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Identity transition invariant without exploration",
+          "provenance": "original counterexample"
+        }
+      ]
+    },
+    {
+      "section": "telephone",
+      "start": 1129.2,
+      "end": 1791.79,
+      "lecture_material": "Telephone channel, posterior query and full-conditional candidate joint weights; spoken rounded values.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Correct four-state normalized target and first-bit17/25;1/17,16/17 full conditional; Forward channel versus posterior conditional distinction",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Fair bit and two1/5flip channels with C=1 evidence",
+          "provenance": "actual recording/official table"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Correct four-state normalized target and first-bit17/25;1/17,16/17 full conditional",
+          "provenance": "original exact derivation from actual source; corrects private preparation second-entry error"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Forward channel versus posterior conditional distinction",
+          "provenance": "recording full-conditional example and original interpretation"
+        }
+      ]
+    },
+    {
+      "section": "gibbs",
+      "start": 1791.98,
+      "end": 2364.61,
+      "lecture_material": "Round-robin Gibbs with evidence fixed, immediate updates and official per-site counting; full-joint candidate cost.",
+      "research_extension": "Levin–Peres actual PDF58–59 conditional fibers/random-site stationarity; original ordered composition proved separately.",
+      "teaching_construction": "Coordinate detailed balance/invariance, sweep invariance and fixed mixture reversibility; Exact4x4telephone sweep and unequal reverse flows; Full-sweep recording versus official per-coordinate recording and factor-cost assumptions",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Conditional-fiber update and source random-site versus original ordered sweep",
+          "provenance": "Levin–Peres PDF58–59; actual official algorithm"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Coordinate detailed balance/invariance, sweep invariance and fixed mixture reversibility",
+          "provenance": "original finite derivations; conditional-fiber source context"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Exact4x4telephone sweep and unequal reverse flows",
+          "provenance": "original exact transition calculation"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Full-sweep recording versus official per-coordinate recording and factor-cost assumptions",
+          "provenance": "actual source algorithm; original computational contract"
+        }
+      ]
+    },
+    {
+      "section": "blanket",
+      "start": 2364.61,
+      "end": 2966.8,
+      "lecture_material": "Local factor cancellation, Markov blanket and explicit co-parent question; shortened summary needs co-parents.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Positive-common-factor cancellation and all involving local kernels; Parents, children and co-parents; source summary narrowed by explicit co-parent question; Alarm B row changes with co-parent E; factor-count versus validation cost",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Positive-common-factor cancellation and all involving local kernels",
+          "provenance": "original finite factor proof"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Parents, children and co-parents; source summary narrowed by explicit co-parent question",
+          "provenance": "actual recording/module and original formal set"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Alarm B row changes with co-parent E; factor-count versus validation cost",
+          "provenance": "original exact conditional and computational count"
+        }
+      ]
+    },
+    {
+      "section": "rare",
+      "start": 2966.8,
+      "end": 3237.65,
+      "lecture_material": "Alarm sampler finite variation and rare-evidence forward-table example; comparison to rejection.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Alarm positive-support bottleneck and rare evidence mass3/20000,posterior2/3; Recording alarm estimates.60/.33 and contrast discussion; Single-free-coordinate exact draw law and finite indicator variance",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "evidence_class": "engineering check",
+          "claim": "Alarm positive-support bottleneck and rare evidence mass3/20000,posterior2/3",
+          "provenance": "original exact arithmetic from actual source table"
+        },
+        {
+          "evidence_class": "speaker judgment",
+          "claim": "Recording alarm estimates.60/.33 and contrast discussion",
+          "provenance": "attributed finite demonstrations, not original program output"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Single-free-coordinate exact draw law and finite indicator variance",
+          "provenance": "original derivation; no exact finite histogram assertion"
+        }
+      ]
+    },
+    {
+      "section": "convergence",
+      "start": 3238.64,
+      "end": 3527.07,
+      "lecture_material": "Deterministic equality trap, softened high agreement, mixing-time pointer and attributed practicality discussion.",
+      "research_extension": "Levin–Peres actual PDF68–70 finite-law convergence/mixing and406–407 time-average theorem; original bottleneck/block/periodic fixtures.",
+      "teaching_construction": "Connected positive support gives irreducible aperiodic full sweep; finite-law convergence and minorization bound; Equality absorbing states, block repair, soft stay probability and periodic-chain distinction; Burn/thinning/trace diagnostics lack an unearned time certificate",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Connected positive support gives irreducible aperiodic full sweep; finite-law convergence and minorization bound",
+          "provenance": "original support/path proof and adaptation of Levin–Peres PDF68–69"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Finite irreducible time-average convergence without required aperiodicity",
+          "provenance": "Levin–Peres PDF406–407 TheoremC.1; scoped explanation of return-cycle proof"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Total variation and mixing-time role",
+          "provenance": "Levin–Peres PDF68–70"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Equality absorbing states, block repair, soft stay probability and periodic-chain distinction",
+          "provenance": "original exact counterexamples"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Burn/thinning/trace diagnostics lack an unearned time certificate",
+          "provenance": "original bounded inference consequence, no current-practice survey"
+        }
+      ]
+    },
+    {
+      "section": "independence",
+      "start": 3527.07,
+      "end": 4063.09,
+      "lecture_material": "Distributional independence examples: disconnected roots, edge, collider and fork.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Independence, collider/fork and faithfulness distinction; Collider parent marginal independence and possible fork dependence; Nonfaithful A→Bconstant-row counterexample and incorrect source-factor correction",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Independence, collider/fork and faithfulness distinction",
+          "provenance": "recording motifs; original explicit definitions"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Collider parent marginal independence and possible fork dependence",
+          "provenance": "original finite normalization and counterexample"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Nonfaithful A→Bconstant-row counterexample and incorrect source-factor correction",
+          "provenance": "original exact calculation checked against actual specified graph"
+        }
+      ]
+    },
+    {
+      "section": "conditional",
+      "start": 4063.22,
+      "end": 4292.99,
+      "lecture_material": "Conditional independence, fork normalization and collider/alarm explaining-away examples.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Conditional independence on positive evidence and observational/causal boundary; Fork conditional factorization and normalized collider posterior formula; Alarm joint1/39 differs from400/1521 product and explaining-away rows",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Conditional independence on positive evidence and observational/causal boundary",
+          "provenance": "recording subject; original formal scope"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Fork conditional factorization and normalized collider posterior formula",
+          "provenance": "original finite algebra correcting official omitted denominator"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Alarm joint1/39 differs from400/1521 product and explaining-away rows",
+          "provenance": "original exact arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "separation",
+      "start": 4292.99,
+      "end": 4472.1,
+      "lecture_material": "Leaf pruning, parent marriage and conditioned paths; medical graph examples, corrected query-preservation and result polarity.",
+      "research_extension": "Lauritzen actual PDF60–63and69–73 ancestor-moral construction, global implication and finite factorization; original finite argument and graph cases.",
+      "teaching_construction": "Ancestor-moral separation versus d-separation and no-path result polarity; Ancestral marginal reduction and factorized conditional components imply global independence; Collider-descendant and all five medical graph cases; Failed separation is not mandatory dependence for a chosen distribution",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Ancestor-moral separation versus d-separation and no-path result polarity",
+          "provenance": "Lauritzen PDF61–62 Proposition2.33; original explicit algorithm"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Ancestral marginal reduction and factorized conditional components imply global independence",
+          "provenance": "original finite proof; Lauritzen PDF70–73 and Proposition2.48"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Collider-descendant and all five medical graph cases",
+          "provenance": "original graph calculations; actually inspected official medical image"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Failed separation is not mandatory dependence for a chosen distribution",
+          "provenance": "Lauritzen PDF70 global implication; original nonfaithful counterexample"
+        }
+      ]
+    },
+    {
+      "section": "synthesis",
+      "start": 4472.1,
+      "end": 4548.98,
+      "lecture_material": "Representation, exact/approximate inference and graph independence recap; next parameter-learning question.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Exact-law versus estimate/model/graph guarantees; parameter-learning boundary",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Exact-law versus estimate/model/graph guarantees; parameter-learning boundary",
+          "provenance": "recording recap and original comparison"
+        }
+      ]
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "No recording span assigned; original support section.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Validated immutable finite kernel/graph/query/evidence/support/rational/sampling-budget contract; Actual exact oracle/matrix/code/stdout and finite seeded histograms",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Validated immutable finite kernel/graph/query/evidence/support/rational/sampling-budget contract",
+          "provenance": "original program"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Actual exact oracle/matrix/code/stdout and finite seeded histograms",
+          "provenance": "original executed program; no empirical mixing certificate"
+        }
+      ]
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "No recording span assigned; original support section.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "Coordinate invariant/reversible identities, conditioned laws, support/path and graph reasoning; Telephone/matrix/flows/trap/rare-evidence/co-parent/separation arithmetic and counterexamples",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Coordinate invariant/reversible identities, conditioned laws, support/path and graph reasoning",
+          "provenance": "original complete proofs and cited finite theorem scopes"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Telephone/matrix/flows/trap/rare-evidence/co-parent/separation arithmetic and counterexamples",
+          "provenance": "original complete worked solutions"
+        }
+      ]
+    },
+    {
+      "section": "references",
+      "start": null,
+      "end": null,
+      "lecture_material": "No recording span assigned; original support section.",
+      "research_extension": "No separately attributed external result beyond the specific claim rows.",
+      "teaching_construction": "",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Actual source identities/read/view limits and remaining distinct review gates",
+          "provenance": "scoped actual source receipts; no global acceptance"
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Official CS221 gibbs_sampling.py at retained commit f70063773fe9e04ddcbc248059501837053b810a",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/gibbs_sampling.py",
+      "role": "Actual full416-line source module and two specified graph images; original book code not copied.",
+      "supports": "Actual full416-line source module and two specified graph images; original book code not copied."
+    },
+    {
+      "title": "Levin and Peres, Markov Chains and Mixing Times, second edition, with contributions by Elizabeth L. Wilmer",
+      "url": "https://pages.uoregon.edu/dlevin/MARKOV/markovmixing.pdf",
+      "role": "Actual cover and PDF58–60,68–70,406–407; viewed59/68/406. Finite conditional fibers and distinct law/time-average convergence hypotheses.",
+      "supports": "Actual cover and PDF58–60,68–70,406–407; viewed59/68/406. Finite conditional fibers and distinct law/time-average convergence hypotheses."
+    },
+    {
+      "title": "Steffen L. Lauritzen, Lectures on Graphical Models, third edition",
+      "url": "https://web.math.ku.dk/~lauritzen/papers/gmnotes.pdf",
+      "role": "Actual cover and PDF60–63,69–73; viewed61/70. Ancestor-moral separation and factorization-to-global Markov direction.",
+      "supports": "Actual cover and PDF60–63,69–73; viewed61/70. Ancestor-moral separation and factorization-to-global Markov direction."
+    }
+  ],
+  "program": "programs/chapter13.py",
+  "implementation_evidence": {
+    "source_sha256": "e052e74fe0c71911756fcad24362b419179a7bea0ae2d91b8ad18e7f06cda018",
+    "stdout_sha256": "209c8f1f0497ee30f56aa687830de71cd32b4fc00c4008969faf87eec930c655",
+    "status": "actual exact code/stdout embedded; author-only finite checks separately retained"
+  },
+  "visual_scope": "Two actual official graph images and five specified full primary pages inspected; original collider/fork schematic; no full talk/deck attestation."
+}
