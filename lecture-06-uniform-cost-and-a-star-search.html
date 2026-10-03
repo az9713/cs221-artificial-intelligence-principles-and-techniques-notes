@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4"><title>Uniform-cost and A* search: when a promising route is provably best · CS221: Artificial Intelligence: Principles and Techniques</title>
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="e4fdae54b5944608c6184a27df1fdb341108a2d9b6b054b0231e45b005118cc0"><title>Uniform-cost and A* search: when a promising route is provably best · CS221: Artificial Intelligence: Principles and Techniques</title>
 <link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
 <script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
 <body><a class="skip" href="#main">Skip to content</a>
@@ -171,6 +171,7 @@ Reopening mode deliberately audits admissibility with an exact reverse solve.
 It is a correctness demonstration, not a competitive heuristic implementation.
 No files, network, random state, or input objects are modified.
 &quot;&quot;&quot;
+
 from dataclasses import dataclass
 from heapq import heappop, heappush
 from itertools import count
@@ -185,8 +186,12 @@ class Result:
 
 def _integer(value, label, nonnegative=False):
     if type(value) is not int or (nonnegative and value &lt; 0):
-        raise ValueError(label + &quot; must be a built-in &quot; +
-                         (&quot;nonnegative &quot; if nonnegative else &quot;&quot;) + &quot;integer&quot;)
+        raise ValueError(
+            label
+            + &quot; must be a built-in &quot;
+            + (&quot;nonnegative &quot; if nonnegative else &quot;&quot;)
+            + &quot;integer&quot;
+        )
     return value
 
 
@@ -226,7 +231,10 @@ def _terminals(graph, goals):
 
 
 def _run(graph, start, goals, potential, reopen):
-    &quot;&quot;&quot;Internal engine. Call shortest_path for validated correctness guarantees.&quot;&quot;&quot;
+    (
+        &#x27;Internal engine. Call shortest_path for validated &#x27;
+        &#x27;correctness guarantees.&#x27;
+    )
     serial = count()
     queue = [(potential[start], next(serial), 0, start)]
     best, parent, closed = {start: 0}, {}, set()
@@ -251,8 +259,15 @@ def _run(graph, start, goals, potential, reopen):
                 best[target] = candidate
                 parent[target] = state
                 closed.discard(target)
-                heappush(queue, (candidate + potential[target], next(serial),
-                                 candidate, target))
+                heappush(
+                    queue,
+                    (
+                        candidate + potential[target],
+                        next(serial),
+                        candidate,
+                        target,
+                    ),
+                )
     return None
 
 
@@ -286,13 +301,16 @@ def future_costs(graph, goals):
 
 
 def shortest_path(graph, start, goals, heuristic=None, *, reopen=False):
-    &quot;&quot;&quot;Return Result or None. Reject violated supported input hypotheses.
-
-    Default: check consistency, use permanent settlement. Reopening mode:
-    check admissibility using a full reverse solve, then allow repeat removals.
-    Reported removals exclude that audit and stale heap records. Integer costs
-    avoid floating-point comparisons; their arithmetic cost grows with bits.
-    &quot;&quot;&quot;
+    (
+        &#x27;Return Result or None. Reject violated supported input &#x27;
+        &#x27;hypotheses.\n\n    Default: check consistency, use &#x27;
+        &#x27;permanent settlement. Reopening mode:\n    check &#x27;
+        &#x27;admissibility using a full reverse solve, then allow &#x27;
+        &#x27;repeat removals.\n    Reported removals exclude that &#x27;
+        &#x27;audit and stale heap records. Integer costs\n    avoid &#x27;
+        &#x27;floating-point comparisons; their arithmetic cost &#x27;
+        &#x27;grows with bits.\n    &#x27;
+    )
     copied = _graph(graph)
     try:
         present = start in copied
@@ -308,35 +326,58 @@ def shortest_path(graph, start, goals, heuristic=None, *, reopen=False):
     else:
         if type(heuristic) is not dict or heuristic.keys() != copied.keys():
             raise ValueError(&quot;heuristic must specify exactly all states&quot;)
-        potential = {state: _integer(value, &quot;heuristic&quot;)
-                     for state, value in heuristic.items()}
+        potential = {
+            state: _integer(value, &quot;heuristic&quot;)
+            for state, value in heuristic.items()
+        }
     if any(potential[goal] != 0 for goal in terminals):
         raise ValueError(&quot;every goal heuristic must be zero&quot;)
     if reopen:
         exact = _future(copied, terminals)
-        if any(potential[state] &gt; distance for state, distance in exact.items()):
+        if any(
+            potential[state] &gt; distance for state, distance in exact.items()
+        ):
             raise ValueError(&quot;reopening audit requires admissibility&quot;)
-    elif any(potential[state] &gt; cost + potential[target]
-             for state, edges in copied.items() for target, cost in edges):
+    elif any(
+        potential[state] &gt; cost + potential[target]
+        for state, edges in copied.items()
+        for target, cost in edges
+    ):
         raise ValueError(&quot;permanent settlement requires consistency&quot;)
     return _run(copied, start, terminals, potential, reopen)
 
 
 def grid_problem(rows):
     &quot;&quot;&quot;Rectangular ASCII grid: # wall, . free, exactly one S and one G.&quot;&quot;&quot;
-    if (not isinstance(rows, (list, tuple)) or not rows or
-            any(type(row) is not str for row in rows) or not rows[0] or
-            any(len(row) != len(rows[0]) for row in rows) or
-            any(ch not in &quot;.#SG&quot; for row in rows for ch in row)):
+    if (
+        not isinstance(rows, (list, tuple))
+        or not rows
+        or any(type(row) is not str for row in rows)
+        or not rows[0]
+        or any(len(row) != len(rows[0]) for row in rows)
+        or any(ch not in &quot;.#SG&quot; for row in rows for ch in row)
+    ):
         raise ValueError(&quot;invalid rectangular grid&quot;)
-    starts = [(r, c) for r, row in enumerate(rows) for c, ch in enumerate(row)
-              if ch == &quot;S&quot;]
-    goals = [(r, c) for r, row in enumerate(rows) for c, ch in enumerate(row)
-             if ch == &quot;G&quot;]
+    starts = [
+        (r, c)
+        for r, row in enumerate(rows)
+        for c, ch in enumerate(row)
+        if ch == &quot;S&quot;
+    ]
+    goals = [
+        (r, c)
+        for r, row in enumerate(rows)
+        for c, ch in enumerate(row)
+        if ch == &quot;G&quot;
+    ]
     if len(starts) != 1 or len(goals) != 1:
         raise ValueError(&quot;grid needs exactly one S and one G&quot;)
-    graph = {(r, c): [] for r, row in enumerate(rows)
-             for c, ch in enumerate(row) if ch != &quot;#&quot;}
+    graph = {
+        (r, c): []
+        for r, row in enumerate(rows)
+        for c, ch in enumerate(row)
+        if ch != &quot;#&quot;
+    }
     for r, c in graph:
         for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             target = r + dr, c + dc
@@ -348,28 +389,41 @@ def grid_problem(rows):
 
 
 def demo():
-    diamond = {&quot;A&quot;: [(&quot;B&quot;, 1), (&quot;C&quot;, 100)],
-               &quot;B&quot;: [(&quot;A&quot;, 1), (&quot;C&quot;, 1), (&quot;D&quot;, 100)],
-               &quot;C&quot;: [(&quot;A&quot;, 100), (&quot;B&quot;, 1), (&quot;D&quot;, 1)],
-               &quot;D&quot;: [(&quot;B&quot;, 100), (&quot;C&quot;, 1)]}
+    diamond = {
+        &quot;A&quot;: [(&quot;B&quot;, 1), (&quot;C&quot;, 100)],
+        &quot;B&quot;: [(&quot;A&quot;, 1), (&quot;C&quot;, 1), (&quot;D&quot;, 100)],
+        &quot;C&quot;: [(&quot;A&quot;, 100), (&quot;B&quot;, 1), (&quot;D&quot;, 1)],
+        &quot;D&quot;: [(&quot;B&quot;, 100), (&quot;C&quot;, 1)],
+    }
     answer = shortest_path(diamond, &quot;A&quot;, [&quot;D&quot;])
     print(&quot;diamond:&quot;, answer.cost, &quot;-&gt;&quot;.join(answer.path))
-    graph, start, goals, h = grid_problem((&quot;S....&quot;, &quot;###.#&quot;, &quot;.....&quot;,
-                                          &quot;.####&quot;, &quot;....G&quot;))
+    graph, start, goals, h = grid_problem(
+        (&quot;S....&quot;, &quot;###.#&quot;, &quot;.....&quot;, &quot;.####&quot;, &quot;....G&quot;)
+    )
     ucs = shortest_path(graph, start, goals)
     astar = shortest_path(graph, start, goals, h)
     exact = future_costs(graph, goals)
-    print(f&quot;grid: cost={astar.cost}, Manhattan={h[start]}, &quot;
-          f&quot;UCS removals={ucs.removals}, A* removals={astar.removals}&quot;)
-    print(f&quot;grid ranking: (2,4) h={h[2,4]} true={exact[2,4]}; &quot;
-          f&quot;(3,0) h={h[3,0]} true={exact[3,0]}&quot;)
-    inconsistent = {&quot;s&quot;: [(&quot;a&quot;, 3), (&quot;b&quot;, 1)], &quot;a&quot;: [(&quot;g&quot;, 3)],
-                    &quot;b&quot;: [(&quot;a&quot;, 1), (&quot;g&quot;, 100)], &quot;g&quot;: []}
+    print(
+        f&quot;grid: cost={astar.cost}, Manhattan={h[start]}, &quot;
+        f&quot;UCS removals={ucs.removals}, A* removals={astar.removals}&quot;
+    )
+    print(
+        f&quot;grid ranking: (2,4) h={h[2, 4]} true={exact[2, 4]}; &quot;
+        f&quot;(3,0) h={h[3, 0]} true={exact[3, 0]}&quot;
+    )
+    inconsistent = {
+        &quot;s&quot;: [(&quot;a&quot;, 3), (&quot;b&quot;, 1)],
+        &quot;a&quot;: [(&quot;g&quot;, 3)],
+        &quot;b&quot;: [(&quot;a&quot;, 1), (&quot;g&quot;, 100)],
+        &quot;g&quot;: [],
+    }
     ih = {&quot;s&quot;: 0, &quot;a&quot;: 0, &quot;b&quot;: 4, &quot;g&quot;: 0}
     unsafe = _run(inconsistent, &quot;s&quot;, {&quot;g&quot;}, ih, False)
     repaired = shortest_path(inconsistent, &quot;s&quot;, [&quot;g&quot;], ih, reopen=True)
-    print(f&quot;inconsistent audit: unchecked closed={unsafe.cost}, &quot;
-          f&quot;validated reopening={repaired.cost}&quot;)
+    print(
+        f&quot;inconsistent audit: unchecked closed={unsafe.cost}, &quot;
+        f&quot;validated reopening={repaired.cost}&quot;
+    )
     zero = {&quot;s&quot;: [(&quot;a&quot;, 0)], &quot;a&quot;: [(&quot;s&quot;, 0), (&quot;g&quot;, 1)], &quot;g&quot;: []}
     print(&quot;finite zero cycle:&quot;, shortest_path(zero, &quot;s&quot;, [&quot;g&quot;]).cost)
     print(&quot;unreachable:&quot;, shortest_path({&quot;s&quot;: [], &quot;g&quot;: []}, &quot;s&quot;, [&quot;g&quot;]))

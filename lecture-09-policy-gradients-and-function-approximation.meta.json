@@ -438,9 +438,9 @@
   "transcript_last_end_seconds": 4436.24,
   "audio_sha256": "fbe6b69b8d022c0c3195ace78cb511a97fd092663951bc49ca60342a3ca068e9",
   "audio_duration_seconds": 4441.521,
-  "authored_body_sha256": "4c8af58a4758fb5a94319ad4dada45e1d8f8c3c5d23fa1d1f3b5683dda3117ad",
+  "authored_body_sha256": "5a9e01553789aae5ea1ca69ca79c0ad9dc1ea169c0552a872359450f50534b6e",
   "program": "programs/chapter09.py",
-  "program_sha256": "1ca9cc21f863de41dfd932ff1b23171aed2e933b7d36938ad7988cde3b04542d",
+  "program_sha256": "ecdcb3a26b539543ce87ca88e1aa525c1bb4e46a5d0cccedb60d03f440440f31",
   "implementation": {
     "dependencies": "Python standard library",
     "input_contract": "Built-in int/Fraction excluding bool; public rational numerator/denominator<=128bits; list/tuple1..64 for moments; normalized nonnegative weights; Bernoulli0<p<1; actions built-in0/1; discounts[0,1]; ValueError on unsupported inputs; exact internal arithmetic allowed to grow; no caller mutation/files/network/random state",

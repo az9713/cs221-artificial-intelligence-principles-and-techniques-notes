@@ -1,0 +1,24 @@
+{
+  "status": "independently reviewed and locally validated chapter",
+  "accepted_scientific_body_sha256": "dee255ec1b8077d86d33970ecbc533e3a8368e34cee2e78a9d337394c4842fec",
+  "accepted_metadata_sha256": "018aebbe3a121658005873e2ed0c8d1c1b0e86d161aaac37ab30d0bbfa3e267d",
+  "accepted_program_sha256": "94f1ad7eab12210f9dc0f4baa7de780d3a29a6eaddf116a92f82883effdeb459",
+  "integrated_html_sha256": "f3bea9e4da62ff2d43529165708a5a3c9ffc62070cfda33e4d3e78f35fa9c836",
+  "worked_solutions": 6,
+  "independent_review": {
+    "gate_6b": "accepted",
+    "blocking_defects": 0,
+    "passes_7_8": "accepted",
+    "report_sha256": "d3acc157bd48f0d90ad70e57ca5db6b7939d6146696e829e30274af67340aa23"
+  },
+  "limits": [
+    "Automatic transcription is not human source certification",
+    "Human keyboard/screen-reader audit unperformed",
+    "No publication performed"
+  ],
+  "current_reader_gate": {
+    "status": "passed within complete 20-chapter reading edition",
+    "reader_report": "reader-validation.json",
+    "human_accessibility": "not performed"
+  }
+}

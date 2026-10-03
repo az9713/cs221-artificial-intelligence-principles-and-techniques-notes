@@ -6949,6 +6949,1830 @@
       "chapter": "lecture-16-first-order-logic-and-structured-inference.html",
       "video_id": "x9Mbqu06OVo",
       "duration": 4547
+    },
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original-only support section; no recording span assigned.",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Newswire task, text probability versus source-supported claim",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Newswire task, text probability versus source-supported claim",
+          "provenance": "original stipulated teaching case"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "industrial",
+      "start": 5.26,
+      "end": 342.32,
+      "lecture_material": "Dated model/data scale and illustrative compute/storage accounting",
+      "research_extension": "Llama405B/15.6T/3.8e25 and Qwen36T reported historical scale (actual primary Llama PDF1/QwenPDF3)",
+      "teaching_construction": "6NM arithmetic, stipulated accelerator-days/dollars and token/word byte conversions",
+      "evidence_class": "empirical result",
+      "claim_provenance": [
+        {
+          "evidence_class": "empirical result",
+          "claim": "Llama405B/15.6T/3.8e25 and Qwen36T reported historical scale",
+          "provenance": "actual primary Llama PDF1/QwenPDF3"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "6NM arithmetic, stipulated accelerator-days/dollars and token/word byte conversions",
+          "provenance": "original dimensioned cost model; no current price or measured utilization"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "representation",
+      "start": 342.32,
+      "end": 917.57,
+      "lecture_material": "Whole-word IDs, embedding/logit axes, probability normalization and autoregression",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Tokens/IDs/BOS/EOS and position/feature/vocabulary axes; Declared prefix IDs, source vector1.26 and normalized sparse teaching kernel",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Tokens/IDs/BOS/EOS and position/feature/vocabulary axes",
+          "provenance": "recording/deck; original consistent map and explicit axes"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Declared prefix IDs, source vector1.26 and normalized sparse teaching kernel",
+          "provenance": "actual slides22/26; original correction"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "probability",
+      "start": 917.57,
+      "end": 1172.72,
+      "lecture_material": "Chain rule, sequence likelihood and autoregressive versus bidirectional prediction",
+      "research_extension": "Masked-position conditioning differs from causal factorization (BERTPDF4; original comparison)",
+      "teaching_construction": "Fixed-horizon normalization, completed mass identity and uniform EOS stopping bound; Geometric and never-EOS/summable-hazard counterexamples; Masked-position conditioning differs from causal factorization",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Fixed-horizon normalization, completed mass identity and uniform EOS stopping bound",
+          "provenance": "original finite sum/survival proof"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Geometric and never-EOS/summable-hazard counterexamples",
+          "provenance": "original teaching constructions"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Masked-position conditioning differs from causal factorization",
+          "provenance": "BERTPDF4; original comparison"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "counts",
+      "start": 1173.23,
+      "end": 1383.42,
+      "lecture_material": "N-grams, word-count likelihood, limited context and sparse support",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Document-bounded bigram counts and additive smoothing; Row MLE via entropy/KL and smoothing uniform EOS bound; Three-document reaction2/3,1/3 versus3/14,2/14 and undefined-row contract",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Document-bounded bigram counts and additive smoothing",
+          "provenance": "recording context; original explicit count conventions"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Row MLE via entropy/KL and smoothing uniform EOS bound",
+          "provenance": "original finite derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Three-document reaction2/3,1/3 versus3/14,2/14 and undefined-row contract",
+          "provenance": "original counts/program"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "training",
+      "start": 1383.42,
+      "end": 1502.83,
+      "lecture_material": "Shifted input/targets and causal whole-sequence training",
+      "research_extension": "Decoder causality must hold throughout dependencies (AttentionPDF3\u20135; original failure example)",
+      "teaching_construction": "Shifted targets, valid masks and token-mean objective; Softmax logit gradient and shared-parameter accumulation; Token2.75 versus document2.5, target-gradient and fused extreme-loss fixtures; Decoder causality must hold throughout dependencies",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Shifted targets, valid masks and token-mean objective",
+          "provenance": "recording/deck48; original semantic axes/normalization"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Softmax logit gradient and shared-parameter accumulation",
+          "provenance": "original differentiation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Token2.75 versus document2.5, target-gradient and fused extreme-loss fixtures",
+          "provenance": "original finite arithmetic/program"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Decoder causality must hold throughout dependencies",
+          "provenance": "AttentionPDF3\u20135; original failure example"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "tasks",
+      "start": 1502.83,
+      "end": 1893.39,
+      "lecture_material": "Task conditioning, prompted applications and prediction/reasoning distinction",
+      "research_extension": "Input/task/output conditioning and decoder/application-score distinction (GPT2PDF1\u20132; original newswire evaluation)",
+      "teaching_construction": "Input/task/output conditioning and decoder/application-score distinction; Greedyaa9/25 versus MAPba2/5; exact sampling law",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Input/task/output conditioning and decoder/application-score distinction",
+          "provenance": "GPT2PDF1\u20132; original newswire evaluation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Greedyaa9/25 versus MAPba2/5; exact sampling law",
+          "provenance": "original finite counterexample/program"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "scaling",
+      "start": 1893.68,
+      "end": 2295.18,
+      "lecture_material": "Empirical scaling, allocation tradeoffs and diminishing-loss motivation",
+      "research_extension": "Reported scaling trends and measured versus extrapolated allocation (KaplanPDF1\u20132,ChinchillaPDF1\u20132/5\u20136,LlamaPDF8)",
+      "teaching_construction": "Unique positive optimum of stipulated fitted-form surrogate under kappaNM budget; Unit-coefficient10/10 versus100/1 allocation",
+      "evidence_class": "empirical result",
+      "claim_provenance": [
+        {
+          "evidence_class": "empirical result",
+          "claim": "Reported scaling trends and measured versus extrapolated allocation",
+          "provenance": "KaplanPDF1\u20132,ChinchillaPDF1\u20132/5\u20136,LlamaPDF8"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Unique positive optimum of stipulated fitted-form surrogate under kappaNM budget",
+          "provenance": "original continuous conditional derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Unit-coefficient10/10 versus100/1 allocation",
+          "provenance": "original stipulated finite arithmetic"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "architecture",
+      "start": 2296.08,
+      "end": 2751.22,
+      "lecture_material": "Flattened MLP count, attention sharing/input routing, causal mask and prefix cache",
+      "research_extension": "Projected scaled-dot-product head and positionwise feed-forward sharing (AttentionPDF3\u20135)",
+      "teaching_construction": "Causal stack induction for unchanged-prefix key/value cache; DVT\u00b2 flattened count, fixed-ReLU sensitivity and attention3/4-to0 example",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Projected scaled-dot-product head and positionwise feed-forward sharing",
+          "provenance": "AttentionPDF3\u20135"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Causal stack induction for unchanged-prefix key/value cache",
+          "provenance": "original dependency proof with fixed evaluation/position/mask assumptions"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "DVT\u00b2 flattened count, fixed-ReLU sensitivity and attention3/4-to0 example",
+          "provenance": "original exact count/counterexamples correcting broad source implications"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "pretraining",
+      "start": 2751.22,
+      "end": 3262.38,
+      "lecture_material": "Selected data mixtures, pre-training and context demonstrations versus fine-tuning",
+      "research_extension": "Domain-mixture loss, heldout grouping and context versus parameter update (original objective/evaluation; GPT3PDF6\u20137 definitions); Reported Qwen multilingual/synthetic stages and bounded GPT3 experiments (QwenPDF3\u20134;GPT3PDF1/3/6\u20137)",
+      "teaching_construction": "Domain-mixture loss, heldout grouping and context versus parameter update",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Domain-mixture loss, heldout grouping and context versus parameter update",
+          "provenance": "original objective/evaluation; GPT3PDF6\u20137 definitions"
+        },
+        {
+          "evidence_class": "empirical result",
+          "claim": "Reported Qwen multilingual/synthetic stages and bounded GPT3 experiments",
+          "provenance": "QwenPDF3\u20134;GPT3PDF1/3/6\u20137"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "preferences",
+      "start": 3262.93,
+      "end": 3609.92,
+      "lecture_material": "Supervised post-training, preference reward and RL-style sequence objectives",
+      "research_extension": "SFT, paired logistic rewards, sequence KL/PPO objective and alternate Llama recipe (InstructPDF2\u20133/6/8\u20139 and LlamaPDF2; reported method semantics)",
+      "teaching_construction": "Finite support-constrained exponential tilt unique optimum; Reaction preference2/3,1/3 reverses to1/3,2/3",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "SFT, paired logistic rewards, sequence KL/PPO objective and alternate Llama recipe",
+          "provenance": "InstructPDF2\u20133/6/8\u20139 and LlamaPDF2; reported method semantics"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Finite support-constrained exponential tilt unique optimum",
+          "provenance": "original KL identity/proof; not PPO/neural convergence"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Reaction preference2/3,1/3 reverses to1/3,2/3",
+          "provenance": "original finite utility example"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "safety",
+      "start": 3609.92,
+      "end": 3919.34,
+      "lecture_material": "Attributed historical refusal/failure examples and prompt sensitivity",
+      "research_extension": "Reported model residual mistakes (InstructPDF4 only; no timeless claim for all systems)",
+      "teaching_construction": "Prompt-distribution failure functional and distribution-shift limits; Zero-failure binomial confidence construction under identical independent trials; 100-trial bound0.029513",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Prompt-distribution failure functional and distribution-shift limits",
+          "provenance": "original evaluation framing; dated recording examples"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Zero-failure binomial confidence construction under identical independent trials",
+          "provenance": "original elementary statistical derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "100-trial bound0.029513",
+          "provenance": "original numerical computation"
+        },
+        {
+          "evidence_class": "empirical result",
+          "claim": "Reported model residual mistakes",
+          "provenance": "InstructPDF4 only; no timeless claim for all systems"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "tokenization",
+      "start": 3919.34,
+      "end": 4054.62,
+      "lecture_material": "Subword/byte BPE and inference segmentation",
+      "research_extension": "Character BPE within-word algorithm/unknown-character qualification (SennrichPDF3\u20134; QwenPDF3 byte-level identification)",
+      "teaching_construction": "Ordered concatenating merges preserve original bytes; ababa/aaa segmentation and arbitrary-byte reconstruction",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Character BPE within-word algorithm/unknown-character qualification",
+          "provenance": "SennrichPDF3\u20134; QwenPDF3 byte-level identification"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Ordered concatenating merges preserve original bytes",
+          "provenance": "original induction"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "ababa/aaa segmentation and arbitrary-byte reconstruction",
+          "provenance": "original program; no production-tokenizer replica"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "systems",
+      "start": 4054.62,
+      "end": 4386.72,
+      "lecture_material": "Weight/training memory, precision, parallelism and memory-efficient computation",
+      "research_extension": "FlashAttention tiling/recomputation mechanism (FlashPDF1\u20134; no transferred speedup)",
+      "teaching_construction": "Raw weight/state/KV units and ideal memory/compute bound; Global token-weighted gradients and contracted/output partition identities",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "evidence_class": "engineering check",
+          "claim": "Raw weight/state/KV units and ideal memory/compute bound",
+          "provenance": "original stipulated engineering model; no performance benchmark"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Global token-weighted gradients and contracted/output partition identities",
+          "provenance": "original algebra with fixed counts and semantic axes"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "FlashAttention tiling/recomputation mechanism",
+          "provenance": "FlashPDF1\u20134; no transferred speedup"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "ecosystem",
+      "start": 4386.72,
+      "end": 4779.89,
+      "lecture_material": "Dated industrial/model access, agents/multimodal/research topics and recap",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Model access/disclosure/behavior distinctions and agent interaction domain",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Model access/disclosure/behavior distinctions and agent interaction domain",
+          "provenance": "recording dated taxonomy; original bounded synthesis"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original-only support section; no recording span assigned.",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Finite validated API shapes/types/budgets/effects and censoring semantics",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Finite validated API shapes/types/budgets/effects and censoring semantics",
+          "provenance": "original program"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Actually executed report, exact mass/decoding and bounded floating computations",
+          "provenance": "actual chapter program and separately designed author references"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original-only support section; no recording span assigned.",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Stopping/KL/cache/byte preservation and surrogate reasoning; Six finite numerical/counterexample calculations",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Stopping/KL/cache/byte preservation and surrogate reasoning",
+          "provenance": "original full mathematical solutions"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Six finite numerical/counterexample calculations",
+          "provenance": "original worked solutions; source-method claims remain separately cited"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "references",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original-only support section; no recording span assigned.",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Exact versions and claim-page scope limits",
+          "provenance": "actual retained source receipts; no source-wide replication"
+        }
+      ],
+      "chapter": "lecture-17-language-models-and-sequence-generation.html",
+      "video_id": "3orP3u2-jcg",
+      "duration": 4786
+    },
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "teaching_construction": "Which students would the service actually help?",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Stipulated university service, configuration, groups and context",
+          "origin": "Original running case"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "responsibility",
+      "start": 5.2,
+      "end": 240.16,
+      "lecture_material": "technologist responsibility",
+      "teaching_construction": "1. Design choices allocate power and responsibility",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Technical choices allocate responsibility and affect who can act",
+          "origin": "Recording topic with original service application"
+        }
+      ],
+      "evidence_class": "speaker judgment",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "principles",
+      "start": 240.16,
+      "end": 385.01,
+      "lecture_material": "ethical principles",
+      "teaching_construction": "2. Ethical principles constrain how an objective is obtained",
+      "claim_provenance": [
+        {
+          "class": "external finding",
+          "claim": "Belmont principles and dated Tuskegee chronology",
+          "origin": "Official HHS and CDC pages checked October 3, 2026"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Ethical constraints cannot be inferred from a supplied performance objective",
+          "origin": "Original service analysis"
+        }
+      ],
+      "evidence_class": "external finding",
+      "research_extension": "Official HHS and CDC pages checked October 3, 2026",
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "dual-use",
+      "start": 385.2,
+      "end": 528.43,
+      "lecture_material": "dual use",
+      "teaching_construction": "3. Dual use changes the question from capability to context",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Use context changes consequences of a capability",
+          "origin": "Recording distinction with original case"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "intent-impact",
+      "start": 528.43,
+      "end": 1009.3,
+      "lecture_material": "benefits misuse and accidents",
+      "teaching_construction": "4. Intent and impact describe different failure mechanisms",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Intent and impact distinguish benefits, misuse and accidents",
+          "origin": "Recording taxonomy with original case boundaries"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "ecosystem",
+      "start": 1009.55,
+      "end": 1240.48,
+      "lecture_material": "ecosystem",
+      "teaching_construction": "5. Follow the dependencies upstream and the consequences downstream",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Upstream dependencies and downstream actors affect a release decision",
+          "origin": "Recording ecosystem distinction with original service map"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "group-audit",
+      "start": 1240.48,
+      "end": 1710.48,
+      "lecture_material": "inequality and subgroup audit",
+      "teaching_construction": "6. Average performance can hide the population that needs a repair",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Finite group mixture risk is bounded by the worst group and a simplex vertex attains it",
+          "origin": "Original explicit convex-mixture proof; Group DRO specified-group model"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact two-group reversal, prevalence threshold and AUC/threshold counterexample",
+          "origin": "Original rational fixtures"
+        },
+        {
+          "class": "external finding",
+          "claim": "Historical subgroup audit tasks and chest-drain AUC results",
+          "origin": "Gender Shades PDF1\u20132/7; hidden stratification PDF1\u20134"
+        }
+      ],
+      "evidence_class": "theorem",
+      "research_extension": "Gender Shades PDF1\u20132/7; hidden stratification PDF1\u20134",
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "alignment",
+      "start": 1710.48,
+      "end": 2158.54,
+      "lecture_material": "alignment and oversight",
+      "teaching_construction": "7. Alignment requires a specification, a value choice and credible oversight",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Proxy specification, stakeholder aggregation and oversight are distinct choices",
+          "origin": "Recording topic with original finite action model"
+        },
+        {
+          "class": "theorem",
+          "claim": "Uniform proxy error bounds selected-action regret by twice that error",
+          "origin": "Original finite proof and tight tie fixture"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Proxy regret, stakeholder weighting, rescaling and oversight premise counterexamples",
+          "origin": "Original exact teaching constructions"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "rights",
+      "start": 2158.54,
+      "end": 2745.84,
+      "lecture_material": "copyright frameworks",
+      "teaching_construction": "8. Data provenance and permissions require questions beyond model accuracy",
+      "claim_provenance": [
+        {
+          "class": "external finding",
+          "claim": "Limited U.S. expression, fair-use factors, post-1977 terms and CC conditions",
+          "origin": "Official Title17 \u00a7\u00a7102/103/107/302 and CC overview checked October3,2026"
+        },
+        {
+          "class": "definition",
+          "claim": "Access, permissions and provenance are separate ledger fields",
+          "origin": "Original educational ledger; no legal verdict"
+        }
+      ],
+      "evidence_class": "external finding",
+      "research_extension": "Official Title17 \u00a7\u00a7102/103/107/302 and CC overview checked October3,2026",
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "memorization",
+      "start": 2746.45,
+      "end": 3223.28,
+      "lecture_material": "training memorization and legal boundaries",
+      "teaching_construction": "9. Token probability, extraction and legal consequence are distinct claims",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Conditional trajectory probabilities multiply; independent repeated attempts have the stated complement formula",
+          "origin": "Original probability derivations under explicit assumptions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Long-trajectory and correlated-attempt counterexamples",
+          "origin": "Original rational calculations"
+        },
+        {
+          "class": "external finding",
+          "claim": "Versioned model/work extraction protocols and scope",
+          "origin": "Cooper et al.2505.12546v1 PDF1\u20134; no unverified whole-book quantity"
+        }
+      ],
+      "evidence_class": "theorem",
+      "research_extension": "Cooper et al.2505.12546v1 PDF1\u20134; no unverified whole-book quantity",
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "transparency",
+      "start": 3223.41,
+      "end": 3546.14,
+      "lecture_material": "transparency",
+      "teaching_construction": "10. Disclosure permits scrutiny without certifying the disclosed system",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "A Boolean disclosure fraction measures supplied disclosure flags",
+          "origin": "Original finite model"
+        },
+        {
+          "class": "external finding",
+          "claim": "Dated FMTI indicator and developer comparisons with changed collection methods",
+          "origin": "2407.12929 PDF1\u20132; no causal or safety certification"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": "2407.12929 PDF1\u20132; no causal or safety certification",
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "release",
+      "start": 3546.14,
+      "end": 4077.09,
+      "lecture_material": "openness and marginal risk",
+      "teaching_construction": "11. Openness is a vector of access decisions; risk needs an alternative",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Release access is a vector; marginal harm compares specified counterfactuals",
+          "origin": "Recording distinctions and original finite model"
+        },
+        {
+          "class": "external finding",
+          "claim": "Attributed open-model risk framework and uncertainty",
+          "origin": "2403.07918v1 PDF1\u20132/6"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Probability/severity and defense examples show that lower probability need not mean lower expected harm",
+          "origin": "Original exact counterfactual calculations"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": "2403.07918v1 PDF1\u20132/6",
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "synthesis",
+      "start": 4077.09,
+      "end": 4324.11,
+      "lecture_material": "synthesis",
+      "teaching_construction": "12. An audit earns a scoped conclusion and identifies the next decision",
+      "claim_provenance": [
+        {
+          "class": "engineering check",
+          "claim": "Scoped audit conclusions require stated populations, assumptions and next decisions",
+          "origin": "Original synthesis of the service case"
+        }
+      ],
+      "evidence_class": "engineering check",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "teaching_construction": "13. An exact finite audit laboratory",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Exact bounded standard-library audit, ranking, choice, trajectory, harm and disclosure contracts",
+          "origin": "Original APIs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Standalone output, runnable snippet and14193 finite author assertions",
+          "origin": "Actual author execution; independent review pending"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "teaching_construction": "14. Six exercises with fully worked solutions",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Worked mixture, regret and probability derivations under explicit finite assumptions",
+          "origin": "Original solution proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Six full solutions cover ranking, weights, extraction and counterfactual harm",
+          "origin": "Original exact fixtures"
+        }
+      ],
+      "evidence_class": "theorem",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "sources",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "teaching_construction": "15. Sources and the boundaries of this treatment",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Source scopes distinguish dated research, official statutory text and original teaching constructions",
+          "origin": "Original provenance boundary"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null,
+      "chapter": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "video_id": "071zJXhvNfM",
+      "duration": 4330
+    },
+    {
+      "section": "case",
+      "start": 5.39,
+      "end": 119.65,
+      "lecture_material": "introduction",
+      "research_extension": null,
+      "teaching_construction": "A successful service still needs a feasible production plan",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Stipulated service unit, planning period, asset/organization graphs and economic decision",
+          "origin": "Original continuation of Chapter18 case"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "questions",
+      "start": 119.65,
+      "end": 592.08,
+      "lecture_material": "economic questions and firms",
+      "research_extension": "31161 PDF1\u20132/4\u20135/15\u201316",
+      "teaching_construction": "1. Identify the economic outcome before estimating an effect",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Unit cost, labor productivity, profit and counterfactual effects measure different objects",
+          "origin": "Original explicit outcome definitions"
+        },
+        {
+          "class": "empirical result",
+          "claim": "Dated customer-support sample, issues-resolved-per-hour outcome and heterogeneous estimated effects; identification depends on the stated observational design",
+          "origin": "Generative AI at Work, retained April 2023/November 2023 revision, PDF pages 1\u20132, 4\u20135 and 15\u201316; not randomized assignment or an aggregate employment/wage estimate"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "firms",
+      "start": 592.4,
+      "end": 736.88,
+      "lecture_material": "benchmarks versus firms",
+      "research_extension": null,
+      "teaching_construction": "2. A benchmark measures a task; a firm chooses a strategy",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Benchmark equality does not determine price, cost, strategy or vertical integration",
+          "origin": "Recording concepts with original matched-quality comparison"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "graphs",
+      "start": 738.67,
+      "end": 854.32,
+      "lecture_material": "asset and organization graphs",
+      "research_extension": null,
+      "teaching_construction": "3. Track assets and organizations in parallel",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Technical assets and organizational supply/control relations are separate graphs",
+          "origin": "Recording distinction with original responsibility table"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "compute",
+      "start": 854.32,
+      "end": 1262.02,
+      "lecture_material": "compute supply chain",
+      "research_extension": null,
+      "teaching_construction": "4. A serial capacity constraint cannot be repaired at the wrong stage",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Ideal steady-state serial flow equals minimum compatible stage capacity",
+          "origin": "Original upper-bound/attainability proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Nonbinding-stage and tied-bottleneck improvements",
+          "origin": "Original exact finite examples"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "data",
+      "start": 1262.02,
+      "end": 1868.91,
+      "lecture_material": "data economics",
+      "research_extension": null,
+      "teaching_construction": "5. Data acquisition creates costs and obligations through different transactions",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Acquisition method, access, rights, quality and costs differ",
+          "origin": "Recording topic and original ledger"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Conditional per-work arithmetic does not identify license price or legal outcome",
+          "origin": "Original stipulated division; no recorded settlement certification"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "distribution",
+      "start": 1869.84,
+      "end": 2211.82,
+      "lecture_material": "distribution and integration",
+      "research_extension": null,
+      "teaching_construction": "6. Distribution determines feasible applications before it determines costs",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Release access changes feasible applications and operational obligations",
+          "origin": "Recording distinctions with original service contract"
+        },
+        {
+          "class": "theorem",
+          "claim": "Linear serving-cost crossover and parallel-line cases",
+          "origin": "Original algebra"
+        },
+        {
+          "class": "engineering check",
+          "claim": "5000crossover and10000costs under matched quality/capacity assumptions",
+          "origin": "Original exact fixture"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "forecasting",
+      "start": 2211.98,
+      "end": 2551.22,
+      "lecture_material": "forecasting frameworks",
+      "research_extension": null,
+      "teaching_construction": "7. A forecast needs a quantity, horizon and mechanism",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Level changes and constant per-period rates require a measure and horizon",
+          "origin": "Original explicit output model"
+        },
+        {
+          "class": "theorem",
+          "claim": "Repeated constant-rate recurrence gives compounded multiplier",
+          "origin": "Original iteration argument"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "macro",
+      "start": 2551.86,
+      "end": 2810.67,
+      "lecture_material": "macro forecasts and GPTs",
+      "research_extension": "32487 PDF1\u20133/5\u20137",
+      "teaching_construction": "8. Translate task savings through explicit exposure and adoption",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "The cited task framework distinguishes exposure, economic adoption, cost savings, TFP and GDP; the main ten-year exercise excludes a broad scientific-discovery transformation",
+          "origin": "The Simple Macroeconomics of AI, retained May 2024 working paper, PDF pages 1\u20133 and 5\u20137; description of the cited model's scope"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Reported conditional ten-year model estimates: baseline at most roughly 0.66% TFP; revised assumptions give 0.53% TFP and 0.90% GDP upper bounds; these are not realized outcomes or annual rates",
+          "origin": "The Simple Macroeconomics of AI, retained May 2024 working paper, PDF pages 2\u20133 and 5\u20137; values and scenario qualifications checked against the original, without reproducing its full general-equilibrium computation or proof"
+        },
+        {
+          "class": "theorem",
+          "claim": "Fixed task-cost partition gives weighted exposure/adoption/net-savings identity and convex bound",
+          "origin": "Original accounting proof; not Hulten/general-equilibrium theorem"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exposed/adopted/saving product exact 207/31250",
+          "origin": "Recomputed PDF page 6 inputs; precision is arithmetic only"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "complements",
+      "start": 2811.6,
+      "end": 3127.97,
+      "lecture_material": "GPT properties and J-curve",
+      "research_extension": "4148 PDF1\u20132;25148 PDF1\u20135/13\u201314",
+      "teaching_construction": "9. Complementary investment separates invention from realized productivity",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "General-purpose-technology criteria comprise pervasiveness, continuing technical improvement and downstream innovation complementarities",
+          "origin": "General Purpose Technologies: Engines of Growth?, retained August 1992 working paper, PDF pages 1\u20132; conceptual criteria from the original abstract, not the later journal edition"
+        },
+        {
+          "class": "definition",
+          "claim": "The productivity J-curve names a conditional measurement framework involving intangible investment and later capital services; the framework does not impose a universal time pattern",
+          "origin": "The Productivity J-Curve, retained October 2018/January 2020 revision, PDF pages 1\u20135 and 13\u201314; description of the cited framework and explicit pattern limitation, without reproducing its full growth-accounting derivation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Signed additive wedge examples illustrate sign changes without universal trajectory",
+          "origin": "Original illustration; not published TFP formula"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "gdp",
+      "start": 3127.97,
+      "end": 3485.5,
+      "lecture_material": "GDP and consumer value",
+      "research_extension": "BEA FAQ1250complete retained article",
+      "teaching_construction": "10. Output accounting and consumer value measure different objects",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Ad-funded provider output in GDP differs from consumer welfare; the separate digital-economy-estimate omission statement refers to the August 2020 vintage",
+          "origin": "BEA FAQ 1250, complete retained article; official accounting explanation with its stated estimate vintage, not a new estimate of free-service welfare"
+        },
+        {
+          "class": "definition",
+          "claim": "Nominal/real/per-capita measures and WTP/WTA differ",
+          "origin": "Original educational definitions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Conditional 100-user monthly-10 annual-12000 example",
+          "origin": "Original stipulated extrapolation; recorded empirical survey not adopted"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "aggregation",
+      "start": 3485.5,
+      "end": 3747.25,
+      "lecture_material": "sector aggregation",
+      "research_extension": null,
+      "teaching_construction": "11. Choose aggregation weights before summing sector effects",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Fixed normalized sector shares give convex bounds",
+          "origin": "Original finite approximation proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Value-added telescoping and gross-output ratios sum7/5",
+          "origin": "Original two-stage ledger; no network productivity theorem"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "production",
+      "start": 3747.25,
+      "end": 3949.87,
+      "lecture_material": "production and labor",
+      "research_extension": null,
+      "teaching_construction": "12. Constant returns does not mean equal optimal input allocations",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Joint homogeneity and unique interior Cobb\u2013Douglas budget optimum under stated positive domains",
+          "origin": "Original algebra, logarithmic derivative and concavity proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Unequal allocation fourth powers27versus16",
+          "origin": "Original exact counterexample"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "ideas",
+      "start": 3951.09,
+      "end": 4121.49,
+      "lecture_material": "nonrival ideas",
+      "research_extension": null,
+      "teaching_construction": "13. More productive work and faster idea production are different growth mechanisms",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Nonrival reuse differs from production cost and access",
+          "origin": "Recording distinction with original scope"
+        },
+        {
+          "class": "theorem",
+          "claim": "Specified multiplicative/additive idea recurrences have different level/growth paths",
+          "origin": "Original iteration; no Romer-model or empirical-growth certification"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "uncertainty",
+      "start": 4123.12,
+      "end": 4469.62,
+      "lecture_material": "discussion and uncertainty",
+      "research_extension": null,
+      "teaching_construction": "14. Identify the measurement that would change the decision",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Recorded forecast/resource assessments remain qualified judgments",
+          "origin": "Recording discussion; no verified current national bottleneck"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Decision-specific measurements and causal/aggregation requirements",
+          "origin": "Original service synthesis"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "15. Execute the specified finite accounting models",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Bounded exact finite teaching API and failure contracts",
+          "origin": "Original standard-library program"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Actual stdout/snippet,9755reference assertions andPEP8pass",
+          "origin": "Author execution; independent review pending"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "16. Six exercises with fully worked solutions",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Worked serial-flow, cost, savings, allocation and recurrence reasoning under stated models",
+          "origin": "Original six solutions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Capacity, double-counting and growth counterexamples",
+          "origin": "Original exact fixtures"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "sources",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "17. Source scope and model boundaries",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Dated paper versions, original constructions and unsupported empirical quantities distinguished",
+          "origin": "Original provenance limits"
+        }
+      ],
+      "chapter": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "video_id": "lPx5PF1ttkc",
+      "duration": 4476
+    },
+    {
+      "section": "case",
+      "start": 5.14,
+      "end": 89.31,
+      "lecture_material": "introduction",
+      "research_extension": null,
+      "teaching_construction": "What should the service team investigate next?",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite states/actions/prior/utility/channel/cost and consequential service experiment",
+          "origin": "Original research decision model"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "background",
+      "start": 89.31,
+      "end": 350.21,
+      "lecture_material": "research background",
+      "research_extension": null,
+      "teaching_construction": "1. Separate a reusable learning principle from a particular architecture",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Research recollection and architecture/objective/capability distinction",
+          "origin": "Recording autobiographical context; original conceptual analysis"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "beyond-lab",
+      "start": 350.21,
+      "end": 522.66,
+      "lecture_material": "AI beyond laboratory",
+      "research_extension": null,
+      "teaching_construction": "2. Moving into use adds new objects to the research question",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Public prominence motivates broader research objects",
+          "origin": "Recording assessment"
+        },
+        {
+          "class": "definition",
+          "claim": "Service states and constraints require layer-specific evidence",
+          "origin": "Original continuation of Chapters18\u201319"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "perception",
+      "start": 522.66,
+      "end": 657.3,
+      "lecture_material": "public perception",
+      "research_extension": null,
+      "teaching_construction": "3. An infrastructure view reveals consequences that a conversation can hide",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Infrastructure decision process differs from visible conversational fluency",
+          "origin": "Recording theme with original routing case"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "prediction",
+      "start": 657.3,
+      "end": 825.89,
+      "lecture_material": "language modeling and reasoning",
+      "research_extension": "Turpin NeurIPS2023 PDF1\u20133/page2table",
+      "teaching_construction": "4. Predictive loss, decision accuracy and faithful explanation differ",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Log loss, Brier loss, threshold accuracy, entropy and explanation faithfulness",
+          "origin": "Original explicit finite metric definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Concavity gives conditional entropy reduction and Bayes-optimal expected log loss interpretation",
+          "origin": "Original finite proof with support assumptions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Lower log/Brier loss with worse threshold accuracy and realized-context boundary",
+          "origin": "Original exact fixtures"
+        },
+        {
+          "class": "empirical result",
+          "claim": "Explanations omit influential prompt features in tested historical models and protocols",
+          "origin": "Turpin NeurIPS2023 PDF1\u20133/page2table"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "academia",
+      "start": 825.89,
+      "end": 1083.66,
+      "lecture_material": "academic research",
+      "research_extension": null,
+      "teaching_construction": "5. Choose an audit whose evidence survives the evaluator's incentives",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Research opportunities and incentives are heterogeneous",
+          "origin": "Recording assessment with bounded organizational claims"
+        },
+        {
+          "class": "theorem",
+          "claim": "Two structural models have identical observations but distinct specified intervention consequences",
+          "origin": "Original two-model nonidentifiability construction"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "problem-selection",
+      "start": 1083.66,
+      "end": 1312.61,
+      "lecture_material": "education jobs and problem selection",
+      "research_extension": null,
+      "teaching_construction": "6. Problem selection precedes implementation efficiency",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "A population, outcome, constraint and action change specify a research question",
+          "origin": "Recording theme with original service decision"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "cross-disciplinary",
+      "start": 1312.61,
+      "end": 1474.86,
+      "lecture_material": "cross-disciplinary outlook",
+      "research_extension": null,
+      "teaching_construction": "7. A new domain changes what a successful prediction means",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Other modalities and disciplines offer research questions",
+          "origin": "Recording direction, no universal transfer guarantee"
+        },
+        {
+          "class": "definition",
+          "claim": "Domain criteria alter units, validation and cost of errors",
+          "origin": "Original model boundary"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "evaluation",
+      "start": 1474.86,
+      "end": 1613.38,
+      "lecture_material": "evaluation and discoveries",
+      "research_extension": "Turing1950 actual PDF1\u20132; cached incorrect header not adopted",
+      "teaching_construction": "8. A criterion is a protocol, not the whole definition of progress",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Original imitation-game criterion differs from modern colloquial tests",
+          "origin": "Turing1950 actual PDF1\u20132; cached incorrect header not adopted"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Development selection does not certify held-out superiority",
+          "origin": "Original exact two-candidate fixture"
+        },
+        {
+          "class": "definition",
+          "claim": "Discovery claims require novelty/attribution/independent validation criteria",
+          "origin": "Original evaluation protocol; no ungameability guarantee"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "executable",
+      "start": 1613.38,
+      "end": 1814.61,
+      "lecture_material": "course redesign",
+      "research_extension": null,
+      "teaching_construction": "9. Executable objects expose ambiguities that a diagram can conceal",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Explicit program objects reveal posterior, domain and effect boundaries",
+          "origin": "Recording executable-lecture theme with original implementation analysis"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "connections",
+      "start": 1814.61,
+      "end": 1931.9,
+      "lecture_material": "search MDP and language models",
+      "research_extension": null,
+      "teaching_construction": "10. Reuse the earlier models through explicit correspondences",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Search/MDP/graphical/logic/learning correspondences retain prior assumptions",
+          "origin": "Original concrete course-object synthesis; pretraining is not RL"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "foundations",
+      "start": 1931.9,
+      "end": 2072.27,
+      "lecture_material": "foundations and classes",
+      "research_extension": null,
+      "teaching_construction": "11. A foundation is the ability to expose a model's assumptions",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Broader foundations and course-era class discussion",
+          "origin": "Recording perspective; no current prerequisite certification"
+        },
+        {
+          "class": "definition",
+          "claim": "Problem/model/algorithm/evidence inspection transfers across architectures",
+          "origin": "Original synthesis"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "research-taste",
+      "start": 2072.27,
+      "end": 2252.59,
+      "lecture_material": "research taste",
+      "research_extension": null,
+      "teaching_construction": "12. An informative experiment can be worth more than a guaranteed improvement",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite baseline/informed/gross/net values under supplied prior/channel/utility",
+          "origin": "Original finite Bayes decision"
+        },
+        {
+          "class": "theorem",
+          "claim": "Gross value is nonnegative when baseline actions remain available and utilities fixed",
+          "origin": "Original maximum/law-of-total-probability proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Perfect/noisy information and cost trade-offs",
+          "origin": "Original exact finite fixtures"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "career",
+      "start": 2253.23,
+      "end": 2579.55,
+      "lecture_material": "career learning",
+      "research_extension": null,
+      "teaching_construction": "13. Exploration is a useful analogy with limits",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Learning/collaboration preferences and exploration analogy",
+          "origin": "Recording preferences, no universal career utility"
+        },
+        {
+          "class": "definition",
+          "claim": "Changing preferences/actions/environment limit stationary decision analogy",
+          "origin": "Original scope boundary"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "collaboration",
+      "start": 2579.55,
+      "end": 2928.5,
+      "lecture_material": "adaptability and collaboration",
+      "research_extension": null,
+      "teaching_construction": "14. Adaptation and collaboration should produce inspectable evidence",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Adaptability/collaboration versus comparison pressure",
+          "origin": "Recording advice with no guarantees"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Paired flip rate and accuracies require preserved labels/task identity",
+          "origin": "Original contingency fixture"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "speculation",
+      "start": 2928.5,
+      "end": 3017.18,
+      "lecture_material": "bubble assessment",
+      "research_extension": null,
+      "teaching_construction": "15. Separate a market narrative from the evidence for a project",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Market analogy and bubble assessment are attributed and dated",
+          "origin": "Recording speculation; no current financial recommendation"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "personal-background",
+      "start": 3017.18,
+      "end": 3107.49,
+      "lecture_material": "background",
+      "research_extension": null,
+      "teaching_construction": "16. A research path can be discussed without turning it into a template",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Mathematics/software interests provide autobiographical context",
+          "origin": "Recording recollection; no career template"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "transparency",
+      "start": 3107.49,
+      "end": 3335.89,
+      "lecture_material": "transparency",
+      "research_extension": "2407.12929v2 PDF1\u20132",
+      "teaching_construction": "17. Disclosure helps formulate tests; it does not certify their outcomes",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Organizational motives are attributed possibilities, not findings about every firm",
+          "origin": "Recording assessment"
+        },
+        {
+          "class": "empirical result",
+          "claim": "Dated FMTI collection/sample changes and opacity findings",
+          "origin": "2407.12929v2 PDF1\u20132"
+        },
+        {
+          "class": "definition",
+          "claim": "Disclosure permits scrutiny without certifying quality/safety",
+          "origin": "Original evidence boundary"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "music",
+      "start": 3336.24,
+      "end": 3430.21,
+      "lecture_material": "music and interdisciplinary work",
+      "research_extension": null,
+      "teaching_construction": "18. Interdisciplinary work starts with a shared question",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Musical interests motivate interdisciplinary connection",
+          "origin": "Recording recollection; no expanded project-history claim"
+        },
+        {
+          "class": "definition",
+          "claim": "Shared sequence representation does not determine artistic utility",
+          "origin": "Original interdisciplinary boundary"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "engagement",
+      "start": 3430.21,
+      "end": 3486.7,
+      "lecture_material": "research engagement",
+      "research_extension": null,
+      "teaching_construction": "19. The first contribution can be a precise question about an existing result",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Read and engage with existing work; access differs",
+          "origin": "Recording recommendation with original access limit"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "conclusion",
+      "start": 3486.77,
+      "end": 3522.45,
+      "lecture_material": "conclusion",
+      "research_extension": null,
+      "teaching_construction": "20. Carry the model, the evidence and the boundary forward",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Carry explicit objects, scoped evidence and counterexamples into research decisions",
+          "origin": "Original book-wide conceptual synthesis"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "21. Execute finite evaluation and experiment decisions",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Bounded exact finite score/paired/policy/intervention contracts",
+          "origin": "Original stdlib APIs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Actual listing/snippet/stdout/23789oracles/PEP8pass",
+          "origin": "Author execution; independent acceptance pending"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "22. Six exercises with fully worked solutions",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Six worked score/entropy/intervention/VOI/zero-support arguments",
+          "origin": "Original finite reasoning"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Complete numeric and selection/sensitivity fixtures",
+          "origin": "Original exact solutions"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
+    },
+    {
+      "section": "sources",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "23. Source and inference boundaries",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Actual primary page scopes and attributed conversation distinguish original derivations",
+          "origin": "Original provenance limits"
+        }
+      ],
+      "chapter": "lecture-20-research-decisions-and-evidence.html",
+      "video_id": "5u5I5jvWR5k",
+      "duration": 3529
     }
   ]
 }

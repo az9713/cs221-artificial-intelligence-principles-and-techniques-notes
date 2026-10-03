@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="e2cbf131185412739961decb65fb1e8f56ccfc026596444286b9a24ce80ed73d"><title>Language models and sequence generation · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><header><p class="eyebrow">CS221 · Autumn 2025 · Lecture 17</p><h1>Language models and sequence generation</h1><p class="lede">A locally normalized next-token model can generate coherent text without establishing that the text is true. Training, decoding, post-training, and serving each change a different part of that system.</p><p>Independent enhanced chapter accompanying <a href="https://www.youtube.com/watch?v=3orP3u2-jcg">Ken Liu's November 17, 2025 recording</a>. Timestamp links preserve the recording's topic sequence. The newswire case, finite models, proofs, resource calculations, program, and exercises are original teaching constructions. Historical research results retain their reported conditions.</p></header>
+
+<section><h2 id="case">1. Completing a report creates a claim about the world</h2>
+<p>A newswire assistant receives the unfinished sentence “The stock market crashed and investors …”. Completing it with <em>panicked</em> is plausible English. Completing it with <em>celebrated</em> could also be appropriate for some investors. Neither completion follows from the price movement alone. An editor who publishes the generated sentence has asserted a reaction that the source may never have established.</p>
+<p>The task has two distinct questions. What continuation is probable under a fitted distribution of text? What statement is supported by the information available for this report? A language model supplies the first object directly. Answering the second needs evidence, an evaluation rule, and possibly a decision to withhold a claim. Enlarging the predictor does not remove that distinction.</p>
+<p>Keep one formal object throughout: a next-token probability kernel that receives an ordered prefix and returns a distribution over possible next tokens. Its vocabulary determines which outputs can be represented. Training changes the kernel. Decoding chooses or samples a continuation from it. Post-training changes which continuations receive mass under an instruction. Serving determines how the same computation uses memory and hardware.</p>
+<p><a href="lecture-01-foundations-and-tensors.html">Chapter 1's semantic tensor axes</a>, <a href="lecture-03-classification-probabilities-and-text.html">Chapter 3's categorical loss</a>, and <a href="lecture-09-policy-gradients-and-function-approximation.html">policy-gradient ideas</a> are useful refreshers. The needed objects and assumptions are defined locally below. The assistant is a stipulated case, not a measured financial reporting system.</p>
+</section>
+
+<section><h2 id="industrial">2. Scale has units, assumptions, and a date <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=5s">00:05</a></h2>
+<p>A trained model can be stored as arrays of numerical parameters. Producing those arrays may require much more data and computation than their final file size suggests. The <a href="https://arxiv.org/abs/2407.21783v3">Llama 3 report</a>, PDF page 1, describes a 405-billion-parameter model trained on 15.6 trillion text tokens with a reported training cost of \(3.8\times10^{25}\) floating-point operations. These are historical report values, not estimates of every contemporary model.</p>
+<p>Let \(N\) be the number of trainable parameters and \(M\) the number of training-token presentations, including repetitions. A <dfn>FLOP</dfn> is one floating-point arithmetic operation; count a multiplication and an addition separately. The rough dense-training estimate \(C\approx6NM\) attributes approximately \(2NM\) operations to the forward parameter contractions and twice that again to their backward derivatives. It is a cost model for dominant dense operations. Attention, embeddings, communication, recomputation, optimizer updates, and utilization can change the full cost.</p>
+<p>Using the reported counts gives \(6(405\times10^9)(15.6\times10^{12})=3.7908\times10^{25}\) FLOPs. This agreement with the rounded reported total is a useful arithmetic check, not a reconstruction of a training run. The recording's rounded 16-trillion-token count instead gives \(3.888\times10^{25}\). Parameter count and token presentations must be specified together.</p>
+<p>Suppose, as a separate teaching assumption, an accelerator sustains \(4.32\times10^{19}\) FLOPs per day for this workload. The reported compute would then require about 879,630 accelerator-days. At a stipulated two US dollars per accelerator-hour, the idealized arithmetic is about 42.22 million dollars. Neither rate is a current price quotation or a verified utilization measurement. Failures, idle periods, and infrastructure costs are absent from that estimate.</p>
+<p>Data-storage estimates need a similarly explicit conversion. The <a href="https://arxiv.org/abs/2505.09388v1">Qwen3 report</a>, PDF page 3, states 36 trillion pre-training tokens. Converting that to words requires a tokenizer- and corpus-dependent ratio. Under the recording's illustrative 27-trillion-word conversion and an additional assumption of four bytes per word, storage is 108 trillion bytes, or 108 TB in decimal units. Four bytes per <em>token</em> over 36 trillion tokens gives 144 TB. Those two assumptions must not be combined as if they were the same calculation.</p>
+<p>For the newswire assistant, scaling raises a concrete question: which additional information and behavior does the resulting probability model capture? A large training budget establishes an engineering investment. It does not establish that the reaction of the investors in this particular report was observed.</p>
+</section>
+
+<section><h2 id="representation">3. A token classifier needs consistent IDs and semantic axes <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=342s">05:42</a></h2>
+<p>A <dfn>token</dfn> is one discrete symbol in a chosen text representation. For the initial case, use whole words and one end-of-sequence symbol, EOS. Let the output vocabulary be the ordered set \(\mathcal V\) below, of size \(V=11\). The integer assigned to a token is its ID. An ID is an address into parameter arrays; its numerical magnitude is not a word's meaning.</p>
+<div class="table-wrap"><table><caption>One fixed vocabulary for the newswire examples and bigram program.</caption><thead><tr><th>ID</th><th>Token</th><th>ID</th><th>Token</th></tr></thead><tbody><tr><td>0</td><td>The</td><td>1</td><td>and</td></tr><tr><td>2</td><td>crashed</td><td>3</td><td>investors</td></tr><tr><td>4</td><td>market</td><td>5</td><td>stock</td></tr><tr><td>6</td><td>lol</td><td>7</td><td>panicked</td></tr><tr><td>8</td><td>celebrated</td><td>9</td><td>golfing</td></tr><tr><td>10</td><td>EOS</td><td>—</td><td>BOS is an input-only beginning marker.</td></tr></tbody></table></div>
+<p>Thus the six-word prefix is \((0,5,4,2,1,3)\). Changing that map after fitting changes the meaning of embedding rows and output columns. The recording's official vocabulary and later displayed IDs are inconsistent. This chapter retains the vocabulary order above and uses it consistently. The illustrative slide vector also sums to 1.26; it is not a normalized probability distribution.</p>
+<p>Let \(D\) be the embedding dimension, a positive integer. An <dfn>embedding</dfn> table \(E\in\mathbb R^{V\times D}\) gives one real vector per output token; an additional input-only BOS row can be stored separately. For a sequence of IDs \(x_1,\ldots,x_T\), lookup produces \(H_{tj}=E_{x_tj}\), with position \(t\) and feature \(j\). Its shape is \((T,D)\). A batch of \(B\) sequences uses input shape \((B,T)\) and embedding shape \((B,T,D)\), with padding handled separately.</p>
+<p>A causal prediction network produces a hidden vector \(h_t\in\mathbb R^D\) for each available prefix. An output matrix \(U\in\mathbb R^{D\times V}\) and bias \(c\in\mathbb R^V\) give <dfn>logits</dfn>, real scores before normalization: \(z_{tk}=\sum_j h_{tj}U_{jk}+c_k\). Here \(k\) indexes vocabulary columns. Applying softmax across that vocabulary axis gives</p>
+\[p_\theta(k\mid x_{1:t})=\frac{\exp z_{tk}}{\sum_{r=0}^{V-1}\exp z_{tr}},\qquad k\in\{0,\ldots,V-1\}.\]
+<p>The symbol \(\theta\) collects fitted parameters; \(x_{1:t}\) denotes the ordered prefix from positions 1 through \(t\). Predictions for a batch have shape \((B,T,V)\). Normalizing across the time axis would answer a different question and would not produce a next-token distribution for each position.</p>
+<p>For an original sparse completion kernel, assign masses \(3/5\) to <em>panicked</em>, \(3/10\) to <em>celebrated</em>, and \(1/10\) to <em>golfing</em>, with zero to other tokens. These masses sum to one. This stipulated sparse kernel is a direct categorical distribution, not the exact softmax of finite logits, whose entries would all be positive. Greedy decoding chooses <em>panicked</em>; categorical sampling selects each token with its assigned probability. Calling the most likely token a random sample confuses two different procedures.</p>
+<p>Appending the chosen token changes the prefix used for the next prediction. <dfn>Autoregressive generation</dfn> repeats this update until EOS or an external budget stops it. A tensor shape alone gives neither this dependency rule nor a termination guarantee. Both must be part of the model.</p>
+</section>
+
+<section><h2 id="probability">4. Prefix probabilities and completed-string probabilities differ <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=917s">15:17</a></h2>
+<p>For a fixed length \(T\), let random tokens \(X_1,\ldots,X_T\) take values in a finite vocabulary. A normalized conditional kernel for every prefix defines a joint law through the probability chain rule:</p>
+\[P_\theta(X_{1:T}=x_{1:T})=\prod_{t=1}^{T}p_\theta(x_t\mid x_{1:t-1}).\]
+<p>The empty prefix at \(t=1\) uses BOS. The identity comes from \(P(a,b)=P(a)P(b\mid a)\), recursively, wherever the conditioned prefix has positive probability. Kernels on zero-probability prefixes may be specified arbitrarily; they do not change the resulting joint mass. This is the chain rule, not repeated application of Bayes' inversion formula.</p>
+<p>The product is normalized at every fixed length. Sum first over \(x_T\): its conditional row sums to one, leaving the length-\(T-1\) product. Repeating backward leaves one. This proof relies on every reachable conditional row being a distribution. It makes no semantic claim about which sentences are meaningful or true.</p>
+<h3>EOS adds a stopping event</h3>
+<p>Now let ordinary tokens be \(\mathcal W=\mathcal V\setminus\{\mathrm{EOS}\}\). A completed string consists of \(L\ge0\) ordinary tokens followed by its first EOS. Define its probability by</p>
+\[q_\theta(x_{1:L})=\left[\prod_{t=1}^{L}p_\theta(x_t\mid x_{1:t-1})\right]p_\theta(\mathrm{EOS}\mid x_{1:L}),\qquad x_t\in\mathcal W.\]
+<p>The empty completed string has probability \(p_\theta(\mathrm{EOS}\mid\mathrm{BOS})\). Let \(S_m\) be the probability of surviving the first \(m\) predictions without EOS, with \(S_0=1\). Strings of exactly \(m\) ordinary tokens have total mass \(S_m-S_{m+1}\). Telescoping gives total mass through length \(L\) equal to \(1-S_{L+1}\).</p>
+<p>Consequently, all finite completed strings sum to one exactly when \(S_m\to0\), meaning termination occurs with probability one. Local normalization alone does not ensure this. A kernel that always emits <em>panicked</em> and assigns EOS probability zero is locally normalized but assigns zero mass to every finite completed string.</p>
+<p>A sufficient condition is a uniform lower bound \(p_\theta(\mathrm{EOS}\mid h)\ge\varepsilon\gt0\) for every reachable nonterminal prefix \(h\). At each step the survival probability is at most \(1-\varepsilon\) times its previous value, so \(S_m\le(1-\varepsilon)^m\to0\). For constant EOS probability \(1/4\), the mass through length 2 is \(1-(3/4)^3=37/64\); the remaining \(27/64\) belongs to longer or still-surviving trajectories. A positive EOS probability at each prefix without a uniform bound is insufficient: if the successive stopping probabilities are \(2^{-t-1}\), their summable hazards can leave positive infinite survival probability.</p>
+<h3>A generation cap is not an extra EOS observation</h3>
+<p>If the assistant stops after a fixed number of predictions while no EOS has occurred, its output is a <dfn>censored prefix</dfn>. Labeling that output “complete” or multiplying by a fabricated EOS probability changes the observation. Conditioning on completion before a cap instead renormalizes each eligible completed string by their total mass; this is a different distribution from ordinary sampling with a cap and a status flag.</p>
+<p>The prediction objective also matters. A masked-token model may estimate \(P(X_t\mid X_{1:t-1},X_{t+1:T})\), using both sides of a missing position. <a href="https://arxiv.org/abs/1810.04805v2">BERT</a>, PDF page 4, describes prediction of selected masked positions, including its specific replacement scheme. Such conditionals are useful for different tasks; independently predicted masked marginals cannot simply be multiplied as the left-to-right chain above. The choice of an autoregressive factorization supplies a tractable generation procedure, not a proof that other objectives are obsolete.</p>
+</section>
+
+<section><h2 id="counts">5. Counting creates a model only after its context and boundaries are fixed <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=1173s">19:33</a></h2>
+<p>Counting whole documents assigns zero probability to every unobserved complete string. A shorter context can share evidence across documents. An <dfn>n-gram model</dfn> approximates the next-token distribution using at most the preceding \(n-1\) tokens. A bigram uses only the previous token, including BOS at the start. This is a modeling restriction, not a consequence of the probability chain rule.</p>
+<p>Let \(C_{uv}\) count occurrences of output token \(v\) immediately after input context \(u\), and let \(C_u=\sum_vC_{uv}\). Each training document begins with its own BOS, ends with one EOS, and contributes no transition from its EOS to the next document. Pooling documents by concatenation without a boundary marker invents training events that the corpus never supplied.</p>
+<p>Suppose the corpus has three copies of the case prefix followed by a reaction: two end in <em>panicked</em>, one in <em>celebrated</em>. The context <em>investors</em> has counts 2 and 1 for those outputs, and zero for the other nine vocabulary entries. Maximum row likelihood gives \(\widehat p(v\mid u)=C_{uv}/C_u\) when \(C_u\gt0\). To see the optimum, the row's negative mean log likelihood is cross entropy between the empirical frequency row and the proposed row. It equals empirical entropy plus KL divergence, minimized at the empirical row. This permits zero probabilities for unseen outputs; the optimum is on the closed probability simplex.</p>
+<p>For that decomposition, write the empirical row as \(f_v=C_{uv}/C_u\). Its <dfn>entropy</dfn> is \(H(f)=-\sum_{v:f_v\gt0}f_v\log f_v\). Its cross entropy against a proposed row \(p\) is \(-\sum_{v:f_v\gt0}f_v\log p_v\); a positive empirical mass where \(p_v=0\) makes this infinite. The <dfn>Kullback–Leibler divergence</dfn>, or KL, is \(D_{\rm KL}(f\|p)=\sum_{v:f_v\gt0}f_v\log(f_v/p_v)\), with the same support convention. Subtracting the entropy gives this divergence. The inequality \(-\log u\ge1-u\), summed on the positive empirical support, gives \(D_{\rm KL}(f\|p)\ge0\), with equality only for \(p=f\). Thus the likelihood optimum and its boundary zeros follow from the row objective.</p>
+<p>For an unseen context, \(C_u=0\), the unsmoothed row likelihood is constant for every distribution. Dividing zero counts by zero is undefined; the data have selected no row. Our program raises an explicit error for that row rather than claiming a fitted uniform prediction.</p>
+<p><dfn>Additive smoothing</dfn> supplies a different estimate. For a nonnegative rational pseudo-count \(\alpha\), define</p>
+\[\widehat p_\alpha(v\mid u)=\frac{C_{uv}+\alpha}{C_u+\alpha V}.\]
+<p>With \(\alpha=1,V=11\), the <em>investors</em> row assigns \(3/14\) to <em>panicked</em>, \(2/14\) to <em>celebrated</em>, and \(1/14\) to each remaining output. It now permits unlikely phrases and immediate EOS. Smoothing prevents zero-probability targets, but it does not discover grammar or evidence about the actual investors.</p>
+<p>If \(\alpha\gt0\) and the fitted count table is finite, EOS has at least \(\alpha/(C_{\max}+\alpha V)\) mass in every context, where \(C_{\max}=\max_u C_u\). This gives the earlier uniform stopping bound, even for unseen contexts. It is a property of this smoothed finite estimator; real neural models need a separate argument. Unsmoothed models learned from finite terminated documents may also terminate, but that must be checked for their reachable transition graph.</p>
+<p>The bigram cannot use a distant phrase such as “short sellers” once only <em>investors</em> remains as context. A longer context, a recurrent state, or attention can change which distinctions survive. These alternatives alter the fitted hypothesis family; simply collecting more occurrences of the same collapsed context cannot restore an absent distinction.</p>
+</section>
+
+<section><h2 id="training">6. Shifted targets make sequence likelihood executable <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=1383s">23:03</a></h2>
+<p>For a document \((x_1,\ldots,x_L,\mathrm{EOS})\), pair inputs \((\mathrm{BOS},x_1,\ldots,x_L)\) with targets \((x_1,\ldots,x_L,\mathrm{EOS})\). Prediction row \(t\) uses only inputs through that row; its target is the next token. Supplying the target itself as an available input gives a shortcut unrelated to predicting an unseen continuation. This alignment is called <dfn>teacher forcing</dfn>: training prefixes contain observed prior tokens rather than the model's previous generated guesses.</p>
+<p>Index documents by \(b\) and target positions by \(t\), starting at one. Let \(m_{bt}\in\{0,1\}\) mark real target slots, including EOS, and zero out padding slots. Let \(K=\sum_{b,t}m_{bt}\gt0\) be the number of valid targets. A token-normalized negative log likelihood is</p>
+\[J(\theta)=-\frac1K\sum_{b,t}m_{bt}\log p_\theta(y_{bt}\mid\text{available prefix}_{bt}).\]
+<p>Here \(y_{bt}\) is the observed target ID. Loss uses natural logarithms and has units of nats per valid target token. If documents are modeled as independent draws conditional on the parameters, multiplying their completed-string probabilities and taking a negative log gives the unnormalized sum. Token normalization rescales that empirical objective. Independence is a statistical modeling assumption, not something proved by putting documents in a batch.</p>
+<p>Equal weighting of document means defines a different objective when lengths vary. Documents contributing one and three valid targets, with loss sums 2 and 9 respectively, give token mean \(11/4=2.75\) nats, but mean document-average loss \((2+3)/2=2.5\). These target counts include EOS: the first document can be empty and the second have two lexical tokens. Changing the aggregation changes which training events receive weight. Padding targets must not increase \(K\), and padding keys must not influence valid hidden states merely because their loss is zero.</p>
+<h3>The softmax derivative is local; parameter credit is shared</h3>
+<p>For one valid target \(r\), define \(A(z)=\log\sum_k e^{z_k}\). Then \(-\log p_r=A(z)-z_r\). Differentiating the normalizing log gives \(\partial A/\partial z_k=p_k\), so</p>
+\[\frac{\partial J}{\partial z_{btk}}=\frac{m_{bt}}K\left(p_{btk}-\mathbf1\{k=y_{bt}\}\right).\]
+<p>The indicator is one for the observed target column and zero elsewhere. The vocabulary-gradient entries sum to zero, matching invariance to a common logit shift. Applying the chain rule through a shared network accumulates these contributions onto the same parameters. The token-local derivative does not mean each position owns an independent copy of those parameters.</p>
+<p>At a stipulated three-output subproblem with probabilities \((3/5,3/10,1/10)\) and target the second output, the logit gradient is \((3/5,-7/10,1/10)\). The loss is \(-\log(3/10)\approx1.203973\) nats. A gradient step on these logits raises the target score and lowers the other two. This finite derivative check is not evidence that a shared neural training run monotonically improves every token.</p>
+<p>Evaluate logits numerically by subtracting their maximum \(a\). Write \(u_k=z_k-a\le0\). Then the target loss is \(\log\sum_k e^{u_k}-u_r\). This avoids exponentiating a large positive score or taking the logarithm of a target probability already rounded to zero. For logits \((1000,-1000)\) and target 1, rounded softmax may report zero target probability, but the fused loss remains approximately 2000 nats. The program bounds accepted scores so that their differences and the returned loss remain representable; stability does not provide unlimited numeric range.</p>
+<p>A causal attention mask excludes future positions before normalization, as specified in <a href="https://arxiv.org/abs/1706.03762v7">Attention Is All You Need</a>, PDF pages 3–5. The whole computation must also keep future targets out of allowed representations. A triangular mask cannot erase a future word already encoded into a permitted value vector. This dependency issue will determine what can be reused during generation.</p>
+</section>
+
+<section><h2 id="tasks">7. Task conditioning changes a distribution, not the meaning of correctness <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=1502s">25:02</a></h2>
+<p>Many tasks admit a sequence representation: an instruction and an input form a prefix, and an answer forms a suffix. For an instruction \(i\), evidence text \(e\), and response string \(y\), the relevant model distribution is \(q_\theta(y\mid i,e)\). The symbols denote token sequences, with delimiters whose interpretation is part of the representation. Concatenating them into text creates an interface; it does not supply a correctness criterion.</p>
+<p>For the newswire assistant, “complete the sentence” and “report only reactions explicitly supported by the article” are different instructions. A predictor may attach different distributions to their prefixes while retaining the same parameters. <a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf">Radford and colleagues' GPT-2 report</a>, §2, explicitly models output conditional on both input and task and describes expressing all three as a sequence. Its particular task-transfer results support a research direction, not the claim that every task is solved by maximizing text likelihood.</p>
+<p>Next-token data can reward memorized facts, recurring mathematical patterns, or chains of reasoning whenever those help predict the observed token. An accurate answer on one prompt does not distinguish those mechanisms. Conversely, representing a logic puzzle as tokens does not establish logical entailment: entailment quantifies over models satisfying premises, whereas the language model supplies a fitted conditional probability.</p>
+<p>Choose an application score before judging a decoder. In the assistant's case, possible measurements include factual support of claims, completeness of extraction, readability, and frequency of abstention. Their tradeoff needs an explicit decision rule. Average token log loss evaluates a probability forecast under a text distribution; it does not combine these application measurements by itself.</p>
+<h3>Local greedy choice can miss the most probable whole sequence</h3>
+<p>To isolate decoding from model quality, consider exactly two ordinary-token positions with output alphabet \(\{a,b\}\). At the first position, assign probabilities \((3/5,2/5)\). After \(a\), use \((3/5,2/5)\); after \(b\), use \((1,0)\). These are normalized stipulated kernels on a fixed horizon, not the eleven-token fitted model.</p>
+<p>Greedy decoding chooses \(a\) first and then \(a\), giving joint probability \(9/25=0.36\). Exhaustive evaluation gives \(P(aa)=9/25,P(ab)=6/25,P(ba)=2/5,P(bb)=0\). The most probable whole sequence is \(ba\), with probability 0.4. Choosing the best first factor ignored how the prefix changes the next factor. The counterexample persists even with perfectly known kernels.</p>
+<p><dfn>Maximum a posteriori decoding</dfn>, or MAP here, chooses a sequence with greatest conditional model probability over a specified candidate set and length or stopping rule. Greedy decoding maximizes one row at a time. Beam search retains several partial candidates but is not generally exact; length penalties or renormalized sampling define still other objectives. Even exact MAP optimizes model probability, which need not select the most factually supported report.</p>
+<p>Categorical sampling preserves the specified generation law; it is not an optimization algorithm. Temperature scaling, top-k restrictions, or forced EOS change that law and require their own normalization and stopping analysis. The finite program deliberately implements original-kernel sampling and exact fixed-horizon enumeration, keeping their outputs distinguishable.</p>
+</section>
+
+<section><h2 id="scaling">8. A fitted scaling relation answers a constrained empirical question <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=1893s">31:33</a></h2>
+<p>Scaling studies vary data, parameter count, and training computation while measuring a specified loss. <a href="https://arxiv.org/abs/2001.08361v1">Kaplan and colleagues</a> report empirical power-law trends for transformer language-model cross entropy. The observation concerns their architecture, data, optimization, and measured ranges. A decreasing fitted loss does not prove that arbitrary doubling will always improve every task or that there is no future limitation.</p>
+<p>Under a fixed training budget, increasing parameter count reduces the number of tokens that can be processed if dense cost is proportional to their product. <a href="https://arxiv.org/abs/2203.15556v1">Hoffmann and colleagues' Chinchilla study</a>, PDF pages 1–2 and 5–6, investigates this tradeoff using hundreds of training runs. Its compute-optimal allocation differs from the earlier study. Such differences matter: a scale rule is an experimentally fitted model, not a universal conservation law.</p>
+<h3>Derive the consequence of one conditional surrogate</h3>
+<p>As an original analysis of the functional form used in that study, stipulate a loss surrogate \(\widehat\ell(N,M)=\ell_\infty+aN^{-\alpha}+bM^{-\beta}\), with \(a,b,\alpha,\beta\gt0\). The constant \(\ell_\infty\) is a fitted floor in nats per token. Use an idealized budget \(C=\kappa NM\), where \(\kappa\gt0\) is FLOPs per parameter-token pair. Treat counts as continuous positive quantities for optimization.</p>
+<p>Eliminate tokens with \(M=C/(\kappa N)\). The excess loss becomes \(f(N)=aN^{-\alpha}+b(\kappa N/C)^\beta\). Differentiating and multiplying by \(N\) shows the balance at a stationary point:</p>
+\[\alpha aN^{-\alpha}=\beta b(\kappa N/C)^\beta,\qquad
+N_* =\left(\frac{\alpha a}{\beta b}\right)^{1/(\alpha+\beta)}\left(\frac C\kappa\right)^{\beta/(\alpha+\beta)},\qquad M_* =\frac C{\kappa N_*}.\]
+<p>The decreasing first term and increasing second term give a unique minimum. More explicitly, in \(s=\log N\), the excess loss is \(ae^{-\alpha s}+b(\kappa/C)^\beta e^{\beta s}\), with strictly positive second derivative and divergence at both ends. The minimizing allocation is conditional on the surrogate and budget. Discrete architectures, minimum batch sizes, different data quality, and inference costs require additional constraints.</p>
+<p>For the stipulated values \(a=b=\alpha=\beta=1\) and \(C/\kappa=100\), the balance gives \(N_*=M_*=10\), with excess loss 0.2. Allocations \((1,100)\) and \((100,1)\) each give 1.01. Here enlarging the model from 10 to 100 while preserving the budget makes the surrogate worse. These numbers illustrate the derivation; they are not fitted coefficients from a language-model experiment.</p>
+<p>The <a href="https://arxiv.org/abs/2407.21783v3">Llama 3 report</a>, PDF page 8, distinguishes measured iso-compute curves from extrapolation to the flagship budget. That distinction is the useful lesson for the assistant. Forecasting a lower text loss can guide an engineering experiment; its factual-support score must still be measured on held-out news tasks under a specified evaluation protocol.</p>
+</section>
+
+<section><h2 id="architecture">9. Parameter sharing and causal dependence determine what can be reused <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=2296s">38:16</a></h2>
+<p>A fixed-width multilayer perceptron can predict tokens, but a particular flattened construction scales poorly with sequence length. Flatten a \((T,D)\) input into \(TD\) coordinates and map it with one unrestricted affine layer to \(TV\) logits. Its weight matrix has \(TD\cdot TV=DVT^2\) entries and its bias has \(TV\). Doubling \(T\) quadruples these weights. This is the count for that construction, not a lower bound for every neural language model.</p>
+<p>Nor do fixed fitted weights imply a function with input-independent sensitivity. For the fixed ReLU function \(f(a,b)=\max(0,a-b)\), the derivative with respect to \(a\) is one when \(a\gt b\) and zero when \(a\lt b\); at equality it is not differentiable. A frozen nonlinear network can change its response depending on the input. Attention contributes a particular learned routing mechanism, rather than being the only possible source of input dependence.</p>
+<h3>One head separates fitted projections from input-dependent weights</h3>
+<p>For a single sequence, let \(H\in\mathbb R^{T\times D}\) be input representations. Choose a positive key dimension \(d_k\) and value dimension \(d_v\). Shared fitted matrices \(W_Q,W_K\in\mathbb R^{D\times d_k}\) and \(W_A\in\mathbb R^{D\times d_v}\) produce queries \(Q=HW_Q\), keys \(K_a=HW_K\), and values \(A=HW_A\). The subscript on \(K_a\) distinguishes the key array from the earlier count of valid training targets.</p>
+<p>For query position \(i\), permit keys \(j\le i\). Define scores \(s_{ij}=Q_i\cdot(K_a)_j/\sqrt{d_k}\) and attention weights</p>
+\[w_{ij}=\begin{cases}\displaystyle\frac{e^{s_{ij}}}{\sum_{r=1}^{i}e^{s_{ir}}},&j\le i,\\0,&j\gt i,\end{cases}\qquad O_i=\sum_{j=1}^{i}w_{ij}A_j.\]
+<p>Positions start at one in this equation. Dot products contract the key-feature axis, normalization is over allowed key positions, and \(O\) has shape \((T,d_v)\). The positive scaling dimension makes the formula well-defined. <a href="https://arxiv.org/abs/1706.03762v7">Vaswani and colleagues</a>, §3.2, specify the scaled dot-product mechanism and projected heads. Shared projections do not grow a separate parameter matrix for every position; computing all token pairs can still require quadratic arithmetic in \(T\).</p>
+<p>For a two-position numerical construction, use representations \((0,0)\) and \((1,\log3)\), with projection columns \(W_Q=(1,0)^\top,W_K=(0,1)^\top,W_A=(1,0)^\top\). The second query is 1, keys are \((0,\log3)\), and values are \((0,1)\). Its weights are \((1/4,3/4)\), giving output \(3/4\). Replacing the second representation's first feature by zero gives query zero and weights \((1/2,1/2)\). The fitted projection matrices stayed fixed while routing changed.</p>
+<p>The transformer also uses positionwise feed-forward transformations. The original paper's §3.3 applies the same feed-forward parameters separately at each position, with distinct parameters in different layers. Parameter sharing across positions and nonlinear computation coexist. Embedding and output matrices still depend on vocabulary size; a learned absolute position table may depend on a configured maximum length.</p>
+<h3>Cache correctness follows from a dependency proof</h3>
+<p>A key/value cache retains the key and value representations already computed for an unchanged causal prefix. Suppose each initial representation depends only on its own token and an unchanged positional encoding at that location. Every layer combines only earlier or current positions, its other operations are tokenwise, and earlier queries keep the same allowed prefix positions. Parameters and evaluation state remain fixed. At layer zero, extending a prefix then leaves the earlier input representations unchanged. If this is true at layer \(r\), each earlier position at layer \(r+1\) reads the same permitted representations and applies the same functions. Its result is unchanged. Induction proves that earlier keys and values can be reused at every layer. A fixed position-encoding rule that changes old encodings when total sequence length changes does not satisfy the initial assumption.</p>
+<p>Editing token \(j\) preserves positions before \(j\), but positions at and after \(j\) can depend on the edit and must be reconsidered. Changing a model, a position convention, dropout realization, or an attention policy can also invalidate a cache. A bidirectional layer or a normalization across all time positions violates the stated induction. “The prefix is visually similar” is not a reuse criterion.</p>
+<p>The newswire assistant therefore cannot keep every cached representation after changing <em>crashed</em> to another event token. Reusing the truly unchanged earlier prefix is a computational property. It has no bearing on whether a generated reaction is supported by the report.</p>
+</section>
+
+<section><h2 id="pretraining">10. Data mixture and prompting are separate sources of behavior <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=2751s">45:51</a></h2>
+<p><dfn>Pre-training</dfn> fits a broadly shared model before a later adaptation procedure. Next-token pre-training obtains targets from observed text, so it is often called self-supervised. The targets can be boilerplate, factual explanations, mistakes, dialogue, code, or synthetic text. The loss rewards predicting the data actually selected, not a hypothetical collection of only useful and true answers.</p>
+<p>For a mixture of data domains indexed by \(d\), let \(\lambda_d\ge0\) sum to one and let \(J_d(\theta)\) be mean token loss in that domain. The mixture objective is \(\sum_d\lambda_dJ_d(\theta)\). Changing sampling proportions changes the weights even when the next-token formula stays the same. Filtering, deduplication, and document extraction therefore alter the training problem. A filter's definition of quality can exclude material useful for another task.</p>
+<p>The <a href="https://arxiv.org/abs/2505.09388v1">Qwen3 report</a>, PDF pages 3–4, describes multilingual, domain-diverse data, synthesized material, and different pre-training stages. Those disclosures support that particular reported recipe. They do not imply that a token count measures unique documents, verified facts, or independently contributed human knowledge. For the assistant, repeated speculative reaction stories can increase the frequency of a phrase without increasing evidence about today's event.</p>
+<h3>In-context examples condition the forward pass</h3>
+<p><dfn>In-context learning</dfn> in the few-shot language-model setting supplies example task inputs and outputs inside the current prompt. The parameters remain fixed. Fine-tuning instead updates parameters using task data. These procedures may use similar text but change different objects: prompting changes the conditioning prefix, while fine-tuning changes the kernel.</p>
+<p><a href="https://arxiv.org/abs/2005.14165v4">Brown and colleagues' GPT-3 study</a>, PDF pages 6–7, explicitly separates fine-tuning, zero-shot, one-shot, and few-shot settings. Its few-shot evaluations permit demonstrations in context without weight updates. The paper reports successes and limitations on its chosen benchmarks, not a theorem that demonstrations improve every prompt or induce one identifiable internal algorithm.</p>
+<p>The assistant might receive examples that quote supported reactions and abstain when none is stated. Those examples can change its completion distribution, but a finite test must determine whether it actually respects the rule. An apparently successful demonstration does not establish transfer to an ambiguous source, unfamiliar language, or longer context.</p>
+<p>Evaluation needs a held-out distribution and a fixed procedure. Separate model fitting, prompt/decoder selection, and final testing. Group duplicates and related source articles before splitting; otherwise a memorized report can masquerade as evidence integration. Declare whether demonstrations contain information from the test item. Report token log loss, claim support, extraction coverage, and abstention separately, with uncertainty appropriate to the sampled groups. No single aggregate establishes all these properties.</p>
+</section>
+
+<section><h2 id="preferences">11. Post-training changes the preferred continuation objective <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=3262s">54:22</a></h2>
+<p>A base model may treat a question as the beginning of a question list. An instruction-following model should instead assign mass to an answer. <dfn>Supervised fine-tuning</dfn>, or SFT, fits demonstrations of the desired response conditional on the prompt. The same next-token likelihood can be used with loss applied only to response targets; prompt tokens still provide context. This changes the training-data distribution and loss mask, even when the probability parameterization is unchanged.</p>
+<p><a href="https://arxiv.org/abs/2203.02155v1">Ouyang and colleagues' InstructGPT study</a>, PDF pages 2–3 and §3.1, follows SFT with preference comparisons, a reward model, and reinforcement learning using proximal policy optimization, or PPO. Its Figure 2 distinguishes the demonstration, comparison, and policy-optimization data paths. The reward represents the preferences of a particular labeler population and training protocol.</p>
+<p>For a prompt \(x\) and two completions \(y_w,y_l\), let a scalar reward model \(r_\phi(x,y)\) use parameters \(\phi\). A paired-comparison model can set preference probability to \(\sigma(r_\phi(x,y_w)-r_\phi(x,y_l))\), where \(\sigma(u)=1/(1+e^{-u})\). Fitting negative log preference probability increases the winner's score relative to the loser's. Adding the same constant to every reward for a prompt leaves those comparisons unchanged. Reward scale and comparison sampling still matter for subsequent optimization.</p>
+<p>InstructGPT §3.5, PDF page 8, uses this reward-difference logistic structure and notes that comparisons from the same ranked set are correlated. Treating every pair as an independently acquired human judgment overstates the information available. A preference that an answer is clear or reassuring also does not establish that the answer's factual premise is correct.</p>
+<h3>A finite regularized policy makes the support restriction visible</h3>
+<p>Fix one prompt and a finite set \(\mathcal Y\) of possible completed responses. Let \(q_0(y)\) be a reference distribution and \(r(y)\) a stipulated finite reward. Choose a new distribution \(q\) to maximize expected reward minus a KL penalty:</p>
+\[F(q)=\sum_yq(y)r(y)-\beta D_{\rm KL}(q\|q_0),\qquad
+D_{\rm KL}(q\|q_0)=\sum_{y:q(y)\gt0}q(y)\log\frac{q(y)}{q_0(y)},\qquad \beta\gt0.\]
+<p>Allowed distributions have support contained in the positive support of \(q_0\); otherwise KL is infinite. Reward and \(\beta\) use the same stipulated utility units, so their ratio is dimensionless. This is a finite teaching optimization, not an implementation of PPO or a claim that a neural policy can realize every distribution.</p>
+<p>Set \(Z=\sum_{y:q_0(y)\gt0}q_0(y)e^{r(y)/\beta}\) and define \(q_*(y)=q_0(y)e^{r(y)/\beta}/Z\) on that support. Expanding the log ratio gives</p>
+\[D_{\rm KL}(q\|q_*)=D_{\rm KL}(q\|q_0)-\frac1\beta\sum_yq(y)r(y)+\log Z,
+\qquad F(q)=\beta\log Z-\beta D_{\rm KL}(q\|q_*).\]
+<p>KL is nonnegative, with equality only when the two distributions match. Thus \(q_*\) is the unique optimum over this finite allowed simplex. The identity also proves what cannot change: a reference-zero response remains impossible under finite KL. A reward does not create support that the admissible family excludes.</p>
+<p>For the two candidate reactions, take \(q_0=(2/3,1/3)\), \(r=(0,\log4)\), and \(\beta=1\), in the order <em>panicked</em>, <em>celebrated</em>. Reweighting gives \((2/3,4/3)\), normalized to \((1/3,2/3)\). The preferred most-probable reaction has reversed. This can represent a preference for upbeat wording, while providing no new observation about investors. Larger reward improvement may worsen factual support if reward rewards the wrong property.</p>
+<p>InstructGPT's PDF page 9 describes a sequence reward with a reference-policy log-ratio penalty and, in PPO-ptx, an additional pre-training term. Our finite identity isolates the regularized distributional objective; it does not reproduce that training algorithm, auxiliary term, or its convergence. At the token level, a sequence-policy log probability is a sum of conditional log probabilities, linking the objective to policy-gradient methods. That gradient still requires the actual policy, sampling distribution, and support assumptions.</p>
+<p>Post-training is broader than RL from human feedback. The <a href="https://arxiv.org/abs/2407.21783v3">Llama 3 report</a>, PDF page 2, describes SFT, rejection sampling, and direct preference optimization. A verifier can supply another reward for a bounded task, but validity then depends on what the verifier actually checks. Improving a proxy is evidence about that proxy until independently evaluated against the intended task.</p>
+</section>
+
+<section><h2 id="safety">12. Refusal examples and evaluation distributions have different scope <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=3609s">60:09</a></h2>
+<p>Instruction following and refusal behavior can conflict when an instruction requests harmful content. Safety tuning can include supervised refusals, preference objectives, automated verification, or data selection. The desired behavior must be stated before deciding whether a generated response passes. The recording's historical examples illustrate that wording changes can affect responses; they do not establish that every such failure is currently present or has been fixed.</p>
+<p>Let \(h(x,y)\in\{0,1\}\) be a defined failure indicator for prompt \(x\) and output \(y\). Assume the declared evaluation procedure produces a normalized output law \(q_\theta(\cdot\mid x)\). For capped generation, the output space must include censored prefixes with their status rather than silently dropping them. Under a declared evaluation prompt distribution \(\mu\), the average failure probability is \(R=\mathbb E_{x\sim\mu,y\sim q_\theta(\cdot\mid x)}h(x,y)\). A finite test estimates this average for its procedure. It does not prove \(h(x,y)=0\) for every possible prompt and output. Changing the prompt population or the decoder changes the quantity being estimated.</p>
+<p>Zero failures in \(n\) independent Bernoulli trials are compatible with nonzero failure probability. Under that stipulated identical-trial model, the probability of observing zero is \((1-R)^n\). A one-sided 95% upper confidence bound after zero failures is \(1-0.05^{1/n}\), approximately 0.0295 for \(n=100\). This bound is an original statistical illustration. Adaptive adversarial searches and correlated prompts violate its simple sampling model and require a different analysis.</p>
+<p>A universal certificate would need a specified domain, property, and verification argument covering that domain. InstructGPT's primary report, PDF page 4, explicitly states that its models still make mistakes. Neither that observation nor a small refusal test is a timeless description of every system. For the assistant, evaluate unsupported-reaction assertions across representative source groups and targeted perturbations, while separately measuring over-abstention. Preferentially refusing all outputs trivially reduces one error category but fails the reporting task.</p>
+</section>
+
+<section><h2 id="tokenization">13. Subword encoding trades vocabulary size against sequence length <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=3919s">65:19</a></h2>
+<p>The fixed whole-word vocabulary cannot represent an unfamiliar company name. Mapping all such names to one unknown symbol erases distinctions; enumerating every possible word makes the vocabulary unwieldy. Subword tokenization uses smaller reusable pieces while retaining an ordered representation. It changes both \(V\) and the number of positions \(T\), affecting output computation and context use.</p>
+<p><dfn>Byte-pair encoding</dfn>, or BPE, repeatedly merges a selected frequent adjacent symbol pair into a larger symbol. <a href="https://aclanthology.org/P16-1162/">Sennrich, Haddow, and Birch</a>, §3.2 and Algorithm 1 on PDF pages 3–4, adapt a prior compression technique to word segmentation. Their initial symbols are characters plus an end-of-word marker; pairs are counted with word frequencies and do not cross word boundaries. At inference, the learned merge operations are replayed. Their footnote explicitly qualifies coverage for unknown initial characters.</p>
+<p>A byte-based construction begins instead with all 256 one-byte strings. Represent a text as its UTF-8 bytes, segment those bytes into tokens, and recover the byte string by concatenation. Every finite byte string has a representation before any merges. Valid UTF-8 text then reconstructs exactly; arbitrary generated bytes need not decode as valid UTF-8. Encoding coverage is a reversible representation property, not semantic understanding.</p>
+<p>Our miniature byte merger uses the ordered rules \((\texttt{a},\texttt{b})\mapsto\texttt{ab}\) and \((\texttt{ab},\texttt{a})\mapsto\texttt{aba}\). Start \(\texttt{ababa}\) as five singleton bytes. The first rule merges nonoverlapping occurrences left to right, producing \((\texttt{ab},\texttt{ab},\texttt{a})\). The second yields \((\texttt{ab},\texttt{aba})\). Concatenating the two tokens recovers the five original bytes.</p>
+<p>Rule order and overlap conventions affect segmentation. With rule \((\texttt{a},\texttt{a})\), \(\texttt{aaa}\) becomes \((\texttt{aa},\texttt{a})\), not two overlapping copies of \(\texttt{aa}\). A merge creates a new available symbol from symbols already available at that stage. Repeated or invalid rules are rejected in the program. The construction has no pre-tokenization, word-boundary restriction, or special-token interpretation; it is not a replica of a production tokenizer. Qwen3's actual report separately identifies its byte-level BPE vocabulary.</p>
+<p>Each merge replaces adjacent pieces by their concatenation, so induction proves that all merges preserve the underlying bytes. This guarantees \(\operatorname{decode}(\operatorname{encode}(b))=b\). It does not guarantee that arbitrary token sequences re-encode to the same segmentation, nor that all text has equally short encodings. Comparing per-token perplexity across different tokenizers can compare different units. A declared common representation or a common byte-normalized likelihood is needed for a meaningful comparison.</p>
+</section>
+
+<section><h2 id="systems">14. Weight storage, training state, and token caches consume different budgets <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=4054s">67:34</a></h2>
+<p>A model's raw weight bytes are \(Nq\) when each parameter occupies \(q\) bytes. For \(N=70\times10^9\) and \(q=2\), weights require 140 GB decimal, about 130.39 GiB, where \(1\,\mathrm{GiB}=2^{30}\) bytes. This excludes activations, temporary workspaces, token caches, and framework overhead. The arithmetic explains why a weight file and a training process have different requirements.</p>
+<p>As one explicit mixed-precision training accounting, allocate two bytes per weight, two per gradient, four per master weight, and four for each of two optimizer moments. That is 16 bytes per parameter, or 1.12 TB decimal for 70 billion parameters, before activations and temporary storage. Other optimizer/state conventions give different totals. The factor of eight relative to two-byte weights is conditional on this accounting, not a universal training-memory multiplier.</p>
+<p>Ideal packed two-bit weights use \(N/4\) bytes, hence 17.5 GB for the same count. This is an eightfold reduction relative to 16-bit weights and sixteenfold relative to 32-bit weights. Real quantization adds scales, metadata, nonquantized parts, and runtime states. Four code values per quantization group need not correspond to four shared real values across the whole model. Reducing numerical precision also changes error; a storage calculation certifies no accuracy or speed guarantee.</p>
+<p>For a standard key/value cache with \(R\) decoder layers, batch size \(B\), retained length \(T\), \(H_{kv}\) key/value heads, head width \(d_h\), and \(q\) bytes per cached number, the raw storage is \(2RBT H_{kv}d_hq\) bytes. The factor two stores keys and values. With \(R=32,B=1,T=4096,H_{kv}=8,d_h=128,q=2\), this is 536,870,912 bytes, or 0.5 GiB. These are stipulated dimensions. Doubling the batch or retained length doubles that cache even though model weights stay fixed.</p>
+<h3>Parallelism must preserve the intended reduction</h3>
+<p>Data parallelism gives model replicas different training targets. If replica \(r\) has loss sum \(S_r\) and valid-target count \(K_r\), the intended global token mean is \(\sum_rS_r/\sum_rK_r\). Its gradient is \(\sum_r\nabla S_r/\sum_rK_r\), with counts fixed by the data. Averaging the replicas' local means instead gives equal weight to replicas, and differs when \(K_r\) varies. With counts 1 and 3 and loss sums 2 and 9, the same 2.75-versus-2.5 discrepancy reappears as a distributed-training error.</p>
+<p>Tensor parallelism partitions contractions. If a feature row is split as \(x=(x_1,x_2)\) and matching weight rows as \(W=\begin{bmatrix}W_1\\W_2\end{bmatrix}\), then \(xW=x_1W_1+x_2W_2\): partial outputs require a sum. Splitting output columns \(W=[W_1\ W_2]\) instead produces \([xW_1\ xW_2]\): outputs are concatenated. These are different communication requirements. Pipeline parallelism puts consecutive layers on different devices; naive execution leaves devices idle while another stage works. Schedules and microbatches affect that utilization without changing the modeled sequence likelihood.</p>
+<h3>Less arithmetic and less memory traffic are different improvements</h3>
+<p>Let an operation require \(F\) FLOPs and transfer \(A\) bytes across a specified memory interface. With peak rates \(P\) FLOPs per second and \(W\) bytes per second, ideal time is bounded below by \(\max(F/P,A/W)\). Arithmetic intensity is \(F/A\) FLOPs per byte. It identifies which ideal resource can dominate; actual time also includes latency, occupancy, and scheduling overhead.</p>
+<p>Kernel fusion can avoid repeated transfers of intermediate arrays. <a href="https://arxiv.org/abs/2205.14135v2">Dao and colleagues' FlashAttention paper</a>, §§2–3, makes this distinction explicit. It tiles attention, computes softmax incrementally, and recomputes selected intermediate quantities rather than materializing the full attention matrix in high-bandwidth memory. Its exact-attention designation concerns the mathematical operation, not bitwise equality under every floating-point evaluation order. The chapter program implements no GPU kernel and makes no speedup claim.</p>
+<p>More generated reasoning tokens, additional sampled candidates, tools, or distilled models can also change cost and task outcomes. Their benefits need separate experiments with a fixed answer criterion and compute budget. Cached prefixes reduce repeated work under the causal assumptions above; they do not supply missing source evidence or an evaluation certificate.</p>
+</section>
+
+<section><h2 id="ecosystem">15. Access to a model and evidence about its behavior are separate questions <a class="timestamp" href="https://www.youtube.com/watch?v=3orP3u2-jcg&amp;t=4386s">73:06</a></h2>
+<p>The recording closes with a dated view of industrial development, multimodal systems, model access, and research opportunities. These categories should be treated as independent axes. A service API exposes behavior through an interface. Downloadable weights permit local numerical inspection and execution. Disclosed training data, code, recipes, and evaluation protocols permit additional reproducibility work. None of these properties alone establishes factual accuracy or harmlessness.</p>
+<p>“Open weights” describes access to numerical parameters. It does not by itself say that training sources or optimization details are available, or that all uses are unrestricted. License and usage conditions require checking the particular release. The chapter makes no current legal conclusion, price comparison, or company leaderboard. The historical primary reports are evidence for their stated versions and experiments.</p>
+<p>A system that turns generated tokens into tool calls needs an execution environment and authorization rules beyond a text predictor. Its observations may then change future prompts, forming an interaction loop. The existence of the loop does not prove reliable long-horizon control. Similarly, representing images or actions as tokens changes the observation/output domain and training problem; the text-only finite model below does not establish robotics capability.</p>
+<p>For the newswire assistant, inspectability helps locate a failure but cannot certify every output. Evaluate whether source claims are preserved, whether uncertain reactions are withheld, and whether that behavior survives changed sources and prompts. Sequence likelihood, preference scores, compute accounting, and practical task evidence remain distinct. That separation connects language modeling to the societal and institutional questions in the concluding course material.</p>
+</section>
+
+<section><h2 id="implementation">16. Execute a finite model with explicit completion and failure contracts</h2>
+<p>The original standard-library program fits the declared newswire bigram model, computes exact completed-string masses and finite-horizon decoding, samples with a private seeded random generator, and evaluates selected numerical formulas. It also implements an ordered byte-merging construction and a finite preference tilt. It does not train a transformer, perform PPO, learn tokenizer merges, run distributed kernels, or measure a reporting system.</p>
+<p>Run <code>python cs221-artificial-intelligence-principles-and-techniques-notes/programs/chapter17.py</code> from the workspace root, or <code>python programs/chapter17.py</code> from this book's directory. The downloadable <a href="programs/chapter17.py">complete original program</a> and listing below are identical. Importing defines functions and constants; running the program prints the deterministic report. It performs no file or network operations.</p>
+<div class="table-wrap"><table><caption>Accepted domains and intentional finite computational limits.</caption><thead><tr><th>Object</th><th>Contract</th><th>Failure or interpretation</th></tr></thead><tbody>
+<tr><td>Vocabulary and documents</td><td>1–32 unique nonempty lexical strings excluding BOS/EOS. Nonempty list/tuple of at most 1,024 documents; each contains at most 128 lexical tokens. Empty documents are allowed. At most 32,768 targets including one EOS per document.</td><td>Unsupported types, unknown tokens, invalid markers, duplicates, or exceeded budgets raise <code>ValueError</code>. Each document begins independently; no cross-document transition.</td></tr>
+<tr><td>Counts and smoothing</td><td>Nonnegative integer count table, copied to immutable tuples, with total at most 32,768. Smoothing is nonnegative <code>int</code> or <code>Fraction</code> with numerator and denominator at most one million.</td><td>Booleans/floats are rejected as exact counts or smoothing. An unseen unsmoothed row raises an explicit undefined-row error; smoothing changes the estimator.</td></tr>
+<tr><td>Probability rows and drawing</td><td>1–33 nonnegative rational entries summing exactly to one. Numerator magnitude and denominator at most \(10^{12}\). Drawing uses integer probability intervals and a supplied <code>random.Random</code>.</td><td>Malformed probabilities or a common draw denominator exceeding \(10^{12}\) raise <code>ValueError</code>. A draw advances that explicit generator; the generation helper creates its own.</td></tr>
+<tr><td>Generation and completed probability</td><td>Lexical prefixes up to 4,096 tokens; combined prefix/new prediction budget at most 4,096. Generation takes 0–4,096 new predictions, counts EOS as a prediction, and returns only new lexical tokens plus a completion flag. Seeds are integers in \([0,2^{64}-1]\).</td><td>A false flag means censoring, not a completed response. Zero budget returns an empty censored suffix. Greedy ties choose the first vocabulary ID. Completed-string probability includes an actual final EOS factor.</td></tr>
+<tr><td>Exact mass and MAP experiment</td><td>Capped bigram mass uses lengths 0–128 and finite state propagation. Fixed-horizon decoding uses 1–12 positions and at most 4,096 candidate strings, with square normalized transition rows.</td><td>Mass computation requires every positively reached row to be defined. MAP ties use lexicographic IDs. The fixed-horizon experiment has no EOS and cannot be interpreted as variable-length MAP.</td></tr>
+<tr><td>Likelihood and logit loss</td><td>Teacher-forced document loss averages actual target slots, including EOS. Logit loss accepts 1–33 finite Python int/float scores with magnitude at most 10,000 and an integer target index.</td><td>Zero target probability contributes infinite NLL; an undefined teacher-forced row is a separate error. Logit loss uses max shifting and retains a finite fused loss even if a probability underflows.</td></tr>
+<tr><td>Finite preference tilt</td><td>Exact reference row, matching bounded real rewards, and \(10^{-6}\le\beta\le10^4\). Returns approximate normalized float weights using shifted log weights.</td><td>Reference zeros stay exactly zero. Extremely small positive weights may underflow; the float implementation does not retain strict positivity at all allowed extremes or solve a neural optimization problem.</td></tr>
+<tr><td>Byte merges</td><td>At most 4,096 bytes and 64 ordered merges. Each merge uses already available nonempty byte symbols and creates a new symbol. Decoding concatenates nonempty byte tokens with a total at most 4,096 bytes.</td><td>Invalid rules, repeated new symbols, unsupported types, or size excess raise <code>ValueError</code>. Arbitrary bytes reconstruct exactly; valid text requires a separate UTF-8 decoding check.</td></tr>
+</tbody></table></div>
+<p>These APIs copy input containers and return scalars or immutable tuples. The frozen count object cannot be altered through a supplied mutable table. Rational computations preserve the stipulated probabilities exactly; logarithms, the logit loss, and preference tilt use bounded binary64 approximations. Computational budgets are part of this teaching implementation, not theoretical limits on language models.</p>
+<p>The seeded bigram continuation in the actual report is grammatically poor. Additive smoothing permits tokens absent from each context, while the one-token history forgets the earlier sentence. Its valid EOS status does not make it suitable for publication. The geometric and never-EOS fixtures expose the stopping distinction independently of the corpus. The greedy/MAP fixture checks whole-sequence probability; the preference tilt reverses a reaction preference without adding a fact.</p>
+<h3>Complete original program</h3>
+<pre><code id="program-source">&quot;&quot;&quot;Original finite language-model fixtures; no neural training or GPU claims.
+
+All mathematical probabilities use int/Fraction inputs and exact normalization.
+The small fused logit loss and preference tilt use bounded binary64 arithmetic.
+Importing defines objects only. Running prints a deterministic teaching report.
+Functions never write files, use the network, mutate supplied containers, or
+share a random generator with the caller except the explicit draw() argument.
+&quot;&quot;&quot;
+
+from dataclasses import dataclass
+from fractions import Fraction
+from itertools import product
+from math import exp, fsum, isfinite, lcm, log
+from random import Random
+
+EOS = &quot;EOS&quot;
+BOS = &quot;BOS&quot;
+WORDS = (
+    &quot;The&quot;,
+    &quot;and&quot;,
+    &quot;crashed&quot;,
+    &quot;investors&quot;,
+    &quot;market&quot;,
+    &quot;stock&quot;,
+    &quot;lol&quot;,
+    &quot;panicked&quot;,
+    &quot;celebrated&quot;,
+    &quot;golfing&quot;,
+)
+PREFIX = (&quot;The&quot;, &quot;stock&quot;, &quot;market&quot;, &quot;crashed&quot;, &quot;and&quot;, &quot;investors&quot;)
+
+
+def _sequence(value, name, maximum, allow_empty=True):
+    if not isinstance(value, (list, tuple)):
+        raise ValueError(name + &quot; must be a list or tuple&quot;)
+    result = tuple(value)
+    if len(result) &gt; maximum or (not allow_empty and not result):
+        raise ValueError(name + &quot; length outside the finite contract&quot;)
+    return result
+
+
+def _integer(value, name, low, high):
+    if type(value) is not int or not low &lt;= value &lt;= high:
+        raise ValueError(name + &quot; must be an integer in the stated interval&quot;)
+    return value
+
+
+def _rational(value, name, maximum=10**12):
+    if type(value) is int:
+        result = Fraction(value)
+    elif type(value) is Fraction:
+        result = value
+    else:
+        raise ValueError(name + &quot; must be an int or Fraction, not float/bool&quot;)
+    if abs(result.numerator) &gt; maximum or result.denominator &gt; maximum:
+        raise ValueError(name + &quot; exceeds the rational representation budget&quot;)
+    return result
+
+
+def _distribution(value):
+    row = _sequence(value, &quot;probability row&quot;, 33, allow_empty=False)
+    row = tuple(_rational(p, &quot;probability&quot;) for p in row)
+    if any(p &lt; 0 for p in row) or sum(row) != 1:
+        raise ValueError(
+            &quot;probabilities must be nonnegative and sum exactly to one&quot;
+        )
+    return row
+
+
+def _float(value, name, bound=10000):
+    if type(value) not in (int, float):
+        raise ValueError(name + &quot; must be int/float, not bool&quot;)
+    try:
+        converted = float(value)
+    except (OverflowError, ValueError) as error:
+        raise ValueError(name + &quot; conversion failed&quot;) from error
+    if not isfinite(converted) or abs(converted) &gt; bound:
+        raise ValueError(name + &quot; outside the finite numeric contract&quot;)
+    return converted
+
+
+def draw(probabilities, rng):
+    (
+        &#x27;One exact integer-interval categorical draw; adv&#x27;
+        &#x27;ances only supplied RNG.&#x27;
+    )
+    row = _distribution(probabilities)
+    if not isinstance(rng, Random):
+        raise ValueError(&quot;rng must be random.Random&quot;)
+    denominator = lcm(*(p.denominator for p in row))
+    if denominator &gt; 10**12:
+        raise ValueError(&quot;common draw denominator exceeds 10**12&quot;)
+    ticket = rng.randrange(denominator)
+    cumulative = 0
+    for index, probability in enumerate(row):
+        cumulative += probability.numerator * (
+            denominator // probability.denominator
+        )
+        if ticket &lt; cumulative:
+            return index
+    raise AssertionError(&quot;validated probability intervals must cover ticket&quot;)
+
+
+@dataclass(frozen=True)
+class Bigram:
+    &quot;&quot;&quot;Immutable exact count table; fit documents or validate explicit counts.
+
+    Input contexts are lexical vocabulary followed by input-only BOS. Outputs
+    are lexical vocabulary followed by EOS. Equal last indices have different
+    context/output meanings; public calls use token strings, not those indices.
+    &quot;&quot;&quot;
+
+    words: tuple
+    counts: tuple
+    alpha: Fraction
+
+    def __post_init__(self):
+        words = _sequence(
+            self.words, &quot;lexical vocabulary&quot;, 32, allow_empty=False
+        )
+        if any(type(w) is not str or not w or w in (EOS, BOS) for w in words):
+            raise ValueError(
+                &quot;words must be nonempty strings excluding BOS/EOS&quot;
+            )
+        if len(set(words)) != len(words):
+            raise ValueError(&quot;lexical vocabulary must be unique&quot;)
+        alpha = _rational(self.alpha, &quot;alpha&quot;, 10**6)
+        if not 0 &lt;= alpha &lt;= 10**6:
+            raise ValueError(&quot;alpha must be nonnegative and at most 10**6&quot;)
+        rows = _sequence(self.counts, &quot;counts&quot;, 33, allow_empty=False)
+        if len(rows) != len(words) + 1:
+            raise ValueError(&quot;one count row per lexical/BOS input context&quot;)
+        copied = []
+        for row in rows:
+            row = _sequence(row, &quot;count row&quot;, 33, allow_empty=False)
+            if len(row) != len(words) + 1:
+                raise ValueError(&quot;one output count per lexical/EOS token&quot;)
+            copied.append(tuple(_integer(c, &quot;count&quot;, 0, 32768) for c in row))
+        if sum(map(sum, copied)) &gt; 32768:
+            raise ValueError(&quot;count table exceeds 32768 targets&quot;)
+        object.__setattr__(self, &quot;words&quot;, words)
+        object.__setattr__(self, &quot;counts&quot;, tuple(copied))
+        object.__setattr__(self, &quot;alpha&quot;, alpha)
+
+    @property
+    def vocabulary(self):
+        return self.words + (EOS,)
+
+    def _prefix(self, tokens, maximum=4096):
+        tokens = _sequence(tokens, &quot;lexical sequence&quot;, maximum)
+        if any(type(t) is not str or t not in self.words for t in tokens):
+            raise ValueError(
+                &quot;prefix/document must contain lexical tokens only&quot;
+            )
+        return tokens
+
+    @classmethod
+    def fit(cls, words, documents, alpha=Fraction(1)):
+        &quot;&quot;&quot;Counts each separate document from BOS through EOS exactly once.&quot;&quot;&quot;
+        words = _sequence(words, &quot;lexical vocabulary&quot;, 32, allow_empty=False)
+        empty = cls(
+            words,
+            tuple((0,) * (len(words) + 1) for _ in range(len(words) + 1)),
+            alpha,
+        )
+        documents = _sequence(documents, &quot;documents&quot;, 1024, allow_empty=False)
+        rows = [[0] * (len(words) + 1) for _ in range(len(words) + 1)]
+        target_count = 0
+        for document in documents:
+            document = empty._prefix(document, 128)
+            target_count += len(document) + 1
+            if target_count &gt; 32768:
+                raise ValueError(&quot;corpus exceeds 32768 valid targets&quot;)
+            previous = len(words)
+            for token in document + (EOS,):
+                index = empty.vocabulary.index(token)
+                rows[previous][index] += 1
+                previous = index
+        return cls(words, tuple(map(tuple, rows)), empty.alpha)
+
+    def row(self, prefix=()):
+        prefix = self._prefix(prefix)
+        context = self.words.index(prefix[-1]) if prefix else len(self.words)
+        counts = self.counts[context]
+        total = sum(counts) + self.alpha * len(self.vocabulary)
+        if total == 0:
+            raise ValueError(
+                &quot;unseen unsmoothed context has no selected distribution&quot;
+            )
+        return tuple((count + self.alpha) / total for count in counts)
+
+    def completed_probability(self, document):
+        &quot;&quot;&quot;Probability of this lexical document followed immediately by EOS.&quot;&quot;&quot;
+        document = self._prefix(document)
+        probability = Fraction(1)
+        prefix = ()
+        for token in document + (EOS,):
+            probability *= self.row(prefix)[self.vocabulary.index(token)]
+            if token != EOS:
+                prefix += (token,)
+        return probability
+
+    def capped_mass(self, max_length):
+        (
+            &#x27;Exact mass terminating with &lt;= max_length lexica&#x27;
+            &#x27;l tokens, plus survival.\n\n        Every row enco&#x27;
+            &#x27;untered by the finite propagation must be define&#x27;
+            &#x27;d. Work\n        uses &lt;=32 ordinary states and &lt;=&#x27;
+            &#x27;129 propagation steps, not an exponential\n      &#x27;
+            &#x27;  enumeration of strings. Censoring means no EOS&#x27;
+            &#x27; in max_length+1 predictions.\n        &#x27;
+        )
+        max_length = _integer(max_length, &quot;max_length&quot;, 0, 128)
+        initial = self.row(())
+        active = initial[:-1]
+        completed = initial[-1]
+        for _ in range(max_length):
+            following = [Fraction(0)] * len(self.words)
+            for index, mass in enumerate(active):
+                if mass == 0:
+                    continue
+                row = self.row((self.words[index],))
+                completed += mass * row[-1]
+                for next_index, probability in enumerate(row[:-1]):
+                    following[next_index] += mass * probability
+            active = tuple(following)
+        return completed, sum(active)
+
+    def generate(self, prefix=(), max_steps=32, seed=0, greedy=False):
+        &quot;&quot;&quot;Generate at most max_steps new predictions, counting EOS as a step.
+
+        Returns (new lexical tokens, completed flag). A false flag means a
+        censored prefix, never a fabricated completed sequence. First ID wins
+        greedy ties. Seeded sampling advances a fresh private Random instance.
+        &quot;&quot;&quot;
+        prefix = self._prefix(prefix)
+        max_steps = _integer(max_steps, &quot;max_steps&quot;, 0, 4096)
+        _integer(seed, &quot;seed&quot;, 0, 2**64 - 1)
+        if type(greedy) is not bool:
+            raise ValueError(&quot;greedy must be bool&quot;)
+        if len(prefix) + max_steps &gt; 4096:
+            raise ValueError(&quot;combined prefix/prediction budget exceeds 4096&quot;)
+        rng = Random(seed)
+        generated = ()
+        for _ in range(max_steps):
+            row = self.row(prefix + generated)
+            index = (
+                max(range(len(row)), key=row.__getitem__)
+                if greedy
+                else draw(row, rng)
+            )
+            token = self.vocabulary[index]
+            if token == EOS:
+                return generated, True
+            generated += (token,)
+        return generated, False
+
+    def corpus_nll(self, documents):
+        (
+            &#x27;Token mean teacher-forced NLL, including EOS, no&#x27;
+            &#x27; cross-document events.\n\n        Returns float n&#x27;
+            &#x27;ats/target. A supported-format zero target proba&#x27;
+            &#x27;bility\n        gives infinity; malformed input o&#x27;
+            &#x27;r undefined row raises ValueError.\n        &#x27;
+        )
+        documents = _sequence(documents, &quot;documents&quot;, 1024, allow_empty=False)
+        total = 0
+        terms = []
+        for document in documents:
+            document = self._prefix(document, 128)
+            total += len(document) + 1
+            if total &gt; 32768:
+                raise ValueError(&quot;corpus exceeds 32768 valid targets&quot;)
+            prefix = ()
+            for token in document + (EOS,):
+                p = self.row(prefix)[self.vocabulary.index(token)]
+                terms.append(
+                    float(&quot;inf&quot;)
+                    if not p
+                    else log(p.denominator) - log(p.numerator)
+                )
+                if token != EOS:
+                    prefix += (token,)
+        return fsum(terms) / total
+
+
+def fixed_horizon(initial, transition, length, greedy=False):
+    (
+        &#x27;Exact best sequence among V**length candidates, &#x27;
+        &#x27;or local greedy sequence.\n\n    This experiment h&#x27;
+        &#x27;as no EOS. At most 4096 candidates and 12 positi&#x27;
+        &#x27;ons.\n    Ties follow lexicographic ID order, inc&#x27;
+        &#x27;luding greedy row ties.\n    &#x27;
+    )
+    initial = _distribution(initial)
+    rows = _sequence(transition, &quot;transition&quot;, 33, allow_empty=False)
+    rows = tuple(_distribution(row) for row in rows)
+    if len(rows) != len(initial) or any(
+        len(row) != len(initial) for row in rows
+    ):
+        raise ValueError(&quot;square transitions must match initial alphabet&quot;)
+    length = _integer(length, &quot;length&quot;, 1, 12)
+    if type(greedy) is not bool or len(initial) ** length &gt; 4096:
+        raise ValueError(
+            &quot;invalid mode or fixed-horizon candidate budget exceeded&quot;
+        )
+
+    def probability(sequence):
+        result = initial[sequence[0]]
+        for old, new in zip(sequence, sequence[1:]):
+            result *= rows[old][new]
+        return result
+
+    if greedy:
+        sequence = (max(range(len(initial)), key=initial.__getitem__),)
+        for _ in range(length - 1):
+            row = rows[sequence[-1]]
+            sequence += (max(range(len(row)), key=row.__getitem__),)
+        return sequence, probability(sequence)
+    choices = product(range(len(initial)), repeat=length)
+    best = max(choices, key=probability)
+    return best, probability(best)
+
+
+def logit_loss_gradient(logits, target):
+    &quot;&quot;&quot;Fused one-target categorical NLL/gradient, bounded binary64 scores.&quot;&quot;&quot;
+    logits = _sequence(logits, &quot;logits&quot;, 33, allow_empty=False)
+    logits = tuple(_float(z, &quot;logit&quot;) for z in logits)
+    target = _integer(target, &quot;target&quot;, 0, len(logits) - 1)
+    shifted = tuple(z - max(logits) for z in logits)
+    weights = tuple(exp(z) for z in shifted)
+    total = fsum(weights)
+    probabilities = tuple(w / total for w in weights)
+    loss = log(total) - shifted[target]
+    gradient = tuple(p - int(k == target) for k, p in enumerate(probabilities))
+    return loss, probabilities, gradient
+
+
+def preference_tilt(reference, rewards, beta=1):
+    &quot;&quot;&quot;Finite KL-regularized ideal optimum, NOT a PPO/neural-policy optimizer.
+
+    Reference zeros remain exactly zero. Float conversion/exp can underflow;
+    positive components need not remain representably positive at extremes.
+    &quot;&quot;&quot;
+    reference = _distribution(reference)
+    rewards = _sequence(rewards, &quot;rewards&quot;, 33, allow_empty=False)
+    if len(rewards) != len(reference):
+        raise ValueError(&quot;reward and reference dimensions differ&quot;)
+    rewards = tuple(_float(r, &quot;reward&quot;) for r in rewards)
+    beta = _float(beta, &quot;beta&quot;)
+    if beta &lt; 10**-6:
+        raise ValueError(&quot;beta must be at least 10**-6 and at most 10000&quot;)
+    scores = tuple(
+        log(p.numerator) - log(p.denominator) + r / beta
+        if p
+        else float(&quot;-inf&quot;)
+        for p, r in zip(reference, rewards)
+    )
+    largest = max(scores)
+    weights = tuple(
+        exp(s - largest) if p else 0.0 for s, p in zip(scores, reference)
+    )
+    total = fsum(weights)
+    return tuple(w / total for w in weights)
+
+
+def byte_encode(raw, merges=()):
+    (
+        &#x27;Ordered byte merges, left-to-right nonoverlap; n&#x27;
+        &#x27;o special/pretokenizer rules.&#x27;
+    )
+    if type(raw) is not bytes or len(raw) &gt; 4096:
+        raise ValueError(&quot;raw must be bytes of length at most 4096&quot;)
+    merges = _sequence(merges, &quot;merges&quot;, 64)
+    available = {bytes((i,)) for i in range(256)}
+    validated = []
+    for pair in merges:
+        pair = _sequence(pair, &quot;merge pair&quot;, 2, allow_empty=False)
+        if len(pair) != 2 or any(
+            type(x) is not bytes or x not in available for x in pair
+        ):
+            raise ValueError(
+                &quot;merge operands must already be available byte symbols&quot;
+            )
+        combined = pair[0] + pair[1]
+        if combined in available or len(combined) &gt; 4096:
+            raise ValueError(&quot;merge must create a new bounded byte symbol&quot;)
+        available.add(combined)
+        validated.append(pair)
+    tokens = tuple(bytes((i,)) for i in raw)
+    for left, right in validated:
+        result = []
+        i = 0
+        while i &lt; len(tokens):
+            if i + 1 &lt; len(tokens) and tokens[i:i + 2] == (left, right):
+                result.append(left + right)
+                i += 2
+            else:
+                result.append(tokens[i])
+                i += 1
+        tokens = tuple(result)
+    return tokens
+
+
+def byte_decode(tokens):
+    tokens = _sequence(tokens, &quot;byte tokens&quot;, 4096)
+    if any(type(t) is not bytes or not t for t in tokens):
+        raise ValueError(&quot;byte tokens must be nonempty bytes&quot;)
+    if sum(map(len, tokens)) &gt; 4096:
+        raise ValueError(&quot;decoded bytes exceed 4096&quot;)
+    return b&quot;&quot;.join(tokens)
+
+
+def report():
+    documents = (
+        PREFIX + (&quot;panicked&quot;,),
+        PREFIX + (&quot;panicked&quot;,),
+        PREFIX + (&quot;celebrated&quot;,),
+    )
+    model = Bigram.fit(WORDS, documents)
+    row = model.row(PREFIX)
+    print(&quot;prefix IDs:&quot;, tuple(model.vocabulary.index(w) for w in PREFIX))
+    print(&quot;smoothed reaction/EOS:&quot;, row[7], row[8], row[10])
+    print(&quot;token mean NLL: %.9f&quot; % model.corpus_nll(documents))
+    print(&quot;seeded completion:&quot;, model.generate(PREFIX, 12, 3))
+    print(&quot;zero-budget generation:&quot;, model.generate(PREFIX, 0, 3))
+    geometric = Bigram((&quot;a&quot;,), ((3, 1), (3, 1)), Fraction(0))
+    print(&quot;completed &lt;=2, survival:&quot;, geometric.capped_mass(2))
+    trapped = Bigram((&quot;a&quot;,), ((1, 0), (1, 0)), Fraction(0))
+    print(
+        &quot;never-EOS model:&quot;, trapped.capped_mass(2), trapped.generate((), 3, 0)
+    )
+    start = (Fraction(3, 5), Fraction(2, 5))
+    transitions = (start, (Fraction(1), Fraction(0)))
+    print(
+        &quot;greedy sequence/probability:&quot;,
+        fixed_horizon(start, transitions, 2, True),
+    )
+    print(&quot;MAP sequence/probability:&quot;, fixed_horizon(start, transitions, 2))
+    print(&quot;extreme target loss:&quot;, logit_loss_gradient((1000, -1000), 1)[0])
+    tilt = preference_tilt((Fraction(2, 3), Fraction(1, 3)), (0, log(4)))
+    print(&quot;preference tilt:&quot;, tuple(round(p, 9) for p in tilt))
+    raw = b&quot;ababa&quot;
+    pieces = byte_encode(raw, ((b&quot;a&quot;, b&quot;b&quot;), (b&quot;ab&quot;, b&quot;a&quot;)))
+    print(&quot;byte pieces/reconstruction:&quot;, pieces, byte_decode(pieces) == raw)
+    print(&quot;70B BF16/ideal2bit bytes:&quot;, 70 * 10**9 * 2, 70 * 10**9 // 4)
+    print(&quot;stipulated KV cache bytes:&quot;, 2 * 32 * 1 * 4096 * 8 * 128 * 2)
+    print(
+        (
+            &#x27;Finite checks do not certify factual support, sa&#x27;
+            &#x27;fety, or neural-scale behavior.&#x27;
+        )
+    )
+
+
+if __name__ == &quot;__main__&quot;:
+    report()
+</code></pre>
+<h3>Actual standard output</h3>
+<pre><code id="program-stdout">prefix IDs: (0, 5, 4, 2, 1, 3)
+smoothed reaction/EOS: 3/14 1/7 1/14
+token mean NLL: 1.345873636
+seeded completion: ((&#x27;investors&#x27;, &#x27;panicked&#x27;, &#x27;celebrated&#x27;, &#x27;crashed&#x27;, &#x27;crashed&#x27;, &#x27;lol&#x27;, &#x27;panicked&#x27;), True)
+zero-budget generation: ((), False)
+completed &lt;=2, survival: (Fraction(37, 64), Fraction(27, 64))
+never-EOS model: (Fraction(0, 1), Fraction(1, 1)) ((&#x27;a&#x27;, &#x27;a&#x27;, &#x27;a&#x27;), False)
+greedy sequence/probability: ((0, 0), Fraction(9, 25))
+MAP sequence/probability: ((1, 0), Fraction(2, 5))
+extreme target loss: 2000.0
+preference tilt: (0.333333333, 0.666666667)
+byte pieces/reconstruction: (b&#x27;ab&#x27;, b&#x27;aba&#x27;) True
+70B BF16/ideal2bit bytes: 140000000000 17500000000
+stipulated KV cache bytes: 536870912
+Finite checks do not certify factual support, safety, or neural-scale behavior.
+</code></pre>
+<p>The author checks compare counts against separately constructed document events, finite mass against direct enumeration, seeded sampling against an integer-interval reference, and gradients against finite differences. Those finite checks test the declared numerical mechanisms. They do not establish generalization, factual support, a universal termination guarantee for arbitrary neural models, or accelerator performance.</p>
+</section>
+
+<section><h2 id="exercises">17. Six exercises with complete reasoning</h2>
+<h3>Exercise 1: a normalized generator can have missing completed mass</h3>
+<p>Consider a kernel that emits ordinary token \(a\) with probability \(3/4\) and EOS with probability \(1/4\) at every step. Compute the probabilities of empty, one-token, and two-token completed strings; the total mass through length two; and the censored mass after three predictions. Contrast a never-EOS kernel and the prefix-dependent stopping schedule \(\varepsilon_t=2^{-t-1}\) for \(t=1,2,\ldots\). Is a positive stopping probability at every step sufficient?</p>
+<details class="solution"><summary>Full solution</summary>
+<p>The completed strings are \(\emptyset,a,aa\), with masses \(1/4,(3/4)(1/4)=3/16,(3/4)^2(1/4)=9/64\). Their sum is \(16/64+12/64+9/64=37/64\). The complementary \(27/64=(3/4)^3\) survives the first three predictions. A cap of three predictions reports those surviving prefixes as censored; it has not observed EOS for them.</p>
+<p>For any length \(L\), finite completed mass is \(\sum_{m=0}^{L}(3/4)^m/4=1-(3/4)^{L+1}\), so all lengths together sum to one. If EOS has zero mass, every finite completed probability is zero and survival is one. Both kernels have normalized next-token rows.</p>
+<p>With stopping probability \(2^{-t-1}\) at step \(t\), the sum of hazards is \(1/2\). For any finite horizon, the probability of having stopped is at most the sum of its step-conditional hazards: each unconditional stop event has probability at most its conditional hazard. Thus survival is at least \(1/2\) at every horizon, and its decreasing limit remains positive. Strictly positive stopping probabilities alone therefore do not imply almost-sure termination. The uniform positive lower bound used in the chapter does; this schedule has none.</p>
+<p>Conditioning the geometric generator on completion within length two would assign probabilities \(16/37,12/37,9/37\) to the three eligible strings. Those sum to one but differ from the ordinary generator's probabilities. A status flag under a cap and conditional resampling are different procedures.</p>
+</details>
+
+<h3>Exercise 2: document boundaries and target weighting change the estimator</h3>
+<p>Use the three newswire documents, two ending in <em>panicked</em> and one in <em>celebrated</em>. Find the unsmoothed and add-one <em>investors</em> rows. Explain the correct shifted targets and the number of valid targets per document. For the stipulated unequal-length loss example, compare token mean and document-mean loss. Derive the one-target softmax gradient and diagnose a network that includes the target in its allowed input.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>The unsmoothed row has counts \(C_{\mathrm{investors},\mathrm{panicked}}=2\), \(C_{\mathrm{investors},\mathrm{celebrated}}=1\), total 3. It assigns \(2/3,1/3\), with zero on all nine other outputs. Add-one smoothing across all eleven outputs has denominator \(3+11=14\), so the two reactions receive \(3/14,2/14\) and every other output, including EOS, receives \(1/14\). A context that never appears has no unique unsmoothed estimate; add-one supplies a uniform eleven-way row instead.</p>
+<p>Each newswire document has seven lexical words. Inputs are BOS followed by all seven words; targets are the seven words followed by EOS. There are eight valid targets per document and 24 across the corpus. No EOS-to-<em>The</em> event links neighboring documents. EOS is a real supervised target, whereas padding is not.</p>
+<p>For loss sums 2 and 9 with target counts 1 and 3, token mean is \((2+9)/(1+3)=11/4\). Equal document weighting gives \((2/1+9/3)/2=5/2\). The longer document has three times the target weight in the first objective but the same total document weight in the second. Both are definable objectives; they are not interchangeable implementation details.</p>
+<p>Writing one-target loss as \(\log\sum_k e^{z_k}-z_r\) gives derivative \(p_k-\mathbf1\{k=r\}\). With a token mean, multiply it by \(m_{bt}/K\). A model given the target token can fit an identity-copy shortcut, lowering training loss without predicting an unavailable next token. Correct target shifting and whole-network causality remove that particular leakage route. They do not establish held-out performance.</p>
+</details>
+
+<h3>Exercise 3: complete sequence probability can reverse a greedy decision</h3>
+<p>Enumerate the two-position \(\{a,b\}\) model from the task section. Give greedy and MAP outputs and their probabilities. If tokens are sampled from the stipulated kernels, calculate the chance of obtaining the MAP sequence. Explain whether greedy, MAP, or sampling establishes a factual claim about a news event.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Initial mass is \((3/5,2/5)\). The second row after \(a\) is \((3/5,2/5)\), and after \(b\) it is \((1,0)\). Multiplying conditionals gives \(aa:9/25,ab:6/25,ba:10/25,bb:0\), summing to one. Greedy first selects \(a\), then \(a\), because each local row's first entry is largest. It obtains \(9/25\). Exhaustive MAP selects \(ba\) with \(10/25=2/5\).</p>
+<p>Sampling preserves these joint masses, so a single independent run produces the MAP string with probability \(2/5\). With \(n\) independent runs, the chance of seeing it at least once is \(1-(3/5)^n\). This calculation assumes the original kernels, not temperature- or top-k-modified rows, and independent random trajectories.</p>
+<p>The horizon and alphabet make MAP finite and attained; changing to arbitrary completed strings changes the optimization domain. All three procedures depend only on the fitted probabilities. None verifies what occurred in a news event. That requires a separate source-supported claim criterion and evaluation of the generated response.</p>
+</details>
+
+<h3>Exercise 4: prove a cache boundary rather than inferring it from a mask</h3>
+<p>For the two-position attention construction, calculate the second output. Replace the second representation \((1,\log3)\) by \((0,\log3)\) and recompute the weights. Prove the cache-reuse condition for a causal stack, determine what an edit at position \(j\) can invalidate, and give a counterexample to “fixed MLP weights imply fixed input sensitivity.”</p>
+<details class="solution"><summary>Full solution</summary>
+<p>The projection columns select queries from the first feature, keys from the second, and values from the first. Original query 1 compares keys 0 and \(\log3\), so exponentiated scores are 1 and 3. Weights are \((1/4,3/4)\), and values \((0,1)\) give output \(3/4\). After the edit the query is zero, both scores are zero, and weights are \((1/2,1/2)\). Both values are now zero, giving output zero. The weights were data-dependent although the projection parameters were unchanged.</p>
+<p>For a causal stack, assume input representations at old positions depend only on their own token and fixed positions. Assume each layer reads only positions at or before its query and otherwise uses tokenwise functions with unchanged parameters/evaluation state. Extending the suffix leaves the earlier layer-zero representations unchanged. If the earlier representations are unchanged at a layer, every earlier query reads the same allowed representations at the next layer, so its result is unchanged. Induction over layers establishes prefix-key/value reuse.</p>
+<p>An edit at \(j\) preserves the input before \(j\), but later queries can read the changed representation and pass its influence through subsequent layers. Retain the cache strictly before \(j\) and recompute affected positions from \(j\) onward under these assumptions. A value vector containing a future token before masking, or a normalization over all time positions, violates the induction. The triangular pattern alone is insufficient.</p>
+<p>The fixed ReLU function \(\max(0,a-b)\) has derivative with respect to \(a\) equal to one for \(a\gt b\) and zero for \(a\lt b\). Its sensitivity changes with input without any parameter update. Attention provides structured learned weighting; the flattened affine parameter count and this nonlinear counterexample address different properties.</p>
+</details>
+
+<h3>Exercise 5: preference optimization can reverse a reaction without observing it</h3>
+<p>For reference probabilities \((2/3,1/3)\), rewards \((0,\log4)\), and \(\beta=1\), derive the finite KL-regularized optimum and its objective value. Prove uniqueness. What happens to an additional completion with reference probability zero? If a test records zero failures in 100 independent identical Bernoulli trials, calculate the stated one-sided upper bound and identify the assumptions it needs.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Unnormalized tilted weights are \((2/3,4/3)\), with sum \(Z=2\). Thus \(q_*=(1/3,2/3)\). Its expected reward is \((2/3)\log4\). Its KL from the reference is \((1/3)\log(1/2)+(2/3)\log2=(1/3)\log2\). Subtracting gives \((4/3-1/3)\log2=\log2=\log Z\).</p>
+<p>For any allowed \(q\), expanding \(\log(q/q_*)\) gives \(F(q)=\log Z-D_{\rm KL}(q\|q_*)\). To see nonnegativity, apply \(-\log v\ge1-v\) with \(v=q_*/q\) on positive \(q\) coordinates and sum. The result is at least zero; equality requires matching all positive coordinates and placing no remaining mass elsewhere, hence \(q=q_*\). This proves the unique optimum of the stipulated finite distributional problem.</p>
+<p>A completion with \(q_0=0\) cannot receive positive admissible mass because its reference KL would be infinite. A large reward on it does not remove that support restriction. Preference optimization has changed which reaction is most probable without supplying an observed investor reaction. A factual criterion must be checked separately; PPO training in a restricted neural family also need not attain this ideal finite optimum.</p>
+<p>Under the independent identical-trial Bernoulli model, zero failures has probability \((1-R)^{100}\). Equating this to 0.05 gives the upper bound \(R=1-0.05^{1/100}\approx0.029513\). This is not a claim of zero risk. Correlated prompts, changed prompt populations, adaptive attack selection, or a different decoder invalidate the simple identical-independent sampling interpretation.</p>
+</details>
+
+<h3>Exercise 6: representation and resource choices require a common unit</h3>
+<p>Apply the two byte merges to \(\texttt{ababa}\), then apply the single rule \((\texttt{a},\texttt{a})\) to \(\texttt{aaa}\). Prove byte reconstruction and explain the unknown-character qualification of character BPE. Compute 70-billion-parameter BF16, ideal two-bit, and stipulated 16-byte training-state storage; derive the two tensor-parallel output combinations. Finally solve the stipulated scaling surrogate with \(a=b=\alpha=\beta=1,C/\kappa=100\).</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Singleton \(\texttt{a,b,a,b,a}\) first becomes \(\texttt{ab,ab,a}\) and then \(\texttt{ab,aba}\). Nonoverlapping left-to-right merging of \(\texttt{aaa}\) gives \(\texttt{aa,a}\). Each replacement concatenates exactly two adjacent byte strings, preserving their underlying concatenation. Induction over all replacements proves reconstruction. The full byte alphabet covers arbitrary finite bytes; character BPE needs an initial character representation or a fallback for a new character. Neither construction proves semantic understanding, and arbitrary generated bytes may be invalid UTF-8.</p>
+<p>BF16 weight storage is \(70\times10^9\times2=140\times10^9\) bytes. Ideal two-bit storage is \(70\times10^9\times2/8=17.5\times10^9\) bytes, eight times smaller than BF16. The declared training-state accounting gives \(70\times10^9\times16=1.12\times10^{12}\) bytes. Quantization metadata, activations, caches, temporary memory, and runtime overhead are outside these raw calculations.</p>
+<p>Partitioning the contracted feature axis gives \(xW=x_1W_1+x_2W_2\), so matching partial outputs must be summed. Partitioning output columns gives \(x[W_1\ W_2]=[xW_1\ xW_2]\), so different output blocks are concatenated. Applying the wrong collective can produce a shape-compatible answer to a different contraction.</p>
+<p>The fixed budget gives \(M=100/N\) and excess loss \(f(N)=1/N+N/100\). Its derivative \(-1/N^2+1/100\) vanishes at positive \(N=10\), yielding \(M=10\). The second derivative \(2/N^3\gt0\) and divergent end behavior establish the unique minimum 0.2. Allocating \((N,M)=(100,1)\) gives 1.01 instead. These stipulated coefficients are not empirical scaling fits; a different budget model or loss fit can select a different allocation. Comparing tokenizer-specific token losses without accounting for units similarly obscures which objective is being optimized.</p>
+</details>
+</section>
+
+<section><h2 id="references">18. Primary references and the scope of the conclusions</h2>
+<p>The finite model explains probability normalization, stopping, count-based estimation, token-weighted likelihood, a decoding counterexample, and support-constrained preference reweighting. It does not predict a real investor reaction, train a large language model, certify a safety policy, or establish a current market comparison. The recording supplies topic order and navigation times; automatic transcription is not human-verified wording. The source deck and primary papers resolve technical notation and the scoped historical claims.</p>
+<ul>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/language_models.pdf">Stanford CS221, Ken Liu, Introduction to Language Models, November 17, 2025, pinned official slide deck</a>: representation, chain rule, n-grams, shifted targets, task conditioning, architecture, pre/post-training, tokenization, systems, and dated ecosystem overview. The chapter corrects illustrative ID/normalization and unit discrepancies; its program is original.</li>
+<li><a href="https://arxiv.org/abs/2407.21783v3">The Llama 3 Herd of Models</a>, retained v3 PDF pages 1–2 and 8: reported 405B/15.6T/3.8e25 scale, post-training recipe, measured iso-compute fits versus extrapolation. These are reported historical values.</li>
+<li><a href="https://arxiv.org/abs/2505.09388v1">Qwen3 Technical Report</a>, PDF pages 1, 3–4: 36T training tokens, byte-level tokenizer identification, diverse/synthetic data and stages. Token-to-word/byte conversions here are separate assumptions.</li>
+<li><a href="https://arxiv.org/abs/1706.03762v7">Vaswani et al., Attention Is All You Need</a>, PDF pages 3–5, §§3.1–3.4: shifted targets, causal masking, projected scaled dot-product attention, positionwise feed-forward sharing. Cache induction and numerical constructions are original extensions.</li>
+<li><a href="https://arxiv.org/abs/1810.04805v2">Devlin et al., BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</a>, PDF page 4, §3.1: masked-position objective and its replacement scheme, distinct from autoregressive generation.</li>
+<li><a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf">Radford et al., Language Models are Unsupervised Multitask Learners</a>, 2019 report PDF pages 1–2, §2: task/input/output conditioning and bounded task-transfer experiments.</li>
+<li><a href="https://arxiv.org/abs/2005.14165v4">Brown et al., Language Models are Few-Shot Learners</a>, PDF pages 1, 3, 6–7: definition and evaluation distinction between task fine-tuning and fixed-parameter context demonstrations; reported successes do not certify all tasks.</li>
+<li><a href="https://arxiv.org/abs/2001.08361v1">Kaplan et al., Scaling Laws for Neural Language Models</a>, PDF pages 1–2: empirical loss-scaling scope. The chapter makes no unrestricted extrapolation or current leaderboard claim.</li>
+<li><a href="https://arxiv.org/abs/2203.15556v1">Hoffmann et al., Training Compute-Optimal Large Language Models</a>, retained v1 PDF pages 1–2 and 5–6: fixed-compute tradeoff, measured curves, and proposed parametric loss form. The allocation derivation and unit-coefficient example are original conditional mathematics.</li>
+<li><a href="https://arxiv.org/abs/2203.02155v1">Ouyang et al., Training language models to follow instructions with human feedback</a>, PDF pages 1–9, especially Figure 2 and §3.5: SFT/comparison/reward/PPO pipeline, labeler-population limits, logistic comparison fitting, reference log-ratio penalty, and residual mistakes. The finite tilt is an original idealized optimization, not the reported PPO implementation.</li>
+<li><a href="https://aclanthology.org/P16-1162/">Sennrich, Haddow, and Birch, Neural Machine Translation of Rare Words with Subword Units</a>, PDF pages 3–4, §3.2, Algorithm 1, Figure 1, and footnote 3: character-based within-word BPE and coverage qualification. The byte program is a separate declared construction.</li>
+<li><a href="https://arxiv.org/abs/2205.14135v2">Dao et al., FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness</a>, PDF pages 1–4, §§2–3: memory hierarchy, arithmetic intensity, tiling and recomputation. No published speedup is transferred to this CPU program.</li>
+</ul>
+</section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-16-first-order-logic-and-structured-inference.html">Previous available chapter</a><a href="index.html">Lecture index</a><a rel="next" href="lecture-18-ai-society-objectives-audits-and-release.html">Next available chapter</a></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

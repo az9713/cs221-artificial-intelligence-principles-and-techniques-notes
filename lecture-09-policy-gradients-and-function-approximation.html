@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="4c8af58a4758fb5a94319ad4dada45e1d8f8c3c5d23fa1d1f3b5683dda3117ad"><title>Policy gradients: learning the decision rule from reward · CS221: Artificial Intelligence: Principles and Techniques</title>
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="5a9e01553789aae5ea1ca69ca79c0ad9dc1ea169c0552a872359450f50534b6e"><title>Policy gradients: learning the decision rule from reward · CS221: Artificial Intelligence: Principles and Techniques</title>
 <link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
 <script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
 <body><a class="skip" href="#main">Skip to content</a>
@@ -167,6 +167,7 @@ and denominator. Bernoulli policies have strict positive two-action support.
 All scores differentiate an implicit logit, not its probability parameter.
 No random training, files, network, global state or caller mutation occurs.
 &quot;&quot;&quot;
+
 from fractions import Fraction
 from itertools import combinations, product
 import json
@@ -174,42 +175,47 @@ import json
 
 def rational(value, label):
     if type(value) not in (int, Fraction):
-        raise ValueError(label + &#x27; must be an int or Fraction, excluding bool&#x27;)
+        raise ValueError(
+            label + (&quot; must be an int or Fraction, excluding bool&quot;)
+        )
     value = Fraction(value)
-    if (abs(value.numerator).bit_length() &gt; 128
-            or value.denominator.bit_length() &gt; 128):
-        raise ValueError(label + &#x27; numerator/denominator exceed 128 bits&#x27;)
+    if (
+        abs(value.numerator).bit_length() &gt; 128
+        or value.denominator.bit_length() &gt; 128
+    ):
+        raise ValueError(label + &quot; numerator/denominator exceed 128 bits&quot;)
     return value
 
 
 def vector(values, label):
     if type(values) not in (list, tuple) or not 1 &lt;= len(values) &lt;= 64:
-        raise ValueError(label + &#x27; must be a list/tuple of 1..64 outcomes&#x27;)
+        raise ValueError(label + &quot; must be a list/tuple of 1..64 outcomes&quot;)
     return tuple(rational(x, label) for x in values)
 
 
 def probability(p):
-    p = rational(p, &#x27;policy probability&#x27;)
+    p = rational(p, &quot;policy probability&quot;)
     if not 0 &lt; p &lt; 1:
-        raise ValueError(&#x27;policy probability must have strict support: 0&lt;p&lt;1&#x27;)
+        raise ValueError(&quot;policy probability must have strict support: 0&lt;p&lt;1&quot;)
     return p
 
 
 def _moments(weights, values):
     &quot;&quot;&quot;Internal exact arithmetic may grow beyond public-input bit bounds.&quot;&quot;&quot;
-    mean = sum((w*x for w, x in zip(weights, values)), Fraction(0))
-    variance = sum((w*(x-mean)**2 for w, x in zip(weights, values)),
-                   Fraction(0))
+    mean = sum((w * x for w, x in zip(weights, values)), Fraction(0))
+    variance = sum(
+        (w * (x - mean) ** 2 for w, x in zip(weights, values)), Fraction(0)
+    )
     return mean, variance
 
 
 def moments(weights, values):
     &quot;&quot;&quot;Exact normalized population mean and variance, not sample variance.&quot;&quot;&quot;
-    weights, values = vector(weights, &#x27;weights&#x27;), vector(values, &#x27;values&#x27;)
+    weights, values = vector(weights, &quot;weights&quot;), vector(values, &quot;values&quot;)
     if len(weights) != len(values) or any(w &lt; 0 for w in weights):
-        raise ValueError(&#x27;nonnegative weights need matching values&#x27;)
+        raise ValueError(&quot;nonnegative weights need matching values&quot;)
     if sum(weights) != 1:
-        raise ValueError(&#x27;weights must sum exactly to one&#x27;)
+        raise ValueError(&quot;weights must sum exactly to one&quot;)
     return _moments(weights, values)
 
 
@@ -217,80 +223,94 @@ def score(p, action):
     &quot;&quot;&quot;d log Bernoulli(A;p(theta))/d theta for p(theta)=sigmoid(theta).&quot;&quot;&quot;
     p = probability(p)
     if type(action) is not int or action not in (0, 1):
-        raise ValueError(&#x27;action must be built-in integer 0 or 1&#x27;)
-    return action-p
+        raise ValueError(&quot;action must be built-in integer 0 or 1&quot;)
+    return action - p
 
 
 def bandit(p, rewards=(1, 3), baseline=0):
     p = probability(p)
-    rewards = vector(rewards, &#x27;rewards&#x27;)
-    baseline = rational(baseline, &#x27;baseline&#x27;)
+    rewards = vector(rewards, &quot;rewards&quot;)
+    baseline = rational(baseline, &quot;baseline&quot;)
     if len(rewards) != 2:
-        raise ValueError(&#x27;bandit requires two rewards&#x27;)
-    weights = (1-p, p)
-    samples = tuple((rewards[a]-baseline)*score(p, a) for a in (0, 1))
+        raise ValueError(&quot;bandit requires two rewards&quot;)
+    weights = (1 - p, p)
+    samples = tuple((rewards[a] - baseline) * score(p, a) for a in (0, 1))
     mean, variance = _moments(weights, samples)
     value, _ = _moments(weights, rewards)
-    optimum_baseline = p*rewards[0]+(1-p)*rewards[1]
-    return {&#x27;value&#x27;: value, &#x27;gradient&#x27;: mean, &#x27;variance&#x27;: variance,
-            &#x27;samples&#x27;: samples, &#x27;optimal_baseline&#x27;: optimum_baseline}
+    optimum_baseline = p * rewards[0] + (1 - p) * rewards[1]
+    return {
+        &quot;value&quot;: value,
+        &quot;gradient&quot;: mean,
+        &quot;variance&quot;: variance,
+        &quot;samples&quot;: samples,
+        &quot;optimal_baseline&quot;: optimum_baseline,
+    }
 
 
 def off_policy(p, behavior_p, rewards=(1, 3)):
     p, behavior_p = probability(p), probability(behavior_p)
-    rewards = vector(rewards, &#x27;rewards&#x27;)
+    rewards = vector(rewards, &quot;rewards&quot;)
     if len(rewards) != 2:
-        raise ValueError(&#x27;two rewards required&#x27;)
-    target = (1-p, p)
-    behavior = (1-behavior_p, behavior_p)
-    scores = tuple((rewards[a]*score(p, a)) for a in (0, 1))
+        raise ValueError(&quot;two rewards required&quot;)
+    target = (1 - p, p)
+    behavior = (1 - behavior_p, behavior_p)
+    scores = tuple((rewards[a] * score(p, a)) for a in (0, 1))
     # Products/ratios are internal exact arithmetic, not fresh public inputs.
-    naive = sum(behavior[a]*scores[a] for a in (0, 1))
-    corrected = sum(behavior[a]*(target[a]/behavior[a])*scores[a]
-                    for a in (0, 1))
+    naive = sum(behavior[a] * scores[a] for a in (0, 1))
+    corrected = sum(
+        behavior[a] * (target[a] / behavior[a]) * scores[a] for a in (0, 1)
+    )
     return naive, corrected
 
 
 def two_round(p, gamma=Fraction(1, 2)):
     &quot;&quot;&quot;R1=2*A0, R2=1+2*A1, shared policy, independent decisions.&quot;&quot;&quot;
-    p, gamma = probability(p), rational(gamma, &#x27;discount&#x27;)
+    p, gamma = probability(p), rational(gamma, &quot;discount&quot;)
     if not 0 &lt;= gamma &lt;= 1:
-        raise ValueError(&#x27;discount must be in [0,1]&#x27;)
+        raise ValueError(&quot;discount must be in [0,1]&quot;)
     value = full = correct = missing = Fraction(0)
     for a0, a1 in product((0, 1), repeat=2):
-        weight = (p if a0 else 1-p)*(p if a1 else 1-p)
-        r1, r2 = 2*a0, 1+2*a1
-        g0 = r1+gamma*r2
+        weight = (p if a0 else 1 - p) * (p if a1 else 1 - p)
+        r1, r2 = 2 * a0, 1 + 2 * a1
+        g0 = r1 + gamma * r2
         u0, u1 = score(p, a0), score(p, a1)
-        value += weight*g0
-        full += weight*g0*(u0+u1)
-        correct += weight*(u0*g0+gamma*u1*r2)
-        missing += weight*(u0*g0+u1*r2)
-    return {&#x27;value&#x27;: value, &#x27;full&#x27;: full, &#x27;return_to_go&#x27;: correct,
-            &#x27;missing_outer_discount&#x27;: missing}
+        value += weight * g0
+        full += weight * g0 * (u0 + u1)
+        correct += weight * (u0 * g0 + gamma * u1 * r2)
+        missing += weight * (u0 * g0 + u1 * r2)
+    return {
+        &quot;value&quot;: value,
+        &quot;full&quot;: full,
+        &quot;return_to_go&quot;: correct,
+        &quot;missing_outer_discount&quot;: missing,
+    }
 
 
 def four_point():
-    weights = (Fraction(1, 4),)*4
+    weights = (Fraction(1, 4),) * 4
     values = (-4, -6, 6, 8)
     single = moments(weights, values)
-    iid_means = tuple(Fraction(x+y, 2) for x, y in product(values, repeat=2))
-    distinct_means = tuple(Fraction(x+y, 2) for x, y in combinations(values, 2))
-    adjusted = tuple(x-c for x, c in zip(values, (-6, -6, 6, 6)))
-    return {&#x27;single&#x27;: single,
-            &#x27;iid_pair&#x27;: moments((Fraction(1, 16),)*16, iid_means),
-            &#x27;distinct_pair&#x27;: moments((Fraction(1, 6),)*6, distinct_means),
-            &#x27;control_variate&#x27;: moments(weights, adjusted)}
+    iid_means = tuple(Fraction(x + y, 2) for x, y in product(values, repeat=2))
+    distinct_means = tuple(
+        Fraction(x + y, 2) for x, y in combinations(values, 2)
+    )
+    adjusted = tuple(x - c for x, c in zip(values, (-6, -6, 6, 6)))
+    return {
+        &quot;single&quot;: single,
+        &quot;iid_pair&quot;: moments((Fraction(1, 16),) * 16, iid_means),
+        &quot;distinct_pair&quot;: moments((Fraction(1, 6),) * 6, distinct_means),
+        &quot;control_variate&quot;: moments(weights, adjusted),
+    }
 
 
 def residual_gradients(x, y, reward=1, gamma=Fraction(1, 2)):
     &quot;&quot;&quot;Full squared residual versus fixed-target semi-gradient in x,y.&quot;&quot;&quot;
-    x, y = rational(x, &#x27;x&#x27;), rational(y, &#x27;y&#x27;)
-    reward, gamma = rational(reward, &#x27;reward&#x27;), rational(gamma, &#x27;discount&#x27;)
+    x, y = rational(x, &quot;x&quot;), rational(y, &quot;y&quot;)
+    reward, gamma = rational(reward, &quot;reward&quot;), rational(gamma, &quot;discount&quot;)
     if not 0 &lt;= gamma &lt;= 1:
-        raise ValueError(&#x27;discount must be in [0,1]&#x27;)
-    residual = x-reward-gamma*y
-    return (2*residual, -2*gamma*residual), (2*residual, Fraction(0))
+        raise ValueError(&quot;discount must be in [0,1]&quot;)
+    residual = x - reward - gamma * y
+    return (2 * residual, -2 * gamma * residual), (2 * residual, Fraction(0))
 
 
 def stringify(value):
@@ -305,26 +325,34 @@ def stringify(value):
 
 def report():
     p = Fraction(1, 4)
-    rows = {str(b): bandit(p, baseline=b)
-            for b in (0, Fraction(5, 2), 100)}
+    rows = {str(b): bandit(p, baseline=b) for b in (0, Fraction(5, 2), 100)}
     # Explicitly wrong action-dependent baseline and reversed critic cases.
-    action_dependent = sum(w*(r-r)*score(p, a)
-                           for a, w, r in ((0, 1-p, 1), (1, p, 3)))
-    reversed_critic = sum(w*q*score(p, a)
-                          for a, w, q in ((0, 1-p, 3), (1, p, 1)))
-    compatible = sum(w*(2*score(p, a))*score(p, a)
-                     for a, w in ((0, 1-p), (1, p)))
-    return stringify({&#x27;bandit_baselines&#x27;: rows,
-                      &#x27;action_dependent_baseline_gradient&#x27;: action_dependent,
-                      &#x27;off_policy_naive_corrected&#x27;: off_policy(p, 1-p),
-                      &#x27;two_round&#x27;: two_round(p),
-                      &#x27;critic_reversed_compatible&#x27;: (reversed_critic, compatible),
-                      &#x27;four_point_mean_variance&#x27;: four_point(),
-                      &#x27;one_hot_selected_other&#x27;: (2*Fraction(1, 10), Fraction(1, 10)),
-                      &#x27;squared_full_detached_gradient&#x27;: residual_gradients(0, 0)})
+    action_dependent = sum(
+        w * (r - r) * score(p, a) for a, w, r in ((0, 1 - p, 1), (1, p, 3))
+    )
+    reversed_critic = sum(
+        w * q * score(p, a) for a, w, q in ((0, 1 - p, 3), (1, p, 1))
+    )
+    compatible = sum(
+        w * (2 * score(p, a)) * score(p, a) for a, w in ((0, 1 - p), (1, p))
+    )
+    return stringify(
+        {
+            &quot;bandit_baselines&quot;: rows,
+            &quot;action_dependent_baseline_gradient&quot;: action_dependent,
+            &quot;off_policy_naive_corrected&quot;: off_policy(p, 1 - p),
+            &quot;two_round&quot;: two_round(p),
+            (&quot;critic_reversed_compatible&quot;): (reversed_critic, compatible),
+            &quot;four_point_mean_variance&quot;: four_point(),
+            ((
+                &#x27;one_hot_selected_other&#x27;
+            )): (2 * Fraction(1, 10), Fraction(1, 10)),
+            (&quot;squared_full_detached_gradient&quot;): residual_gradients(0, 0),
+        }
+    )
 
 
-if __name__ == &#x27;__main__&#x27;:
+if __name__ == &quot;__main__&quot;:
     print(json.dumps(report(), indent=2))
 </code></pre></div>
 <p>Running <code>python -I -B programs/chapter09.py</code> from the book folder produces:</p>

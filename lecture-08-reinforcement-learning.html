@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="9fd41d0061718308556e055bc9274835173b855916e51e0b192ab5fca918a87c"><title>Reinforcement learning · CS221: Artificial Intelligence: Principles and Techniques</title>
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="4a22484d4510eda5c85b347160bcefce72fe8ace0904ee08fc3d4e6bc7373632"><title>Reinforcement learning · CS221: Artificial Intelligence: Principles and Techniques</title>
 <link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
 <script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
 <body><a class="skip" href="#main">Skip to content</a>
@@ -112,12 +112,13 @@ Q_{k+1}(S_t,A_t)=Q_k(S_t,A_t)+\alpha_k[Y_k^*-Q_k(S_t,A_t)].\]
 <p><code>train</code> uses a local seeded <code>random.Random</code>, caches/executes the selected next action, and returns the learned table, pair visits and training returns. Its displayed 2,000-episode runs use \(\gamma=0.9\), \(\epsilon=0.2\) and pair rate \((i+1)^{-0.7}\). The oracle uses the exact rational discount \(9/10\); binary64 training approximates that decimal parameter. This discounted objective differs from literal undiscounted expected minutes. Neither the finite budget nor a positive minimum visit count proves the infinite-coverage condition or SARSA optimality. The 500-episode model-based exploration phase is also seeded, then planning and exploitation are frozen separately.</p>
 <p><code>exact_policy_value</code> is a held-out rational oracle, not data given to the learner. It accepts a complete admissible deterministic policy, or computes the true route optimum by backward self-loop elimination. For discount \(\gamma\), a repeated-tram branch solves \(v=-2+\gamma p v+\gamma(1-p)V(2s)\), yielding \((-2+\gamma(1-p)V(2s))/(1-\gamma p)\); walking gives \(-1+\gamma V(s+1)\). Their maximum satisfies the original optimality equation by the branch argument of Chapter 7. The oracle's discount/failure fractions have denominator at most \(10^{12}\), with failure below one. Evaluating a frozen policy here is exact under the stipulated true model, not a measurement of an actual commuter.</p>
 <p>The code below is exactly the downloadable source, and the output is its actual seeded stdout. All three displayed frozen greedy policies happen to attain the same oracle start value in these runs. This observation does not rank sample efficiency, establish optimality for another seed, or prove the learned Q tables equal \(Q^*\). SARSA still trains with exploratory continuation; its extracted greedy policy is a separately evaluated object.</p>
-<pre><code class="language-python" id="program-source">&quot;&quot;&quot;Original tabular RL mechanics; standard library, no file/network effects.
+<pre><code class="language-python" id="program-source">&#x27;Original tabular RL mechanics; standard library, no &#x27; \
+    &#x27;file/network effects.\n\nKnown finite state/action &#x27; \
+    &#x27;catalogue; unknown transition probabilities/rewards.\n&#x27; \
+    &#x27;Invalid inputs and nonrepresentable nonzero arithmetic &#x27; \
+    &#x27;raise ValueError;\nunfinished episodes raise &#x27; \
+    &#x27;RuntimeError. Finite runs are not convergence proofs.\n&#x27;
 
-Known finite state/action catalogue; unknown transition probabilities/rewards.
-Invalid inputs and nonrepresentable nonzero arithmetic raise ValueError;
-unfinished episodes raise RuntimeError. Finite runs are not convergence proofs.
-&quot;&quot;&quot;
 from dataclasses import dataclass
 from fractions import Fraction
 from math import isfinite
@@ -166,7 +167,9 @@ def catalogue(actions):
             raise ValueError(&quot;states must be nonempty strings&quot;)
         if not isinstance(row, (tuple, list)) or len(row) &gt; 16:
             raise ValueError(&quot;action rows must be tuple/list of length &lt;=16&quot;)
-        if any(not isinstance(a, str) or not a for a in row) or len(set(row)) != len(row):
+        if any(not isinstance(a, str) or not a for a in row) or len(
+            set(row)
+        ) != len(row):
             raise ValueError(&quot;action names must be distinct nonempty strings&quot;)
         fixed[state] = tuple(row)
     return fixed
@@ -174,9 +177,12 @@ def catalogue(actions):
 
 def tram_actions(n=10):
     integer(n, &quot;n&quot;, 2, 50)
-    return {str(s): (() if s == n else
-            ((&#x27;walk&#x27;, &#x27;tram&#x27;) if 2*s &lt;= n else (&#x27;walk&#x27;,)))
-            for s in range(1, n+1)}
+    return {
+        str(s): (
+            () if s == n else ((&quot;walk&quot;, &quot;tram&quot;) if 2 * s &lt;= n else (&quot;walk&quot;,))
+        )
+        for s in range(1, n + 1)
+    }
 
 
 @dataclass(frozen=True)
@@ -192,15 +198,28 @@ def sample_for(actions, sample):
     fixed = catalogue(actions)
     if not isinstance(sample, Sample):
         raise ValueError(&quot;feedback must be a Sample&quot;)
-    if (not isinstance(sample.state, str) or sample.state not in fixed
-            or not isinstance(sample.action, str) or sample.action not in fixed[sample.state]):
-        raise ValueError(&quot;feedback requires a declared nonterminal admissible action&quot;)
-    if not isinstance(sample.next_state, str) or sample.next_state not in fixed:
+    if (
+        not isinstance(sample.state, str)
+        or sample.state not in fixed
+        or not isinstance(sample.action, str)
+        or sample.action not in fixed[sample.state]
+    ):
+        raise ValueError(
+            &quot;feedback requires a declared nonterminal admissible action&quot;
+        )
+    if (
+        not isinstance(sample.next_state, str)
+        or sample.next_state not in fixed
+    ):
         raise ValueError(&quot;successor must be declared&quot;)
-    if type(sample.done) is not bool or sample.done != (not fixed[sample.next_state]):
+    if type(sample.done) is not bool or sample.done != (
+        not fixed[sample.next_state]
+    ):
         raise ValueError(&quot;done must agree with declared terminal successor&quot;)
     reward = finite_real(sample.reward, &quot;reward&quot;)
-    return Sample(sample.state, sample.action, reward, sample.next_state, sample.done)
+    return Sample(
+        sample.state, sample.action, reward, sample.next_state, sample.done
+    )
 
 
 def initial_q(actions):
@@ -210,7 +229,9 @@ def initial_q(actions):
 def q_for(actions, q):
     expected = initial_q(actions)
     if not isinstance(q, dict) or set(q) != set(expected):
-        raise ValueError(&quot;Q must contain exactly all admissible state-action pairs&quot;)
+        raise ValueError(
+            &quot;Q must contain exactly all admissible state-action pairs&quot;
+        )
     return {pair: finite_real(q[pair], &quot;Q value&quot;) for pair in expected}
 
 
@@ -225,10 +246,14 @@ def epsilon_probabilities(actions, q, state, epsilon):
     fixed = catalogue(actions)
     best = greedy(fixed, q, state)
     epsilon = unit(epsilon, &quot;epsilon&quot;)
-    if epsilon and epsilon/len(fixed[state]) == 0:
-        raise ValueError(&quot;positive per-action exploration probability rounds to zero&quot;)
-    return {a: epsilon/len(fixed[state]) + (1-epsilon if a == best else 0)
-            for a in fixed[state]}
+    if epsilon and epsilon / len(fixed[state]) == 0:
+        raise ValueError(
+            &quot;positive per-action exploration probability rounds to zero&quot;
+        )
+    return {
+        a: epsilon / len(fixed[state]) + (1 - epsilon if a == best else 0)
+        for a in fixed[state]
+    }
 
 
 def choose(actions, q, state, epsilon, rng):
@@ -254,56 +279,94 @@ class EmpiricalModel:
         if sum(self.counts.values()) &gt;= 1000000:
             raise ValueError(&quot;feedback budget exceeds 1000000&quot;)
         self.counts[key] = self.counts.get(key, 0) + 1
-        self.rewards[key] = self.rewards.get(key, Fraction()) + Fraction.from_float(sample.reward)
+        self.rewards[key] = self.rewards.get(
+            key, Fraction()
+        ) + Fraction.from_float(sample.reward)
 
     def row(self, state, action):
-        if (not isinstance(state, str) or state not in self.actions
-                or not isinstance(action, str) or action not in self.actions[state]):
+        if (
+            not isinstance(state, str)
+            or state not in self.actions
+            or not isinstance(action, str)
+            or action not in self.actions[state]
+        ):
             raise ValueError(&quot;row requires an admissible state-action pair&quot;)
         keys = [key for key in self.counts if key[:2] == (state, action)]
         total = sum(self.counts[key] for key in keys)
         if not total:
-            raise ValueError(&quot;unobserved action has no empirical distribution&quot;)
-        return tuple((key[2], Fraction(self.counts[key], total),
-                      self.rewards[key]/self.counts[key]) for key in keys)
+            raise ValueError(
+                (&quot;unobserved action has no empirical distribution&quot;)
+            )
+        return tuple(
+            (
+                key[2],
+                Fraction(self.counts[key], total),
+                self.rewards[key] / self.counts[key],
+            )
+            for key in keys
+        )
 
     def coverage(self):
-        return tuple((s,a) for s,row in self.actions.items() for a in row
-                     if not any(key[:2] == (s,a) for key in self.counts))
+        return tuple(
+            (s, a)
+            for s, row in self.actions.items()
+            for a in row
+            if not any(key[:2] == (s, a) for key in self.counts)
+        )
 
 
-def plan_empirical(model, gamma=.9, tolerance=1e-9, max_iterations=10000):
-    if not isinstance(model,EmpiricalModel) or model.coverage():
-        raise ValueError(&quot;planning requires feedback for every admissible pair&quot;)
-    gamma=unit(gamma,&quot;gamma&quot;)
-    if gamma==1:
+def plan_empirical(model, gamma=0.9, tolerance=1e-9, max_iterations=10000):
+    if not isinstance(model, EmpiricalModel) or model.coverage():
+        raise ValueError(
+            &quot;planning requires feedback for every admissible pair&quot;
+        )
+    gamma = unit(gamma, &quot;gamma&quot;)
+    if gamma == 1:
         raise ValueError(&quot;generic empirical planning requires discount &lt;1&quot;)
-    tolerance=finite_real(tolerance,&quot;tolerance&quot;,1e6)
-    if tolerance&lt;=0:
+    tolerance = finite_real(tolerance, &quot;tolerance&quot;, 1e6)
+    if tolerance &lt;= 0:
         raise ValueError(&quot;planning tolerance must be positive&quot;)
-    integer(max_iterations,&quot;max_iterations&quot;,1,10000)
-    rows={(s,a):model.row(s,a) for s,row in model.actions.items() for a in row}
-    rate=Fraction.from_float(gamma)
+    integer(max_iterations, &quot;max_iterations&quot;, 1, 10000)
+    rows = {
+        (s, a): model.row(s, a)
+        for s, row in model.actions.items()
+        for a in row
+    }
+    rate = Fraction.from_float(gamma)
+
     def backup(q):
-        result={}
-        for pair,row in rows.items():
-            target=Fraction()
-            for successor,prob,reward in row:
-                continuation=(max(q[(successor,a)] for a in model.actions[successor])
-                              if model.actions[successor] else 0.0)
-                target+=prob*(reward+rate*Fraction.from_float(continuation))
-            result[pair]=rounded(target,&quot;empirical backup&quot;)
+        result = {}
+        for pair, row in rows.items():
+            target = Fraction()
+            for successor, prob, reward in row:
+                continuation = (
+                    max(q[(successor, a)] for a in model.actions[successor])
+                    if model.actions[successor]
+                    else 0.0
+                )
+                target += prob * (
+                    reward + rate * Fraction.from_float(continuation)
+                )
+            result[pair] = rounded(target, &quot;empirical backup&quot;)
         return result
-    q=initial_q(model.actions)
+
+    q = initial_q(model.actions)
     if not q:
-        return q,{},0,0.0
-    for iteration in range(1,max_iterations+1):
-        q=backup(q);checked=backup(q)
-        residual=max(abs(checked[pair]-q[pair]) for pair in q)
-        bound=finite_real(residual/(1-gamma),&quot;numerical planning bound&quot;)
-        if bound&lt;=tolerance:
-            policy={s:greedy(model.actions,q,s) for s in model.actions if model.actions[s]}
-            return q,policy,iteration,bound
+        return q, {}, 0, 0.0
+    for iteration in range(1, max_iterations + 1):
+        q = backup(q)
+        checked = backup(q)
+        residual = max(abs(checked[pair] - q[pair]) for pair in q)
+        bound = finite_real(residual / (1 - gamma), (
+            &#x27;numerical planning bound&#x27;
+        ))
+        if bound &lt;= tolerance:
+            policy = {
+                s: greedy(model.actions, q, s)
+                for s in model.actions
+                if model.actions[s]
+            }
+            return q, policy, iteration, bound
     raise RuntimeError(&quot;empirical planning iteration budget exhausted&quot;)
 
 
@@ -314,14 +377,21 @@ def suffix_returns(actions, episode, gamma):
     integer(len(episode), &quot;episode length&quot;, 1, 10000)
     checked = [sample_for(actions, sample) for sample in episode]
     for i, sample in enumerate(checked):
-        if sample.done != (i == len(checked)-1):
-            raise ValueError(&quot;only the final feedback may be terminal, and it must be terminal&quot;)
-        if i and checked[i-1].next_state != sample.state:
+        if sample.done != (i == len(checked) - 1):
+            raise ValueError(
+                (
+                    &quot;only the final feedback may be terminal, and it must &quot;
+                    &quot;be terminal&quot;
+                )
+            )
+        if i and checked[i - 1].next_state != sample.state:
             raise ValueError(&quot;episode feedback must be contiguous&quot;)
-    returns, continuation = [0.0]*len(checked), Fraction()
+    returns, continuation = [0.0] * len(checked), Fraction()
     discount = Fraction.from_float(gamma)
-    for i in range(len(checked)-1,-1,-1):
-        continuation = Fraction.from_float(checked[i].reward) + discount*continuation
+    for i in range(len(checked) - 1, -1, -1):
+        continuation = (
+            Fraction.from_float(checked[i].reward) + discount * continuation
+        )
         returns[i] = rounded(continuation, &quot;suffix return&quot;)
     return tuple(returns)
 
@@ -332,148 +402,276 @@ def monte_carlo(actions, episode, gamma, first_visit=False):
     returns = suffix_returns(actions, episode, gamma)
     sums, counts = {}, {}
     for sample, value in zip(episode, returns):
-        key = (sample.state,sample.action)
+        key = (sample.state, sample.action)
         if first_visit and key in counts:
             continue
-        sums[key] = sums.get(key,Fraction()) + Fraction.from_float(value)
-        counts[key] = counts.get(key,0)+1
-    return {key: rounded(sums[key]/counts[key], &quot;MC mean&quot;) for key in sums}, counts
+        sums[key] = sums.get(key, Fraction()) + Fraction.from_float(value)
+        counts[key] = counts.get(key, 0) + 1
+    return {
+        key: rounded(sums[key] / counts[key], &quot;MC mean&quot;) for key in sums
+    }, counts
 
 
 def td_update(actions, q, sample, gamma, alpha, method, next_action=None):
     sample = sample_for(actions, sample)
-    gamma, alpha = unit(gamma,&quot;gamma&quot;), unit(alpha,&quot;alpha&quot;)
+    gamma, alpha = unit(gamma, &quot;gamma&quot;), unit(alpha, &quot;alpha&quot;)
     q = q_for(actions, q)
-    if method not in (&#x27;sarsa&#x27;,&#x27;q_learning&#x27;):
+    if method not in (&quot;sarsa&quot;, &quot;q_learning&quot;):
         raise ValueError(&quot;method must be sarsa or q_learning&quot;)
     if sample.done:
         if next_action is not None:
             raise ValueError(&quot;terminal feedback has no next action&quot;)
         bootstrap = 0.0
-    elif method == &#x27;sarsa&#x27;:
-        if not isinstance(next_action,str) or next_action not in catalogue(actions)[sample.next_state]:
-            raise ValueError(&quot;SARSA requires the actual admissible next action&quot;)
-        bootstrap = q[(sample.next_state,next_action)]
+    elif method == &quot;sarsa&quot;:
+        if (
+            not isinstance(next_action, str)
+            or next_action not in catalogue(actions)[sample.next_state]
+        ):
+            raise ValueError(
+                &quot;SARSA requires the actual admissible next action&quot;
+            )
+        bootstrap = q[(sample.next_state, next_action)]
     else:
         if next_action is not None:
-            raise ValueError(&quot;Q-learning does not consume a sampled next action&quot;)
-        bootstrap = q[(sample.next_state,greedy(actions,q,sample.next_state))]
-    target_exact = (Fraction.from_float(sample.reward) +
-                    Fraction.from_float(gamma)*Fraction.from_float(bootstrap))
+            raise ValueError(
+                &quot;Q-learning does not consume a sampled next action&quot;
+            )
+        bootstrap = q[
+            (sample.next_state, greedy(actions, q, sample.next_state))
+        ]
+    target_exact = Fraction.from_float(sample.reward) + Fraction.from_float(
+        gamma
+    ) * Fraction.from_float(bootstrap)
     target = rounded(target_exact, &quot;TD target&quot;)
-    pair = (sample.state,sample.action)
+    pair = (sample.state, sample.action)
     rate = Fraction.from_float(alpha)
-    new = rounded((1-rate)*Fraction.from_float(q[pair]) + rate*target_exact, &quot;updated Q&quot;)
+    new = rounded(
+        (1 - rate) * Fraction.from_float(q[pair]) + rate * target_exact,
+        &quot;updated Q&quot;,
+    )
     q[pair] = new
     return q, target
 
 
-def tram_step(state, action, rng, n=10, failure=.4):
+def tram_step(state, action, rng, n=10, failure=0.4):
     actions = tram_actions(n)
-    failure = unit(failure,&quot;failure&quot;)
+    failure = unit(failure, &quot;failure&quot;)
     if failure == 1:
-        raise ValueError(&quot;this simulator requires positive tram success probability&quot;)
-    if (not isinstance(state,str) or state not in actions
-            or not isinstance(action,str) or action not in actions[state]
-            or not isinstance(rng,Random)):
-        raise ValueError(&quot;step requires admissible state/action and random.Random&quot;)
+        raise ValueError(
+            &quot;this simulator requires positive tram success probability&quot;
+        )
+    if (
+        not isinstance(state, str)
+        or state not in actions
+        or not isinstance(action, str)
+        or action not in actions[state]
+        or not isinstance(rng, Random)
+    ):
+        raise ValueError(
+            &quot;step requires admissible state/action and random.Random&quot;
+        )
     s = int(state)
-    successor = s+1 if action == &#x27;walk&#x27; else (s if rng.random()&lt;failure else 2*s)
-    return Sample(state,action,-1.0 if action==&#x27;walk&#x27; else -2.0,str(successor),successor==n)
+    successor = (
+        s + 1 if action == (
+            &#x27;walk&#x27;
+        ) else (s if rng.random() &lt; failure else 2 * s)
+    )
+    return Sample(
+        state,
+        action,
+        -1.0 if action == &quot;walk&quot; else -2.0,
+        str(successor),
+        successor == n,
+    )
 
 
-def train(method, episodes=2000, seed=7, n=10, gamma=.9, epsilon=.2):
-    if method not in (&#x27;sarsa&#x27;,&#x27;q_learning&#x27;):
+def train(method, episodes=2000, seed=7, n=10, gamma=0.9, epsilon=0.2):
+    if method not in (&quot;sarsa&quot;, &quot;q_learning&quot;):
         raise ValueError(&quot;method must be sarsa or q_learning&quot;)
-    integer(episodes,&quot;episodes&quot;,1,10000);integer(seed,&quot;seed&quot;,0,2**32-1)
-    gamma,epsilon=unit(gamma,&quot;gamma&quot;),unit(epsilon,&quot;epsilon&quot;)
-    actions=tram_actions(n);q=initial_q(actions);visits={pair:0 for pair in q};rng=Random(seed)
-    training_returns=[]
+    integer(episodes, &quot;episodes&quot;, 1, 10000)
+    integer(seed, &quot;seed&quot;, 0, 2**32 - 1)
+    gamma, epsilon = unit(gamma, &quot;gamma&quot;), unit(epsilon, &quot;epsilon&quot;)
+    actions = tram_actions(n)
+    q = initial_q(actions)
+    visits = {pair: 0 for pair in q}
+    rng = Random(seed)
+    training_returns = []
     for _ in range(episodes):
-        state=&#x27;1&#x27;;action=choose(actions,q,state,epsilon,rng);episode=[]
+        state = &quot;1&quot;
+        action = choose(actions, q, state, epsilon, rng)
+        episode = []
         for _ in range(10000):
-            sample=tram_step(state,action,rng,n);episode.append(sample)
-            next_action=None if sample.done else choose(actions,q,sample.next_state,epsilon,rng)
-            pair=(state,action);visits[pair]+=1
-            alpha=(visits[pair]+1)**(-.7)
-            q,_=td_update(actions,q,sample,gamma,alpha,method,
-                           next_action if method==&#x27;sarsa&#x27; else None)
+            sample = tram_step(state, action, rng, n)
+            episode.append(sample)
+            next_action = (
+                None
+                if sample.done
+                else choose(actions, q, sample.next_state, epsilon, rng)
+            )
+            pair = (state, action)
+            visits[pair] += 1
+            alpha = (visits[pair] + 1) ** (-0.7)
+            q, _ = td_update(
+                actions,
+                q,
+                sample,
+                gamma,
+                alpha,
+                method,
+                next_action if method == &quot;sarsa&quot; else None,
+            )
             if sample.done:
-                training_returns.append(suffix_returns(actions,episode,gamma)[0]);break
+                training_returns.append(
+                    suffix_returns(actions, episode, gamma)[0]
+                )
+                break
             # The sampled SARSA target action is actually executed next.
-            state,action=sample.next_state,next_action
+            state, action = sample.next_state, next_action
         else:
-            raise RuntimeError(&quot;training rollout exhausted before terminal arrival&quot;)
-    return q,visits,tuple(training_returns)
+            raise RuntimeError(
+                &quot;training rollout exhausted before terminal arrival&quot;
+            )
+    return q, visits, tuple(training_returns)
 
 
-def exact_policy_value(policy,n=10,gamma=Fraction(9,10),failure=Fraction(2,5)):
-    actions=tram_actions(n)
-    if (not isinstance(gamma,Fraction) or not 0&lt;=gamma&lt;=1
-            or gamma.denominator&gt;10**12 or not isinstance(failure,Fraction)
-            or not 0&lt;=failure&lt;1 or failure.denominator&gt;10**12):
-        raise ValueError(&quot;oracle requires bounded rational discount and proper failure probability&quot;)
-    required={s for s in actions if actions[s]}
-    if policy is not None and (not isinstance(policy,dict) or set(policy)!=required
-            or any(not isinstance(policy[s],str) or policy[s] not in actions[s] for s in required)):
-        raise ValueError(&quot;oracle policy requires every nonterminal admissible action&quot;)
-    values={n:Fraction()}
-    for s in range(n-1,0,-1):
-        choices={&#x27;walk&#x27;:-1+gamma*values[s+1]}
-        if 2*s&lt;=n:
-            choices[&#x27;tram&#x27;]=(-2+gamma*(1-failure)*values[2*s])/(1-gamma*failure)
-        values[s]=max(choices.values()) if policy is None else choices[policy[str(s)]]
+def exact_policy_value(
+    policy, n=10, gamma=Fraction(9, 10), failure=Fraction(2, 5)
+):
+    actions = tram_actions(n)
+    if (
+        not isinstance(gamma, Fraction)
+        or not 0 &lt;= gamma &lt;= 1
+        or gamma.denominator &gt; 10**12
+        or not isinstance(failure, Fraction)
+        or not 0 &lt;= failure &lt; 1
+        or failure.denominator &gt; 10**12
+    ):
+        raise ValueError(
+            (
+                &quot;oracle requires bounded rational discount and proper &quot;
+                &quot;failure probability&quot;
+            )
+        )
+    required = {s for s in actions if actions[s]}
+    if policy is not None and (
+        not isinstance(policy, dict)
+        or set(policy) != required
+        or any(
+            not isinstance(policy[s], str) or policy[s] not in actions[s]
+            for s in required
+        )
+    ):
+        raise ValueError(
+            &quot;oracle policy requires every nonterminal admissible action&quot;
+        )
+    values = {n: Fraction()}
+    for s in range(n - 1, 0, -1):
+        choices = {&quot;walk&quot;: -1 + gamma * values[s + 1]}
+        if 2 * s &lt;= n:
+            choices[&quot;tram&quot;] = (-2 + gamma * (1 - failure) * values[2 * s]) / (
+                1 - gamma * failure
+            )
+        values[s] = (
+            max(choices.values())
+            if policy is None
+            else choices[policy[str(s)]]
+        )
     return values
 
 
 def main():
-    actions=tram_actions()
-    model=EmpiricalModel(actions)
-    for successor in [&#x27;2&#x27;]*2+[&#x27;4&#x27;]*5:
-        model.add(Sample(&#x27;2&#x27;,&#x27;tram&#x27;,-2,successor,False))
-    print(&#x27;estimated tram2 row:&#x27;, &#x27; &#x27;.join(f&#x27;{s}:P={p},r={r}&#x27; for s,p,r in model.row(&#x27;2&#x27;,&#x27;tram&#x27;)))
-    rewards=EmpiricalModel({&#x27;s&#x27;:(&#x27;go&#x27;,),&#x27;end&#x27;:()})
-    for reward in [0,4]:rewards.add(Sample(&#x27;s&#x27;,&#x27;go&#x27;,reward,&#x27;end&#x27;,True))
-    print(&#x27;stochastic reward mean:&#x27;,rewards.row(&#x27;s&#x27;,&#x27;go&#x27;)[0][2])
-    short={&#x27;1&#x27;:(&#x27;walk&#x27;,),&#x27;2&#x27;:(&#x27;tram&#x27;,),&#x27;4&#x27;:()}
-    episode=[Sample(&#x27;1&#x27;,&#x27;walk&#x27;,-1,&#x27;2&#x27;,False),Sample(&#x27;2&#x27;,&#x27;tram&#x27;,-2,&#x27;2&#x27;,False),Sample(&#x27;2&#x27;,&#x27;tram&#x27;,-2,&#x27;4&#x27;,True)]
-    print(&#x27;complete artificial-terminal4 suffixes:&#x27;,suffix_returns(short,episode,1))
-    every,_=monte_carlo(short,episode,1);first,_=monte_carlo(short,episode,1,True)
-    print(f&quot;tram2 MC: every={every[(&#x27;2&#x27;,&#x27;tram&#x27;)]:.6f}, first={first[(&#x27;2&#x27;,&#x27;tram&#x27;)]:.6f}&quot;)
-    fixture={&#x27;s&#x27;:(&#x27;go&#x27;,),&#x27;next&#x27;:(&#x27;low&#x27;,&#x27;high&#x27;),&#x27;end&#x27;:()};q=initial_q(fixture)
-    q.update({(&#x27;s&#x27;,&#x27;go&#x27;):3,(&#x27;next&#x27;,&#x27;low&#x27;):2,(&#x27;next&#x27;,&#x27;high&#x27;):8})
-    sample=Sample(&#x27;s&#x27;,&#x27;go&#x27;,-1,&#x27;next&#x27;,False)
-    for method in [&#x27;sarsa&#x27;,&#x27;q_learning&#x27;]:
-        updated,target=td_update(fixture,q,sample,.9,.5,method,&#x27;low&#x27; if method==&#x27;sarsa&#x27; else None)
-        print(f&quot;{method} target={target:.6f}, new={updated[(&#x27;s&#x27;,&#x27;go&#x27;)]:.6f}&quot;)
-    done=Sample(&#x27;s&#x27;,&#x27;go&#x27;,-1,&#x27;end&#x27;,True)
-    updated,target=td_update(fixture,q,done,.9,.5,&#x27;sarsa&#x27;)
-    print(f&quot;terminal target={target:.6f}, new={updated[(&#x27;s&#x27;,&#x27;go&#x27;)]:.6f}&quot;)
-    print(&#x27;epsilon.2 with two actions:&#x27;,epsilon_probabilities(fixture,q,&#x27;next&#x27;,.2))
-    oracle=exact_policy_value(None)[1]
-    print(f&#x27;discount.9 true optimum: {float(oracle):.6f}&#x27;)
-    fitted=EmpiricalModel(actions);rng=Random(19);empty_q=initial_q(actions)
+    actions = tram_actions()
+    model = EmpiricalModel(actions)
+    for successor in [&quot;2&quot;] * 2 + [&quot;4&quot;] * 5:
+        model.add(Sample(&quot;2&quot;, &quot;tram&quot;, -2, successor, False))
+    print(
+        &quot;estimated tram2 row:&quot;,
+        &quot; &quot;.join(f&quot;{s}:P={p},r={r}&quot; for s, p, r in model.row(&quot;2&quot;, &quot;tram&quot;)),
+    )
+    rewards = EmpiricalModel({&quot;s&quot;: (&quot;go&quot;,), &quot;end&quot;: ()})
+    for reward in [0, 4]:
+        rewards.add(Sample(&quot;s&quot;, &quot;go&quot;, reward, &quot;end&quot;, True))
+    print(&quot;stochastic reward mean:&quot;, rewards.row(&quot;s&quot;, &quot;go&quot;)[0][2])
+    short = {&quot;1&quot;: (&quot;walk&quot;,), &quot;2&quot;: (&quot;tram&quot;,), &quot;4&quot;: ()}
+    episode = [
+        Sample(&quot;1&quot;, &quot;walk&quot;, -1, &quot;2&quot;, False),
+        Sample(&quot;2&quot;, &quot;tram&quot;, -2, (&quot;2&quot;), False),
+        Sample((&quot;2&quot;), (&quot;tram&quot;), -2, (&quot;4&quot;), True),
+    ]
+    print(
+        &quot;complete artificial-terminal4 suffixes:&quot;,
+        suffix_returns(short, episode, 1),
+    )
+    every, _ = monte_carlo(short, episode, 1)
+    first, _ = monte_carlo(short, episode, 1, True)
+    print(
+        f&quot;tram2 MC: every={every[((&#x27;2&#x27;), (&#x27;tram&#x27;))]:.6f}, first={
+            first[((&#x27;2&#x27;), (&#x27;tram&#x27;))]:.6f}&quot;
+    )
+    fixture = {&quot;s&quot;: (&quot;go&quot;,), &quot;next&quot;: (&quot;low&quot;, &quot;high&quot;), &quot;end&quot;: ()}
+    q = initial_q(fixture)
+    q.update({(&quot;s&quot;, &quot;go&quot;): 3, (&quot;next&quot;, &quot;low&quot;): 2, (&quot;next&quot;, &quot;high&quot;): 8})
+    sample = Sample(&quot;s&quot;, &quot;go&quot;, -1, &quot;next&quot;, False)
+    for method in [&quot;sarsa&quot;, &quot;q_learning&quot;]:
+        updated, target = td_update(
+            fixture,
+            q,
+            sample,
+            0.9,
+            0.5,
+            method,
+            (&quot;low&quot;) if method == (&quot;sarsa&quot;) else None,
+        )
+        print(f&quot;{method} target={target:.6f}, new={updated[(&#x27;s&#x27;, &#x27;go&#x27;)]:.6f}&quot;)
+    done = Sample(&quot;s&quot;, &quot;go&quot;, -1, &quot;end&quot;, True)
+    updated, target = td_update(fixture, q, done, 0.9, 0.5, &quot;sarsa&quot;)
+    print(f&quot;terminal target={target:.6f}, new={updated[(&#x27;s&#x27;, &#x27;go&#x27;)]:.6f}&quot;)
+    print(
+        &quot;epsilon.2 with two actions:&quot;,
+        epsilon_probabilities(fixture, q, &quot;next&quot;, 0.2),
+    )
+    oracle = exact_policy_value(None)[1]
+    print(f&quot;discount.9 true optimum: {float(oracle):.6f}&quot;)
+    fitted = EmpiricalModel(actions)
+    rng = Random(19)
+    empty_q = initial_q(actions)
     for _ in range(500):
-        state=&#x27;1&#x27;
+        state = &quot;1&quot;
         for _ in range(10000):
-            action=choose(actions,empty_q,state,1,rng)
-            feedback=tram_step(state,action,rng);fitted.add(feedback)
+            action = choose(actions, empty_q, state, 1, rng)
+            feedback = tram_step(state, action, rng)
+            fitted.add(feedback)
             if feedback.done:
                 break
-            state=feedback.next_state
+            state = feedback.next_state
         else:
             raise RuntimeError(&quot;model exploration rollout exhausted&quot;)
-    _,frozen_policy,_,_=plan_empirical(fitted)
-    print(f&quot;model-based 500 explore episodes: missing pairs={len(fitted.coverage())}, frozen V={float(exact_policy_value(frozen_policy)[1]):.6f}&quot;)
-    for method in [&#x27;sarsa&#x27;,&#x27;q_learning&#x27;]:
-        learned,visits,returns=train(method)
-        policy={s:greedy(actions,learned,s) for s in actions if actions[s]}
-        frozen=exact_policy_value(policy)[1]
-        print(f&#x27;{method} finite training: min visits={min(visits.values())}, frozen greedy V={float(frozen):.6f}&#x27;)
-    print(&#x27;Finite training/evaluation figures are fixtures, not an optimum guarantee.&#x27;)
+    _, frozen_policy, _, _ = plan_empirical(fitted)
+    print(
+        f&quot;model-based 500 explore episodes: missing pairs={
+            len(fitted.coverage())
+        }, frozen V={float(exact_policy_value(frozen_policy)[1]):.6f}&quot;
+    )
+    for method in [&quot;sarsa&quot;, &quot;q_learning&quot;]:
+        learned, visits, returns = train(method)
+        policy = {
+            s: greedy(actions, learned, s) for s in actions if actions[s]
+        }
+        frozen = exact_policy_value(policy)[1]
+        print(
+            f&quot;{method} finite training: min visits={
+                min(visits.values())
+            }, frozen greedy V={float(frozen):.6f}&quot;
+        )
+    print(
+        (
+            &quot;Finite training/evaluation figures are fixtures, not &quot;
+            &quot;an optimum guarantee.&quot;
+        )
+    )
 
 
-if __name__==&#x27;__main__&#x27;:
+if __name__ == &quot;__main__&quot;:
     main()
 </code></pre><pre><code class="language-text" id="program-output">estimated tram2 row: 2:P=2/7,r=-2 4:P=5/7,r=-2
 stochastic reward mean: 2

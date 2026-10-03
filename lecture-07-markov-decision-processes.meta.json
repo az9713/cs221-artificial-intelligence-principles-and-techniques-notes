@@ -4,7 +4,7 @@
   "video_id": "2ZtF1j3n6XE",
   "source_type": "locally generated automatic speech recognition",
   "status": "author draft; independent science-editor gate6b pending",
-  "authored_body_sha256": "2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa",
+  "authored_body_sha256": "5718300930a8f835555ffefbe860abdaf61af55a1d0c7253a8bf3b3ccd60f433",
   "sections": [
     {
       "section": "case",
@@ -484,7 +484,7 @@
   ],
   "implementation": {
     "program": "programs/chapter07.py",
-    "sha256": "d762f9d424dc09583f814907cfb453924720a9a31e0d602f0b8ea4ecd51e3f26",
+    "sha256": "209b60cab0eac8eb2de4f7c7e0992d2d6e63fe9ca19e4080bcd8f6c81155375a",
     "dependencies": "Python standard library",
     "evidence": "Exact embedded source and original seeded stdout; author checks are distinct from independent review."
   },

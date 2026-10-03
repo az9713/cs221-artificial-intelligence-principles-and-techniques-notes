@@ -1,12 +1,14 @@
-"""Original bounded numerical model for Chapter 3; Python standard library only.
-
-Inputs are finite Python int/float scalars (not bool), converted to binary64.
-Scores, weights and biases have magnitude at most 1e6. Features are normalized
-nonnegative frequencies. Probabilities must sum to one within 1e-12; accepted
-vectors are renormalized. Functions do not mutate inputs or perform I/O.
-Invalid inputs raise ValueError. Direct cross entropy / KL return inf on a
-target-positive, forecast-zero coordinate. The CLI prints a teaching report.
-"""
+'Original bounded numerical model for Chapter 3; Python ' \
+    'standard library only.\n\nInputs are finite Python ' \
+    'int/float scalars (not bool), converted to binary64.\n' \
+    'Scores, weights and biases have magnitude at most 1e6. ' \
+    'Features are normalized\nnonnegative frequencies. ' \
+    'Probabilities must sum to one within 1e-12; accepted\n' \
+    'vectors are renormalized. Functions do not mutate ' \
+    'inputs or perform I/O.\nInvalid inputs raise ' \
+    'ValueError. Direct cross entropy / KL return inf on a\n' \
+    'target-positive, forecast-zero coordinate. The CLI ' \
+    'prints a teaching report.\n'
 
 import json
 import math
@@ -26,7 +28,9 @@ def _number(value, bound=None):
     try:
         out = float(value)
     except (OverflowError, ValueError) as exc:
-        raise ValueError("number cannot be represented as finite binary64") from exc
+        raise ValueError(
+            "number cannot be represented as finite binary64"
+        ) from exc
     if not math.isfinite(out):
         raise ValueError("number must be finite")
     return out
@@ -138,22 +142,38 @@ def relative_entropy(target, forecast):
         raise ValueError("probability dimensions must agree")
     if any(tj > 0 and pj == 0 for tj, pj in zip(t, p)):
         return math.inf
-    return math.fsum(tj * (math.log(tj) - math.log(pj))
-                     for tj, pj in zip(t, p) if tj > 0)
+    return math.fsum(
+        tj * (math.log(tj) - math.log(pj)) for tj, pj in zip(t, p) if tj > 0
+    )
 
 
 def encode(text, vocabulary=VOCABULARY):
     if not isinstance(text, str) or not text.split():
-        raise ValueError("review must be a nonempty string after whitespace splitting")
+        raise ValueError(
+            "review must be a nonempty string after whitespace splitting"
+        )
     if not isinstance(vocabulary, (tuple, list)) or not vocabulary:
         raise ValueError("vocabulary must be a nonempty list or tuple")
-    if any(not isinstance(v, str) or not v or v != v.lower()
-           or len(v.split()) != 1 or v.split()[0] != v for v in vocabulary):
-        raise ValueError("vocabulary entries must be unique lowercase whitespace-free strings")
+    if any(
+        not isinstance(v, str)
+        or not v
+        or v != v.lower()
+        or len(v.split()) != 1
+        or v.split()[0] != v
+        for v in vocabulary
+    ):
+        raise ValueError(
+            (
+                "vocabulary entries must be unique lowercase "
+                "whitespace-free strings"
+            )
+        )
     if len(set(vocabulary)) != len(vocabulary) or "<unk>" not in vocabulary:
         raise ValueError("vocabulary must be unique and contain <unk>")
     lookup = {piece: j for j, piece in enumerate(vocabulary)}
-    return tuple(lookup.get(piece, lookup["<unk>"]) for piece in text.lower().split())
+    return tuple(
+        lookup.get(piece, lookup["<unk>"]) for piece in text.lower().split()
+    )
 
 
 def _indices(indices, size):
@@ -161,9 +181,13 @@ def _indices(indices, size):
         raise ValueError("vocabulary size must be a positive integer")
     if not isinstance(indices, (tuple, list)) or not indices:
         raise ValueError("index sequence must be nonempty")
-    if any(isinstance(j, bool) or not isinstance(j, int) or not 0 <= j < size
-           for j in indices):
-        raise ValueError("each index must be an integer in the vocabulary range")
+    if any(
+        isinstance(j, bool) or not isinstance(j, int) or not 0 <= j < size
+        for j in indices
+    ):
+        raise ValueError(
+            "each index must be an integer in the vocabulary range"
+        )
     return tuple(indices)
 
 
@@ -183,7 +207,11 @@ def gather_mean(indices, weights):
 
 
 def affine_score(features, weights, bias):
-    x, w, b = _distribution(features), _vector(weights, LIMIT), _number(bias, LIMIT)
+    x, w, b = (
+        _distribution(features),
+        _vector(weights, LIMIT),
+        _number(bias, LIMIT),
+    )
     if len(x) != len(w):
         raise ValueError("feature and weight dimensions must agree")
     z = math.fsum(xj * wj for xj, wj in zip(x, w)) + b
@@ -205,15 +233,24 @@ def binary_objective(features, labels, weights, bias):
     r = tuple(binary_score_gradient(zi, yi) for zi, yi in zip(z, y))
     n = len(x)
     loss = math.fsum(binary_loss(zi, yi) / n for zi, yi in zip(z, y))
-    grad = tuple(math.fsum(ri * row[j] / n for ri, row in zip(r, x))
-                 for j in range(len(w)))
+    grad = tuple(
+        math.fsum(ri * row[j] / n for ri, row in zip(r, x))
+        for j in range(len(w))
+    )
     return loss, grad, math.fsum(ri / n for ri in r)
 
 
 def train(features, labels, weights, bias, learning_rate=1.0, steps=20):
     eta = _number(learning_rate, LIMIT)
-    if eta <= 0 or isinstance(steps, bool) or not isinstance(steps, int) or steps < 0:
-        raise ValueError("learning rate must be positive; steps a nonnegative integer")
+    if (
+        eta <= 0
+        or isinstance(steps, bool)
+        or not isinstance(steps, int)
+        or steps < 0
+    ):
+        raise ValueError(
+            "learning rate must be positive; steps a nonnegative integer"
+        )
     w, b = _vector(weights, LIMIT), _number(bias, LIMIT)
     history = [binary_objective(features, labels, w, b)[0]]
     for _ in range(steps):
@@ -225,38 +262,54 @@ def train(features, labels, weights, bias, learning_rate=1.0, steps=20):
 
 
 def report():
-    features = tuple(bag_of_words(encode(text), len(VOCABULARY))
-                     for text in ("good film", "bad film"))
+    features = tuple(
+        bag_of_words(encode(text), len(VOCABULARY))
+        for text in ("good film", "bad film")
+    )
     labels, zero = (1, -1), (0.0,) * len(VOCABULARY)
     first_w, first_b, first_history = train(features, labels, zero, 0, steps=1)
     final_w, final_b, history = train(features, labels, zero, 0, steps=20)
-    t, p = (.5, .2, .3), (.1, .5, .4)
+    t, p = (0.5, 0.2, 0.3), (0.1, 0.5, 0.4)
     left = bag_of_words(encode("not good but bad"), len(VOCABULARY))
     right = bag_of_words(encode("not bad but good"), len(VOCABULARY))
     return {
         "zero_score_negative_error": int(hard_label(0) != -1),
         "zero_score_nonpositive_margin_penalty": int((-1 * 0) <= 0),
         "initial_mean_loss": round(first_history[0], 12),
-        "first_step_weights": list(first_w), "first_step_bias": first_b,
+        "first_step_weights": list(first_w),
+        "first_step_bias": first_b,
         "first_step_mean_loss": round(first_history[1], 12),
         "twenty_step_mean_loss": round(history[-1], 12),
-        "twenty_step_losses_decrease": all(a > b for a, b in zip(history, history[1:])),
-        "twenty_step_training_labels": [hard_label(affine_score(row, final_w, final_b))
-                                       for row in features],
+        ("twenty_step_losses_decrease"): all(
+            a > b for a, b in zip(history, history[1:])
+        ),
+        ("twenty_step_training_labels"): [
+            hard_label(affine_score(row, final_w, final_b)) for row in features
+        ],
         "softmax_1_minus1_0": [round(v, 12) for v in softmax((1, -1, 0))],
-        "shifted_softmax_matches": softmax((1, -1, 0)) == softmax((1000, 998, 999)),
+        ("shifted_softmax_matches"): softmax((1, -1, 0))
+        == softmax((1000, 998, 999)),
         "soft_target_logit_loss": round(categorical_loss((1, -1, 0), t), 12),
-        "soft_target_logit_gradient": [round(v, 12) for v in categorical_gradient((1, -1, 0), t)],
-        "entropy": round(entropy(t), 12), "cross_entropy": round(cross_entropy(t, p), 12),
+        ("soft_target_logit_gradient"): [
+            round(v, 12) for v in categorical_gradient((1, -1, 0), t)
+        ],
+        ("entropy"): round(entropy(t), 12),
+        ("cross_entropy"): round(cross_entropy(t, p), 12),
         "KL": round(relative_entropy(t, p), 12),
         "wrong_extreme_binary_loss": binary_loss(-1000, 1),
-        "rounded_zero_forecast_fused_loss": categorical_loss((1000, -1000), (0, 1)),
+        ("rounded_zero_forecast_fused_loss"): categorical_loss(
+            (1000, -1000), (0, 1)
+        ),
         "top_class_tiny_positive": top_class((0, 1e-300)),
         "order_collision": left == right,
         "collision_minimum_mean_loss": round(binary_loss(0, 1), 12),
         "encoding_good_film_good": list(encode("good film good")),
-        "gather_and_dot_agree": gather_mean(encode("good film good"), (1, -1, 0, 0, 0))
-                                == affine_score(bag_of_words(encode("good film good"), 5), (1, -1, 0, 0, 0), 0),
+        ("gather_and_dot_agree"): gather_mean(
+            encode(("good film good")), (1, -1, 0, 0, 0)
+        )
+        == affine_score(
+            bag_of_words(encode(("good film good")), 5), (1, -1, 0, 0, 0), 0
+        ),
     }
 
 

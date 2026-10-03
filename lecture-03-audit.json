@@ -3,16 +3,15 @@
   "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
   "status": "independently reviewed and locally validated chapter",
   "independent_review": {
-    "rounds": 1,
     "gate_6b": "accepted",
-    "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "7ae40dd596c6526b750db94e7685db0b676cf2f1ea5ecbff8631141aff68fb47"
+    "passes_7_8": "accepted",
+    "report_sha256": "7ae40dd596c6526b750db94e7685db0b676cf2f1ea5ecbff8631141aff68fb47"
   },
-  "accepted_scientific_body_sha256": "426eeffceeca7168b53a6474a516945b09fad5e8c897b9577c3254be430e7d1a",
-  "accepted_metadata_sha256": "882df672ad25065d669271c76ff87bae62bae5076be24e3d92d9ef702f17530d",
-  "accepted_program_sha256": "a9525bcc62ea3c05296904b6effe4d3a48b2efc3bf143e8e106cd9b9ae9660ab",
-  "integrated_html_sha256": "461c780ce0a7e47cd68f14d5baa64cb9b20098a2fb22839de6d1a8e2cb3e8be2",
+  "accepted_scientific_body_sha256": "39fa6d7fff6ce1afbf8ea841ad37c1e613ee1f4a1bb85b9ac7cebaf8ff7ef992",
+  "accepted_metadata_sha256": "73d227ac85efba7e489252939bd6406624016ef839ecaad424f2b3ddc7d3899d",
+  "accepted_program_sha256": "7375fec2ae8f1c20855a4552a68468179446a2a1573cb9d0a0162386ab9a08f9",
+  "integrated_html_sha256": "ace464c586c307c2db54a38f3c9c9236e879739a0765db0f3243785caaebfb46",
   "worked_solutions": 6,
   "source_scope": "Full sequential transcript and official module plus recorded claim-specific primary pages; bounded inspection",
   "pass_9": {
@@ -23,13 +22,16 @@
     "human_accessibility": "not performed"
   },
   "limits": [
-    "Full20chapter course incomplete",
-    "Machine transcription is not human ASR certification",
+    "Automatic transcription is not human source certification",
     "Human keyboard/screen-reader audit unperformed",
     "No publication performed"
   ],
+  "formatting_closure": {
+    "status": "independently accepted; AST and stdout unchanged",
+    "report_sha256": "743266e53b47400a8cce76ecbf3b35fd2b2803d5020589d63cfedf2c5f68031b"
+  },
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-16 reader scope",
+    "status": "passed within complete 20-chapter reading edition",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   }

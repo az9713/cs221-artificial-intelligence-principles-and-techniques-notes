@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="a473d2529fc3afe6320e6663a69fbf0392acddd4065ef68fd3f5e40f3dbb7cf5"><title>AI and society: choosing objectives, auditing evidence and governing a release · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><h1>AI and society: choosing objectives, auditing evidence and governing a release</h1>
+<p class="subtitle">Chapter 18 · A correct calculation can still answer the wrong social question.</p>
+<section id="case">
+<h2>Which students would the service actually help?</h2>
+<p>A university is considering a multilingual student-assistance service. It can explain assignments, suggest learning resources and answer questions about administrative procedures. One candidate model has a lower average error rate. Another performs better for students using a less common language. The service can increase access, but it can also deliver misleading answers, collect sensitive information and encourage students to outsource the very reasoning they need to learn. Choosing a model is therefore only one part of choosing a service.</p>
+<p>We use this stipulated service to ask four continuing questions: whose outcomes enter the objective, what the measurements establish, where responsibilities arise in the production chain, and what changes when the model is released. The numerical tables are original teaching constructions, not measurements of a university or language community. A mathematical result about a supplied table does not establish that the table describes the people affected.</p>
+<p>The topic sequence follows <a href="https://www.youtube.com/watch?v=071zJXhvNfM">CS221 Lecture 18: AI and Society</a>. Ethical principles, subgroup auditing, alignment, copyright, transparency and openness answer different parts of the same release decision. The recording's numerical and historical claims are checked against the sources beside them; machine transcription supplies topic timing rather than authoritative wording.</p>
+</section>
+<section id="responsibility">
+<h2>1. Design choices allocate power and responsibility <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=5">[00:05–04:00]</a></h2>
+<p>The service's designers choose supported languages, data sources, retention practices, user access and whether to release model weights. These choices determine which people can use the system and which people supply its inputs. A user may experience an answer as the product of a single model, even though its language coverage depends on upstream data collection and its practical consequences depend on downstream institutional procedures.</p>
+<p>Separate control from influence. The university controls its own interface and escalation policy. It may influence a model supplier through procurement conditions, but cannot directly inspect undisclosed training decisions. Once students copy an answer into another setting, the university may have still less control. A responsible design identifies these boundaries rather than assuming that absence of total control eliminates every opportunity to reduce harm.</p>
+<p>Define the service configuration \(a\) as an element of a finite candidate set \(\mathcal A\). A configuration includes the model, interface, allowed uses and release arrangement; changing any of these may change its outcomes. Let \(g\) index a stated group in a finite set \(\mathcal G=\{1,\ldots,m\}\). Later we will measure a loss \(R_g(a)\) for each group. The groups are analysis choices, not a claim that all relevant social differences have been captured.</p>
+<p>These definitions turn “the model is good” into a more demanding question: good for which configuration, group, task and consequence? They also expose a practical failure. If the procurement report compares models in English but the deployed service promises multilingual assistance, the evidence and the service refer to different configurations. Correct arithmetic cannot repair that mismatch.</p>
+</section>
+<section id="principles">
+<h2>2. Ethical principles constrain how an objective is obtained <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=240">[04:00–06:25]</a></h2>
+<p>The <a href="https://www.hhs.gov/ohrp/regulations-and-policy/belmont-report/read-the-belmont-report/index.html">Belmont Report</a>, dated April 18, 1979, discusses respect for persons, beneficence and justice in human-subject research. Its principles concern autonomy and protection, benefits and harms, and the distribution of burdens and benefits. It supplies an analytical framework, not a formula that removes every conflict. The <a href="https://www.cdc.gov/tuskegee/about/index.html">CDC chronology</a> places the untreated syphilis study at Tuskegee in 1932–1972; 1974 is not its starting year. The report's summary separately identifies the 1974 National Research Act.</p>
+<p>For our service, a useful original application is to ask who understands and can decline data collection, which consequences the evaluation omits, and whether one population bears costs while another receives benefits. This application does not make an educational software evaluation equivalent to a biomedical research protocol. It shows why an apparently favorable numerical objective can depend on an unacceptable way of collecting evidence.</p>
+<p>Suppose the service reduces aggregate error by retaining identifiable student conversations. A loss table describing answer errors contains no variable for that retention burden. Declaring the lower-error system optimal means optimal under the table's objective. It does not mean that consent, privacy or institutional obligations have been resolved. Add a constraint or a separately evaluated outcome if it belongs in the decision; do not hide it inside the word “quality.”</p>
+<p>A constraint is also a choice requiring interpretation. An instruction such as “do not disclose student information” must specify whose information, which recipients and which authorized exceptions. A formal privacy specification can be useful, but proving compliance with a narrow specification does not prove that every person affected regards the practice as acceptable.</p>
+</section>
+<section id="dual-use">
+<h2>3. Dual use changes the question from capability to context <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=385">[06:25–08:48]</a></h2>
+<p>A dual-use technology can support beneficial and harmful uses. The same ability to write convincing explanations can help a student understand a subject or help someone fabricate misleading communications. The capability alone does not specify the user's purpose, the deployment conditions or the eventual effect.</p>
+<p>Let \(u\) denote a use context, including the user, permitted task and relevant safeguards. A configuration's outcome is more accurately written \(R_g(a,u)\). This notation does not quantify actual misuse; it states which object an evaluation would need to describe. If the university tests cooperative educational questions, those measurements do not automatically cover adversarial requests or answers reused outside the university.</p>
+<p>One response is to restrict contexts. Another is to change the interface so that unsupported administrative claims are routed to a human office. A third is to monitor outcomes and provide an appeal process. These interventions act at different points. An interface restriction cannot make the underlying training data representative, while collecting more data cannot by itself establish a legitimate appeals process.</p>
+<p>Dual use therefore prevents a simple inference from “this capability has a beneficial application” to “every release of it is beneficial.” It also prevents the opposite inference that a conceivable harmful use establishes that every beneficial application should be abandoned. A decision needs explicit alternatives and evidence about the consequences of each.</p>
+</section>
+<section id="intent-impact">
+<h2>4. Intent and impact describe different failure mechanisms <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=528">[08:48–16:49]</a></h2>
+<p>The recording organizes applications by intent and impact. Beneficial applications pair a constructive purpose with a favorable effect. Misuse involves a harmful purpose; accidents describe adverse effects despite an intended benefit. Treat this as an organizing framework, not an exhaustive partition of every stakeholder's motives or every externality. A single project can have mixed intentions and uneven effects.</p>
+<div class="table-scroll"><table><thead><tr><th>Service scenario</th><th>Intended use</th><th>Outcome requiring evidence</th></tr></thead><tbody>
+<tr><td>Explain a difficult exercise</td><td>Support learning</td><td>Whether the student can subsequently reason independently</td></tr>
+<tr><td>Generate deceptive notices</td><td>Mislead recipients</td><td>Whether distribution and detection controls reduce actual exposure</td></tr>
+<tr><td>Answer an administrative deadline question</td><td>Help a student act</td><td>Whether unsupported answers cause missed opportunities</td></tr>
+</tbody></table></div>
+<p>The first example distinguishes pedagogy from task completion. If the service immediately supplies a final answer, the user may finish the assignment while learning less. A metric counting completed tasks measures that completion. It is not automatically a measure of retained understanding. The evaluation should state the intended learning outcome and assess it separately.</p>
+<p>The accident example motivates a different repair from the misuse example. Deliberately deceptive requests may require restrictions and detection. Incorrect deadline answers may require authoritative retrieval, explicit uncertainty and escalation. A generic refusal rule can miss the second failure because the student's request is legitimate.</p>
+<p>The recording also discusses scientific, healthcare, robotics and environmental applications as possible benefits, and overreliance, unequal service and cultural homogenization as concerns. These categories identify questions to investigate. They are not numerical findings about this service, and our finite examples do not establish efficacy in those domains. In particular, an educational model's performance does not establish clinical utility.</p>
+</section>
+<section id="ecosystem">
+<h2>5. Follow the dependencies upstream and the consequences downstream <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=1009">[16:49–20:40]</a></h2>
+<p>The model is produced using data, labor, software, hardware and energy. Its answers then pass through an interface and into decisions made by people or institutions. Call the resources and activities contributing to production <em>upstream</em>; call deployment and subsequent uses <em>downstream</em>. These are positions in a dependency chain, not rankings of moral importance.</p>
+<p>For the student service, an upstream data item might be a contributed explanation. The people who wrote it may differ from the students who use the resulting system. Downstream, an answer can affect an instructor, administrator or classmate who never interacted with the interface. Counting only direct users omits those parties.</p>
+<div class="table-scroll"><table><thead><tr><th>Dependency</th><th>Question to make inspectable</th><th>What a model benchmark does not establish</th></tr></thead><tbody>
+<tr><td>Contributed data and annotations</td><td>Origin, permission, privacy and working conditions</td><td>Whether collecting or reusing the material was appropriate</td></tr>
+<tr><td>Compute and infrastructure</td><td>Measured resource use and accounting boundary</td><td>A complete environmental impact from answer accuracy</td></tr>
+<tr><td>Interface and institutional process</td><td>Allowed uses, human escalation and appeal</td><td>Whether a correct-looking answer produces a correct action</td></tr>
+<tr><td>Redistribution and later uses</td><td>Who can modify, reuse and monitor the system</td><td>Every effect after release</td></tr>
+</tbody></table></div>
+<p>A measurement boundary determines what a resource total includes. A count of inference electricity, for example, is not automatically a count of training, hardware production and facility use. We give no resource estimate here. The lesson is to define the quantity before comparing configurations, exactly as a probability calculation requires defining its conditioning event.</p>
+<p>An ecosystem view also changes where a repair is possible. A downstream answer audit can discover a language disparity. Fixing it may require upstream sampling or annotation changes, an interface change, or an institutional alternative to automated assistance. The audit locates a problem; it does not identify a unique intervention without additional evidence.</p>
+</section>
+<section id="group-audit">
+<h2>6. Average performance can hide the population that needs a repair <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=1240">[20:40–28:30]</a></h2>
+<p>Let \(X\) be a request, \(Y\) a reference outcome and \(G\) a group label. For a configuration \(a\), define a bounded loss \(\ell(a;X,Y)\in[0,1]\), with smaller values preferable. The population group risk is \(R_g(a)=\mathbb E[\ell(a;X,Y)\mid G=g]\). This conditional expectation requires a specified population and group of positive probability. A finite audit estimates it; a supplied teaching table stipulates it.</p>
+<p>If the population group proportions are \(w_g\geq0\), with \(\sum_g w_g=1\), partitioning the expectation by group gives
+\[
+R_w(a)=\sum_{g=1}^{m}w_gR_g(a).
+\]
+The weights state who counts in this average. Replacing them changes the question even when the model and every group loss stay fixed.</p>
+<p>Use two language groups with stipulated weights \(99/100\) and \(1/100\). Configuration A has losses \(1/100\) and \(4/5\); B has \(1/10\) and \(1/5\). Then
+\[
+R_w(A)=\frac{99}{100}\frac1{100}+\frac1{100}\frac45
+=\frac{179}{10000},\qquad R_w(B)=\frac{101}{1000}.
+\]
+A wins on average, while its worst-group loss \(4/5\) exceeds B's \(1/5\). The calculations disagree because average and worst-group risk are distinct objectives.</p>
+<p>If the first group's weight is \(w\), then \(R_w(A)=4/5-(79/100)w\) and \(R_w(B)=1/5-(1/10)w\). A has lower average loss precisely when \(w>20/23\), with a tie at \(20/23\). This threshold exposes why reporting an average without its population mixture is insufficient for transferring the result to another institution.</p>
+<h3>Specified group mixtures give a precise robustness statement</h3>
+<p>Define the probability simplex \(\Delta_m=\{q\in\mathbb R^m:q_g\geq0,\sum_gq_g=1\}\). For a fixed configuration and fixed group risks,
+\[
+\max_{q\in\Delta_m}\sum_gq_gR_g(a)=\max_gR_g(a).
+\]
+To prove the upper bound, replace each \(R_g(a)\) by \(M=\max_gR_g(a)\); the weighted sum is at most \(M\sum_gq_g=M\). For equality, choose a maximizing group \(g^\star\) and put all mixture mass on it. This vertex belongs to the stated simplex and attains \(M\).</p>
+<p>The result is exact for mixtures of the specified group distributions. It does not cover a new within-group distribution, an unmeasured subgroup or a change in the definition of loss. Restricting the allowable mixture set can also change the maximum; the full-simplex vertex proof should not be reused for a set that excludes that vertex.</p>
+<p><a href="https://arxiv.org/abs/1911.08731">Sagawa and colleagues' group DRO paper</a>, actual PDF pages 2–3, defines this specified-group uncertainty set and separates population risk from empirical risk. Its results emphasize worst-group generalization and regularization. Minimizing worst-group training loss is not a proof that every group's future loss is small. An overparameterized model can fit all training groups perfectly and still fail on a test group.</p>
+<h3>A measured disparity is a task-specific finding</h3>
+<p><a href="https://proceedings.mlr.press/v81/buolamwini18a/buolamwini18a.pdf">Buolamwini and Gebru's 2018 Gender Shades study</a>, PDF pages 1–2, audited commercial gender classification with intersectional phenotypic subgroups. It reported substantially different errors across the studied groups. This is not the same task as identity recognition, and its image labels do not establish gender as a universally image-readable property. The paper's benchmark and year belong beside its findings.</p>
+<p>An audit can reveal a disparity without proving why it occurred or which subsequent improvement it caused. For our service, compare data coverage, labeling, task difficulty and interface behavior before choosing a repair. Preserve group sample sizes and the uncertainty of estimated risks. A precise percentage from a small audit is still an estimate.</p>
+<h3>Ranking quality is different from a decision at a threshold</h3>
+<p>A binary evaluation has positive and negative examples. Let \(S^+\) and \(S^-\) be scores drawn independently from their respective class-conditional populations. ROC AUC is the ranking probability
+\[
+\Pr(S^+>S^-)+\tfrac12\Pr(S^+=S^-).
+\]
+Its finite pairwise estimate averages this comparison over every positive-negative pair. It does not specify a classification threshold, population prevalence or cost of an error.</p>
+<p>In an original four-example audit, group 1 has positive score \(1/5\) and negative score \(1/10\); group 2 has positive \(9/10\) and negative \(4/5\). Both within-group AUCs are one. Pooling produces four cross-class pairs: three favorable comparisons and one unfavorable comparison, so pooled AUC is \(3/4\). Averaging the two within-group AUCs gives one and misses the cross-group pair. At threshold \(1/2\), with score at or above the threshold classified positive, only two of the four labels are correct.</p>
+<p><a href="https://arxiv.org/abs/1909.12475">Oakden-Rayner and colleagues</a>, PDF pages 2–4, distinguish methods for investigating hidden stratification. Their chest-radiograph audit reports AUC \(0.87\) overall, \(0.94\) with chest drains and \(0.77\) without drains. These are ranking results, not accuracy percentages. The process-related correlate motivates examining subgroups and intended use; it does not give our service a medical decision rule or establish that every remaining error is caused by that correlate.</p>
+</section>
+<section id="alignment">
+<h2>7. Alignment requires a specification, a value choice and credible oversight <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=1710">[28:30–35:58]</a></h2>
+<p>A reward or objective represents what an optimizer is instructed to prefer. It need not represent every outcome its designer wants. For the student service, suppose candidate actions are different response styles, and the proxy score rewards immediate user approval. A flattering answer can score well even when it reinforces a misconception. The specification error is the difference between the supplied score and the intended educational consequence.</p>
+<p>Write \(\widehat U(a)\) for the proxy and \(U(a)\) for a stipulated target value, using larger values as preferable. For four actions, let the proxy values be \(0,1,2,3\) and target values \(0,1,4/5,-1\). Maximizing the proxy selects the fourth action; maximizing the target selects the second. Target regret is \(1-(-1)=2\). This finite counterexample proves that the objectives can disagree. It does not establish a universal curve relating optimization strength to harm.</p>
+<p>The same distinction appears in software evaluation. Passing a test suite means satisfying the assertions that were run under their test conditions. If the suite omits a consequential behavior, passing it cannot establish that behavior. Exhaustive checking can establish every case of a specified finite contract; it does not turn that contract into a complete specification of an unrestricted deployment.</p>
+<h3>A bounded specification error yields a bounded decision error</h3>
+<p>Assume a finite nonempty action set and \(|\widehat U(a)-U(a)|\leq\epsilon\) for every action, with \(\epsilon\geq0\). Let \(\hat a\) maximize the proxy and \(a^\star\) maximize the target. Then
+\[
+U(a^\star)\leq\widehat U(a^\star)+\epsilon
+\leq\widehat U(\hat a)+\epsilon\leq U(\hat a)+2\epsilon.
+\]
+The middle inequality uses proxy optimality. Thus target regret is at most \(2\epsilon\). The conclusion depends on a uniform bound covering the selected action, not merely an average error on familiar actions.</p>
+<p>This theorem identifies the missing evidence in an overoptimization claim. If the optimizer can find actions outside the region where the proxy is well calibrated, the uniform bound may fail. Conversely, a verified bound supplies a concrete guarantee for its stated finite domain. Neither a few agreeable examples nor a claim that optimization is always dangerous establishes that bound.</p>
+<h3>Whose target value is being optimized?</h3>
+<p>Different stakeholders can reasonably prefer different outcomes. Let \(U_j(a)\) denote the utility of action \(a\) to stakeholder \(j\), in stipulated comparable units. A weighted rule maximizes \(\sum_j\lambda_jU_j(a)\), with \(\lambda\) a declared probability vector. The weights and comparability assumptions are normative inputs; an optimizer cannot discover their legitimacy from arithmetic.</p>
+<p>Consider utilities \(X=(4,0)\), \(Y=(0,4)\) and \(Z=(3,3)\) for two stakeholders. With all weight on the first stakeholder, the weighted rule selects X. With all weight on the second, it selects Y. The max-min rule, maximizing the smaller utility, selects Z. For weights \((\lambda,1-\lambda)\), X scores \(4\lambda\), Y \(4(1-\lambda)\) and Z 3. Z is a weighted maximizer when \(1/4\leq\lambda\leq3/4\). Endpoint ties require a stated convention.</p>
+<p>This table does not prove that max-min is the correct social rule. Rescaling only one stakeholder's units can change a weighted result without changing that person's ordering of outcomes. The university must therefore explain both the aggregation rule and how the quantities were obtained. Personalization may accommodate different preferences, but it does not remove effects on other people.</p>
+<h3>Decomposition helps only when the parts and their composition are checked</h3>
+<p>For an administrative answer, separate the claimed deadline, the student's applicable category and the action recommended. A human reviewer may check each against an authoritative record. To infer that the final recommendation is correct, the reviewer must also check that the rule combines the verified facts correctly. Individually true facts can support a wrong recommendation if the rule uses the wrong student category.</p>
+<p>An AI monitor can contribute another assessment, but agreement between two systems does not establish independence or truth. They may share training artifacts or the same mistaken premise. Process supervision makes intermediate claims available for inspection; it does not guarantee that every consequential claim is visible, that the checker is reliable or that the final action follows the checked steps.</p>
+<p>Formal verification is strongest when the desired property and execution model are explicit. It can prove that a finite procedure respects a stipulated policy. A proof of the policy's implementation does not prove the policy is fair, beneficial or legally sufficient. Specification, implementation and societal consequence remain separate objects.</p>
+</section>
+<section id="rights">
+<h2>8. Data provenance and permissions require questions beyond model accuracy <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=2158">[35:58–45:45]</a></h2>
+<p>For U.S. copyright, <a href="https://www.copyright.gov/title17/92chap1.html">Title 17 §§102–103</a> distinguishes protected original expression from ideas and addresses compilations and derivative works. Section 107 considers purpose and character, the work's nature, amount and substantiality, and market effect in fair-use analysis. An educational purpose or a short excerpt is not an automatic verdict. A code-overlap metric cannot decide these factors.</p>
+<p><a href="https://www.copyright.gov/title17/92chap3.html">Section 302</a> provides different terms for post-1977 works, including generally life plus 70 years and, for specified categories, 95 years from publication or 120 from creation, whichever expires first. A universal “75 years” rule is incorrect. Earlier works and other jurisdictions require their own analysis.</p>
+<p>The <a href="https://creativecommons.org/cc-licenses/">Creative Commons overview</a> distinguishes attribution, share-alike, noncommercial and no-derivatives conditions across six licenses. A CC work is not automatically public domain or unrestricted. This chapter describes the distinction; it does not determine whether a particular training, adaptation or distribution practice complies with a license.</p>
+<p>For the service, build a data ledger with an item's origin, stated permission, intended operation and any unresolved question. “Available on the web” records an access observation; it does not fill the permission field. A model accuracy result belongs in neither field. Keep technical access, rights, privacy and other applicable conditions separate so that one favorable answer does not silently stand in for the others.</p>
+<p>Consider two internally stipulated workflows. One uses permission-reviewed contributed explanations and keeps the authorization record. Another gathers publicly readable explanations but records no authorization basis. The second workflow may have the same benchmark loss as the first. The equality of losses says nothing about the missing provenance evidence. This example requires no verdict that every item in either workflow is lawful or unlawful.</p>
+<p>Training, distributing model weights and publishing generated answers are also different operations. A conclusion about one does not automatically settle the others. The recording raises their interaction with copyright; current case-specific outcomes require current legal sources and factual details beyond this chapter. We therefore do not turn the numerical examples below into infringement findings.</p>
+</section>
+<section id="memorization">
+<h2>9. Token probability, extraction and legal consequence are distinct claims <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=2746">[45:46–53:43]</a></h2>
+<p>A language model assigns conditional probabilities to token sequences. Fix a prefix, a target suffix \(z_1,\ldots,z_L\), and a declared decoding distribution. Let \(p_t\) be the probability of target token \(z_t\), conditioned on the prefix and every preceding target token. The probability of generating that exact suffix along this trajectory is
+\[
+p_{\mathrm{suffix}}=\prod_{t=1}^{L}p_t.
+\]
+This chain-rule product does not require the tokens to be independent. Each probability is conditional on the relevant preceding tokens.</p>
+<p>For \(p_t=99/100\) at all 1,000 positions, the product is less than \(1/10000\). A high individual-token probability therefore need not imply high probability of an entire exact suffix. With ten probabilities \(9/10\), the exact product is \(3486784401/10000000000\). These are supplied conditional probabilities, not measurements of a commercial model.</p>
+<p>A different decoding rule can change the result. Greedy decoding follows maxima rather than sampling from the supplied law; top-k or temperature modification changes that law. The product calculation must name the probabilities actually governing the claimed generation. It cannot support a claim about every prompting protocol.</p>
+<p>For \(n\) independent, identically distributed attempts with success probability \(p_{\mathrm{suffix}}\), the probability of at least one exact generation is
+\[
+1-(1-p_{\mathrm{suffix}})^n.
+\]
+The complement is failure on every attempt; independence permits multiplication of those failure probabilities. Correlated attempts or a changing prompt invalidate this particular formula. Two independent fair-success attempts give \(3/4\), whereas two perfectly linked attempts still give \(1/2\).</p>
+<p><a href="https://arxiv.org/abs/2505.12546v1">Cooper and colleagues' May 2025 preprint</a>, actual PDF pages 1–4, separates extraction protocols, model/work variation and probabilistic evidence. Its scoped experiments discuss 13 models and 56 books. These historical version details must not be silently replaced by a later revision. The probability product and repeated-attempt interpretation are checked here; the recording's specific whole-book token count is not established by these pages and is not adopted.</p>
+<p>High probability by itself does not prove training membership or identify a causal memorization mechanism. A common phrase can be predictable for other reasons. Successful extraction of sufficiently distinctive material, combined with a defined protocol and other evidence, supports a different argument. The paper's interpretation of such evidence should be identified as its argument, rather than converted into a universal technical detector or a court ruling.</p>
+<p>The service's audit should therefore report the target, prefix, model version, decoding law, attempt budget and observed or computed quantity. Whether an output creates a legal issue depends on further facts and analysis. This program contains no protected-book targets, extraction attack or training-membership classifier; its rational products expose the inference boundary.</p>
+</section>
+<section id="transparency">
+<h2>10. Disclosure permits scrutiny without certifying the disclosed system <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=3223">[53:43–59:06]</a></h2>
+<p>Transparency makes relevant information available for inspection. For the service, that might include data provenance, evaluation conditions, subgroup results, resource accounting, intended uses and a process for reporting failures. These disclosures let a reviewer ask better questions. Their existence does not establish that the answers are accurate or that the system is safe.</p>
+<p>Let \(d_k\in\{0,1\}\) indicate whether a stipulated disclosure criterion \(k\) is satisfied, for \(k=1,\ldots,K\). An unweighted disclosure fraction is \(D=K^{-1}\sum_kd_k\). The program computes this fraction for a supplied Boolean record. It does not independently verify a disclosure, import the Foundation Model Transparency Index rubric or measure safety.</p>
+<p>If two records both score \(1/2\), they can disclose different information. A service that reports average performance but withholds subgroup results and one that reports subgroup results but withholds data origin have different audit gaps. The scalar score loses that distinction. Preserve the indicator vector beside an aggregate.</p>
+<p><a href="https://arxiv.org/abs/2407.12929">The 2024 Foundation Model Transparency Index study</a>, PDF pages 1–2, compared 100 indicators across iterations. The earlier iteration assessed ten developers through public searches; the later one used reports from fourteen developers. The reported means were 37 and 58, with a separate comparison for eight common developers. Those changes describe the study, not a randomized estimate of the index's causal effect or a current leaderboard.</p>
+<p>For our service, a useful release record preserves versioned disclosures and evidence for each claim. If a provider changes the model without updating the evaluation, a previous disclosure can remain historically true while no longer describing the current configuration. Version identity matters here just as it matters in a probabilistic extraction experiment.</p>
+</section>
+<section id="release">
+<h2>11. Openness is a vector of access decisions; risk needs an alternative <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=3546">[59:06–67:57]</a></h2>
+<p>Access to an interface, model weights, code, data recipe and development process are different capabilities. Releasing weights allows local inference and some modifications. It does not automatically disclose training data, permissions, reproducibility details or how decisions were made. Treat the recording's openness spectrum as a useful conceptual distinction; named license or open-source compliance claims require their own definitions.</p>
+<p>For the student service, compare an institutionally controlled interface with a weight release. The interface can change access or withdraw a deployed version. Widely redistributed weights cannot be recalled in the same way. Conversely, locally runnable weights can permit some independent audits and customization that a restricted interface cannot support. These are mechanism differences, not a proof that either arrangement dominates every outcome.</p>
+<p><a href="https://arxiv.org/abs/2403.07918v1">Kapoor, Bommasani and colleagues' position paper</a>, PDF pages 1–2 and 6, defines its “open” category using broadly available weights and examines benefits, caveats and marginal misuse risk. Its risk framework asks about existing risk, defenses, additional risk, adaptation and uncertainty. The paper is a framework and attributed assessment, not a timeless certification of every open or restricted model.</p>
+<h3>A marginal quantity requires a stated counterfactual</h3>
+<p>Fix a population, time interval, event definition and harm unit. For configuration \(a\) and defense arrangement \(b\), write \(H(a,b)\) for expected harm. Relative to an explicitly supplied alternative \((a_0,b_0)\), define
+\[
+\Delta H=H(a,b)-H(a_0,b_0).
+\]
+This comparison includes the alternative's existing capabilities and defenses; the alternative is not automatically a world with no technology and no harm.</p>
+<p>In an original one-event model with unit severity, suppose baseline harm probability is \(1/100\), release probability is \(3/100\), and release with a specified improved defense has probability \(1/200\). The increments are \(1/50\) and \(-1/200\), respectively. The sign changes because the assumptions describe different configurations and defenses. These inputs do not estimate actual misuse rates.</p>
+<p>If harm severity changes, compare probability times severity rather than probability alone. An event at probability \(1/100\) and severity 100 has expected harm one; an event at probability \(1/10\) and severity one has expected harm \(1/10\). The smaller probability does not imply the smaller expected harm. Combining incomparable harm dimensions into one scalar would require another explicit value choice.</p>
+<p>An experiment measuring performance on a controlled task establishes a capability result under those conditions. A societal-risk estimate additionally needs assumptions about adoption, exposure, intent, safeguards, consequential actions and affected populations. An unmeasured stage is an evidence gap, not a mathematical zero. We discuss harmful-use categories only at this assessment level, without operational instructions.</p>
+<p>A defense can also alter who bears a burden. Restricting all use of a minority language might reduce a measured failure count while eliminating the service's benefit for that group. A complete comparison should retain access and benefit alongside harm, rather than declare a configuration better because its users disappear from the evaluated population.</p>
+</section>
+<section id="synthesis">
+<h2>12. An audit earns a scoped conclusion and identifies the next decision <a class="timestamp" href="https://youtu.be/071zJXhvNfM?t=4077">[67:57–72:04]</a></h2>
+<p>The student service now has a more precise decision record. Its configuration and allowed uses are defined; its group losses and mixture are visible; its ranking metric is separated from a threshold action; its proxy objective is separated from stakeholder values; its data provenance and disclosure gaps are recorded; and its release is compared with a stated alternative.</p>
+<p>These additions do not eliminate judgment. They make judgment inspectable. A committee choosing B over A because it prioritizes the worse-served group is making a different decision from one choosing A for its current-population average. Neither choice should be presented as the inevitable result of one universal “AI quality” number.</p>
+<p>An audit conclusion should name the configuration, population, period, task, metric and uncertainty. For example, “this supplied two-group table makes B preferable under worst-group loss” is established by the finite calculation. “B is fair for every student” is not. The latter statement requires both a conception of fairness and evidence about outcomes beyond this table.</p>
+<p>The upstream/downstream view connects this chapter to the following supply-chain discussion. If an audit locates an adverse result, the next question is which actor can change the relevant dependency and under what incentives. A model-level diagnosis becomes actionable only when it is connected to production, access and institutional decisions.</p>
+</section>
+<section id="implementation">
+<h2>13. An exact finite audit laboratory</h2>
+<p>The original standard-library program implements the supplied calculations. Group losses, weights and target-token probabilities use exact integers or <code>Fraction</code> values; booleans and binary floats are rejected as numeric inputs. Public functions copy list or tuple inputs. They perform no file access, network requests or random sampling; the command-line demonstration prints results.</p>
+<p>The group and stakeholder dimensions are at most sixteen, and there are at most sixteen candidate actions. Each class in the pairwise AUC calculation has at most 64 scores. A supplied suffix has one to 1,000 probabilities; repeated-attempt counts range from zero to 1,000. Each input rational's numerator and denominator have at most 128 bits. Exact intermediate products can have more bits; the work bound limits their growth without rounding them into a different probability.</p>
+<p>AUC requires both classes to be nonempty. Group weights must sum exactly to one and match the loss vector. The threshold rule predicts positive at equality. Weighted or max-min stakeholder selection uses the first listed action at an exact tie. The harm calculation requires probabilities in \([0,1]\) and nonnegative severities. Invalid contracts raise <code>ValueError</code>, rather than returning a reassuring zero or silently renormalizing inputs.</p>
+<div class="codewrap" id="runnable-example"><pre><code>from fractions import Fraction
+from programs.chapter18 import audit
+result = audit([Fraction(1, 100), Fraction(4, 5)],
+               [Fraction(99, 100), Fraction(1, 100)])
+print(result["average"], result["worst"])
+</code></pre></div>
+<div class="codewrap" id="example-output"><pre><code>179/10000 4/5
+</code></pre></div>
+<p>Run the example from the repository root. The downloadable complete program is <a href="programs/chapter18.py">chapter18.py</a>; execute <code>python programs/chapter18.py</code> for the finite demonstration below. The disclosure function counts caller-supplied Boolean flags. It does not read a website or check that a flag is truthful. The extraction functions multiply supplied probabilities; they do not query a language model or process copyrighted text.</p>
+<div class="codewrap" id="program-source"><pre><code>&quot;&quot;&quot;Exact finite audit fixtures; no empirical, legal or deployment \
+certification.
+
+Functions copy bounded list/tuple inputs. Exact ints and Fractions only;
+booleans/floats are rejected as numbers. No files, network or randomness.
+The CLI prints original examples. Stakeholder columns use stipulated common
+utility units; risk probabilities and harm magnitudes are supplied assumptions.
+&quot;&quot;&quot;
+from fractions import Fraction as F
+
+
+def rational(value):
+    (
+        &#x27;Accept an exact rational with at most 128 bits in each &#x27;
+        &#x27;input component.&#x27;
+    )
+    if type(value) not in (int, F):
+        raise ValueError(&#x27;Use an exact int or Fraction, not bool/float.&#x27;)
+    value = F(value)
+    if (value.numerator.bit_length() &gt; 128 or
+            value.denominator.bit_length() &gt; 128):
+        raise ValueError(
+            &#x27;Input rational exceeds the 128-bit component budget.&#x27;
+        )
+    return value
+
+
+def vector(values, maximum=16, lower=None, upper=None):
+    (
+        &#x27;Copy a nonempty finite numeric list/tuple under a &#x27;
+        &#x27;declared length bound.&#x27;
+    )
+    if type(values) not in (tuple, list) or not 1 &lt;= len(values) &lt;= maximum:
+        raise ValueError(&#x27;Expected a nonempty bounded list or tuple.&#x27;)
+    copied = tuple(rational(v) for v in values)
+    if any((lower is not None and v &lt; lower) or
+           (upper is not None and v &gt; upper) for v in copied):
+        raise ValueError(&#x27;Numeric value outside the declared domain.&#x27;)
+    return copied
+
+
+def distribution(weights):
+    &quot;&quot;&quot;At most sixteen nonnegative weights, summing exactly to one.&quot;&quot;&quot;
+    weights = vector(weights, lower=0, upper=1)
+    if sum(weights) != 1:
+        raise ValueError(&#x27;Group/stakeholder weights must sum exactly to one.&#x27;)
+    return weights
+
+
+def audit(losses, weights):
+    (
+        &#x27;Return assumed weighted and worst risks for up to &#x27;
+        &#x27;sixteen known groups.&#x27;
+    )
+    losses = vector(losses, lower=0, upper=1)
+    weights = distribution(weights)
+    if len(losses) != len(weights):
+        raise ValueError(&#x27;One weight per supplied group is required.&#x27;)
+    worst = max(losses)
+    return {
+        &#x27;average&#x27;: sum(w * r for w, r in zip(weights, losses)),
+        &#x27;worst&#x27;: worst,
+        &#x27;worst_groups&#x27;: tuple(i for i, r in enumerate(losses) if r == worst)
+    }
+
+
+def auc(positive, negative):
+    (
+        &#x27;Exact pairwise AUC, half credit for ties; at most 64 &#x27;
+        &#x27;scores per class.&#x27;
+    )
+    positive = vector(positive, maximum=64)
+    negative = vector(negative, maximum=64)
+    pairs = len(positive) * len(negative)
+    wins = sum(int(p &gt; n) for p in positive for n in negative)
+    ties = sum(int(p == n) for p in positive for n in negative)
+    return F(2 * wins + ties, 2 * pairs)
+
+
+def threshold_summary(positive, negative, threshold):
+    (
+        &#x27;Classify score &gt;= threshold as positive; both true &#x27;
+        &#x27;classes must exist.&#x27;
+    )
+    positive = vector(positive, maximum=64)
+    negative = vector(negative, maximum=64)
+    threshold = rational(threshold)
+    tp = sum(p &gt;= threshold for p in positive)
+    tn = sum(n &lt; threshold for n in negative)
+    return {&#x27;true_positives&#x27;: tp, &#x27;true_negatives&#x27;: tn,
+            &#x27;sensitivity&#x27;: F(tp, len(positive)),
+            &#x27;specificity&#x27;: F(tn, len(negative)),
+            &#x27;accuracy&#x27;: F(tp + tn, len(positive) + len(negative))}
+
+
+def stakeholder_choice(utilities, weights, criterion=&#x27;weighted&#x27;):
+    (
+        &#x27;Finite social choice under a supplied rule; first action&#x27;
+        &#x27; wins exact ties.\n&#x27;
+        &#x27;\n&#x27;
+        &#x27;    Rows are actions and columns are stakeholder &#x27;
+        &#x27;utilities in common assumed\n&#x27;
+        &quot;    units. Weighted or maxmin aggregation is a caller&#x27;s &quot;
+        &#x27;normative choice.\n&#x27;
+        &#x27;    Both the matrix and stakeholder weights have at most&#x27;
+        &#x27; sixteen entries.\n&#x27;
+        &#x27;    &#x27;
+    )
+    weights = distribution(weights)
+    if (type(utilities) not in (list, tuple) or
+            not 1 &lt;= len(utilities) &lt;= 16):
+        raise ValueError(&#x27;Expected one to sixteen action rows.&#x27;)
+    rows = tuple(vector(row) for row in utilities)
+    if any(len(row) != len(weights) for row in rows):
+        raise ValueError(&#x27;Utility columns must match stakeholder weights.&#x27;)
+    if type(criterion) is not str:
+        raise ValueError(&#x27;Criterion must be a string.&#x27;)
+    if criterion == &#x27;weighted&#x27;:
+        scores = tuple(
+            sum(w * u for w, u in zip(weights, row)) for row in rows
+        )
+    elif criterion == &#x27;maxmin&#x27;:
+        scores = tuple(min(row) for row in rows)
+    else:
+        raise ValueError(&#x27;Criterion must be weighted or maxmin.&#x27;)
+    chosen = scores.index(max(scores))
+    return {&#x27;chosen&#x27;: chosen, &#x27;scores&#x27;: scores, &#x27;utilities&#x27;: rows[chosen]}
+
+
+def proxy_selection(proxy, true_values):
+    (
+        &#x27;Compare finite proxy and stipulated true-value &#x27;
+        &#x27;maximizers, first at ties.&#x27;
+    )
+    proxy = vector(proxy)
+    true_values = vector(true_values)
+    if len(proxy) != len(true_values):
+        raise ValueError(&#x27;Both value vectors must describe the same actions.&#x27;)
+    chosen = proxy.index(max(proxy))
+    best = true_values.index(max(true_values))
+    return {&#x27;proxy_action&#x27;: chosen, &#x27;true_value_action&#x27;: best,
+            &#x27;true_value_regret&#x27;: true_values[best] - true_values[chosen]}
+
+
+def suffix_probability(probabilities):
+    &quot;&quot;&quot;Product of up to 1000 supplied target-token conditionals along a prefix.
+
+    These conditionals are along the specified target trajectory, under one
+    declared decoding law. Their product is not a training-membership test.
+    &quot;&quot;&quot;
+    probabilities = vector(probabilities, maximum=1000, lower=0, upper=1)
+    result = F(1)
+    for value in probabilities:
+        result *= value
+    return result
+
+
+def at_least_once(probability, trials):
+    &quot;&quot;&quot;Exact success in 0..1000 independent identically distributed trials.&quot;&quot;&quot;
+    probability = rational(probability)
+    if not 0 &lt;= probability &lt;= 1:
+        raise ValueError(&#x27;Probability must be in [0,1].&#x27;)
+    if type(trials) is not int or not 0 &lt;= trials &lt;= 1000:
+        raise ValueError(&#x27;Trials must be an integer in 0..1000.&#x27;)
+    return 1 - (1 - probability) ** trials
+
+
+def marginal_risk(base_probability, new_probability,
+                  base_severity=1, new_severity=1):
+    &quot;&quot;&quot;Difference of supplied expected harms in the same stated harm units.&quot;&quot;&quot;
+    bp, np = rational(base_probability), rational(new_probability)
+    bs, ns = rational(base_severity), rational(new_severity)
+    if not 0 &lt;= bp &lt;= 1 or not 0 &lt;= np &lt;= 1 or bs &lt; 0 or ns &lt; 0:
+        raise ValueError(
+            &#x27;Probability or nonnegative severity domain violated.&#x27;
+        )
+    return np * ns - bp * bs
+
+
+def disclosure_score(indicators):
+    (
+        &#x27;Fraction of true Boolean disclosures; not &#x27;
+        &#x27;truthfulness/safety scoring.&#x27;
+    )
+    if (type(indicators) is not dict
+            or not 1 &lt;= len(indicators) &lt;= 128):
+        raise ValueError(&#x27;Expected one to 128 named Boolean indicators.&#x27;)
+    for name, value in indicators.items():
+        if (type(name) is not str or not 1 &lt;= len(name) &lt;= 64 or
+                not name.isascii() or not name.isidentifier() or
+                type(value) is not bool):
+            raise ValueError(
+                &#x27;Indicator names and Boolean values are required.&#x27;
+            )
+    return F(sum(indicators.values()), len(indicators))
+
+
+def demo():
+    weights = [F(99, 100), F(1, 100)]
+    for name, losses in [(&#x27;A&#x27;, [F(1, 100), F(4, 5)]),
+                         (&#x27;B&#x27;, [F(1, 10), F(1, 5)])]:
+        row = audit(losses, weights)
+        print(name, &#x27;average:&#x27;, row[&#x27;average&#x27;], &#x27;worst:&#x27;, row[&#x27;worst&#x27;])
+    positive, negative = [F(1, 5), F(9, 10)], [F(1, 10), F(4, 5)]
+    threshold = threshold_summary(positive, negative, F(1, 2))
+    print(&#x27;pooled AUC:&#x27;, auc(positive, negative),
+          &#x27;threshold accuracy:&#x27;, threshold[&#x27;accuracy&#x27;])
+    proxy = proxy_selection([0, 1, 2, 3], [0, 1, F(4, 5), -1])
+    print(&#x27;proxy regret:&#x27;, proxy[&#x27;true_value_regret&#x27;])
+    rows = [[4, 0], [0, 4], [3, 3]]
+    print(&#x27;weighted/maxmin choices:&#x27;,
+          stakeholder_choice(rows, [1, 0])[&#x27;chosen&#x27;],
+          stakeholder_choice(rows, [1, 0], &#x27;maxmin&#x27;)[&#x27;chosen&#x27;])
+    print(&#x27;suffix .9^10:&#x27;, suffix_probability([F(9, 10)] * 10))
+    print(&#x27;two independent fair attempts:&#x27;, at_least_once(F(1, 2), 2))
+    print(&#x27;risk increments:&#x27;,
+          marginal_risk(F(1, 100), F(3, 100)),
+          marginal_risk(F(1, 100), F(1, 200)))
+    print(&#x27;disclosure fraction:&#x27;,
+          disclosure_score({&#x27;data&#x27;: True, &#x27;labor&#x27;: False}))
+    print(&#x27;Supplied finite assumptions; &#x27;
+          &#x27;no empirical or deployment certification.&#x27;)
+
+
+if __name__ == &#x27;__main__&#x27;:
+    demo()
+</code></pre></div>
+<div class="codewrap" id="program-output"><pre><code>A average: 179/10000 worst: 4/5
+B average: 101/1000 worst: 1/5
+pooled AUC: 3/4 threshold accuracy: 1/2
+proxy regret: 2
+weighted/maxmin choices: 0 2
+suffix .9^10: 3486784401/10000000000
+two independent fair attempts: 3/4
+risk increments: 1/50 -1/200
+disclosure fraction: 1/2
+Supplied finite assumptions; no empirical or deployment certification.
+</code></pre></div>
+<p>The author checks use replicated group slots, independent average-rank AUC, full threshold label tables, trajectory-law enumeration and first-success partitions as arithmetic oracles. They also exercise tie behavior, class and group denominators, exact domain limits, invalid inputs and input preservation. These checks validate the finite implementation; the mathematical proofs establish their stated general claims. Neither substitutes for empirical deployment evidence or ethical and legal judgment.</p>
+</section>
+<section id="exercises">
+<h2>14. Six exercises with fully worked solutions</h2>
+<h3>Exercise 1 — Which population makes the average change its mind?</h3>
+<p>Use A's losses \((1/100,4/5)\) and B's \((1/10,1/5)\). Find every first-group proportion \(w\in[0,1]\) for which A has strictly smaller average loss. Then allow every group mixture. Which configuration has lower worst-mixture risk, and what hypothesis would fail if a new unmeasured third group appeared?</p>
+<details class="solution"><summary>Solution</summary><p>The averages are \(4/5-(79/100)w\) and \(1/5-(1/10)w\). Subtracting gives \(3/5-(69/100)w\). It is negative precisely when \(w>(3/5)/(69/100)=20/23\), and zero at the boundary. Under the full two-group simplex, each worst-mixture risk equals its maximum group loss, because a mixture is bounded by that maximum and a concentrating vertex attains it. B has worst risk \(1/5\), below A's \(4/5\). A new group changes the family of allowed conditional distributions; the original two-group bound never covered its loss. It is not enough to insert a new prevalence into a table with no third-group risk.</p></details>
+<h3>Exercise 2 — Perfect within-group ranking, imperfect decisions</h3>
+<p>The two groups each have one positive and one negative score: \((1/5,1/10)\) and \((9/10,4/5)\). Compute both within-group AUCs, pooled AUC and accuracy at threshold \(1/2\). Give a threshold with pooled accuracy \(3/4\). Explain why neither AUC is a posterior probability of a positive label.</p>
+<details class="solution"><summary>Solution</summary><p>Each group's positive exceeds its negative, so both within-group AUCs are one. Pooled comparisons are \(1/5>1/10\), \(1/5<4/5\), \(9/10>1/10\) and \(9/10>4/5\): three wins out of four, giving \(3/4\). At \(1/2\), the low positive is missed and the high negative is falsely positive, leaving two correct labels and accuracy \(1/2\). Threshold \(3/20\) predicts both positives and the high negative as positive, while correctly rejecting the low negative; accuracy is \(3/4\). AUC is a probability over two independently selected class-conditional scores, not \(\Pr(Y=1\mid S=s)\). The latter additionally needs class prevalence and score-conditional distributions or calibration evidence.</p></details>
+<h3>Exercise 3 — How much does a uniformly inaccurate proxy cost?</h3>
+<p>Prove the \(2\epsilon\) target-regret bound for a proxy with uniform error at most \(\epsilon\). Construct two actions attaining that bound under a stated tie convention. Would an error bound averaged over actions establish the same result?</p>
+<details class="solution"><summary>Solution</summary><p>For target optimum \(a^\star\) and proxy optimum \(\hat a\), \(U(a^\star)\leq\widehat U(a^\star)+\epsilon\leq\widehat U(\hat a)+\epsilon\leq U(\hat a)+2\epsilon\). Rearranging gives the bound. For \(\epsilon>0\), list actions B then A; let \(U(B)=0\), \(U(A)=2\epsilon\), and both proxy values equal \(\epsilon\). Each absolute error is \(\epsilon\); selecting the first action at a proxy tie gives B and target regret \(2\epsilon\). An average bound does not bound the optimizer's selected action. Adding many accurately scored irrelevant actions can make average error small while preserving a large error at the selected action. The uniform hypothesis is the step that controls both endpoints of the inequality chain.</p></details>
+<h3>Exercise 4 — A scalar objective contains a social choice</h3>
+<p>For \(X=(4,0)\), \(Y=(0,4)\) and \(Z=(3,3)\), characterize the weighted maximizers as the first stakeholder's weight varies over \([0,1]\). Find the max-min choice. At weight \(1/2\), multiply only the first stakeholder's utility numbers by four. Does the weighted choice remain the same, and what does that show?</p>
+<details class="solution"><summary>Solution</summary><p>The weighted scores are \(4\lambda\), \(4(1-\lambda)\) and 3. Y uniquely wins below \(1/4\), Z uniquely wins between \(1/4\) and \(3/4\), and X uniquely wins above \(3/4\). Y/Z tie at \(1/4\); X/Z tie at \(3/4\). At a boundary the first-listed maximizer determines the program's choice. The max-min scores are 0, 0 and 3, selecting Z. Rescaling the first column by four gives \((16,0)\), \((0,4)\) and \((12,3)\). At equal weights their scores are 8, 2 and \(15/2\), so X replaces Z. Each person's ordinal preferences are unchanged by that positive rescaling. The changed aggregate exposes the required interpersonal scale convention; equal coefficients alone do not establish equal treatment in a substantive sense.</p></details>
+<h3>Exercise 5 — High confidence is not a whole-sequence certificate</h3>
+<p>Compute exact generation probability for ten target-token conditionals of \(9/10\), under the specified sampling law. For an experiment with success probability \(1/2\), compute success in two independent trials and contrast perfectly linked trials. Which extra evidence would be needed to turn a large probability for a phrase into a claim of training-data memorization or infringement?</p>
+<details class="solution"><summary>Solution</summary><p>The chain-rule product is \((9/10)^{10}=3486784401/10000000000\). Token independence was not assumed; each supplied probability is conditional along the exact target trajectory. For independent trials, the two-failure probability is \(1/4\), so at least one success has probability \(3/4\). Perfectly linked trials have the same outcome and retain success probability \(1/2\). A phrase's probability needs a specified model/version, target, prefix and decoding protocol. Memorization requires additional evidence distinguishing a particular training example from ordinary predictable language and establishing the applicable extraction or reconstruction claim. A legal conclusion further needs protected expression, relevant operations and legal analysis; neither a product nor string overlap decides it.</p></details>
+<h3>Exercise 6 — A release comparison can reverse when its assumptions change</h3>
+<p>Assume unit harm severity and event probabilities \(1/100\) for an alternative, \(3/100\) for a release and \(1/200\) for release with a specified defense. Compute the two increments. Now give the defended event severity 10. Recompute its increment. Explain whether a disclosure score of one could settle any of these probability or severity assumptions.</p>
+<details class="solution"><summary>Solution</summary><p>The unprotected increment is \(3/100-1/100=1/50\). Under the supplied defense it is \(1/200-1/100=-1/200\). With severity 10, defended expected harm becomes \(10/200=1/20\); relative to baseline \(1/100\), the increment is \(1/25\), now positive. Probability reduction did not compensate for the changed harm magnitude. A disclosure score of one establishes only that every supplied disclosure flag was true under the rubric. It does not measure event probabilities, verify severities, validate a causal defense effect or choose a common harm scale. These quantities require distinct evidence; the finite arithmetic remains conditional on them.</p></details>
+</section>
+<section id="sources">
+<h2>15. Sources and the boundaries of this treatment</h2>
+<p>The original numerical fixtures and program establish finite relationships between explicitly supplied quantities. They do not estimate disparities, misuse prevalence, clinical performance, economic effects, environmental costs or legal outcomes. Population evidence, ethical reasoning and a formal implementation proof answer different questions. Machine transcript timing and source integrity do not certify human-verified wording.</p>
+<ul>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/society.py">Official executable Lecture 18 material</a>: topic sequence, source pointers and the upstream/downstream, intent/impact and openness distinctions. Historical or imprecise claims are corrected beside the relevant sections.</li>
+<li><a href="https://www.hhs.gov/ohrp/regulations-and-policy/belmont-report/read-the-belmont-report/index.html">Belmont Report</a> and <a href="https://www.cdc.gov/tuskegee/about/index.html">CDC chronology</a>: ethical framework and dated historical correction; the chapter's educational application is original.</li>
+<li><a href="https://proceedings.mlr.press/v81/buolamwini18a/buolamwini18a.pdf">Gender Shades</a>, PDF pages 1–2 and 7: task, dataset and subgroup scope; no claim of a universal current system disparity or causal audit effect.</li>
+<li><a href="https://arxiv.org/abs/1911.08731">Group DRO</a>, PDF pages 1–3: specified-group mixtures, empirical/population distinction and worst-group generalization limits.</li>
+<li><a href="https://arxiv.org/abs/1909.12475">Hidden stratification</a>, PDF pages 1–4: subgroup-audit methods and the chest-drain AUC results, not a clinical recommendation.</li>
+<li><a href="https://www.copyright.gov/title17/92chap1.html">Title 17 §§102–103 and 107</a>, <a href="https://www.copyright.gov/title17/92chap3.html">§302</a>, and the <a href="https://creativecommons.org/cc-licenses/">CC overview</a>: limited U.S. statutory and license distinctions checked October 3, 2026; no case-specific legal verdict.</li>
+<li><a href="https://arxiv.org/abs/2505.12546v1">Versioned probabilistic extraction study</a>, PDF pages 1–4: extraction terminology and protocol dependence. Its interpretations are attributed; later revisions and unverified whole-book quantities are not substituted.</li>
+<li><a href="https://arxiv.org/abs/2407.12929">2024 FMTI</a>, PDF pages 1–2: dated indicators, comparison method and disclosure findings, not a safety certificate.</li>
+<li><a href="https://arxiv.org/abs/2403.07918v1">Open foundation models position paper</a>, PDF pages 1–2 and 6: release properties, counterfactual marginal-risk framework and acknowledged uncertainty.</li>
+</ul>
+</section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-17-language-models-and-sequence-generation.html">Previous available chapter</a><a href="index.html">Lecture index</a><a rel="next" href="lecture-19-ai-supply-chains-and-economic-value.html">Next available chapter</a></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

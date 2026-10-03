@@ -440,9 +440,9 @@
       "supports": "Pinned v1 pages2\u20134 and9\u201312: coverage versus selection, reported Llama-3-8B-Instruct MATH comparison, conditional fixed-pool pass@k estimator and verifier limitations; figures1/7 on PDF pages2/10."
     }
   ],
-  "body_sha256": "2cf63c537ad2c7fa0aa5350f648864ce93e2a95d62c207255a2ccdc1009b106c",
+  "body_sha256": "ed6e1ade5efd95ebdfb6732bc4d84de76c84fe18d536f631aa7fd2b1e51cfe31",
   "implementation": {
-    "program_sha256": "5a85a4cf33b2dc0dbb1b0fdbb1a145cd8a52e0489cfff3560443e12ff5ef086e",
+    "program_sha256": "693621c8ec308b83df4950e531b62421c7910e60e8119ff6a9a55cb625fe3a93",
     "stdout_sha256": "936539f2bbdfc099729bea9a154305d5a3453177746286fd351492cb504c1d69",
     "runtime": "Python standard library; exact finite graph diagnostic report only"
   }

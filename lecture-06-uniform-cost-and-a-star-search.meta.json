@@ -511,9 +511,9 @@
   "transcript_last_end_seconds": 4785.94,
   "audio_sha256": "de2ae3458e58aefc4d7ac23bcfed7cad864daaddb2e008330cc04753af88bda5",
   "audio_duration_seconds": 4791.381,
-  "authored_body_sha256": "fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4",
+  "authored_body_sha256": "e4fdae54b5944608c6184a27df1fdb341108a2d9b6b054b0231e45b005118cc0",
   "program": "programs/chapter06.py",
-  "program_sha256": "a6d99d5484b432d2b29b79efe6e5ffa4178d8a5267e63a2f8b867e4b3e9d86dd",
+  "program_sha256": "bc2b235eee69bbaa134c049dffee19ef3661567c5fe7886028608ad45ec9f9e0",
   "implementation": {
     "dependencies": "Python standard library",
     "input_contract": "Finite built-in graph dictionary; stable hash/equality states; built-in integer costs>=0 and signed integer heuristic values; bool/float excluded; exact state coverage; goal values0; consistency required or expensive reverse admissibility audit with reopening; ValueError rejection; None unreachable; no caller mutation or external side effects",

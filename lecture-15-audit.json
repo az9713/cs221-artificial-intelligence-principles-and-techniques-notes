@@ -7,23 +7,20 @@
   "accepted_program_sha256": "c390eb2111c50d322d261f7662699376449d74266c3dd284469d0eeaf198c12b",
   "integrated_html_sha256": "c9b2542b569d6494e107a863644139b3feee93bffbe38184a22466f8f7c512f8",
   "worked_solutions": 6,
-  "current_reader_gate": {
-    "status": "passed within accepted Chapters1-16 reader scope",
-    "reader_report": "reader-validation.json",
-    "human_accessibility": "not performed"
-  },
   "limits": [
-    "Full20chapter course incomplete",
-    "Machine transcription is not human ASR certification",
+    "Automatic transcription is not human source certification",
     "Human keyboard/screen-reader audit unperformed",
     "No publication performed"
   ],
   "independent_review": {
-    "rounds": 2,
     "gate_6b": "accepted",
-    "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "7a2d801426584f62dd64718a891bd2dbf1751ec6368107d115c701f74ff2ae32",
-    "independent_numerical_checks": 8224
+    "passes_7_8": "accepted",
+    "report_sha256": "7a2d801426584f62dd64718a891bd2dbf1751ec6368107d115c701f74ff2ae32"
+  },
+  "current_reader_gate": {
+    "status": "passed within complete 20-chapter reading edition",
+    "reader_report": "reader-validation.json",
+    "human_accessibility": "not performed"
   }
 }

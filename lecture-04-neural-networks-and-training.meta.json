@@ -388,9 +388,9 @@
   "transcript_last_end_seconds": 4299.7,
   "audio_sha256": "0110037150b2185dab7323008ae6f642ce3263312e25482dc67e59d04932638a",
   "audio_duration_seconds": 4305.161,
-  "authored_body_sha256": "095b221f476e3c8a006d3c59ee2747cf340ec3270ecb18826d85ae72355967e9",
+  "authored_body_sha256": "e7117213e884619018783a29a8f63cbc6d351a5e692023b18eb47b8ac9964474",
   "program": "programs/chapter04.py",
-  "program_sha256": "9d0966317c21d58b3480efabc54af091a68f4688ee45b5e527e32e9bdf31081e",
+  "program_sha256": "62fb928cd2e9e17ab8d682bf8fff85bffa8af8b5913478af211b6adee6d2c181",
   "implementation": {
     "dependencies": "Python standard library",
     "optional_api_version": "PyTorch2.11.0+cu128 CPU observations; not needed for runnable program",

@@ -1,12 +1,12 @@
 {
   "course": "CS221",
-  "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
-  "scope": "Accepted Chapters1-16 and four reader support pages; full20chapter course incomplete",
+  "checked_at_utc": "2026-10-03T17:04:27.791482+00:00",
+  "scope": "All 20 chapters and four reader support pages",
   "static": {
     "status": "passed",
-    "html_files": 21,
-    "local_links_checked": 260,
-    "timestamps_checked": 209,
+    "html_files": 25,
+    "local_links_checked": 319,
+    "timestamps_checked": 271,
     "chapter_pages_with_dollar_math": 0,
     "failures": [],
     "warnings": []
@@ -322,6 +322,78 @@
       },
       {
         "mathErrors": 0,
+        "mathNodes": 365,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-17-language-models-and-sequence-generation.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 365,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-17-language-models-and-sequence-generation.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 169,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-18-ai-society-objectives-audits-and-release.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 169,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-18-ai-society-objectives-audits-and-release.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 154,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-19-ai-supply-chains-and-economic-value.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 154,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-19-ai-supply-chains-and-economic-value.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 138,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-20-research-decisions-and-evidence.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 138,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-20-research-decisions-and-evidence.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
         "mathNodes": 0,
         "horizontalOverflow": false,
         "controls": true,
@@ -379,9 +451,9 @@
     "clipboard": "Fallback branch checked with captured text; manual OS clipboard verification not performed",
     "network": "HTTP and HTTPS requests blocked during browser checks"
   },
-  "renderer": "Explicit disposable headless Chromium; no user session",
-  "validator_adapter": "Reviewed TeX-free lab does not require MathJax; all other DOM/control/print checks retained",
+  "privacy_findings": [],
+  "renderer": "Explicit disposable headless Chromium; HTTP/HTTPS blocked",
+  "validator_adapter": "TeX-free course lab skips MathJax wait only",
   "human_accessibility": "not performed",
-  "other_course_files_unchanged": 345,
-  "privacy_findings": []
+  "other_course_files_unchanged": 345
 }

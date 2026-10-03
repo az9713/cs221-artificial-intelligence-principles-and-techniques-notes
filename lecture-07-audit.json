@@ -2,28 +2,29 @@
   "chapter": "lecture-07-markov-decision-processes.html",
   "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
   "status": "independently reviewed and locally validated chapter",
-  "accepted_scientific_body_sha256": "2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa",
-  "accepted_metadata_sha256": "e2eabcefbc817001beffc1b2ac334f85140ec10915d7adf53e3c6ff63bf74169",
-  "accepted_program_sha256": "d762f9d424dc09583f814907cfb453924720a9a31e0d602f0b8ea4ecd51e3f26",
-  "integrated_html_sha256": "aca6bab290cb8401b21f17861689c899fe46379459b3fa565a95762b431141ca",
+  "accepted_scientific_body_sha256": "5718300930a8f835555ffefbe860abdaf61af55a1d0c7253a8bf3b3ccd60f433",
+  "accepted_metadata_sha256": "93a95312252e948e3745ac2c8c0a189a44f8d1a23e3de4fcc848d5b6ee954ae0",
+  "accepted_program_sha256": "209b60cab0eac8eb2de4f7c7e0992d2d6e63fe9ca19e4080bcd8f6c81155375a",
+  "integrated_html_sha256": "63c844e7a0f159879a0f46f7237a6709d254b190fa782935e9398812d0a9976f",
   "worked_solutions": 6,
-  "current_reader_gate": {
-    "status": "passed within accepted Chapters1-16 reader scope",
-    "reader_report": "reader-validation.json",
-    "human_accessibility": "not performed"
-  },
   "limits": [
-    "Full20chapter course incomplete",
-    "Machine transcription is not human ASR certification",
+    "Automatic transcription is not human source certification",
     "Human keyboard/screen-reader audit unperformed",
     "No publication performed"
   ],
   "independent_review": {
-    "rounds": 2,
     "gate_6b": "accepted",
-    "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "65a1034dcf81fbd0ab339bad114b4547b9051c1de01eeae2876ac9de2b221c25",
-    "independent_numerical_checks": 612
+    "passes_7_8": "accepted",
+    "report_sha256": "65a1034dcf81fbd0ab339bad114b4547b9051c1de01eeae2876ac9de2b221c25"
+  },
+  "formatting_closure": {
+    "status": "independently accepted; AST and stdout unchanged",
+    "report_sha256": "743266e53b47400a8cce76ecbf3b35fd2b2803d5020589d63cfedf2c5f68031b"
+  },
+  "current_reader_gate": {
+    "status": "passed within complete 20-chapter reading edition",
+    "reader_report": "reader-validation.json",
+    "human_accessibility": "not performed"
   }
 }

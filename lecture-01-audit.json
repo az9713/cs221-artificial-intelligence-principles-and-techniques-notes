@@ -3,11 +3,10 @@
   "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
   "status": "independently reviewed and locally validated chapter",
   "independent_review": {
-    "rounds": 2,
     "gate_6b": "accepted",
-    "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "824eeb551100f3f2ac1151e6baf2aa9cb216664c04a5ff65bff20590f3e3e8b9"
+    "passes_7_8": "accepted",
+    "report_sha256": "824eeb551100f3f2ac1151e6baf2aa9cb216664c04a5ff65bff20590f3e3e8b9"
   },
   "accepted_scientific_body_sha256": "ded1654d52105cb8a2a7a92e9dfa47fb8619bb3876b605780f51a5f18572c396",
   "accepted_metadata_sha256": "11b13303a71fa1f588170d33c8b06fce8845001aa3fb987e53e01be523e3451b",
@@ -16,8 +15,7 @@
   "historical_audit": "Earlier author audit superseded by independent two-round review; earlier evidence retained privately",
   "worked_solutions": 6,
   "limits": [
-    "Full20chapter course incomplete",
-    "Machine transcription is not human ASR certification",
+    "Automatic transcription is not human source certification",
     "Human keyboard/screen-reader audit unperformed",
     "No publication performed"
   ],
@@ -34,10 +32,10 @@
     "privacy_scan": "No local user paths, private source paths, task errors or local account name found in public documents and code",
     "human_accessibility": "not performed"
   },
-  "accepted_program_sha256": null,
+  "accepted_program_sha256": "2c289f963482201c8cc58f98f00a1ba1652674ba885175ed829d5f9eefb217e1",
   "integrated_html_sha256": "374d562e94868e4fbc89ea116506173b65e12cb0d11c79fd42d2b753b7f255cf",
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-16 reader scope",
+    "status": "passed within complete 20-chapter reading edition",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   }

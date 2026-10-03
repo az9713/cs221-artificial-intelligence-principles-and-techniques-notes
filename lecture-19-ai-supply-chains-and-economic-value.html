@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="89dfd3321c5fabdb46ff7290cd2fd6ebfb3caa1dee94bcdd83196c97064428e2"><title>AI supply chains: from a capable model to economic value · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><h1>AI supply chains: from a capable model to economic value</h1>
+<p class="subtitle">Chapter 19 · Capacity, adoption, accounting and growth answer different questions.</p>
+<section id="case">
+<h2>A successful service still needs a feasible production plan <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=5">[00:05–01:59]</a></h2>
+<p>The university service from Chapter 18 has passed a scoped evaluation. Its planners now face an economic decision: purchase a hosted service, operate a model themselves, or postpone deployment while they improve the surrounding workflow. Two models can answer the evaluation questions equally well and still require different staffing, infrastructure, contractual rights and payments. The task is to choose a feasible service plan, then state what its savings establish.</p>
+<p>We use a stipulated service rather than a measured university deployment. Its completed unit is one request that meets the declared quality requirement. Let \(n\geq0\) be requests completed in a planning period. A plan specifies an asset graph, the organizations responsible for those assets, compatible capacities, a cost schedule and task-level adoption assumptions. Those objects persist across the chapter. When we move from a service to an economy, we will identify the extra aggregation and behavioral assumptions required.</p>
+<p>The topic spine follows <a href="https://www.youtube.com/watch?v=lPx5PF1ttkc">CS221 Lecture 19: AI Supply Chains</a>. Its economic questions concern firms as well as technologies, then compute, data, distribution, general-purpose technologies and alternative growth mechanisms. Recorded company examples and forecasts belong to their dates; a benchmark score supplies neither a current market valuation nor a macroeconomic forecast.</p>
+</section>
+<section id="questions">
+<h2>1. Identify the economic outcome before estimating an effect <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=119">[01:59–09:52]</a></h2>
+<p>The service's unit cost is currency per completed request. Labor productivity is completed qualifying requests per worker-hour. Profit is revenue minus the defined costs over a period. These measures can move differently. A service can become cheaper because of a subsidy without requiring fewer resources; a worker can handle more requests while verification errors rise; a provider can improve its margin without passing savings to the university.</p>
+<p>An economic effect also needs a counterfactual: what would have happened without the change? Let \(z_1\) be an outcome under access to an AI tool and \(z_0\) its outcome under the specified alternative. The causal question concerns \(z_1-z_0\) for comparable units. Observing a before/after change does not by itself identify that difference because demand, staffing, experience and other tools may change at the same time.</p>
+<p><a href="https://www.nber.org/papers/w31161">Brynjolfsson, Li and Raymond's retained November 2023 working-paper version</a>, PDF pages 2, 4–5 and 15–16, studies the staggered introduction of an assistant among 5,179 customer-support agents. Its headline productivity measure is issues resolved per hour, with an approximately 14% average increase and heterogeneous effects. The preferred controlled specification reports 13.8%; the less controlled time/location specification reports 22.2%.</p>
+<p>The study uses difference-in-differences and event-study methods, rather than randomized assignment. Its identification assumptions include parallel trends and no anticipatory behavior for the discussed event-study estimator. The paper expressly limits inference about aggregate employment and wages. For our service, this finding motivates measuring resolved requests and worker experience separately; it does not justify multiplying every worker's output by 1.14.</p>
+<p>Distribution matters even when the aggregate improves. A provider, annotator, university employee and student can face different benefits and burdens. Chapter 18's stakeholder analysis remains relevant: an accounting gain does not establish that each participant is better off.</p>
+</section>
+<section id="firms">
+<h2>2. A benchmark measures a task; a firm chooses a strategy <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=592">[09:52–12:16]</a></h2>
+<p>Suppose providers A and B achieve the same score on the university's evaluation set. Equality of that score is equality of one measured statistic under one protocol. It does not imply equal latency, reliability, data permissions, prices or compatibility with the university's infrastructure. Nor does it determine when a provider releases a model or which applications it builds itself.</p>
+<p>Price and production cost are different variables. A price is a payment charged under a contract; a production cost measures the specified resources and obligations borne by an actor. Competition, bargaining, subsidies and product bundling can separate them. The university observes its procurement cost, while a provider may bear training expenditure that is amortized across many clients.</p>
+<p>Vertical integration means that an organization performs activities at several stages of a supply chain. A model developer that also supplies the final student application controls more stages than one that licenses weights to independent service operators. Integration can coordinate decisions, but it can also restrict which downstream organizations can participate. Neither conclusion follows from an evaluation score.</p>
+<p>We therefore compare complete plans under a matched task and quality requirement. A cheaper plan that fails the declared requirement is infeasible, not an economic improvement within this comparison. If the requirement itself is disputed, return to the objective and stakeholder analysis before optimizing costs.</p>
+</section>
+<section id="graphs">
+<h2>3. Track assets and organizations in parallel <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=738">[12:18–14:14]</a></h2>
+<p>An asset graph is a directed graph whose vertices are resources or intermediate products, with an edge indicating a dependency in production or use. An organization graph records the actors that supply, purchase, control or use those assets. These graphs answer different questions. An edge from data to a trained model describes a technical dependency; a contract between a data owner and a developer describes an organizational relationship.</p>
+<table><thead><tr><th>Asset or activity</th><th>Possible responsible actor</th><th>Question for the service plan</th></tr></thead><tbody>
+<tr><td>Training data and annotations</td><td>Owner, annotator, developer</td><td>What quality, access and permissions are supplied?</td></tr>
+<tr><td>Compute and physical infrastructure</td><td>Chip supplier, facility operator, cloud</td><td>What compatible capacity is actually available?</td></tr>
+<tr><td>Model and serving software</td><td>Developer, inference operator</td><td>Who can update, host and audit the system?</td></tr>
+<tr><td>Student application and oversight</td><td>University, service vendor, employees</td><td>Who completes and verifies the qualifying request?</td></tr>
+</tbody></table>
+<p>The table is an original dependency map, not a claim that each activity belongs to a separate firm. One actor can occupy several rows. Conversely, one row can contain several organizations with different contracts. Concentration at a particular stage concerns substitutability and control at that stage; it need not describe the concentration of the entire chain.</p>
+<p>A capability improvement becomes useful only if the required path through these dependencies remains feasible. This observation is the bridge from a model evaluation to the capacity calculation next.</p>
+</section>
+<section id="compute">
+<h2>4. A serial capacity constraint cannot be repaired at the wrong stage <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=854">[14:14–21:02]</a></h2>
+<p>Compute depends on more than a processor count. Semiconductor production, servers, networking, facilities, power delivery and serving software form distinct dependencies. The recording uses particular firms to illustrate design, fabrication and lithography roles. We use those role distinctions without adopting its unverified market-share, valuation or national-bottleneck quantities as current facts.</p>
+<p>For a simple capacity model, suppose every qualifying request passes through \(m\) serial stages. Stage \(i\) can sustain \(b_i\geq0\) completed-request equivalents per hour. Inputs must already have been converted into this common unit; raw kilowatts and tokens per second cannot be compared by taking their minimum. Assume no losses, no inventory drawdown, no alternate path and a steady operating regime. Let \(q\) denote sustained completed requests per hour.</p>
+<p>Every request consumes capacity at every stage, so feasibility requires \(0\leq q\leq b_i\) for each \(i\). Hence \(q\leq\min_i b_i\). Conversely, the idealized model permits operating every stage at any common rate up to that minimum. Its maximum feasible flow is therefore</p>
+\[q^*=\min_{1\leq i\leq m}b_i.\]
+<p>A bottleneck is any stage attaining this minimum. All ties matter: increasing one of two tied stages leaves the other binding. For the original capacities \((50,80,100)\), maximum flow is 50. Doubling the second capacity to 160 leaves flow at 50. Increasing the first to 75 raises flow to 75; increasing it to 90 moves the bottleneck to the second stage and yields 80.</p>
+<p>This is a feasibility proof under an ideal serial model. Queues, burst arrivals, latency targets, redundancy, maintenance, losses and heterogeneous request sizes require additional objects. A stage that is not a steady-state bottleneck can still matter for reliability or response time. Inventory can temporarily permit completed output above current upstream production, so a finite-period observation need not equal the steady-state minimum.</p>
+<p>The service planner should locate the binding constraint before purchasing more of an unbound resource. The calculation does not establish which physical stage constrains a country's data-center expansion; that requires dated measurements and a much larger network.</p>
+</section>
+<section id="data">
+<h2>5. Data acquisition creates costs and obligations through different transactions <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=1262">[21:02–31:08]</a></h2>
+<p>The data side contains several mechanisms: internal generation, data supplied during product use, downloading or crawling accessible material, purchasing annotations, and negotiating access to material held by another organization. These mechanisms need not share a unit price. Generation consumes computation; annotation consumes paid labor; licensing can involve a fixed fee and conditions; product use involves the terms and purposes under which information is collected.</p>
+<p>Accessible data is not synonymous with authorized training data. A crawler directive describes an access preference or protocol instruction; it is not a complete copyright or privacy analysis. A purchase also requires a description of what rights and uses were transferred. Chapter 18 distinguishes access, provenance and permissions; those distinctions survive when the planner adds a price column.</p>
+<p>The university's data ledger should record the source, acquisition method, purpose, permitted uses, restrictions, quality checks, relevant population and retention obligations. A low acquisition payment can hide expensive cleaning, verification or contractual work. A large corpus can also fail to cover the language or procedure on which the service's worst-group performance depends.</p>
+<p>A settlement payment and a license price are different economic observations. As an original arithmetic example, dividing a stipulated aggregate payment of three million currency units among one thousand equally eligible works gives three thousand per work. That division says nothing about eligibility, a negotiated license, liability or the value of a marginal training example. The chapter does not infer a current legal outcome from the recording's settlement discussion.</p>
+<p>Exclusive access can change which firms can build a particular product. It does not prove that the data improves model quality, nor that an observed quality difference is caused by that access. The empirical question still needs a comparison with the same evaluation, other resources and acquisition constraints.</p>
+</section>
+<section id="distribution">
+<h2>6. Distribution determines feasible applications before it determines costs <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=1869">[31:09–36:51]</a></h2>
+<p>A developer can provide only an integrated product, offer an inference interface, or distribute weights for others to host. Further choices concern code, data, licenses and development information. These are several coordinates of access, as Chapter 18 explains; the word “open” alone does not specify the university's deployment rights or operational duties.</p>
+<p>Weight access can permit local adaptation and hosting, but local hosting still requires capacity, maintenance, updates and security controls. A hosted interface may avoid some fixed operational work while charging for use. Privacy depends on the complete data path, authorization and controls, not just the location of weights.</p>
+<p>Let \(F_A,F_B\geq0\) be plan-specific fixed costs over the same planning period, in currency. Let \(v_A,v_B\geq0\) be constant marginal costs in currency per qualifying request. Assume the plans meet the same task and quality constraints and can serve volume \(n\). Their simplified total costs are \(C_A(n)=F_A+v_An\) and \(C_B(n)=F_B+v_Bn\).</p>
+<p>If \(v_A\ne v_B\), equality occurs at \(n^*=(F_B-F_A)/(v_A-v_B)\). This algebraic value can be negative, in which case it is not a feasible nonnegative-volume crossing. With equal variable costs, the fixed-cost difference determines ordering for all volumes; equal fixed costs as well give identical lines.</p>
+<p>In the original fixture, A has fixed cost 100 and variable cost \(1/100\); B has no fixed cost and variable cost \(3/100\). Thus \(C_A-C_B=100-n/50\), and the crossover is 5,000 requests. At 10,000 requests A costs 200 and B costs 300. Below the crossover B is cheaper; above it A is cheaper. These are supplied currency units, not current API prices.</p>
+<p>Capacity can invalidate the cheapest line. If A cannot meet the required volume or a latency/quality obligation, it is not a candidate at that volume. Real serving costs can also change with batching, utilization, request length and contract tiers. The linear comparison is useful precisely because its assumptions are visible.</p>
+</section>
+<section id="forecasting">
+<h2>7. A forecast needs a quantity, horizon and mechanism <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=2211">[36:51–42:31]</a></h2>
+<p>A technological-importance ranking is not a growth-rate forecast. A subjective comparison with electricity or other major technologies may communicate a judgment about scope. It does not identify a numerical path for real output, employment or welfare. A year has twelve months; a logarithmic analogy cannot change that calendar or supply an economic model.</p>
+<p>Let \(t=0,1,\ldots\) index periods and let \(Y_t&gt;0\) denote a defined real-output measure, with geography, price basis and population normalization fixed. For a positive integer horizon \(T\), a level change is \(d=Y_T/Y_0-1&gt;-1\). A constant per-period rate \(g&gt;-1\) gives \(Y_T/Y_0=(1+g)^T\). Its equivalent rate is \(g=(1+d)^{1/T}-1\), not \(g=d\). Zero-period compounding is well defined and has multiplier one, but a zero horizon does not identify a unique equivalent rate.</p>
+<p>For an original ten-year level change of 1%, the equivalent annual rate solves \((1+g)^{10}=1.01\). If one incorrectly uses 1% annually, the resulting multiplier is \(1.01^{10}\), which exceeds 1.01 because multiplying ten factors greater than one exceeds a single factor. The exact program compares these rational powers without pretending an irrational root is exact.</p>
+<p>A forecast must also state the alternative path. An output level 1% above a no-AI baseline in year ten does not imply that all growth over the decade was caused by AI. Nor does an aggregate-output change establish a per-person change if population varies.</p>
+</section>
+<section id="macro">
+<h2>8. Translate task savings through explicit exposure and adoption <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=2551">[42:31–46:50]</a></h2>
+<p><a href="https://www.nber.org/papers/w32487">Acemoglu's May 2024 working paper</a>, PDF pages 2–3 and 5–7, uses a task-based framework for automation and complementarities. The retained version's baseline illustration yields at most roughly 0.66% total-factor-productivity growth over ten years. Its revised hard-to-learn-task assumptions yield upper bounds of 0.53% for TFP and 0.90% for GDP over ten years. These are dated conditional estimates, not annual rates, realized outcomes or a current consensus.</p>
+<p>Total factor productivity, or TFP, concerns output relative to the modeled combination of inputs. It differs from labor productivity, which divides output by a labor input. Capital accumulation can therefore make the modeled GDP response differ from a TFP change. The paper also excludes a broad transformation of scientific discovery from its principal ten-year cost-saving exercise; its numbers should not be applied automatically to that different mechanism.</p>
+<p>For the university, first construct a simpler accounting model. Partition baseline costs into tasks \(j=1,\ldots,k\). Let \(w_j\geq0\) be task cost shares with \(\sum_jw_j=1\), \(e_j\in[0,1]\) the exposed fraction, \(a_j\in[0,1]\) the fraction of exposed activity adopted economically, and \(s_j\in[0,1]\) its net relative cost saving. Shares refer to baseline costs, not an unweighted count of task names.</p>
+<p>Let \(C_0&gt;0\) be the total baseline cost and let \(C_1\) be the total cost after the stipulated task reductions, with quantities unchanged and associated incremental costs already included in \(s_j\). Both costs use the same currency and planning period. The baseline cost on task \(j\) is \(C_0w_j\). The adopted exposed part is \(C_0w_je_ja_j\); saving the fraction \(s_j\) removes \(C_0w_je_ja_js_j\). Summing these reductions gives \(C_0-C_1\). Dividing by \(C_0\) therefore gives</p>
+\[D=\frac{C_0-C_1}{C_0}=\sum_{j=1}^k w_je_ja_js_j.\]
+<p>This formula assumes a fixed task partition, no overlapping double count, unchanged quantities and net savings that already include the associated incremental costs. It is a linear accounting identity under those stipulations, not a proof of the paper's general-equilibrium theorem. Costs of new verification tasks must enter the accounting; they cannot be silently excluded while calling \(s_j\) net.</p>
+<p>For the original one-partition fixture, set \(e=1/5\), \(a=23/100\) and \(s=18/125\). Then \(D=207/31250=0.006624\), or 0.6624%. This recomputes the exposed/adopted/cost-saving multiplication on the paper's PDF page 6; the exact decimal is arithmetic, not additional forecast precision. Zero adoption makes the predicted saving zero even with full technical exposure.</p>
+<p>We have \(0\leq D\leq\sum_jw_js_j\leq\max_js_j\), since \(e_ja_j\leq1\) and the weights form a convex combination. The bound applies to this fixed cost model. Demand responses, changing prices, new products, spillovers and investment require further models before translating a local saving into macroeconomic output.</p>
+</section>
+<section id="complements">
+<h2>9. Complementary investment separates invention from realized productivity <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=2811">[46:51–52:07]</a></h2>
+<p><a href="https://www.nber.org/papers/w4148">Bresnahan and Trajtenberg's August 1992 working-paper abstract</a>, PDF pages 1–2, characterizes general-purpose technologies through pervasiveness across downstream sectors, continuing technical improvement and innovational complementarities. The last condition concerns downstream innovation becoming more productive as the enabling technology improves. Wide use alone does not establish every part of that framework.</p>
+<p>The university's complementary investments include workflow redesign, worker training, evaluation, integration and escalation procedures. A capable model is an input to this process. If staff cannot recognize its failures or route difficult requests, improving raw answer generation may not improve completed qualifying requests.</p>
+<p><a href="https://www.nber.org/papers/w25148">Brynjolfsson, Rock and Syverson's January 2020 revised working paper</a>, PDF pages 2–5 and 13–14, studies intangible investments and productivity measurement. Unmeasured investment output and later uncredited capital-service inputs can affect measured productivity differently. Page 13 states that the framework does not imply a universal time pattern; Figure 1 on page 14 is a toy economy, not an observed AI trajectory. The paper also develops empirical measurement methods.</p>
+<p>To expose the sign mechanism without claiming to implement that growth-accounting model, let \(I_t\geq0\) be a supplied unmeasured-investment contribution and \(S_t\geq0\) a supplied uncredited-service contribution in the same illustrative units. Define an original signed wedge \(E_t=S_t-I_t\). This definition records which contribution dominates; it is not the paper's TFP formula.</p>
+<p>For \(I=(3,2,1,1)\) and \(S=(0,1,2,3)\), the wedge is \((-3,-1,1,2)\). A sign change follows from these supplied paths. If instead \(I_t=2\) and \(S_t=1\) in every period, the wedge stays negative. Thus the arithmetic itself does not promise a trough followed by a boom.</p>
+<p>The service's accounting should distinguish investment expenditure, operational costs and the later services of the resulting assets. A learning period can be economically consequential without making an arbitrary adoption delay inevitable. Measurement error, genuine inefficiency and delayed benefits are different explanations for weak measured performance.</p>
+</section>
+<section id="gdp">
+<h2>10. Output accounting and consumer value measure different objects <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=3127">[52:07–58:05]</a></h2>
+<p>Gross domestic product measures production within an economy under national-accounting conventions. Real GDP adjusts for price changes; nominal GDP uses current prices. GDP per person divides the aggregate by population. None is a direct sum of all benefits people receive, and changing among them changes the question.</p>
+<p>The <a href="https://www.bea.gov/help/faq/1250">BEA's free-services explanation</a> distinguishes ad-funded provider output from consumer welfare. Provider output can be recorded as intermediate consumption of the advertiser even when a consumer pays no direct fee. The page's separate omission statement concerns the August 2020 digital-economy estimates. It does not establish that free digital services never enter GDP.</p>
+<p>Consumer surplus concerns a benefit relative to the payment needed to obtain it, within a specified preference and market model. Willingness to pay asks what payment a person would offer to obtain a good; willingness to accept asks what compensation would suffice to give it up. They can differ because of the reference state, income constraints, substitutes and experimental design. An observed subscription payment is neither quantity automatically.</p>
+<p>Suppose, purely as an original extrapolation, one hundred eligible users report willingness to accept ten currency units per month to forgo the service. Multiplying by twelve months gives 12,000 per year for that stipulated population. This is a conditional survey aggregation, not provider revenue, a GDP increment or a complete social-welfare estimate. Nonusers, substitutes, other people's behavior and response incentives may alter interpretation.</p>
+<p>The recording's specific survey values require the original population and protocol, so they are not adopted here as empirical findings. The substantive lesson survives: a service can produce value beyond direct user payments, while an increase in expenditure can coexist with harms. Chapter 18's impact dimensions remain separate from output accounting.</p>
+</section>
+<section id="aggregation">
+<h2>11. Choose aggregation weights before summing sector effects <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=3485">[58:05–62:27]</a></h2>
+<p>For a supplied first-order final-sector approximation, let \(u_j\geq0\) be sector shares summing to one and \(d_j\) small proportional sector changes. Define \(d_{\mathrm{agg}}=\sum_ju_jd_j\). Then \(\min_jd_j\leq d_{\mathrm{agg}}\leq\max_jd_j\) by the convex-combination argument used for group risks in Chapter 18. This is a stipulated fixed-share approximation; changing expenditure shares and substitution can invalidate a literal large-change interpretation.</p>
+<p>For original shares \((1/10,9/10)\) and shocks \((1/2,0)\), the approximation gives \(1/20=5\%\). A 50% improvement confined to the small sector does not become a 50% aggregate improvement under these weights. This fixture is not a forecast about software's measured economic share.</p>
+<p>Intermediate production needs different accounting. Suppose an upstream actor sells an input for 40 and uses no purchased intermediate input. A downstream actor purchases that input and sells the final product for 100. Upstream value added is 40; downstream value added is \(100-40=60\). Their sum is 100. Adding gross sales instead produces 140 and counts the intermediate transaction twice.</p>
+<p>Relative to total value added, the value-added shares are \((2/5,3/5)\) and sum to one. Gross-output-to-value-added ratios are \((2/5,1)\) and sum to \(7/5\). These ratios illustrate why gross-output weights need not form a convex combination. A network productivity aggregation result uses further assumptions about technology, optimization and market structure; the program does not implement that theorem simply by computing the ratios.</p>
+<p>Changes in relative prices and wages can alter expenditure shares. A wage increase in a less productive sector can raise its costs, but neither the sign nor the size of an economy's adjustment follows from this two-stage ledger alone. The recording's sectoral-growth and cost-disease discussion motivates examining these mechanisms rather than treating one sector's productivity gain as the whole economy's gain.</p>
+</section>
+<section id="production">
+<h2>12. Constant returns does not mean equal optimal input allocations <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=3747">[62:27–65:49]</a></h2>
+<p>Consider a supplied production function \(Y=A K^\alpha L^{1-\alpha}\), with \(A&gt;0\), \(K,L&gt;0\) and \(0&lt;\alpha&lt;1\). Capital \(K\) and effective labor \(L\) use declared index units, and \(A\) has the corresponding units needed to produce output \(Y\). This Cobb–Douglas model is an assumption, not a verified universal law for AI production.</p>
+<p>Scaling both inputs by \(t&gt;0\) yields \(A(tK)^\alpha(tL)^{1-\alpha}=tY\). This is constant returns to scale: joint homogeneity of degree one. With capital fixed, multiplying labor by \(t\) yields \(t^{1-\alpha}Y\), which grows less than proportionally when \(t&gt;1\). A new effective-labor input therefore need not translate one-for-one into output.</p>
+<p>Optimal allocation is a separate question. Let positive prices \(p_K,p_L\) convert input units to currency, and let \(B&gt;0\) be a fixed budget. With no other constraints, impose \(p_KK+p_LL=B\). Maximizing output is equivalent to maximizing \(\alpha\log K+(1-\alpha)\log L\), because logarithm is increasing and \(\log A\) is constant.</p>
+<p>Substitute \(L=(B-p_KK)/p_L\), for \(0&lt;K&lt;B/p_K\). Differentiating gives \(\alpha/K-(1-\alpha)p_K/(B-p_KK)\). Setting it to zero gives \(\alpha(B-p_KK)=(1-\alpha)p_KK\), hence</p>
+\[K^*=\frac{\alpha B}{p_K},\qquad L^*=\frac{(1-\alpha)B}{p_L}.\]
+<p>The second derivative is \(-\alpha/K^2-(1-\alpha)p_K^2/(B-p_KK)^2&lt;0\). The objective tends to minus infinity at either endpoint, so this interior critical point is the unique maximum. Optimal spending shares are \(\alpha\) and \(1-\alpha\); equal quantities require a special relationship between share and prices.</p>
+<p>For \(\alpha=1/4\), \(B=4\) and equal unit prices, the optimum is \((K,L)=(1,3)\), not \((2,2)\). With \(A=1\), comparing fourth powers avoids root rounding: optimal \(Y^4=1\cdot3^3=27\), while equal allocation gives \(2\cdot2^3=16\). Since the fourth-root function is increasing on positive numbers, 27 proves higher output.</p>
+<p>Capacity limits, indivisible equipment, minimum staffing and externalities alter the feasible set and can move the optimum. Effective AI labor also needs a conversion rule for task quality and supervision. Treating an arbitrary token as an effective worker-hour without such a rule hides the central empirical assumption.</p>
+</section>
+<section id="ideas">
+<h2>13. More productive work and faster idea production are different growth mechanisms <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=3951">[65:51–68:41]</a></h2>
+<p>An idea can be nonrival: one person's use need not prevent another person's use. That property differs from the time needed to learn it, the resources required to discover it, and restrictions on access. A reusable algorithm still needs hardware, skilled implementation and a suitable task. Nonrivalry alone specifies no growth rate.</p>
+<p>Keep the production model but hold \(K\) and \(L\) constant. If AI makes \(A\) twice as large once and then \(A\) remains constant, output doubles once and subsequent growth is zero. The higher level does not constitute an indefinitely higher growth rate.</p>
+<p>For an original alternative, stipulate discrete idea dynamics \(A_{t+1}=(1+\eta R)A_t\), where \(R\geq0\) is a constant research-input index and \(\eta\geq0\) converts that index into a per-period proportional improvement. Iterating gives \(A_T=A_0(1+\eta R)^T\). With other production inputs fixed, output follows the same multiplier. Constant \(R\) implies exponential growth under this law, not growth faster than exponential.</p>
+<p>If instead the law were \(A_{t+1}=A_t+\eta R\), the same constant research input produces a linear technology path. The difference is the stipulated dependence of new ideas on existing ideas. To obtain accelerating growth, one must specify and justify a changing research input or a different law, then examine its domain and resource constraints.</p>
+<p>The recording's discussion of ideas and research motivates comparing these mechanisms. These recurrences are original teaching constructions, not a reproduction or verification of Romer's full model, nor an empirical prediction that AI will create a particular research-growth path.</p>
+</section>
+<section id="uncertainty">
+<h2>14. Identify the measurement that would change the decision <a class="timestamp" href="https://youtu.be/lPx5PF1ttkc?t=4123">[68:43–74:29]</a></h2>
+<p>The university can now ask distinct questions: which stage binds capacity; what complete cost schedule applies at the feasible volume; which tasks are actually adopted; whether savings are net; and what evaluation establishes completed qualifying requests. A wider economic claim additionally needs task weights, behavioral responses, investment and an output or welfare measure.</p>
+<p>The recording's concluding assessments about natural resources, transmission, adoption and the significance of AI are qualified judgments. They are useful hypotheses to investigate, not verified national constraints or calibrated forecasts supplied by this chapter. A bottleneck model tells us how a measured constraint matters once identified; it does not identify the constraint by analogy.</p>
+<p>For the service decision, useful next measurements are request-size distributions, verified completion rates, peak and sustained capacity, integration costs and adoption by task. For a broader labor claim, study a design that separates tool access from experience and common changes. For a growth claim, specify whether AI changes a fixed task cost, effective labor, capital or the idea-production law.</p>
+<p>A local deployment can be worthwhile even when its aggregate GDP effect is small. Conversely, large measured output does not settle who benefits or whether the service is acceptable. The economic model extends Chapter 18's release decision while retaining its separate stakeholder and impact questions.</p>
+</section>
+<section id="implementation">
+<h2>15. Execute the specified finite accounting models</h2>
+<p>The original standard-library program implements serial capacity, two linear serving-cost schedules, weighted task savings, a supplied sales/input ledger, the interior budget optimum, exact powered production, compounding and a signed measurement wedge. It has no network, file or empirical-data access. Functions preserve inputs and return exact fractions, tuples or dictionaries; the demonstration prints output.</p>
+<p>Scalar inputs are integers or <code>Fraction</code>, excluding Boolean and floating-point values. Each input numerator and denominator is limited to 128 bits. Vectors are nonempty lists or tuples of at most 16 elements. Shares and task fractions must satisfy their stated domains; budget and prices are positive; production exponents satisfy <code>1 &lt;= p &lt; q &lt;= 16</code>; compound periods are integers from zero to 1,000. Type errors raise <code>TypeError</code>; invalid domains, shapes and budgets raise <code>ValueError</code>.</p>
+<p>The accounting ledger excludes negative value added and requires a positive total; that is a teaching API restriction, not a statement that negative value added cannot occur in real data. A serving crossover may be negative, and parallel cost lines return <code>None</code> for the crossover; inspect the returned costs to distinguish identical from unequal parallel lines. All comparisons assume the caller has supplied compatible units and matched quality.</p>
+<div class="codewrap" id="runnable-example"><pre><code>from fractions import Fraction
+from programs.chapter19 import budget_allocation, production_power
+plan = budget_allocation(Fraction(1, 4), 4, 1, 1)
+print(plan['capital'], plan['labor'])
+print(production_power(plan['capital'], plan['labor'], 1, 4))</code></pre></div>
+<div class="codewrap" id="example-output"><pre><code>1 3
+27
+</code></pre></div>
+<p>Run the example from the repository root, or execute <code>python programs/chapter19.py</code> using the complete <a href="programs/chapter19.py">downloadable program</a>. Powered production returns \((Y/A)^q\), not \(Y\); its name and return contract keep the distinction explicit.</p>
+<div class="codewrap" id="program-source"><pre><code>&quot;&quot;&quot;Exact finite supply-chain and productivity teaching models, not forecasts.
+
+Public scalar inputs are int/Fraction (never bool/float), each numerator and
+denominator at most128bits. Vectors are nonempty list/tuple, at most16 entries.
+All effects are local calculations; inputs are preserved. No I/O except demo.
+Invalid types raise TypeError; domain/shape/budget failures raise ValueError.
+Caller supplies compatible units, quality constraints and economic assumptions.
+&quot;&quot;&quot;
+from fractions import Fraction as F
+
+
+def _number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, F)):
+        raise TypeError(&#x27;Use exact int or Fraction inputs.&#x27;)
+    value = F(value)
+    bits = max(abs(value.numerator).bit_length(),
+               value.denominator.bit_length())
+    if bits &gt; 128:
+        raise ValueError(&#x27;Exact scalar input exceeds128bits.&#x27;)
+    return value
+
+
+def _vector(values, lower=None, upper=None):
+    if not isinstance(values, (list, tuple)):
+        raise TypeError(&#x27;Use a list or tuple.&#x27;)
+    if not 1 &lt;= len(values) &lt;= 16:
+        raise ValueError(&#x27;Vector length must be1..16.&#x27;)
+    result = tuple(_number(value) for value in values)
+    if lower is not None and any(value &lt; lower for value in result):
+        raise ValueError(&#x27;Value below permitted domain.&#x27;)
+    if upper is not None and any(value &gt; upper for value in result):
+        raise ValueError(&#x27;Value above permitted domain.&#x27;)
+    return result
+
+
+def serial_capacity(capacities):
+    &quot;&quot;&quot;Serial chain without loss/inventory, rates in service units/time.&quot;&quot;&quot;
+    rates = _vector(capacities, 0)
+    rate = min(rates)
+    return {&#x27;throughput&#x27;: rate,
+            &#x27;bottlenecks&#x27;: tuple(i for i, value in enumerate(rates)
+                                 if value == rate)}
+
+
+def serving_comparison(fixed_a, variable_a, fixed_b, variable_b, volume):
+    &quot;&quot;&quot;Same-period costs and matched service quality supplied by caller.
+
+    crossover_volume is the real algebraic equality point, possibly negative;
+    None denotes parallel cost lines. Feasible volume/quality is not inferred.
+    &quot;&quot;&quot;
+    inputs = (fixed_a, variable_a, fixed_b, variable_b, volume)
+    fa, va, fb, vb, n = tuple(_number(x) for x in inputs)
+    if min(fa, va, fb, vb, n) &lt; 0:
+        raise ValueError(&#x27;Costs and volume must be nonnegative.&#x27;)
+    a, b = fa + va*n, fb + vb*n
+    return {&#x27;cost_a&#x27;: a, &#x27;cost_b&#x27;: b, &#x27;difference_a_minus_b&#x27;: a-b,
+            &#x27;crossover_volume&#x27;: (fb-fa)/(va-vb) if va != vb else None}
+
+
+def task_cost_savings(shares, exposure, adoption, savings):
+    &quot;&quot;&quot;Fixed cost partition; per-task exposure/adoption/savings in[0,1].
+
+    Savings are net reductions on adopted exposed activity. This accounting
+    excludes price adjustment, new tasks and general-equilibrium effects.
+    &quot;&quot;&quot;
+    vectors = [_vector(x, 0, 1) for x in (shares, exposure, adoption, savings)]
+    if len({len(x) for x in vectors}) != 1 or sum(vectors[0]) != 1:
+        raise ValueError(
+            &#x27;Equal vector lengths and normalized cost shares required.&#x27;)
+    contributions = tuple(w*e*a*s for w, e, a, s in zip(*vectors))
+    return {&#x27;contributions&#x27;: contributions, &#x27;total&#x27;: sum(contributions, F(0))}
+
+
+def chain_value_added(sales, purchased_inputs):
+    &quot;&quot;&quot;Caller supplies complete same-period sales/intermediate-input accounts.
+
+    Returns each value added and gross-sales/total-value-added ratios, not a
+    certified GDP series or network productivity theorem. Negative value added
+    is excluded in this model; total must be strictly positive.
+    &quot;&quot;&quot;
+    sales = _vector(sales, 0)
+    purchases = _vector(purchased_inputs, 0)
+    if (len(sales) != len(purchases)
+            or any(i &gt; s for s, i in zip(sales, purchases))):
+        raise ValueError(
+            &#x27;Matched vectors and nonnegative value added required.&#x27;)
+    values = tuple(s-i for s, i in zip(sales, purchases))
+    total = sum(values, F(0))
+    if total &lt;= 0:
+        raise ValueError(&#x27;Positive total value added required.&#x27;)
+    return {&#x27;value_added&#x27;: values, &#x27;total&#x27;: total,
+            &#x27;value_added_shares&#x27;: tuple(v/total for v in values),
+            &#x27;gross_output_ratios&#x27;: tuple(s/total for s in sales)}
+
+
+def budget_allocation(alpha, budget, capital_price, labor_price):
+    &quot;&quot;&quot;Interior optimum of A*K^alpha*L^(1-alpha), A&gt;0, linear input budget.
+
+    All prices and budget positive; alpha in(0,1). Fractional inputs and no
+    minimum or capacity constraints. Output is the exact allocation.
+    &quot;&quot;&quot;
+    inputs = (alpha, budget, capital_price, labor_price)
+    a, b, pk, pl = tuple(_number(x) for x in inputs)
+    if not 0 &lt; a &lt; 1 or min(b, pk, pl) &lt;= 0:
+        raise ValueError(&#x27;Interior share and positive budget/prices required.&#x27;)
+    return {&#x27;capital&#x27;: a*b/pk, &#x27;labor&#x27;: (1-a)*b/pl,
+            &#x27;capital_spending&#x27;: a*b, &#x27;labor_spending&#x27;: (1-a)*b}
+
+
+def production_power(capital, labor, numerator, denominator):
+    &quot;&quot;&quot;Exact (Y/A)^q=K^p*L^(q-p), 1&lt;=p&lt;q&lt;=16; no root rounding.&quot;&quot;&quot;
+    k, labor_value = _number(capital), _number(labor)
+    if any(isinstance(x, bool) or not isinstance(x, int)
+           for x in (numerator, denominator)):
+        raise TypeError(&#x27;Exponent integers required.&#x27;)
+    if min(k, labor_value) &lt;= 0 or not 1 &lt;= numerator &lt; denominator &lt;= 16:
+        raise ValueError(&#x27;Positive inputs and1&lt;=p&lt;q&lt;=16 required.&#x27;)
+    return k**numerator*labor_value**(denominator-numerator)
+
+
+def compound_multiplier(rate, periods):
+    &quot;&quot;&quot;Constant per-period fractional rate, rate&gt;-1, periods integer0..1000.&quot;&quot;&quot;
+    rate = _number(rate)
+    if isinstance(periods, bool) or not isinstance(periods, int):
+        raise TypeError(&#x27;Integer period count required.&#x27;)
+    if rate &lt;= -1 or not 0 &lt;= periods &lt;= 1000:
+        raise ValueError(&#x27;Rate&gt;-1 and periods0..1000 required.&#x27;)
+    return (1+rate)**periods
+
+
+def measurement_wedge(unmeasured_investment, uncredited_services):
+    &quot;&quot;&quot;Supplied same-unit additive illustration services-investment per period.
+
+    This teaching wedge differs from the published growth-accounting formula.
+    &quot;&quot;&quot;
+    investments = _vector(unmeasured_investment, 0)
+    services = _vector(uncredited_services, 0)
+    if len(investments) != len(services):
+        raise ValueError(&#x27;Same period counts required.&#x27;)
+    return tuple(s-i for i, s in zip(investments, services))
+
+
+def demo():
+    print(&#x27;serial throughput:&#x27;, serial_capacity([50, 80, 100])[&#x27;throughput&#x27;])
+    costs = serving_comparison(100, F(1, 100), 0, F(3, 100), 10000)
+    print(&#x27;serving costs:&#x27;, costs[&#x27;cost_a&#x27;], costs[&#x27;cost_b&#x27;])
+    print(&#x27;crossover volume:&#x27;, costs[&#x27;crossover_volume&#x27;])
+    tasks = task_cost_savings([1], [F(1, 5)], [F(23, 100)], [F(18, 125)])
+    print(&#x27;linear task savings:&#x27;, tasks[&#x27;total&#x27;])
+    accounts = chain_value_added([40, 100], [0, 40])
+    print(&#x27;value added:&#x27;, accounts[&#x27;total&#x27;])
+    print(&#x27;gross ratios sum:&#x27;, sum(accounts[&#x27;gross_output_ratios&#x27;]))
+    allocation = budget_allocation(F(1, 4), 4, 1, 1)
+    print(&#x27;optimal K,L:&#x27;, allocation[&#x27;capital&#x27;], allocation[&#x27;labor&#x27;])
+    print(&#x27;unequal/equal fourth powers:&#x27;,
+          production_power(1, 3, 1, 4), production_power(2, 2, 1, 4))
+    print(&#x27;measurement wedge:&#x27;, measurement_wedge([3, 2, 1, 1], [0, 1, 2, 3]))
+    print(&#x27;Supplied finite accounting; no empirical or economic forecast.&#x27;)
+
+
+if __name__ == &#x27;__main__&#x27;:
+    demo()
+</code></pre></div>
+<div class="codewrap" id="program-output"><pre><code>serial throughput: 50
+serving costs: 200 300
+crossover volume: 5000
+linear task savings: 207/31250
+value added: 100
+gross ratios sum: 7/5
+optimal K,L: 1 3
+unequal/equal fourth powers: 27 16
+measurement wedge: (Fraction(-3, 1), Fraction(-1, 1), Fraction(1, 1), Fraction(2, 1))
+Supplied finite accounting; no empirical or economic forecast.
+</code></pre></div>
+<p>The author checks independently enumerate feasible integer flows, repeated-unit costs, Boolean exposure/adoption/saving branches, budget-grid alternatives and sequential compounding. They test domain boundaries and input preservation. These checks validate the implemented finite models; they do not identify causal labor effects or verify an economy-wide forecast.</p>
+</section>
+<section id="exercises">
+<h2>16. Six exercises with fully worked solutions</h2>
+<h3>Exercise 1 — Purchase capacity at a binding stage</h3>
+<p>A serial service has capacities \((50,80,100)\) in qualifying requests per hour. A budget permits increasing one stage by 40. Which purchase maximizes sustained throughput? What if capacities start at \((50,50,100)\)?</p>
+<details class="solution"><summary>Solution</summary><p>In the first case the three resulting flows are \(\min(90,80,100)=80\), \(\min(50,120,100)=50\), and \(\min(50,80,140)=50\). Increasing the first stage is uniquely best and gains 30, not 40, because the second stage becomes binding.</p><p>In the tied case either first or second increase leaves the other at 50; increasing the third also leaves flow at 50. No single-stage purchase improves sustained flow. The conclusion depends on the serial steady-state assumptions and compatible units, not on processor counts alone.</p></details>
+<h3>Exercise 2 — Separate algebraic crossover from a feasible decision</h3>
+<p>Use A's fixed cost 100 and variable cost 1/100, and B's fixed cost 0 and variable cost 3/100. Derive the crossover and compare volume 10,000. Suppose A can serve at most 6,000 requests in the period.</p>
+<details class="solution"><summary>Solution</summary><p>Subtracting costs gives \(100+(1/100-3/100)n=100-n/50\). Setting it to zero gives \(n=5,000\). At 10,000 the nominal costs are 200 and 300, respectively.</p><p>A cannot serve the required volume under its capacity constraint, so its lower nominal cost does not make it feasible. B is the only feasible candidate if it meets all other requirements. Splitting service across plans would introduce a new decision variable and potentially new fixed costs; it is not covered by this two-exclusive-plan calculation.</p></details>
+<h3>Exercise 3 — Compute adoption-weighted savings</h3>
+<p>Two tasks have cost shares \((3/4,1/4)\), exposure \((1,1/2)\), adoption \((1/2,1)\), and net savings \((1/5,2/5)\). Compute the total saving. Explain why replacing adoption by one changes the claim.</p>
+<details class="solution"><summary>Solution</summary><p>The contributions are \((3/4)(1)(1/2)(1/5)=3/40\) and \((1/4)(1/2)(1)(2/5)=1/20\). Their sum is \(5/40=1/8\), or 12.5% of the stipulated baseline cost.</p><p>Full adoption would give \(3/20+1/20=1/5\). That 20% result assumes the exposed activity is adopted economically; technical exposure alone supplied no such premise. New review work must enter the net saving or the baseline partition. Neither number by itself is a GDP-growth forecast.</p></details>
+<h3>Exercise 4 — Avoid counting the same intermediate product twice</h3>
+<p>Upstream sales are 40 with no purchased intermediates. Downstream sales are 100 and its purchased upstream input costs 40. Compute value added, value-added shares and gross-output ratios relative to the total. Can the gross ratios be treated as normalized final-sector shares?</p>
+<details class="solution"><summary>Solution</summary><p>Value added is 40 upstream and 60 downstream, totaling 100. Shares are 2/5 and 3/5. Gross-output ratios are 2/5 and 1, totaling 7/5.</p><p>Adding gross sales gives 140 and double-counts the 40 intermediate transaction. The gross ratios do not sum to one and cannot be substituted into a convex-combination bound as normalized final-sector shares. Their use in a network productivity theorem needs the theorem's additional economic assumptions; these accounting identities alone establish no such theorem.</p></details>
+<h3>Exercise 5 — Optimal spending is not equal input quantity</h3>
+<p>For \(\alpha=1/4\), budget 8, capital price 2 and labor price 1, find the interior optimum. Compare powered output with the equal-quantity feasible plan.</p>
+<details class="solution"><summary>Solution</summary><p>Optimal capital spending is \(\alpha B=2\), so \(K=1\). Labor spending is 6, so \(L=6\). The budget equation is \(2(1)+6=8\). The fourth power of output divided by \(A^4\) is \(K L^3=216\).</p><p>Equal quantities require \(2K+K=8\), hence \(K=L=8/3\). Its powered output is \((8/3)^4=4096/81\), which is less than 216 because \(216\cdot81=17,496&gt;4,096\). Constant returns remains true for either input combination; it did not imply equality was optimal.</p></details>
+<h3>Exercise 6 — Distinguish a level improvement from an idea-growth law</h3>
+<p>Hold capital and labor fixed. Compare a one-time doubling of \(A\), a law \(A_{t+1}=(11/10)A_t\), and a law \(A_{t+1}=A_t+1\), beginning at \(A_0=1\). What follows after three periods, and which paths have a constant proportional growth rate?</p>
+<details class="solution"><summary>Solution</summary><p>A one-time doubling followed by constancy gives \(A_3=2\), with zero growth after the jump. The multiplicative law gives \(A_3=(11/10)^3=1331/1000\) and a 10% proportional increase every period. The additive law gives \(A_3=4\), but its proportional rates are 1, 1/2 and 1/3 over the first three transitions.</p><p>With other inputs fixed, output inherits these technology multipliers. The larger third-period level in the additive fixture does not make its long-run proportional growth rate constant. None of the paths is implied merely by calling ideas nonrival; each follows from its stated law.</p></details>
+</section>
+<section id="sources">
+<h2>17. Source scope and model boundaries</h2>
+<p>The source recording supplies the economic topic order. The capacity, serving-cost, partition accounting, production-allocation and idea-dynamics examples are original finite models with explicit assumptions. They do not supply current security, legal, investment or national-infrastructure recommendations.</p>
+<ul>
+<li><a href="https://www.nber.org/papers/w31161">Generative AI at Work</a>, retained April 2023/November 2023 revision, PDF 1–2, 4–5, 15–16: sample, outcome, heterogeneous findings, specification and identification limits.</li>
+<li><a href="https://www.nber.org/papers/w32487">The Simple Macroeconomics of AI</a>, retained May 2024 working paper, PDF 1–3, 5–7: task-cost framework and separate baseline/revised ten-year estimates; full general-equilibrium proof is not reproduced.</li>
+<li><a href="https://www.nber.org/papers/w4148">General Purpose Technologies: Engines of Growth?</a>, August 1992 working paper, PDF 1–2: conceptual criteria; this is not the later journal edition or an audited full-model proof.</li>
+<li><a href="https://www.nber.org/papers/w25148">The Productivity J-Curve</a>, October 2018/January 2020 revision, PDF 1–5, 13–14: intangible investment and measurement mechanism, explicit time-pattern boundary and toy figure.</li>
+<li><a href="https://www.bea.gov/help/faq/1250">BEA explanation of free digital services</a>: ad-funded output versus consumer welfare, with the separate digital-estimate vintage kept explicit.</li>
+</ul>
+<p>The machine transcript is not a human-verified caption track, and no matching guest-slide deck is substituted from another lecture. Recorded company valuations, crawler trends, settlement outcomes, survey totals and power-transmission assessments are not asserted as newly verified measurements. Their conceptual questions are preserved through the scoped models and evidence distinctions.</p>
+</section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-18-ai-society-objectives-audits-and-release.html">Previous available chapter</a><a href="index.html">Lecture index</a><a rel="next" href="lecture-20-research-decisions-and-evidence.html">Next available chapter</a></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

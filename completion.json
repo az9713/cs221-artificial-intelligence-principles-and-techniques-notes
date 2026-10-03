@@ -1,0 +1,10 @@
+{
+  "status": "reading edition complete; human course-certification gate pending",
+  "reading_edition_complete": true,
+  "course_complete": false,
+  "chapter_count": 20,
+  "worked_solutions": 120,
+  "human_accessibility": "not performed",
+  "publication": "not performed",
+  "validation_summary": "validation-summary.json"
+}

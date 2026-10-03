@@ -4,7 +4,7 @@
   "video_id": "SMOD_GiRzb8",
   "source_type": "locally generated automatic speech recognition",
   "status": "author draft; different-editor6b/7/8 pending",
-  "authored_body_sha256": "dacecac97ded7a9a05b6c7a584c86f2fd71134ec432e90656d2bf9ab6fe8093a",
+  "authored_body_sha256": "6e94797d443b554836df5368e613fe162aebe7a17babeac0cc33e78d942176b1",
   "sections": [
     {
       "section": "case",
@@ -390,7 +390,7 @@
   ],
   "program": "programs/chapter10.py",
   "implementation_evidence": {
-    "source_sha256": "4d2a6a4e419ffbf2858d3f450988b072012f9ec1963db3ff2dec1ba2a35ce742",
+    "source_sha256": "6bc38c89161c6ea622d568f29278f259d656dbacf41ab37672cd803083ed79c9",
     "stdout_sha256": "b447e3a877bf8f3fb6d0ab4476ecae7e904e2a32d01a86506a2dd3d041207979",
     "status": "actual source/stdout embedded; complete author checks separately retained"
   },

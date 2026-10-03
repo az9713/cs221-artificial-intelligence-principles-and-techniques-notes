@@ -5,25 +5,22 @@
   "accepted_scientific_body_sha256": "b19746ad0dd4da0c5590ee473c8eca0647a47bc8c04c5d2e0c6f9e7ee968382c",
   "accepted_metadata_sha256": "c0cf3a63e38832ca4e454dc025f1e91c5eb4bc8f0c706b527acb4f6a5aea8ef2",
   "accepted_program_sha256": "1cbd3d0c91c987cbe8873c4dd320805f20bfa02be3134bffe4abc14b0a0936c1",
-  "integrated_html_sha256": "444cfa264a26b738655315aafcab88fe5a154a67209b8db16eed00781b6253fe",
+  "integrated_html_sha256": "0927a4285eae226767098c7d671acbfe7b4ede0eac18dd01fe776bcb80179f3f",
   "worked_solutions": 6,
-  "current_reader_gate": {
-    "status": "passed within accepted Chapters1-16 reader scope",
-    "reader_report": "reader-validation.json",
-    "human_accessibility": "not performed"
-  },
   "limits": [
-    "Full20chapter course incomplete",
-    "Machine transcription is not human ASR certification",
+    "Automatic transcription is not human source certification",
     "Human keyboard/screen-reader audit unperformed",
     "No publication performed"
   ],
   "independent_review": {
-    "rounds": 1,
     "gate_6b": "accepted",
-    "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "df3ef458ab3cd58e3e8c5a385a021234ab662a3ca8dbeef768b6cb54808dd30c",
-    "independent_numerical_checks": 11775
+    "passes_7_8": "accepted",
+    "report_sha256": "df3ef458ab3cd58e3e8c5a385a021234ab662a3ca8dbeef768b6cb54808dd30c"
+  },
+  "current_reader_gate": {
+    "status": "passed within complete 20-chapter reading edition",
+    "reader_report": "reader-validation.json",
+    "human_accessibility": "not performed"
   }
 }

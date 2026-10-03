@@ -2,28 +2,29 @@
   "chapter": "lecture-08-reinforcement-learning.html",
   "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
   "status": "independently reviewed and locally validated chapter",
-  "accepted_scientific_body_sha256": "9fd41d0061718308556e055bc9274835173b855916e51e0b192ab5fca918a87c",
-  "accepted_metadata_sha256": "d367a27e4257b8969fe0feb4cefcb88ed6c4a663933f91c2fa45fa43beade7c4",
-  "accepted_program_sha256": "873e3db06116bad3f834cfd108de29fec4105dee30cc117c406c733e1fc4bfb2",
-  "integrated_html_sha256": "ea47cbf84e6f4e47b505590eb6426b404d5dd25aa8e51c15bed23d9c535e663b",
+  "accepted_scientific_body_sha256": "4a22484d4510eda5c85b347160bcefce72fe8ace0904ee08fc3d4e6bc7373632",
+  "accepted_metadata_sha256": "376131e37b012e0bb11a20b7123f4cf3fc220761b929a209b07bd77c51ccebf1",
+  "accepted_program_sha256": "5825b079ed43af4d1ad85118e6687584eb2ce2ee777a2120000f3399b246f7fe",
+  "integrated_html_sha256": "a5cd89fe243726fbd45908a5b9ef84845006d25e65a615041333352421ee9d53",
   "worked_solutions": 6,
-  "current_reader_gate": {
-    "status": "passed within accepted Chapters1-16 reader scope",
-    "reader_report": "reader-validation.json",
-    "human_accessibility": "not performed"
-  },
   "limits": [
-    "Full20chapter course incomplete",
-    "Machine transcription is not human ASR certification",
+    "Automatic transcription is not human source certification",
     "Human keyboard/screen-reader audit unperformed",
     "No publication performed"
   ],
   "independent_review": {
-    "rounds": 2,
     "gate_6b": "accepted",
-    "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "14f09638bfa24950a5152d6d0b98a56892c0f0a460d072b1d5f9a6c6115d0bcb",
-    "independent_numerical_checks": 1559
+    "passes_7_8": "accepted",
+    "report_sha256": "14f09638bfa24950a5152d6d0b98a56892c0f0a460d072b1d5f9a6c6115d0bcb"
+  },
+  "formatting_closure": {
+    "status": "independently accepted; AST and stdout unchanged",
+    "report_sha256": "743266e53b47400a8cce76ecbf3b35fd2b2803d5020589d63cfedf2c5f68031b"
+  },
+  "current_reader_gate": {
+    "status": "passed within complete 20-chapter reading edition",
+    "reader_report": "reader-validation.json",
+    "human_accessibility": "not performed"
   }
 }

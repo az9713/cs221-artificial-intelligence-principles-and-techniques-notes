@@ -1,35 +1,43 @@
 # CS221 — Artificial Intelligence: Principles and Techniques
 
-Independent, enhanced textbook based on 20 selected Autumn 2025 recordings.
+Independent textbook notes for all 20 selected Autumn 2025 recordings.
 
-## Current local edition
+## Reading the book
 
-Chapters1-16 are independently reviewed and locally validated. Chapters17-20 are in development. All twenty recordings and local machine transcripts are available; machine transcription is not publisher-authored captioning.
+Open `index.html`. It includes searchable recordings, prerequisites and an
+ordered learning route. Every chapter links its major lecture topics to the
+recording and includes derivations, original finite examples, executable code,
+six exercises and complete worked solutions. `source-map.html` separates
+recording material, primary research and original teaching constructions;
+`references.html` describes the claims supported by the primary sources.
 
-Open `index.html` for the reader. Run `python numerical_lab.py` for Chapter 1's numerical checks; NumPy checks are optional when NumPy is installed. The HTML reader's laboratory is currently a general companion scaffold; the full course laboratory and learning route remain in development.
+The seven-panel `numerical-lab.html` explores learning, planning, games,
+inference, logic, societal decisions and information value. It runs offline
+with the bundled reader assets. Its exact finite models are available in
+`programs/course_lab.py`. Run `python numerical_lab.py` for Chapter 1's
+checks, and `python programs/chapterNN.py` for Chapters 02–20. These teaching
+models do not establish neural-scale performance or deployment safety.
 
-This is a local working edition. The full book is not complete, and CS221 publication is not authorized. Automated reader checks do not constitute a human keyboard or screen-reader audit. No hardware speed or empirical robot-performance benchmark is claimed.
+## Coverage and evidence
 
-Original chapter programs: `python programs/chapter02.py`, `python programs/chapter03.py`, and `python programs/chapter04.py`. These standard-library examples are checked teaching constructions, not deployment benchmarks.
+The edition covers the 20 approved recordings, not absent lectures or a
+future revision of the course. Source transcripts are local automatic speech
+recognition, not publisher-authored captions or a certified human transcript.
+Section provenance and recording endpoints are documented in the compact
+source manifest. Raw audio, transcripts, slides and private editorial records
+are excluded from this reading edition.
 
-Search chapter programs: `python programs/chapter05.py` and `python programs/chapter06.py`. Their exact finite examples are checked teaching constructions.
+Explanations, proofs, examples, programs and exercises are independent teaching
+work. Stanford recordings supply the topic sequence; cited primary papers
+support their explicitly scoped claims. Reported results, conditional formal
+guarantees and finite implementation checks remain distinct.
 
-MDP chapter program: `python programs/chapter07.py`. Their exact finite examples are checked teaching constructions.
+`validation-summary.json` and `reader-validation.json` record the actual local
+validation scope. All 20 chapters have passed independent scientific review.
+Final book review and reader validation are recorded on the installed files. Automated browser checks cover
+typeset mathematics, narrow and desktop layouts, navigation, search, reading
+controls, copied code and print expansion. They do not constitute a human
+keyboard or screen-reader audit, which remains unperformed. Full course
+certification therefore remains pending that human audit.
 
-RL chapter program: `python programs/chapter08.py`. Their exact finite examples are checked teaching constructions.
-
-Policy-gradient chapter program: `python programs/chapter09.py`. Their exact finite examples are checked teaching constructions.
-
-Game-search chapter program: `python programs/chapter10.py`. Their exact finite examples are checked teaching constructions.
-
-Additional accepted chapter program: `python programs/chapter11.py`. Their exact finite examples are checked teaching constructions.
-
-Additional accepted chapter program: `python programs/chapter12.py`. Their exact finite examples are checked teaching constructions.
-
-Additional accepted chapter program: `python programs/chapter13.py`. Their exact finite examples are checked teaching constructions.
-
-Additional accepted chapter program: `python programs/chapter14.py`. These exact finite examples are checked teaching constructions.
-
-Additional accepted chapter program: `python programs/chapter15.py`. These exact finite examples are checked teaching constructions.
-
-Additional accepted chapter program: `python programs/chapter16.py`. These exact finite examples are checked teaching constructions.
+This is a local reading edition. No CS221 publication or deployment is claimed.

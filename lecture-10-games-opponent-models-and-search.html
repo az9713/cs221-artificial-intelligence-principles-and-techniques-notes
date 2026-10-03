@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="dacecac97ded7a9a05b6c7a584c86f2fd71134ec432e90656d2bf9ab6fe8093a"><title>Games: opponent models and search · CS221: Artificial Intelligence: Principles and Techniques</title>
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="6e94797d443b554836df5368e613fe162aebe7a17babeac0cc33e78d942176b1"><title>Games: opponent models and search · CS221: Artificial Intelligence: Principles and Techniques</title>
 <link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
 <script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
 <body><a class="skip" href="#main">Skip to content</a>
@@ -111,13 +111,15 @@
 <p><code>alpha_beta</code> rejects chance games, validates optional finite rational window endpoints and strict ordering, and can accept a permutation of actions at selected states. <code>None</code> denotes an infinite endpoint. It returns value, action, leaf visits, bound status and trace. Leaf visits count unfolded occurrences, including repeats in a shared graph; unlike <code>solve</code>, this search has no transposition cache. A strict call budget between 1 and one million raises <code>RuntimeError</code> if exhausted. The full-window root is exact when the call completes; narrow-window bound actions are not asserted optimal. Reordering affects work and tie preference, not the exact full-window value.</p>
 <p><code>depth_search</code> takes depth 0–64 in plies and an exact rational estimate for every nonterminal state. It checks terminal before cutoff, memoizes state/depth pairs, averages chance and optimizes max/min. Status is conservatively heuristic if the budget is below the graph's maximum height; it can happen that a shallower particular tree already yields the exact value. No empirical training or frontier-error certificate is supplied. The printed A, B, A depth sequence is a counterexample, not evidence that depth two usually performs worse.</p>
 <p>The following source is byte-identical to the downloadable program, and the next block is its actual stdout. The nine-leaf pruning count assumes the displayed left-to-right order. Its cut-subtree comparison deliberately exposes a bound differing from the complete subtree value, preventing an implementation match at the root from hiding an incorrect interpretation of internal returns.</p>
-<pre><code class="language-python" id="program-source">&quot;&quot;&quot;Original finite game calculations. Standard library; no file/network effects.
+<pre><code class="language-python" id="program-source">&#x27;Original finite game calculations. Standard library; &#x27; \
+    &#x27;no file/network effects.\n\nExact model numbers are &#x27; \
+    &#x27;ints/Fractions (not bools or floats), magnitude &#x27; \
+    &#x27;&lt;=1e100\nand denominator &lt;=1e6. Finite acyclic labelled &#x27; \
+    &#x27;graph: &lt;=4096 states, &lt;=16\nactions/state and &lt;=64 &#x27; \
+    &#x27;plies. State labels identify full information. Each\n&#x27; \
+    &#x27;policy/known-chance row has the exact action keys and &#x27; \
+    &#x27;sums exactly to one.\n&#x27;
 
-Exact model numbers are ints/Fractions (not bools or floats), magnitude &lt;=1e100
-and denominator &lt;=1e6. Finite acyclic labelled graph: &lt;=4096 states, &lt;=16
-actions/state and &lt;=64 plies. State labels identify full information. Each
-policy/known-chance row has the exact action keys and sums exactly to one.
-&quot;&quot;&quot;
 from dataclasses import dataclass
 from fractions import Fraction
 from math import lcm
@@ -126,18 +128,18 @@ from random import Random
 F = Fraction
 
 
-def rational(x, name=&#x27;number&#x27;):
+def rational(x, name=&quot;number&quot;):
     if isinstance(x, bool) or not isinstance(x, (int, Fraction)):
-        raise ValueError(name + &#x27; must be an int or Fraction, not bool/float&#x27;)
+        raise ValueError(name + &quot; must be an int or Fraction, not bool/float&quot;)
     x = F(x)
     if abs(x) &gt; 10**100 or x.denominator &gt; 10**6:
-        raise ValueError(name + &#x27; exceeds magnitude/denominator bound&#x27;)
+        raise ValueError(name + &quot; exceeds magnitude/denominator bound&quot;)
     return x
 
 
 def count(x, name, lo, hi):
     if type(x) is not int or not lo &lt;= x &lt;= hi:
-        raise ValueError(name + &#x27; is outside the integer bounds&#x27;)
+        raise ValueError(name + &quot; is outside the integer bounds&quot;)
     return x
 
 
@@ -153,85 +155,135 @@ class Node:
 def distribution(edges, supplied):
     actions = tuple(a for a, _ in edges)
     if not isinstance(supplied, dict) or set(supplied) != set(actions):
-        raise ValueError(&#x27;distribution must have exactly the admissible keys&#x27;)
-    row = tuple((a, rational(supplied[a], &#x27;probability&#x27;)) for a in actions)
+        raise ValueError(&quot;distribution must have exactly the admissible keys&quot;)
+    row = tuple((a, rational(supplied[a], &quot;probability&quot;)) for a in actions)
     if any(p &lt; 0 for _, p in row) or sum(p for _, p in row) != 1:
-        raise ValueError(&#x27;probability row must be nonnegative and sum to one&#x27;)
+        raise ValueError(&quot;probability row must be nonnegative and sum to one&quot;)
     return row
 
 
 @dataclass(frozen=True, init=False)
 class Game:
-    &quot;&quot;&quot;Own immutable copies; reject malformed, cyclic or unreachable states.&quot;&quot;&quot;
+    &quot;Own immutable copies; reject malformed, cyclic or unreachable states.&quot;
+
     nodes: tuple
     root: str
     height: int
+
     def __init__(self, nodes, root):
         if not isinstance(nodes, (tuple, list)) or not 1 &lt;= len(nodes) &lt;= 4096:
-            raise ValueError(&#x27;nodes must be a finite sequence of 1..4096 Nodes&#x27;)
+            raise ValueError(
+                &quot;nodes must be a finite sequence of 1..4096 Nodes&quot;
+            )
         copied = {}
         for node in nodes:
-            if not isinstance(node, Node) or not isinstance(node.label, str) or not node.label:
-                raise ValueError(&#x27;each Node needs a nonempty string label&#x27;)
-            if node.label in copied or node.kind not in (&#x27;leaf&#x27;, &#x27;max&#x27;, &#x27;min&#x27;, &#x27;chance&#x27;):
-                raise ValueError(&#x27;duplicate label or unsupported node kind&#x27;)
-            if not isinstance(node.edges, (tuple, list)) or not isinstance(node.probabilities, (tuple, list)):
-                raise ValueError(&#x27;edges/probabilities must be finite sequences&#x27;)
+            if (
+                not isinstance(node, Node)
+                or not isinstance(node.label, str)
+                or not node.label
+            ):
+                raise ValueError(&quot;each Node needs a nonempty string label&quot;)
+            if node.label in copied or node.kind not in (
+                &quot;leaf&quot;,
+                &quot;max&quot;,
+                &quot;min&quot;,
+                &quot;chance&quot;,
+            ):
+                raise ValueError(&quot;duplicate label or unsupported node kind&quot;)
+            if not isinstance(node.edges, (tuple, list)) or not isinstance(
+                node.probabilities, (tuple, list)
+            ):
+                raise ValueError(
+                    &quot;edges/probabilities must be finite sequences&quot;
+                )
             edges = []
             for edge in node.edges:
                 if not isinstance(edge, (tuple, list)) or len(edge) != 2:
-                    raise ValueError(&#x27;edge must be an action/successor pair&#x27;)
+                    raise ValueError(&quot;edge must be an action/successor pair&quot;)
                 a, child = edge
-                if not isinstance(a, str) or not a or not isinstance(child, str) or not child:
-                    raise ValueError(&#x27;edge labels must be nonempty strings&#x27;)
+                if (
+                    not isinstance(a, str)
+                    or not a
+                    or not isinstance(child, str)
+                    or not child
+                ):
+                    raise ValueError(&quot;edge labels must be nonempty strings&quot;)
                 edges.append((a, child))
             edges = tuple(edges)
             if len({a for a, _ in edges}) != len(edges):
-                raise ValueError(&#x27;duplicate action&#x27;)
-            if node.kind == &#x27;leaf&#x27;:
+                raise ValueError(&quot;duplicate action&quot;)
+            if node.kind == &quot;leaf&quot;:
                 if edges or node.probabilities or node.utility is None:
-                    raise ValueError(&#x27;leaf has utility and no edges/probabilities&#x27;)
-                copied[node.label] = Node(node.label, &#x27;leaf&#x27;, (), rational(node.utility), ())
+                    raise ValueError(
+                        &quot;leaf has utility and no edges/probabilities&quot;
+                    )
+                copied[node.label] = Node(
+                    node.label, &quot;leaf&quot;, (), rational(node.utility), ()
+                )
             else:
                 if not 1 &lt;= len(edges) &lt;= 16 or node.utility is not None:
-                    raise ValueError(&#x27;nonterminal needs 1..16 edges and no utility&#x27;)
+                    raise ValueError(
+                        &quot;nonterminal needs 1..16 edges and no utility&quot;
+                    )
                 probs = ()
-                if node.kind == &#x27;chance&#x27;:
+                if node.kind == &quot;chance&quot;:
                     try:
-                        pairs = tuple(tuple(pair) for pair in node.probabilities)
-                        if any(len(pair) != 2 for pair in pairs) or len({pair[0] for pair in pairs}) != len(pairs):
-                            raise ValueError(&#x27;invalid/duplicate chance action&#x27;)
+                        pairs = tuple(
+                            tuple(pair) for pair in node.probabilities
+                        )
+                        if any(len(pair) != 2 for pair in pairs) or len(
+                            {pair[0] for pair in pairs}
+                        ) != len(pairs):
+                            raise ValueError(
+                                (&quot;invalid/duplicate chance action&quot;)
+                            )
                         probs = distribution(edges, dict(pairs))
                     except (TypeError, KeyError) as exc:
-                        raise ValueError(&#x27;malformed chance distribution&#x27;) from exc
+                        raise ValueError(
+                            &quot;malformed chance distribution&quot;
+                        ) from exc
                 elif node.probabilities:
-                    raise ValueError(&#x27;only chance nodes carry probabilities&#x27;)
-                copied[node.label] = Node(node.label, node.kind, edges, None, probs)
+                    raise ValueError(&quot;only chance nodes carry probabilities&quot;)
+                copied[node.label] = Node(
+                    node.label, node.kind, edges, None, probs
+                )
         if not isinstance(root, str) or root not in copied:
-            raise ValueError(&#x27;root must identify a declared state&#x27;)
-        if any(child not in copied for node in copied.values() for _, child in node.edges):
-            raise ValueError(&#x27;unknown successor&#x27;)
+            raise ValueError(&quot;root must identify a declared state&quot;)
+        if any(
+            child not in copied
+            for node in copied.values()
+            for _, child in node.edges
+        ):
+            raise ValueError(&quot;unknown successor&quot;)
         active, heights = set(), {}
+
         def height(s, depth=0):
             if depth &gt; 64:
-                raise ValueError(&#x27;graph exceeds 64-ply bound&#x27;)
+                raise ValueError(&quot;graph exceeds 64-ply bound&quot;)
             if s in active:
-                raise ValueError(&#x27;cyclic game; finite backward induction required&#x27;)
+                raise ValueError(
+                    &quot;cyclic game; finite backward induction required&quot;
+                )
             if s in heights:
                 return heights[s]
             active.add(s)
-            h = 0 if not copied[s].edges else 1 + max(height(c, depth+1) for _, c in copied[s].edges)
+            h = (
+                0
+                if not copied[s].edges
+                else 1 + max(height(c, depth + 1) for _, c in copied[s].edges)
+            )
             active.remove(s)
             if h &gt; 64:
-                raise ValueError(&#x27;graph exceeds 64-ply bound&#x27;)
+                raise ValueError(&quot;graph exceeds 64-ply bound&quot;)
             heights[s] = h
             return h
+
         height(root)
         if set(heights) != set(copied):
-            raise ValueError(&#x27;unreachable states are not part of this Game&#x27;)
-        object.__setattr__(self, &#x27;nodes&#x27;, tuple(copied.values()))
-        object.__setattr__(self, &#x27;root&#x27;, root)
-        object.__setattr__(self, &#x27;height&#x27;, heights[root])
+            raise ValueError(&quot;unreachable states are not part of this Game&quot;)
+        object.__setattr__(self, &quot;nodes&quot;, tuple(copied.values()))
+        object.__setattr__(self, &quot;root&quot;, root)
+        object.__setattr__(self, &quot;height&quot;, heights[root])
 
     def table(self):
         return {node.label: node for node in self.nodes}
@@ -239,11 +291,17 @@ class Game:
 
 def policy_rows(game, policy, kinds):
     if not isinstance(game, Game) or not isinstance(policy, dict):
-        raise ValueError(&#x27;Game and policy dictionary required&#x27;)
+        raise ValueError(&quot;Game and policy dictionary required&quot;)
     expected = {n.label for n in game.nodes if n.kind in kinds}
     if set(policy) != expected:
-        raise ValueError(&#x27;policy must specify exactly the requested player states&#x27;)
-    return {n.label: distribution(n.edges, policy[n.label]) for n in game.nodes if n.label in expected}
+        raise ValueError(
+            &quot;policy must specify exactly the requested player states&quot;
+        )
+    return {
+        n.label: distribution(n.edges, policy[n.label])
+        for n in game.nodes
+        if n.label in expected
+    }
 
 
 @dataclass(frozen=True)
@@ -251,56 +309,64 @@ class Result:
     value: Fraction
     action: object
     leaves: int
-    bound: str = &#x27;exact&#x27;
+    bound: str = &quot;exact&quot;
     trace: tuple = ()
 
 
-def solve(game, mode=&#x27;minimax&#x27;, policy=None):
-    &quot;&quot;&quot;Memoized exact evaluation; leaves counts unique evaluated leaf states.&quot;&quot;&quot;
-    if not isinstance(game, Game) or mode not in (&#x27;evaluate&#x27;, &#x27;expectimax&#x27;, &#x27;minimax&#x27;):
-        raise ValueError(&#x27;invalid Game or solve mode&#x27;)
-    if mode == &#x27;minimax&#x27;:
+def solve(game, mode=&quot;minimax&quot;, policy=None):
+    &quot;Memoized exact evaluation; leaves counts unique evaluated leaf states.&quot;
+    if not isinstance(game, Game) or mode not in (
+        &quot;evaluate&quot;,
+        &quot;expectimax&quot;,
+        &quot;minimax&quot;,
+    ):
+        raise ValueError(&quot;invalid Game or solve mode&quot;)
+    if mode == &quot;minimax&quot;:
         if policy is not None:
-            raise ValueError(&#x27;minimax does not consume a fixed player policy&#x27;)
+            raise ValueError(&quot;minimax does not consume a fixed player policy&quot;)
         rows = {}
     else:
-        rows = policy_rows(game, policy, (&#x27;max&#x27;, &#x27;min&#x27;) if mode == &#x27;evaluate&#x27; else (&#x27;min&#x27;,))
+        rows = policy_rows(
+            game, policy, (&quot;max&quot;, &quot;min&quot;) if mode == &quot;evaluate&quot; else (&quot;min&quot;,)
+        )
     table, memo, choices, leaves = game.table(), {}, {}, set()
+
     def value(s):
         if s in memo:
             return memo[s]
         n = table[s]
-        if n.kind == &#x27;leaf&#x27;:
+        if n.kind == &quot;leaf&quot;:
             leaves.add(s)
             v = n.utility
         else:
             child = {a: value(c) for a, c in n.edges}
-            if n.kind == &#x27;chance&#x27; or s in rows:
-                probs = n.probabilities if n.kind == &#x27;chance&#x27; else rows[s]
+            if n.kind == &quot;chance&quot; or s in rows:
+                probs = n.probabilities if n.kind == &quot;chance&quot; else rows[s]
                 v = sum((p * child[a] for a, p in probs), F(0))
             else:
-                choose = max if n.kind == &#x27;max&#x27; else min
+                choose = max if n.kind == &quot;max&quot; else min
                 a = choose(child, key=child.get)
                 choices[s] = a
                 v = child[a]
         memo[s] = v
         return v
+
     v = value(game.root)
     return Result(v, choices.get(game.root), len(leaves))
 
 
 def sample_value(game, policy, rng):
-    &quot;&quot;&quot;Exact rational action sampling with integer draws, denominator cap1e12.&quot;&quot;&quot;
-    rows = policy_rows(game, policy, (&#x27;max&#x27;, &#x27;min&#x27;))
+    &quot;Exact rational action sampling with integer draws, denominator cap1e12.&quot;
+    rows = policy_rows(game, policy, (&quot;max&quot;, &quot;min&quot;))
     if not isinstance(rng, Random):
-        raise ValueError(&#x27;local random.Random required&#x27;)
+        raise ValueError(&quot;local random.Random required&quot;)
     table, s = game.table(), game.root
-    while table[s].kind != &#x27;leaf&#x27;:
+    while table[s].kind != &quot;leaf&quot;:
         node = table[s]
-        row = node.probabilities if node.kind == &#x27;chance&#x27; else rows[s]
+        row = node.probabilities if node.kind == &quot;chance&quot; else rows[s]
         denominator = lcm(*(p.denominator for _, p in row))
         if denominator &gt; 10**12:
-            raise ValueError(&#x27;exact integer sampling denominator exceeds1e12&#x27;)
+            raise ValueError(&quot;exact integer sampling denominator exceeds1e12&quot;)
         draw = rng.randrange(denominator)
         cumulative = 0
         for a, p in row:
@@ -312,157 +378,305 @@ def sample_value(game, policy, rng):
 
 
 def alpha_beta(game, alpha=None, beta=None, order=None, max_calls=1000000):
-    &quot;&quot;&quot;Fail-soft deterministic search; return exact/upper/lower plus trace.
-
-    None is an infinite window endpoint. A narrow-window return is not an
-    exact subtree value unless its status says exact. Leaves count visits,
-    including repeated occurrences of shared graph nodes; no transposition cache.
-    &quot;&quot;&quot;
-    if not isinstance(game, Game) or any(n.kind == &#x27;chance&#x27; for n in game.nodes):
-        raise ValueError(&#x27;alpha-beta requires a deterministic Game&#x27;)
-    max_calls=count(max_calls,&#x27;search-call budget&#x27;,1,1000000)
-    alpha = None if alpha is None else rational(alpha, &#x27;alpha&#x27;)
-    beta = None if beta is None else rational(beta, &#x27;beta&#x27;)
+    (
+        &#x27;Fail-soft deterministic search; return &#x27;
+        &#x27;exact/upper/lower plus trace.\n\n    None is an infinite &#x27;
+        &#x27;window endpoint. A narrow-window return is not an\n    &#x27;
+        &#x27;exact subtree value unless its status says exact. &#x27;
+        &#x27;Leaves count visits,\n    including repeated &#x27;
+        &#x27;occurrences of shared graph nodes; no transposition &#x27;
+        &#x27;cache.\n    &#x27;
+    )
+    if not isinstance(game, Game) or any(
+        n.kind == &quot;chance&quot; for n in game.nodes
+    ):
+        raise ValueError(&quot;alpha-beta requires a deterministic Game&quot;)
+    max_calls = count(max_calls, &quot;search-call budget&quot;, 1, 1000000)
+    alpha = None if alpha is None else rational(alpha, &quot;alpha&quot;)
+    beta = None if beta is None else rational(beta, &quot;beta&quot;)
     if alpha is not None and beta is not None and alpha &gt;= beta:
-        raise ValueError(&#x27;alpha must be strictly below beta&#x27;)
+        raise ValueError(&quot;alpha must be strictly below beta&quot;)
     table = game.table()
     if order is None:
         order = {}
-    if not isinstance(order, dict) or any(s not in table or table[s].kind == &#x27;leaf&#x27; for s in order):
-        raise ValueError(&#x27;order keys must identify nonterminal states&#x27;)
+    if not isinstance(order, dict) or any(
+        s not in table or table[s].kind == &quot;leaf&quot; for s in order
+    ):
+        raise ValueError(&quot;order keys must identify nonterminal states&quot;)
     for s, actions in order.items():
-        if not isinstance(actions, (tuple, list)) or any(not isinstance(a,str) for a in actions) or len(actions) != len(table[s].edges) or set(actions) != {a for a, _ in table[s].edges}:
-            raise ValueError(&#x27;order must be a permutation of admissible actions&#x27;)
+        if (
+            not isinstance(actions, (tuple, list))
+            or any(not isinstance(a, str) for a in actions)
+            or len(actions) != len(table[s].edges)
+            or set(actions) != {a for a, _ in table[s].edges}
+        ):
+            raise ValueError(
+                &quot;order must be a permutation of admissible actions&quot;
+            )
     visits, trace, calls = [], [], [0]
+
     def search(s, a0, b0):
-        calls[0]+=1
-        if calls[0]&gt;max_calls:
-            raise RuntimeError(&#x27;alpha-beta search-call budget exhausted&#x27;)
+        calls[0] += 1
+        if calls[0] &gt; max_calls:
+            raise RuntimeError(&quot;alpha-beta search-call budget exhausted&quot;)
         n = table[s]
-        if n.kind == &#x27;leaf&#x27;:
+        if n.kind == &quot;leaf&quot;:
             visits.append(s)
-            return n.utility, None, &#x27;exact&#x27;
+            return n.utility, None, &quot;exact&quot;
         edges = dict(n.edges)
         actions = order.get(s, tuple(edges))
         best, chosen, a, b = None, None, a0, b0
         for index, action in enumerate(actions):
             v, _, _ = search(edges[action], a, b)
-            if best is None or (v &gt; best if n.kind == &#x27;max&#x27; else v &lt; best):
+            if best is None or (v &gt; best if n.kind == &quot;max&quot; else v &lt; best):
                 best, chosen = v, action
-            if n.kind == &#x27;max&#x27;:
+            if n.kind == &quot;max&quot;:
                 a = best if a is None else max(a, best)
             else:
                 b = best if b is None else min(b, best)
             if a is not None and b is not None and a &gt;= b:
-                trace.append((s, &#x27;cutoff&#x27;, tuple(actions[index + 1:]), best))
+                trace.append((s, &quot;cutoff&quot;, tuple(actions[index + 1:]), best))
                 break
-        status = &#x27;upper&#x27; if a0 is not None and best &lt;= a0 else &#x27;lower&#x27; if b0 is not None and best &gt;= b0 else &#x27;exact&#x27;
+        status = (
+            (&quot;upper&quot;)
+            if a0 is not None and best &lt;= a0
+            else (&quot;lower&quot;)
+            if b0 is not None and best &gt;= b0
+            else (&quot;exact&quot;)
+        )
         trace.append((s, status, chosen, best))
         return best, chosen, status
+
     v, action, status = search(game.root, alpha, beta)
     return Result(v, action, len(visits), status, tuple(trace))
 
 
 def depth_search(game, depth, evaluation):
-    &quot;&quot;&quot;Terminal first, then heuristic cutoff; depth counts every traversed edge.&quot;&quot;&quot;
+    (
+        &#x27;Terminal first, then heuristic cutoff; depth counts &#x27;
+        &#x27;every traversed edge.&#x27;
+    )
     if not isinstance(game, Game):
-        raise ValueError(&#x27;Game required&#x27;)
-    depth = count(depth, &#x27;depth&#x27;, 0, 64)
-    expected = {n.label for n in game.nodes if n.kind != &#x27;leaf&#x27;}
+        raise ValueError(&quot;Game required&quot;)
+    depth = count(depth, &quot;depth&quot;, 0, 64)
+    expected = {n.label for n in game.nodes if n.kind != &quot;leaf&quot;}
     if not isinstance(evaluation, dict) or set(evaluation) != expected:
-        raise ValueError(&#x27;evaluation must specify every nonterminal state exactly&#x27;)
-    evaluation = {s: rational(x, &#x27;evaluation&#x27;) for s, x in evaluation.items()}
+        raise ValueError(
+            &quot;evaluation must specify every nonterminal state exactly&quot;
+        )
+    evaluation = {s: rational(x, &quot;evaluation&quot;) for s, x in evaluation.items()}
     table, memo, choices, leaves = game.table(), {}, {}, set()
+
     def value(s, d):
         if (s, d) in memo:
             return memo[s, d]
         n = table[s]
-        if n.kind == &#x27;leaf&#x27;:
+        if n.kind == &quot;leaf&quot;:
             leaves.add(s)
             v = n.utility
         elif d == 0:
             v = evaluation[s]
         else:
-            child = {a: value(c, d-1) for a, c in n.edges}
-            if n.kind == &#x27;chance&#x27;:
+            child = {a: value(c, d - 1) for a, c in n.edges}
+            if n.kind == &quot;chance&quot;:
                 v = sum((p * child[a] for a, p in n.probabilities), F(0))
             else:
-                a = (max if n.kind == &#x27;max&#x27; else min)(child, key=child.get)
+                a = (max if n.kind == &quot;max&quot; else min)(child, key=child.get)
                 choices[s, d] = a
                 v = child[a]
         memo[s, d] = v
         return v
+
     v = value(game.root, depth)
-    return Result(v, choices.get((game.root, depth)), len(leaves), &#x27;heuristic&#x27; if depth &lt; game.height else &#x27;exact&#x27;)
+    return Result(
+        v,
+        choices.get((game.root, depth)),
+        len(leaves),
+        &quot;heuristic&quot; if depth &lt; game.height else &quot;exact&quot;,
+    )
 
 
 def bins(chance=False):
     nodes = []
-    for label, numbers in [(&#x27;A&#x27;,(-50,50)),(&#x27;B&#x27;,(1,3)),(&#x27;C&#x27;,(-5,15))]:
-        nodes.append(Node(label,&#x27;min&#x27;,tuple((str(i),label+str(i)) for i in (1,2))))
-        nodes.extend(Node(label+str(i),&#x27;leaf&#x27;,utility=x) for i,x in enumerate(numbers,1))
-    targets = (&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;)
+    for label, numbers in [(&quot;A&quot;, (-50, 50)), (&quot;B&quot;, (1, 3)), (&quot;C&quot;, (-5, 15))]:
+        nodes.append(
+            Node(label, (
+                &#x27;min&#x27;
+            ), tuple((str(i), label + str(i)) for i in (1, 2)))
+        )
+        nodes.extend(
+            Node(label + str(i), &quot;leaf&quot;, utility=x)
+            for i, x in enumerate(numbers, 1)
+        )
+    targets = (&quot;A&quot;, &quot;B&quot;, &quot;C&quot;)
     if chance:
-        for i,label in enumerate(targets):
-            nodes.append(Node(&#x27;coin&#x27;+label,&#x27;chance&#x27;,((&#x27;stay&#x27;,label),(&#x27;left&#x27;,targets[(i-1)%3])),probabilities=((&#x27;stay&#x27;,F(1,2)),(&#x27;left&#x27;,F(1,2)))))
-        targets = tuple(&#x27;coin&#x27;+s for s in targets)
-    nodes.append(Node(&#x27;root&#x27;,&#x27;max&#x27;,tuple(zip((&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;),targets))))
-    return Game(nodes,&#x27;root&#x27;)
+        for i, label in enumerate(targets):
+            nodes.append(
+                Node(
+                    &quot;coin&quot; + label,
+                    (&quot;chance&quot;),
+                    (((&quot;stay&quot;), label), ((&quot;left&quot;), targets[(i - 1) % 3])),
+                    probabilities=(((&quot;stay&quot;), F(1, 2)), ((&quot;left&quot;), F(1, 2))),
+                )
+            )
+        targets = tuple(&quot;coin&quot; + s for s in targets)
+    nodes.append(Node(&quot;root&quot;, &quot;max&quot;, tuple(zip((&quot;A&quot;, &quot;B&quot;, &quot;C&quot;), targets))))
+    return Game(nodes, &quot;root&quot;)
 
 
 def halving(n=11):
-    n=count(n,&#x27;initial number&#x27;,0,40)
-    states={}
-    def add(k,player):
-        s=f&#x27;{k}:{player}&#x27;
+    n = count(n, &quot;initial number&quot;, 0, 40)
+    states = {}
+
+    def add(k, player):
+        s = f&quot;{k}:{player}&quot;
         if s in states:
             return s
-        if k==0:
-            states[s]=Node(s,&#x27;leaf&#x27;,utility=1 if player==&#x27;max&#x27; else -1)
+        if k == 0:
+            states[s] = Node(s, &quot;leaf&quot;, utility=1 if player == &quot;max&quot; else -1)
         else:
-            other=&#x27;min&#x27; if player==&#x27;max&#x27; else &#x27;max&#x27;
-            states[s]=Node(s,player,((&#x27;decrement&#x27;,add(k-1,other)),(&#x27;half&#x27;,add(k//2,other))))
+            other = &quot;min&quot; if player == &quot;max&quot; else &quot;max&quot;
+            states[s] = Node(
+                s,
+                player,
+                (
+                    ((&quot;decrement&quot;), add(k - 1, other)),
+                    ((&quot;half&quot;), add(k // 2, other)),
+                ),
+            )
         return s
-    root=add(n,&#x27;max&#x27;)
-    return Game(list(states.values()),root)
+
+    root = add(n, &quot;max&quot;)
+    return Game(list(states.values()), root)
 
 
 def pruning_fixture():
-    leaves=[Node(str(x)+suffix,&#x27;leaf&#x27;,utility=x) for x,suffix in [(9,&#x27;L&#x27;),(7,&#x27;L&#x27;),(6,&#x27;M&#x27;),(3,&#x27;M&#x27;),(4,&#x27;M&#x27;),(7,&#x27;M&#x27;),(9,&#x27;M&#x27;),(8,&#x27;R&#x27;),(3,&#x27;R&#x27;)]]
-    return Game(leaves+[Node(&#x27;left&#x27;,&#x27;min&#x27;,((&#x27;a&#x27;,&#x27;9L&#x27;),(&#x27;b&#x27;,&#x27;7L&#x27;))),Node(&#x27;m1&#x27;,&#x27;max&#x27;,((&#x27;a&#x27;,&#x27;3M&#x27;),(&#x27;b&#x27;,&#x27;4M&#x27;))),Node(&#x27;m2&#x27;,&#x27;max&#x27;,((&#x27;a&#x27;,&#x27;7M&#x27;),(&#x27;b&#x27;,&#x27;9M&#x27;))),Node(&#x27;middle&#x27;,&#x27;min&#x27;,((&#x27;a&#x27;,&#x27;6M&#x27;),(&#x27;b&#x27;,&#x27;m1&#x27;),(&#x27;c&#x27;,&#x27;m2&#x27;))),Node(&#x27;right&#x27;,&#x27;min&#x27;,((&#x27;a&#x27;,&#x27;8R&#x27;),(&#x27;b&#x27;,&#x27;3R&#x27;))),Node(&#x27;root&#x27;,&#x27;max&#x27;,((&#x27;L&#x27;,&#x27;left&#x27;),(&#x27;M&#x27;,&#x27;middle&#x27;),(&#x27;R&#x27;,&#x27;right&#x27;)))],&#x27;root&#x27;)
+    leaves = [
+        Node(str(x) + suffix, (&quot;leaf&quot;), utility=x)
+        for x, suffix in [
+            (9, (&quot;L&quot;)),
+            (7, (&quot;L&quot;)),
+            (6, (&quot;M&quot;)),
+            (3, (&quot;M&quot;)),
+            (4, (&quot;M&quot;)),
+            (7, (&quot;M&quot;)),
+            (9, (&quot;M&quot;)),
+            (8, (&quot;R&quot;)),
+            (3, (&quot;R&quot;)),
+        ]
+    ]
+    return Game(
+        leaves
+        + [
+            Node((&quot;left&quot;), (&quot;min&quot;), (((&quot;a&quot;), (&quot;9L&quot;)), ((&quot;b&quot;), (&quot;7L&quot;)))),
+            Node((&quot;m1&quot;), (&quot;max&quot;), (((&quot;a&quot;), (&quot;3M&quot;)), ((&quot;b&quot;), (&quot;4M&quot;)))),
+            Node((&quot;m2&quot;), (&quot;max&quot;), (((&quot;a&quot;), (&quot;7M&quot;)), ((&quot;b&quot;), (&quot;9M&quot;)))),
+            Node(
+                (&quot;middle&quot;),
+                (&quot;min&quot;),
+                (((&quot;a&quot;), (&quot;6M&quot;)), ((&quot;b&quot;), (&quot;m1&quot;)), ((&quot;c&quot;), (&quot;m2&quot;))),
+            ),
+            Node((&quot;right&quot;), (&quot;min&quot;), (((&quot;a&quot;), (&quot;8R&quot;)), ((&quot;b&quot;), (&quot;3R&quot;)))),
+            Node(
+                (&quot;root&quot;),
+                (&quot;max&quot;),
+                (((&quot;L&quot;), (&quot;left&quot;)), ((&quot;M&quot;), (&quot;middle&quot;)), ((&quot;R&quot;), (&quot;right&quot;))),
+            ),
+        ],
+        (&quot;root&quot;),
+    )
 
 
 def main():
-    game=bins()
-    fair={s:{&#x27;1&#x27;:F(1,2),&#x27;2&#x27;:F(1,2)} for s in (&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;)}
-    robust=solve(game)
-    response=solve(game,&#x27;expectimax&#x27;,fair)
-    print(f&#x27;bins: minimax={robust.value}, action={robust.action}; expectimax={response.value}, action={response.action}&#x27;)
-    adversary={s:{&#x27;1&#x27;:1,&#x27;2&#x27;:0} for s in (&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;)}
-    for agent in (&#x27;C&#x27;,&#x27;B&#x27;):
-        row={&#x27;root&#x27;:{a:int(a==agent) for a in (&#x27;A&#x27;,&#x27;B&#x27;,&#x27;C&#x27;)}}
-        print(f&#x27;faceoff {agent}: adversarial={solve(game,&quot;evaluate&quot;,dict(row,**adversary)).value}, fair={solve(game,&quot;evaluate&quot;,dict(row,**fair)).value}&#x27;)
-    row=dict(fair,root={&#x27;A&#x27;:1,&#x27;B&#x27;:0,&#x27;C&#x27;:0})
-    rng=Random(7)
-    mean=sum((sample_value(game,row,rng) for _ in range(1000)),F(0))/1000
-    print(f&#x27;fixed A/fair: exact={solve(game,&quot;evaluate&quot;,row).value}, seeded1000 mean={mean}&#x27;)
-    print(&#x27;halving agent-turn n1..11:&#x27;,tuple(int(solve(halving(n)).value) for n in range(1,12)))
-    coin=solve(bins(True))
-    print(f&#x27;chance before informed opponent: value={coin.value}, action={coin.action}&#x27;)
-    tree=pruning_fixture()
-    pruned=alpha_beta(tree)
-    print(f&#x27;alpha-beta full window: value={pruned.value}, action={pruned.action}, visited leaves={pruned.leaves}/9, status={pruned.bound}&#x27;)
-    middle_nodes=[n for n in tree.nodes if n.label in (&#x27;middle&#x27;,&#x27;m1&#x27;,&#x27;m2&#x27;,&#x27;6M&#x27;,&#x27;3M&#x27;,&#x27;4M&#x27;,&#x27;7M&#x27;,&#x27;9M&#x27;)]
-    middle=Game(middle_nodes,&#x27;middle&#x27;)
-    cut=alpha_beta(middle,alpha=7)
-    print(f&#x27;cut middle subtree: returned={cut.value}, status={cut.bound}, exhaustive={solve(middle).value}&#x27;)
-    shallow=Game([Node(&#x27;r&#x27;,&#x27;max&#x27;,((&#x27;A&#x27;,&#x27;a&#x27;),(&#x27;B&#x27;,&#x27;b&#x27;))),Node(&#x27;a&#x27;,&#x27;min&#x27;,((&#x27;go&#x27;,&#x27;aa&#x27;),)),Node(&#x27;b&#x27;,&#x27;min&#x27;,((&#x27;go&#x27;,&#x27;bb&#x27;),)),Node(&#x27;aa&#x27;,&#x27;max&#x27;,((&#x27;finish&#x27;,&#x27;u2&#x27;),)),Node(&#x27;bb&#x27;,&#x27;max&#x27;,((&#x27;finish&#x27;,&#x27;u1&#x27;),)),Node(&#x27;u2&#x27;,&#x27;leaf&#x27;,utility=2),Node(&#x27;u1&#x27;,&#x27;leaf&#x27;,utility=1)],&#x27;r&#x27;)
-    evaluation={&#x27;r&#x27;:0,&#x27;a&#x27;:2,&#x27;b&#x27;:1,&#x27;aa&#x27;:0,&#x27;bb&#x27;:3}
-    print(&#x27;depth cutoff:&#x27;,tuple((d,depth_search(shallow,d,evaluation).action,str(depth_search(shallow,d,evaluation).value)) for d in (1,2,3)))
-    print(&#x27;Finite fixtures do not verify an opponent model or a heuristic error bound.&#x27;)
+    game = bins()
+    fair = {s: {&quot;1&quot;: F(1, 2), &quot;2&quot;: F(1, 2)} for s in (&quot;A&quot;, &quot;B&quot;, &quot;C&quot;)}
+    robust = solve(game)
+    response = solve(game, &quot;expectimax&quot;, fair)
+    print(
+        f&quot;bins: minimax={robust.value}, action={robust.action}; expectimax={
+            response.value
+        }, action={response.action}&quot;
+    )
+    adversary = {s: {&quot;1&quot;: 1, &quot;2&quot;: 0} for s in (&quot;A&quot;, &quot;B&quot;, &quot;C&quot;)}
+    for agent in (&quot;C&quot;, &quot;B&quot;):
+        row = {&quot;root&quot;: {a: int(a == agent) for a in (&quot;A&quot;, &quot;B&quot;, &quot;C&quot;)}}
+        print(
+            f&quot;faceoff {agent}: adversarial={
+                solve(game, &#x27;evaluate&#x27;, dict(row, **adversary)).value
+            }, fair={solve(game, &#x27;evaluate&#x27;, dict(row, **fair)).value}&quot;
+        )
+    row = dict(fair, root={&quot;A&quot;: 1, &quot;B&quot;: 0, &quot;C&quot;: 0})
+    rng = Random(7)
+    mean = (
+        sum((sample_value(game, row, rng) for _ in range(1000)), F(0)) / 1000
+    )
+    print(
+        f&quot;fixed A/fair: exact={
+            solve(game, &#x27;evaluate&#x27;, row).value
+        }, seeded1000 mean={mean}&quot;
+    )
+    print(
+        &quot;halving agent-turn n1..11:&quot;,
+        tuple(int(solve(halving(n)).value) for n in range(1, 12)),
+    )
+    coin = solve(bins(True))
+    print(
+        f&quot;chance before informed opponent: value={coin.value}, action={
+            coin.action
+        }&quot;
+    )
+    tree = pruning_fixture()
+    pruned = alpha_beta(tree)
+    print(
+        f&quot;alpha-beta full window: value={pruned.value}, action={
+            pruned.action
+        }, visited leaves={pruned.leaves}/9, status={pruned.bound}&quot;
+    )
+    middle_nodes = [
+        n
+        for n in tree.nodes
+        if n.label in (&quot;middle&quot;, &quot;m1&quot;, &quot;m2&quot;, &quot;6M&quot;, &quot;3M&quot;, &quot;4M&quot;, &quot;7M&quot;, &quot;9M&quot;)
+    ]
+    middle = Game(middle_nodes, &quot;middle&quot;)
+    cut = alpha_beta(middle, alpha=7)
+    print(
+        f&quot;cut middle subtree: returned={cut.value}, status={
+            cut.bound
+        }, exhaustive={solve(middle).value}&quot;
+    )
+    shallow = Game(
+        [
+            Node(&quot;r&quot;, &quot;max&quot;, ((&quot;A&quot;, &quot;a&quot;), (&quot;B&quot;, &quot;b&quot;))),
+            Node(&quot;a&quot;, &quot;min&quot;, ((&quot;go&quot;, &quot;aa&quot;),)),
+            Node(&quot;b&quot;, &quot;min&quot;, ((&quot;go&quot;, &quot;bb&quot;),)),
+            Node(&quot;aa&quot;, &quot;max&quot;, ((&quot;finish&quot;, &quot;u2&quot;),)),
+            Node(&quot;bb&quot;, &quot;max&quot;, ((&quot;finish&quot;, &quot;u1&quot;),)),
+            Node(&quot;u2&quot;, &quot;leaf&quot;, utility=2),
+            Node(&quot;u1&quot;, &quot;leaf&quot;, utility=1),
+        ],
+        &quot;r&quot;,
+    )
+    evaluation = {&quot;r&quot;: 0, &quot;a&quot;: 2, &quot;b&quot;: 1, &quot;aa&quot;: 0, &quot;bb&quot;: 3}
+    print(
+        &quot;depth cutoff:&quot;,
+        tuple(
+            (
+                d,
+                depth_search(shallow, d, evaluation).action,
+                str(depth_search(shallow, d, evaluation).value),
+            )
+            for d in (1, 2, 3)
+        ),
+    )
+    print(
+        (
+            &quot;Finite fixtures do not verify an opponent model or a &quot;
+            &quot;heuristic error bound.&quot;
+        )
+    )
 
 
-if __name__==&#x27;__main__&#x27;:
+if __name__ == &quot;__main__&quot;:
     main()
 </code></pre>
 <pre><code class="language-text" id="program-output">bins: minimax=1, action=B; expectimax=5, action=C

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa"><title>Markov decision processes · CS221: Artificial Intelligence: Principles and Techniques</title>
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="5718300930a8f835555ffefbe860abdaf61af55a1d0c7253a8bf3b3ccd60f433"><title>Markov decision processes · CS221: Artificial Intelligence: Principles and Techniques</title>
 <link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
 <script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
 <body><a class="skip" href="#main">Skip to content</a>
@@ -165,12 +165,13 @@ V^*(s)=\sup_\pi V^\pi(s).\]
 <p><code>exact_tram</code> instead solves the proper undiscounted route using exact rational arithmetic and backward self-loop elimination. It accepts 2–50 locations and a rational failure probability in \([0,1)\) with the same denominator bound. It rejects failure probability one rather than claim a finite route value. The generic model constructor can represent continuing or improper tasks; the special route solver and generic discounted iterator each enforce their own sufficient domain.</p>
 <p><code>rollout</code> uses a supplied local <code>random.Random</code> generator and an explicit step limit. Reaching the terminal state on the last permitted transition succeeds; exhausting the budget while still traveling raises <code>RuntimeError</code>. It samples rational probabilities after conversion to binary64, so finite sampling granularity remains. <code>mean_and_se</code> requires 2–100,000 complete finite returns of magnitude at most \(10^6\). It accumulates exact rational representations of those binary64 returns, computes their mean and centered squared deviations exactly, and takes the standard-error square root with 80-digit decimal arithmetic before binary64 conversion. This avoids losing a small residual through cancellation and avoids squaring tiny returns in binary64 before taking a representable square root. A nonzero mean or standard error that rounds to zero is rejected. Equal inputs give zero sample variance. Its sample standard error is a statistical estimate, not a certified confidence interval or interval-arithmetic certificate.</p>
 <p>The source below is the exact downloadable program. Its output is an original seeded fixture, not the lecture's sample sequence. The analytic optimal standard deviation \(\sqrt{40/9}\) is a population quantity; the printed sample standard error estimates uncertainty of a 2,000-episode mean. The favorable sample mean does not establish a deployment guarantee.</p>
-<pre><code class="language-python" id="program-source">&quot;&quot;&quot;Original finite MDP examples for Chapter 7; Python standard library only.
+<pre><code class="language-python" id="program-source">&#x27;Original finite MDP examples for Chapter 7; Python &#x27; \
+    &#x27;standard library only.\n\nExact rational probabilities; &#x27; \
+    &#x27;binary64 rewards/iterates; bounded finite inputs.\n&#x27; \
+    &#x27;Invalid inputs raise ValueError. Exhausted &#x27; \
+    &#x27;iteration/rollout budgets raise\nRuntimeError, never a &#x27; \
+    &#x27;silently completed episode. No file/network effects.\n&#x27;
 
-Exact rational probabilities; binary64 rewards/iterates; bounded finite inputs.
-Invalid inputs raise ValueError. Exhausted iteration/rollout budgets raise
-RuntimeError, never a silently completed episode. No file/network effects.
-&quot;&quot;&quot;
 from dataclasses import dataclass
 from decimal import Decimal, localcontext
 from fractions import Fraction
@@ -200,7 +201,9 @@ def probability(value):
     if type(value) is int:
         value = Fraction(value)
     if not isinstance(value, Fraction) or not 0 &lt; value &lt;= 1:
-        raise ValueError(&quot;outcome probabilities must be positive int/Fraction&quot;)
+        raise ValueError(
+            (&quot;outcome probabilities must be positive int/Fraction&quot;)
+        )
     if value.denominator &gt; 10**12:
         raise ValueError(&quot;probability denominator exceeds 10**12&quot;)
     return value
@@ -232,17 +235,29 @@ class Model:
                 raise ValueError(&quot;each row must contain state and actions&quot;)
             state, actions = row
             if not isinstance(state, str) or not state or state in names:
-                raise ValueError(&quot;state names must be distinct nonempty strings&quot;)
+                raise ValueError(
+                    &quot;state names must be distinct nonempty strings&quot;
+                )
             names.add(state)
             if not isinstance(actions, (tuple, list)) or len(actions) &gt; 16:
-                raise ValueError(&quot;actions must be a tuple/list of at most 16 entries&quot;)
+                raise ValueError(
+                    &quot;actions must be a tuple/list of at most 16 entries&quot;
+                )
             fixed_actions, action_names = [], set()
             for entry in actions:
                 if not isinstance(entry, (tuple, list)) or len(entry) != 2:
-                    raise ValueError(&quot;action entries must contain name and outcomes&quot;)
+                    raise ValueError(
+                        &quot;action entries must contain name and outcomes&quot;
+                    )
                 action, outcomes = entry
-                if not isinstance(action, str) or not action or action in action_names:
-                    raise ValueError(&quot;action names must be distinct nonempty strings&quot;)
+                if (
+                    not isinstance(action, str)
+                    or not action
+                    or action in action_names
+                ):
+                    raise ValueError(
+                        &quot;action names must be distinct nonempty strings&quot;
+                    )
                 action_names.add(action)
                 if not isinstance(outcomes, (tuple, list)):
                     raise ValueError(&quot;outcomes must be a tuple/list&quot;)
@@ -257,13 +272,17 @@ class Model:
                         raise ValueError(&quot;successor must be a state name&quot;)
                     fixed.append(Outcome(prob, reward, outcome.successor))
                 if sum((o.probability for o in fixed), Fraction()) != 1:
-                    raise ValueError(&quot;each action&#x27;s exact probability mass must be one&quot;)
+                    raise ValueError(
+                        &quot;each action&#x27;s exact probability mass must be one&quot;
+                    )
                 fixed_actions.append((action, tuple(fixed)))
             canonical.append((state, tuple(fixed_actions)))
         for _, actions in canonical:
             for _, outcomes in actions:
                 if any(o.successor not in names for o in outcomes):
-                    raise ValueError(&quot;every successor must be a declared state&quot;)
+                    raise ValueError(
+                        &quot;every successor must be a declared state&quot;
+                    )
         object.__setattr__(self, &quot;rows&quot;, tuple(canonical))
         object.__setattr__(self, &quot;discount&quot;, gamma)
 
@@ -286,8 +305,10 @@ def policy_for(model, policy):
     required = {s for s in table if table[s]}
     if not isinstance(policy, dict) or set(policy) != required:
         raise ValueError(&quot;policy must contain exactly the nonterminal states&quot;)
-    if any(not isinstance(policy[s], str) or policy[s] not in table[s]
-           for s in required):
+    if any(
+        not isinstance(policy[s], str) or policy[s] not in table[s]
+        for s in required
+    ):
         raise ValueError(&quot;policy selects an inadmissible action&quot;)
     return dict(policy)
 
@@ -295,12 +316,17 @@ def policy_for(model, policy):
 def action_backup(model, state, action, values):
     fixed = values_for(model, values)
     table = model.table()
-    if (not isinstance(state, str) or not isinstance(action, str)
-            or state not in table or action not in table[state]):
+    if (
+        not isinstance(state, str)
+        or not isinstance(action, str)
+        or state not in table
+        or action not in table[state]
+    ):
         raise ValueError(&quot;unknown state or inadmissible action&quot;)
-    terms = [float(o.probability) *
-             (o.reward + model.discount * fixed[o.successor])
-             for o in table[state][action]]
+    terms = [
+        float(o.probability) * (o.reward + model.discount * fixed[o.successor])
+        for o in table[state][action]
+    ]
     return finite_real(fsum(terms), &quot;backup&quot;)
 
 
@@ -312,10 +338,14 @@ def sweep(model, values, policy=None):
         if not actions:
             updated[state] = 0.0
             continue
-        pairs = [(a, action_backup(model, state, a, fixed)) for a, _ in actions]
+        pairs = [
+            (a, action_backup(model, state, a, fixed)) for a, _ in actions
+        ]
         action, score = max(pairs, key=lambda pair: pair[1])
         greedy[state] = action  # exact float ties retain declaration order
-        updated[state] = score if selected is None else dict(pairs)[selected[state]]
+        updated[state] = (
+            score if selected is None else dict(pairs)[selected[state]]
+        )
     return updated, greedy
 
 
@@ -343,9 +373,16 @@ def iterate(model, policy=None, tolerance=1e-10, max_iterations=10000):
         residual = max(abs(checked[s] - values[s]) for s in values)
         bound = finite_real(residual / (1 - model.discount), &quot;error bound&quot;)
         if bound &lt;= tolerance:
-            return Iteration(tuple(values.items()), tuple(greedy.items()),
-                             iteration, residual, bound)
-    raise RuntimeError(&quot;iteration budget exhausted before numerical residual test&quot;)
+            return Iteration(
+                tuple(values.items()),
+                tuple(greedy.items()),
+                iteration,
+                residual,
+                bound,
+            )
+    raise RuntimeError(
+        &quot;iteration budget exhausted before numerical residual test&quot;
+    )
 
 
 def tram_model(n=10, failure=Fraction(2, 5), discount=1):
@@ -376,7 +413,9 @@ def exact_tram(n=10, failure=Fraction(2, 5), mode=&quot;optimal&quot;):
     for state in range(n - 1, 0, -1):
         choices = [(&quot;walk&quot;, -1 + values[state + 1])]
         if 2 * state &lt;= n:
-            choices.append((&quot;tram&quot;, -Fraction(2) / (1 - failure) + values[2 * state]))
+            choices.append(
+                (&quot;tram&quot;, -Fraction(2) / (1 - failure) + values[2 * state])
+            )
         if mode == &quot;walk&quot;:
             action, value = choices[0]
         elif mode == &quot;tram&quot;:
@@ -388,17 +427,38 @@ def exact_tram(n=10, failure=Fraction(2, 5), mode=&quot;optimal&quot;):
 
 
 def dice_model(discount=1):
-    return Model(((&quot;in&quot;, ((&quot;quit&quot;, (Outcome(Fraction(1), 10, &quot;end&quot;),)),
-                          (&quot;stay&quot;, (Outcome(Fraction(1, 3), 4, &quot;end&quot;),
-                                    Outcome(Fraction(2, 3), 4, &quot;in&quot;))))),
-                  (&quot;end&quot;, ())), discount)
+    return Model(
+        (
+            (
+                &quot;in&quot;,
+                (
+                    (&quot;quit&quot;, (Outcome(Fraction(1), 10, &quot;end&quot;),)),
+                    (
+                        &quot;stay&quot;,
+                        (
+                            Outcome(Fraction(1, 3), 4, &quot;end&quot;),
+                            Outcome(Fraction(2, 3), 4, &quot;in&quot;),
+                        ),
+                    ),
+                ),
+            ),
+            (&quot;end&quot;, ()),
+        ),
+        discount,
+    )
 
 
 def rollout(model, policy, start, rng, max_steps=10000):
     selected = policy_for(model, policy)
     table = model.table()
-    if not isinstance(start, str) or start not in table or not isinstance(rng, Random):
-        raise ValueError(&quot;start must be declared and rng must be random.Random&quot;)
+    if (
+        not isinstance(start, str)
+        or start not in table
+        or not isinstance(rng, Random)
+    ):
+        raise ValueError(
+            &quot;start must be declared and rng must be random.Random&quot;
+        )
     count(max_steps, &quot;max_steps&quot;, 1, 100000)
     state, weight, rewards = start, 1.0, []
     for _ in range(max_steps):
@@ -430,37 +490,51 @@ def mean_and_se(returns):
     mean = float(exact_mean)
     if exact_mean and mean == 0:
         raise ValueError(&quot;nonzero mean is below binary64 representability&quot;)
-    squares = sum(((x - exact_mean)**2 for x in exact), Fraction())
+    squares = sum(((x - exact_mean) ** 2 for x in exact), Fraction())
     exact_se_squared = squares / (len(xs) * (len(xs) - 1))
     with localcontext() as context:
         context.prec = 80
-        decimal_variance = (Decimal(exact_se_squared.numerator) /
-                            Decimal(exact_se_squared.denominator))
+        decimal_variance = Decimal(exact_se_squared.numerator) / Decimal(
+            exact_se_squared.denominator
+        )
         se = float(decimal_variance.sqrt())
     if exact_se_squared and se == 0:
-        raise ValueError(&quot;nonzero standard error is below binary64 representability&quot;)
+        raise ValueError(
+            &quot;nonzero standard error is below binary64 representability&quot;
+        )
     return mean, se
 
 
 def main():
     tram = tram_model()
     initial = {str(i): (-100.0 if i &lt; 10 else 0.0) for i in range(1, 11)}
-    print(f&quot;first tram backup at state 5: {action_backup(tram, &#x27;5&#x27;, &#x27;tram&#x27;, initial):.6f}&quot;)
+    print(
+        f&quot;first tram backup at state 5: {
+            action_backup(tram, &#x27;5&#x27;, &#x27;tram&#x27;, initial):.6f}&quot;
+    )
     for mode in (&quot;walk&quot;, &quot;tram&quot;, &quot;optimal&quot;):
         values, _ = exact_tram(mode=mode)
         print(f&quot;{mode} start value: {values[1]} ({float(values[1]):.6f})&quot;)
     values, policy = exact_tram()
-    print(&quot;optimal actions:&quot;, &quot; &quot;.join(f&quot;{s}:{policy[s]}&quot; for s in sorted(policy)))
+    print(
+        &quot;optimal actions:&quot;,
+        &quot; &quot;.join(f&quot;{s}:{policy[s]}&quot; for s in sorted(policy)),
+    )
     for gamma in (0, 0.5, 0.9, 1):
         stay = 4 / (1 - 2 * gamma / 3)
         print(f&quot;dice discount {gamma}: stay={stay:.6f}, quit=10.000000&quot;)
     result = iterate(dice_model(0.5), {&quot;in&quot;: &quot;stay&quot;})
-    print(f&quot;discounted evaluation: V={dict(result.values)[&#x27;in&#x27;]:.9f}, bound={result.error_bound:.3e}&quot;)
+    print(
+        f&quot;discounted evaluation: V={dict(result.values)[&#x27;in&#x27;]:.9f}, bound={
+            result.error_bound:.3e}&quot;
+    )
     rng = Random(7)
     fixed_policy = {str(s): a for s, a in policy.items()}
     returns = [rollout(tram, fixed_policy, &quot;1&quot;, rng) for _ in range(2000)]
     mean, se = mean_and_se(returns)
-    print(f&quot;2000 original optimal rollouts: mean={mean:.6f}, sample SE={se:.6f}&quot;)
+    print(
+        f&quot;2000 original optimal rollouts: mean={mean:.6f}, sample SE={se:.6f}&quot;
+    )
     print(f&quot;analytic optimal return SD: {sqrt(40 / 9):.6f}&quot;)
 
 

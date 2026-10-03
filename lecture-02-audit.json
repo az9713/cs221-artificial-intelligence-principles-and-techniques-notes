@@ -3,11 +3,10 @@
   "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
   "status": "independently reviewed and locally validated chapter",
   "independent_review": {
-    "rounds": 1,
     "gate_6b": "accepted",
-    "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "05c8a00d8398ebdcff6fc2b878c02add00cde4c00c2fd4d7ab597fdb69417ecf"
+    "passes_7_8": "accepted",
+    "report_sha256": "05c8a00d8398ebdcff6fc2b878c02add00cde4c00c2fd4d7ab597fdb69417ecf"
   },
   "accepted_scientific_body_sha256": "6c98e9aa2aeb6fa735b31d38fe1b7d1edd62c5d686e87451ba0c538fbea5c832",
   "accepted_metadata_sha256": "66b4eac6b5076a6331a763db438623adf7af1800d1d14fe3e500c67bcd80478e",
@@ -110,13 +109,12 @@
     "human_accessibility": "not performed"
   },
   "limits": [
-    "Full20chapter course incomplete",
-    "Machine transcription is not human ASR certification",
+    "Automatic transcription is not human source certification",
     "Human keyboard/screen-reader audit unperformed",
     "No publication performed"
   ],
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-16 reader scope",
+    "status": "passed within complete 20-chapter reading edition",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   }

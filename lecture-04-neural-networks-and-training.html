@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="095b221f476e3c8a006d3c59ee2747cf340ec3270ecb18826d85ae72355967e9"><title>Neural networks: representation, differentiation, and stable training · CS221: Artificial Intelligence: Principles and Techniques</title>
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="e7117213e884619018783a29a8f63cbc6d351a5e692023b18eb47b8ac9964474"><title>Neural networks: representation, differentiation, and stable training · CS221: Artificial Intelligence: Principles and Techniques</title>
 <link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
 <script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
 <body><a class="skip" href="#main">Skip to content</a>
@@ -104,13 +104,15 @@
 <p>Run the program from the repository root using the standard library:</p>
 <pre><code class="language-bash">python -I -B programs/chapter04.py</code></pre>
 <p>Equivalently, this runnable snippet invokes the original module’s demonstration:</p>
-<pre><code class="language-python">&quot;&quot;&quot;Original finite neural-network fixtures. Standard library; no external effects.
+<pre><code class="language-python">&#x27;Original finite neural-network fixtures. Standard &#x27; \
+    &#x27;library; no external effects.\n\nAll scalar inputs must &#x27; \
+    &#x27;be int/float, not bool, convertible to finite &#x27; \
+    &#x27;binary64,\nand at most 1e6 in magnitude. Shapes are &#x27; \
+    &#x27;fixed where stated. Rounded arithmetic\nand saturation &#x27; \
+    &#x27;are intentional; this is not an arbitrary-precision &#x27; \
+    &#x27;solver.\nInvalid values, shapes, or updates outside the &#x27; \
+    &#x27;supported range raise ValueError.\n&#x27;
 
-All scalar inputs must be int/float, not bool, convertible to finite binary64,
-and at most 1e6 in magnitude. Shapes are fixed where stated. Rounded arithmetic
-and saturation are intentional; this is not an arbitrary-precision solver.
-Invalid values, shapes, or updates outside the supported range raise ValueError.
-&quot;&quot;&quot;
 import itertools
 import math
 
@@ -119,68 +121,85 @@ LIMIT = 1e6
 
 def number(value):
     if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise ValueError(&#x27;expected an int or float, excluding bool&#x27;)
+        raise ValueError(&quot;expected an int or float, excluding bool&quot;)
     try:
         value = float(value)
     except (ValueError, OverflowError) as exc:
-        raise ValueError(&#x27;number is not representable&#x27;) from exc
+        raise ValueError(&quot;number is not representable&quot;) from exc
     if not math.isfinite(value) or abs(value) &gt; LIMIT:
-        raise ValueError(&#x27;expected finite magnitude at most 1e6&#x27;)
+        raise ValueError(&quot;expected finite magnitude at most 1e6&quot;)
     return value
 
 
 def vector(values, size=None):
     if not isinstance(values, (list, tuple)) or not values:
-        raise ValueError(&#x27;expected a nonempty list or tuple&#x27;)
+        raise ValueError(&quot;expected a nonempty list or tuple&quot;)
     if (size is not None and len(values) != size) or len(values) &gt; 10000:
-        raise ValueError(&#x27;unsupported vector length&#x27;)
+        raise ValueError(&quot;unsupported vector length&quot;)
     return tuple(number(x) for x in values)
 
 
 def _sigmoid(score):
     # Internal scores are finite; this avoids exp(positive large value).
     if score &gt;= 0:
-        return 1. / (1. + math.exp(-score))
+        return 1.0 / (1.0 + math.exp(-score))
     e = math.exp(score)
-    return e / (1. + e)
+    return e / (1.0 + e)
 
 
 def loss_gradient(parameters, x, target):
-    &quot;&quot;&quot;Two inputs, two ReLU units, one logit; return loss and nine derivatives.
-
-    Parameter order: W00,W01,W10,W11,b0,b1,v0,v1,c. Target is int 0 or 1.
-    The ReLU backward convention at zero is zero. Inputs are never mutated.
-    &quot;&quot;&quot;
+    (
+        &#x27;Two inputs, two ReLU units, one logit; return loss and &#x27;
+        &#x27;nine derivatives.\n\n    Parameter order: &#x27;
+        &#x27;W00,W01,W10,W11,b0,b1,v0,v1,c. Target is int 0 or 1.\n  &#x27;
+        &#x27;  The ReLU backward convention at zero is zero. Inputs &#x27;
+        &#x27;are never mutated.\n    &#x27;
+    )
     w00, w01, w10, w11, b0, b1, v0, v1, c = vector(parameters, 9)
     x0, x1 = vector(x, 2)
-    if isinstance(target, bool) or not isinstance(target, int) or target not in (0, 1):
-        raise ValueError(&#x27;target must be integer 0 or 1&#x27;)
-    a0 = math.fsum((w00*x0, w01*x1, b0))
-    a1 = math.fsum((w10*x0, w11*x1, b1))
-    h0, h1 = max(0., a0), max(0., a1)
-    score = math.fsum((v0*h0, v1*h1, c))
+    if (
+        isinstance(target, bool)
+        or not isinstance(target, int)
+        or target not in (0, 1)
+    ):
+        raise ValueError(&quot;target must be integer 0 or 1&quot;)
+    a0 = math.fsum((w00 * x0, w01 * x1, b0))
+    a1 = math.fsum((w10 * x0, w11 * x1, b1))
+    h0, h1 = max(0.0, a0), max(0.0, a1)
+    score = math.fsum((v0 * h0, v1 * h1, c))
     # Binary cross entropy without subtracting two large nearly equal values.
-    loss = max(score, 0.) if target == 0 else max(-score, 0.)
+    loss = max(score, 0.0) if target == 0 else max(-score, 0.0)
     loss += math.log1p(math.exp(-abs(score)))
-    # Avoid cancellation of sigmoid(score)-1 for a positive correct-class score.
+    # Avoid cancellation of sigmoid(score)-1 for a positive correct-class
+    # score.
     delta = _sigmoid(score) if target == 0 else -_sigmoid(-score)
-    q0 = delta*v0 if a0 &gt; 0 else 0.
-    q1 = delta*v1 if a1 &gt; 0 else 0.
-    gradient = (q0*x0, q0*x1, q1*x0, q1*x1,
-                q0, q1, delta*h0, delta*h1, delta)
+    q0 = delta * v0 if a0 &gt; 0 else 0.0
+    q1 = delta * v1 if a1 &gt; 0 else 0.0
+    gradient = (
+        q0 * x0,
+        q0 * x1,
+        q1 * x0,
+        q1 * x1,
+        q0,
+        q1,
+        delta * h0,
+        delta * h1,
+        delta,
+    )
     return loss, gradient
 
 
 def step(parameters, gradient, rate):
-    &quot;&quot;&quot;Return fresh supported parameters; no mutation or gradient accumulation.&quot;&quot;&quot;
+    &quot;Return fresh supported parameters; no mutation or gradient accumulation.&quot;
     p = vector(parameters, 9)
     # Gradients produced above may exceed the scalar-input support limit.
-    # For an externally supplied update require the same finite bounded contract.
+    # For an externally supplied update require the same finite bounded
+    # contract.
     g = vector(gradient, 9)
     rate = number(rate)
     if rate &lt;= 0:
-        raise ValueError(&#x27;rate must be positive&#x27;)
-    return vector([a-rate*b for a,b in zip(p,g)], 9)
+        raise ValueError(&quot;rate must be positive&quot;)
+    return vector([a - rate * b for a, b in zip(p, g)], 9)
 
 
 def normalize(values, epsilon):
@@ -188,15 +207,16 @@ def normalize(values, epsilon):
     x = vector(values)
     epsilon = number(epsilon)
     if epsilon &lt;= 0:
-        raise ValueError(&#x27;epsilon must be positive&#x27;)
-    # Center relative to an input anchor: an identical vector stays exactly zero
+        raise ValueError(&quot;epsilon must be positive&quot;)
+    # Center relative to an input anchor: an identical vector stays exactly
+    # zero
     # even when epsilon is tiny, instead of amplifying a rounded absolute mean.
-    shifted = tuple(z-x[0] for z in x)
-    mean_shift = math.fsum(shifted)/len(x)
-    centered = tuple(z-mean_shift for z in shifted)
-    variance = math.fsum(z*z for z in centered)/len(x)
-    denominator = math.sqrt(variance+epsilon)
-    return tuple(z/denominator for z in centered)
+    shifted = tuple(z - x[0] for z in x)
+    mean_shift = math.fsum(shifted) / len(x)
+    centered = tuple(z - mean_shift for z in shifted)
+    variance = math.fsum(z * z for z in centered) / len(x)
+    denominator = math.sqrt(variance + epsilon)
+    return tuple(z / denominator for z in centered)
 
 
 def finite_difference(parameters, x, target, increment=1e-6):
@@ -204,48 +224,56 @@ def finite_difference(parameters, x, target, increment=1e-6):
     p = vector(parameters, 9)
     increment = number(increment)
     if increment &lt;= 0:
-        raise ValueError(&#x27;increment must be positive&#x27;)
+        raise ValueError(&quot;increment must be positive&quot;)
     result = []
     for j in range(9):
         plus, minus = list(p), list(p)
         plus[j] += increment
         minus[j] -= increment
         if plus[j] == p[j] or minus[j] == p[j]:
-            raise ValueError(&#x27;increment is lost to rounding&#x27;)
-        result.append((loss_gradient(plus,x,target)[0]
-                       - loss_gradient(minus,x,target)[0])/(2*increment))
+            raise ValueError(&quot;increment is lost to rounding&quot;)
+        result.append(
+            (
+                loss_gradient(plus, x, target)[0]
+                - loss_gradient(minus, x, target)[0]
+            )
+            / (2 * increment)
+        )
     return tuple(result)
 
 
 def demo():
-    p = (2.,-1.,1.,.5,0.,.5,1.,-1.,0.)
-    x = (.5,0.)
-    loss, gradient = loss_gradient(p,x,1)
-    updated = step(p,gradient,.1)
-    new_loss = loss_gradient(updated,x,1)[0]
-    numerical = finite_difference(p,x,1)
-    error = max(abs(a-b) for a,b in zip(gradient,numerical))
+    p = (2.0, -1.0, 1.0, 0.5, 0.0, 0.5, 1.0, -1.0, 0.0)
+    x = (0.5, 0.0)
+    loss, gradient = loss_gradient(p, x, 1)
+    updated = step(p, gradient, 0.1)
+    new_loss = loss_gradient(updated, x, 1)[0]
+    numerical = finite_difference(p, x, 1)
+    error = max(abs(a - b) for a, b in zip(gradient, numerical))
     assert error &lt; 1e-8 and new_loss &lt; loss
-    assert p == (2.,-1.,1.,.5,0.,.5,1.,-1.,0.)
+    assert p == (2.0, -1.0, 1.0, 0.5, 0.0, 0.5, 1.0, -1.0, 0.0)
     # Enumerate independent centered weights of variance 1/4 with x=(1,1,1,1).
-    sums = [sum(w) for w in itertools.product((-.5,.5), repeat=4)]
-    variance = math.fsum(z*z for z in sums)/len(sums)
-    assert variance == 1.
-    assert normalize([7.,7.],1e-5) == (0.,0.)
-    print(f&#x27;warning probability before: {_sigmoid(0.):.6f}&#x27;)
-    print(f&#x27;loss before: {loss:.6f}&#x27;)
-    print(&#x27;gradient:&#x27;, &#x27;, &#x27;.join(f&#x27;{z:.6f}&#x27; for z in gradient))
-    print(f&#x27;loss after one step: {new_loss:.6f}&#x27;)
-    print(&#x27;central difference check: passed&#x27;)
-    print(f&#x27;input derivative at depth 20, w=0.5: {.5**20:.12f}&#x27;)
-    print(f&#x27;shared-weight derivative at depth 20, w=0.5: {20*.5**19:.12f}&#x27;)
-    print(f&#x27;residual multiplier when w=-1: {1.+(-1.):.6f}&#x27;)
-    print(&#x27;population normalization:&#x27;, &#x27;, &#x27;.join(f&#x27;{z:.6f}&#x27; for z in normalize([1.,3.],3.)))
-    print(f&#x27;enumerated initialization variance: {variance:.6f}&#x27;)
-    print(f&#x27;full sample mean: {13/3:.6f}; equal-batch mean: {5.5:.6f}&#x27;)
+    sums = [sum(w) for w in itertools.product((-0.5, 0.5), repeat=4)]
+    variance = math.fsum(z * z for z in sums) / len(sums)
+    assert variance == 1.0
+    assert normalize([7.0, 7.0], 1e-5) == (0.0, 0.0)
+    print(f&quot;warning probability before: {_sigmoid(0.0):.6f}&quot;)
+    print(f&quot;loss before: {loss:.6f}&quot;)
+    print(&quot;gradient:&quot;, &quot;, &quot;.join(f&quot;{z:.6f}&quot; for z in gradient))
+    print(f&quot;loss after one step: {new_loss:.6f}&quot;)
+    print(&quot;central difference check: passed&quot;)
+    print(f&quot;input derivative at depth 20, w=0.5: {0.5**20:.12f}&quot;)
+    print(f&quot;shared-weight derivative at depth 20, w=0.5: {20 * 0.5**19:.12f}&quot;)
+    print(f&quot;residual multiplier when w=-1: {1.0 + (-1.0):.6f}&quot;)
+    print(
+        &quot;population normalization:&quot;,
+        &quot;, &quot;.join(f&quot;{z:.6f}&quot; for z in normalize([1.0, 3.0], 3.0)),
+    )
+    print(f&quot;enumerated initialization variance: {variance:.6f}&quot;)
+    print(f&quot;full sample mean: {13 / 3:.6f}; equal-batch mean: {5.5:.6f}&quot;)
 
 
-if __name__ == &#x27;__main__&#x27;:
+if __name__ == &quot;__main__&quot;:
     demo()
 </code></pre>
 <p>Exact displayed output, rounded to the shown precision:</p>

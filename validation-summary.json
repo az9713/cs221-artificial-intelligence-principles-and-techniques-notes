@@ -1,189 +1,197 @@
 {
-  "checked_at_utc": "2026-10-03T16:02:04.275792+00:00",
   "course": "CS221",
-  "chapter_count": 16,
-  "selected_recordings": 20,
-  "status": "Sixteen independently reviewed chapters locally validated; full course in development",
+  "checked_at_utc": "2026-10-03T17:10:34.005738+00:00",
+  "status": "Complete independently reviewed and locally validated reading edition",
+  "reading_edition_complete": true,
   "course_complete": false,
-  "human_accessibility": "not performed",
-  "reader_report": "reader-validation.json",
+  "chapter_count": 20,
+  "selected_recordings": 20,
+  "worked_solutions": 120,
+  "interactive_lab_panels": 7,
+  "chapter_editorial_blockers": 0,
+  "book_editorial_blockers": 0,
+  "book_review_sha256": "2c98cc5e0efcf39625b96b9e1b1692cda86c9cdeb65f818a86c36987ae5ad304",
   "accepted_chapters": {
     "1": {
+      "path": "lecture-01-foundations-and-tensors.html",
       "BODY": "ded1654d52105cb8a2a7a92e9dfa47fb8619bb3876b605780f51a5f18572c396",
       "META": "11b13303a71fa1f588170d33c8b06fce8845001aa3fb987e53e01be523e3451b",
-      "CODE": null,
-      "review": "reviews/lecture-01-round2.md",
-      "before_HTML": "374d562e94868e4fbc89ea116506173b65e12cb0d11c79fd42d2b753b7f255cf",
-      "review_sha256": "824eeb551100f3f2ac1151e6baf2aa9cb216664c04a5ff65bff20590f3e3e8b9",
-      "path": "lecture-01-foundations-and-tensors.html",
-      "after_HTML": "374d562e94868e4fbc89ea116506173b65e12cb0d11c79fd42d2b753b7f255cf"
+      "CODE": "2c289f963482201c8cc58f98f00a1ba1652674ba885175ed829d5f9eefb217e1",
+      "HTML": "374d562e94868e4fbc89ea116506173b65e12cb0d11c79fd42d2b753b7f255cf",
+      "review_sha256": "824eeb551100f3f2ac1151e6baf2aa9cb216664c04a5ff65bff20590f3e3e8b9"
     },
     "2": {
+      "path": "lecture-02-objectives-gradients-and-learning.html",
       "BODY": "6c98e9aa2aeb6fa735b31d38fe1b7d1edd62c5d686e87451ba0c538fbea5c832",
       "META": "66b4eac6b5076a6331a763db438623adf7af1800d1d14fe3e500c67bcd80478e",
       "CODE": "fa0cef934f2436267cf0822d33beea72f829358c61777ad715f5719e86332844",
-      "review": "reviews/lecture-02-round1.md",
-      "before_HTML": "5f1e5cfdf2cd131aeb76a498a9980754863d734b65b8a2d8db0771c115cc1453",
-      "review_sha256": "05c8a00d8398ebdcff6fc2b878c02add00cde4c00c2fd4d7ab597fdb69417ecf",
-      "path": "lecture-02-objectives-gradients-and-learning.html",
-      "after_HTML": "5f1e5cfdf2cd131aeb76a498a9980754863d734b65b8a2d8db0771c115cc1453"
+      "HTML": "5f1e5cfdf2cd131aeb76a498a9980754863d734b65b8a2d8db0771c115cc1453",
+      "review_sha256": "05c8a00d8398ebdcff6fc2b878c02add00cde4c00c2fd4d7ab597fdb69417ecf"
     },
     "3": {
-      "BODY": "426eeffceeca7168b53a6474a516945b09fad5e8c897b9577c3254be430e7d1a",
-      "META": "882df672ad25065d669271c76ff87bae62bae5076be24e3d92d9ef702f17530d",
-      "CODE": "a9525bcc62ea3c05296904b6effe4d3a48b2efc3bf143e8e106cd9b9ae9660ab",
-      "review": "reviews/lecture-03-round1.md",
-      "before_HTML": "461c780ce0a7e47cd68f14d5baa64cb9b20098a2fb22839de6d1a8e2cb3e8be2",
-      "review_sha256": "7ae40dd596c6526b750db94e7685db0b676cf2f1ea5ecbff8631141aff68fb47",
       "path": "lecture-03-classification-probabilities-and-text.html",
-      "after_HTML": "461c780ce0a7e47cd68f14d5baa64cb9b20098a2fb22839de6d1a8e2cb3e8be2"
+      "BODY": "39fa6d7fff6ce1afbf8ea841ad37c1e613ee1f4a1bb85b9ac7cebaf8ff7ef992",
+      "META": "73d227ac85efba7e489252939bd6406624016ef839ecaad424f2b3ddc7d3899d",
+      "CODE": "7375fec2ae8f1c20855a4552a68468179446a2a1573cb9d0a0162386ab9a08f9",
+      "HTML": "ace464c586c307c2db54a38f3c9c9236e879739a0765db0f3243785caaebfb46",
+      "review_sha256": "7ae40dd596c6526b750db94e7685db0b676cf2f1ea5ecbff8631141aff68fb47"
     },
     "4": {
-      "BODY": "095b221f476e3c8a006d3c59ee2747cf340ec3270ecb18826d85ae72355967e9",
-      "META": "7d6dd90e91c70e67e8e7a7fb45450c229d95dcaccc7c7d0316a450c6ebea8469",
-      "CODE": "9d0966317c21d58b3480efabc54af091a68f4688ee45b5e527e32e9bdf31081e",
-      "review": "reviews/lecture-04-round1.md",
-      "before_HTML": "0bc30ae31bde092f870f557bb0b50255cd07ad71c3ae918bfaf726a4b13de5ce",
-      "review_sha256": "9183b1262577693e0afb3c2c9e12937338c0f81bc0d4b03df1bdb0a8880ee730",
       "path": "lecture-04-neural-networks-and-training.html",
-      "after_HTML": "0bc30ae31bde092f870f557bb0b50255cd07ad71c3ae918bfaf726a4b13de5ce"
+      "BODY": "e7117213e884619018783a29a8f63cbc6d351a5e692023b18eb47b8ac9964474",
+      "META": "156b28e86829bec88580f70428ac1337c1a1d84cad35a4ccee73b530886a8e76",
+      "CODE": "62fb928cd2e9e17ab8d682bf8fff85bffa8af8b5913478af211b6adee6d2c181",
+      "HTML": "cfced66837030546f45c9cd54a0c00ee7bc37280be0394937a24ad1911e3c3f5",
+      "review_sha256": "9183b1262577693e0afb3c2c9e12937338c0f81bc0d4b03df1bdb0a8880ee730"
     },
     "5": {
-      "HTML": "226c0bfbeb0ca62ce4262245a83cdc2c243d1ac57c59761ba6f02dda19a07a45",
-      "BODY": "2cf63c537ad2c7fa0aa5350f648864ce93e2a95d62c207255a2ccdc1009b106c",
-      "META": "61d5ac5788398157f5e8bf852f590c1e4a57631ad06d0ea9d0bf07c2aa5e0425",
-      "CODE": "5a85a4cf33b2dc0dbb1b0fdbb1a145cd8a52e0489cfff3560443e12ff5ef086e",
-      "review": "reviews/lecture-05-round1.md",
-      "before_HTML": "ef19dbc6745b1861425f8f305344577f68b503c568d87faaa8d3a23de192e128",
-      "review_sha256": "54df384864cfd92fb1f4eb636c077f13af7e0c876c3517ef1006b57f484b4ada",
       "path": "lecture-05-search-problems-and-approximate-planning.html",
-      "after_HTML": "ef19dbc6745b1861425f8f305344577f68b503c568d87faaa8d3a23de192e128"
+      "BODY": "ed6e1ade5efd95ebdfb6732bc4d84de76c84fe18d536f631aa7fd2b1e51cfe31",
+      "META": "3a4eb6dd81204e296696541ec5f5ee942451e8e92e68c8bdb1a89550969be73c",
+      "CODE": "693621c8ec308b83df4950e531b62421c7910e60e8119ff6a9a55cb625fe3a93",
+      "HTML": "76e7994c8cd368f143807ca1044c695213394b287f26c22de810379278c3de72",
+      "review_sha256": "54df384864cfd92fb1f4eb636c077f13af7e0c876c3517ef1006b57f484b4ada"
     },
     "6": {
-      "HTML": "b2e93c0d205efcbfd90c1507aac3bcdbc7aaebaf38a52745c147be8b84a51d04",
-      "BODY": "fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4",
-      "META": "ecafcb9b0e2a7df34748cc7a6498aac771323e4d6616ce3c9af18b1dcfcd0e60",
-      "CODE": "a6d99d5484b432d2b29b79efe6e5ffa4178d8a5267e63a2f8b867e4b3e9d86dd",
-      "STDOUT": "3b9f7d112cd8fcfff33387b4aa4c5a315463c4cd915af3199e284e55abb64dd6",
-      "review": "reviews/lecture-06-round2.md",
-      "before_HTML": "89cac3a604977f187d71e00c0562b3f61fca912a5bb55944d853baf72cb3a645",
-      "review_sha256": "edd159004065d5536c2734d64fe26f8afb2d8054d185b9e45162d69c8341b24f",
       "path": "lecture-06-uniform-cost-and-a-star-search.html",
-      "after_HTML": "89cac3a604977f187d71e00c0562b3f61fca912a5bb55944d853baf72cb3a645"
+      "BODY": "e4fdae54b5944608c6184a27df1fdb341108a2d9b6b054b0231e45b005118cc0",
+      "META": "2c507c14df8573e7288970643560dabd07f29409b43e719b5718cf297acf6f00",
+      "CODE": "bc2b235eee69bbaa134c049dffee19ef3661567c5fe7886028608ad45ec9f9e0",
+      "HTML": "e03ced0db4a70a971cad1211679bb4f125751de52cf8ad5ed4c94e5ae10d48b6",
+      "review_sha256": "edd159004065d5536c2734d64fe26f8afb2d8054d185b9e45162d69c8341b24f"
     },
     "7": {
-      "BODY": "2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa",
-      "META": "e2eabcefbc817001beffc1b2ac334f85140ec10915d7adf53e3c6ff63bf74169",
-      "CODE": "d762f9d424dc09583f814907cfb453924720a9a31e0d602f0b8ea4ecd51e3f26",
-      "HTML": "93bb870972c69ac5697b8573ab41b7203456da9e31ce8cfeee80575cf6792361",
-      "review": "reviews/lecture-07-round2.md",
-      "before_HTML": "aca6bab290cb8401b21f17861689c899fe46379459b3fa565a95762b431141ca",
-      "review_sha256": "65a1034dcf81fbd0ab339bad114b4547b9051c1de01eeae2876ac9de2b221c25",
       "path": "lecture-07-markov-decision-processes.html",
-      "after_HTML": "aca6bab290cb8401b21f17861689c899fe46379459b3fa565a95762b431141ca"
+      "BODY": "5718300930a8f835555ffefbe860abdaf61af55a1d0c7253a8bf3b3ccd60f433",
+      "META": "93a95312252e948e3745ac2c8c0a189a44f8d1a23e3de4fcc848d5b6ee954ae0",
+      "CODE": "209b60cab0eac8eb2de4f7c7e0992d2d6e63fe9ca19e4080bcd8f6c81155375a",
+      "HTML": "63c844e7a0f159879a0f46f7237a6709d254b190fa782935e9398812d0a9976f",
+      "review_sha256": "65a1034dcf81fbd0ab339bad114b4547b9051c1de01eeae2876ac9de2b221c25"
     },
     "8": {
-      "BODY": "9fd41d0061718308556e055bc9274835173b855916e51e0b192ab5fca918a87c",
-      "META": "d367a27e4257b8969fe0feb4cefcb88ed6c4a663933f91c2fa45fa43beade7c4",
-      "CODE": "873e3db06116bad3f834cfd108de29fec4105dee30cc117c406c733e1fc4bfb2",
-      "HTML": "9a03ecb6b6b48d43a3d6d310cd9a82d342a7fde4e2dfcd1e54f7dd3cda0b0988",
-      "review": "reviews/lecture-08-round2.md",
-      "before_HTML": "ea47cbf84e6f4e47b505590eb6426b404d5dd25aa8e51c15bed23d9c535e663b",
-      "review_sha256": "14f09638bfa24950a5152d6d0b98a56892c0f0a460d072b1d5f9a6c6115d0bcb",
       "path": "lecture-08-reinforcement-learning.html",
-      "after_HTML": "ea47cbf84e6f4e47b505590eb6426b404d5dd25aa8e51c15bed23d9c535e663b"
+      "BODY": "4a22484d4510eda5c85b347160bcefce72fe8ace0904ee08fc3d4e6bc7373632",
+      "META": "376131e37b012e0bb11a20b7123f4cf3fc220761b929a209b07bd77c51ccebf1",
+      "CODE": "5825b079ed43af4d1ad85118e6687584eb2ce2ee777a2120000f3399b246f7fe",
+      "HTML": "a5cd89fe243726fbd45908a5b9ef84845006d25e65a615041333352421ee9d53",
+      "review_sha256": "14f09638bfa24950a5152d6d0b98a56892c0f0a460d072b1d5f9a6c6115d0bcb"
     },
     "9": {
-      "BODY": "4c8af58a4758fb5a94319ad4dada45e1d8f8c3c5d23fa1d1f3b5683dda3117ad",
-      "META": "766687b08b2ca1c88169fdaa89a9fe55a821e3e7a5ffa172523752c9fc0acdc4",
-      "CODE": "1ca9cc21f863de41dfd932ff1b23171aed2e933b7d36938ad7988cde3b04542d",
-      "HTML": "048ac79c7c03838eeaae2cf08c0127a9c5bdedf7c1e07bb8001928c3a50a518a",
-      "review": "reviews/lecture-09-round1.md",
-      "before_HTML": "165b1a5c20b4e24d5a2dc6508b34a44b3cb43206caacb4b8abaaa0b397017cad",
-      "review_sha256": "f3e886716e270171df251d02a3a272ff8ec7f786beb8ce42e77b04e890d6aee7",
       "path": "lecture-09-policy-gradients-and-function-approximation.html",
-      "after_HTML": "165b1a5c20b4e24d5a2dc6508b34a44b3cb43206caacb4b8abaaa0b397017cad"
+      "BODY": "5a9e01553789aae5ea1ca69ca79c0ad9dc1ea169c0552a872359450f50534b6e",
+      "META": "1ccaca0db3743de4ec8ffd4d858ee79b10b1b7c771ffaa74503b21d772123241",
+      "CODE": "ecdcb3a26b539543ce87ca88e1aa525c1bb4e46a5d0cccedb60d03f440440f31",
+      "HTML": "167a64769b489321f35007843bd3b57eab998045940e8b9aa3ed5f83ce581c38",
+      "review_sha256": "f3e886716e270171df251d02a3a272ff8ec7f786beb8ce42e77b04e890d6aee7"
     },
     "10": {
-      "BODY": "dacecac97ded7a9a05b6c7a584c86f2fd71134ec432e90656d2bf9ab6fe8093a",
-      "META": "f81f795b23400104f0640dacc7e1746bf1dee6eee63f648d5e20fec0661454a0",
-      "CODE": "4d2a6a4e419ffbf2858d3f450988b072012f9ec1963db3ff2dec1ba2a35ce742",
-      "HTML": "e0821e393216e5c4a9a88fd8ec84fb0b3874ba9e1bb2d0f88abf9d4b622412a6",
-      "review": "reviews/lecture-10-round2.md",
-      "before_HTML": "d803a5190a7b9fc389b13ed3947c652dc1bf7e491100bde5e1355d7d9e5c8cbd",
-      "review_sha256": "246badaf139e85b8c7c2b33d882e71b01c6102d4a31f00889443380555a2ecd7",
       "path": "lecture-10-games-opponent-models-and-search.html",
-      "after_HTML": "d803a5190a7b9fc389b13ed3947c652dc1bf7e491100bde5e1355d7d9e5c8cbd"
+      "BODY": "6e94797d443b554836df5368e613fe162aebe7a17babeac0cc33e78d942176b1",
+      "META": "e17ccf5ea6e033a3d5afeff4d4409a2e63dc8394e1d7360947e435fc96ef45a8",
+      "CODE": "6bc38c89161c6ea622d568f29278f259d656dbacf41ab37672cd803083ed79c9",
+      "HTML": "7f81b02c540541551696b64a034e31ab2e70c1c60effba2994c8295ab217c2dc",
+      "review_sha256": "246badaf139e85b8c7c2b33d882e71b01c6102d4a31f00889443380555a2ecd7"
     },
     "11": {
+      "path": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
       "BODY": "490588343d92b9dd7f16fcbcaeeca7ba0a09c3fe77b5df831eddcdc85ddea1ba",
       "META": "98caf53a552efa6c6c50bc4f37a1e6c16f5999f6f8e008ce50793d20ea687f2f",
       "CODE": "678724cc79aaadb945801bd455f4411dab756858e69a1d19970e018b3c44edf9",
-      "HTML": "20e41a97ed246b67d02c591475ac16741b5d771c38dfeca55ad13d08861d6332",
-      "review": "reviews/lecture-11-round2.md",
-      "before_HTML": "ddd99cd1b1900ad216f253739616625ee53662eb85d56eb39e63d6b1571e264e",
-      "review_sha256": "da4e5a0527b1b9310683721e0167238dbc948d1305ce68064de8e095eeb0de97",
-      "path": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
-      "after_HTML": "ddd99cd1b1900ad216f253739616625ee53662eb85d56eb39e63d6b1571e264e"
+      "HTML": "ddd99cd1b1900ad216f253739616625ee53662eb85d56eb39e63d6b1571e264e",
+      "review_sha256": "da4e5a0527b1b9310683721e0167238dbc948d1305ce68064de8e095eeb0de97"
     },
     "12": {
+      "path": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
       "BODY": "82130fa1990fad90aed47dfd71540f66046876acbc3fa4c1789e464be60ee9ad",
       "META": "cf6f442084bfe41557882906841bcad57a8c0fadbeef20ee2bb120242b6e5e22",
       "CODE": "e15e74642f7b2231e9652eac3bf4d24f6de1aaa3304c3d17558e22b981bdfb3a",
-      "HTML": "0327786a7d3aa54d47b48d4db62291e55b596bd7e7faadf331fdf15098262757",
-      "review": "reviews/lecture-12-round2.md",
-      "before_HTML": "9dafd989e26989598d7cc902bd0f6804382249e31267fa324aea72a21b56c446",
-      "review_sha256": "c295c6e6c404ec1287ba533927cb348f9f719f285cc6e71c12a8b2e02d6afabf",
-      "path": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
-      "after_HTML": "9dafd989e26989598d7cc902bd0f6804382249e31267fa324aea72a21b56c446"
+      "HTML": "9dafd989e26989598d7cc902bd0f6804382249e31267fa324aea72a21b56c446",
+      "review_sha256": "c295c6e6c404ec1287ba533927cb348f9f719f285cc6e71c12a8b2e02d6afabf"
     },
     "13": {
+      "path": "lecture-13-conditional-inference-and-gibbs-sampling.html",
       "BODY": "d1571093d0496f7860926404a9fd28e39c7d91bd9257ffeac05b7f76957e24b8",
       "META": "2c8d5989babb8c3df481978bd257371e11e7e8f6c761a7251d6a414e1c6a66f0",
       "CODE": "e052e74fe0c71911756fcad24362b419179a7bea0ae2d91b8ad18e7f06cda018",
-      "HTML": "f4292ac73042f8eba13637bfab33c4bc92b9f0e0aa4d3d336b7a2156535b4786",
-      "review": "reviews/lecture-13-round1.md",
-      "before_HTML": "6f2508fe1aa5cc9eafe05ba07ce8cf390d5ae0559eeeb6b4a0cc99e1c7c25e2d",
-      "review_sha256": "0944b5275d2bc175ee464e808d66c39661cfc056156736ca9939ced79fe779be",
-      "path": "lecture-13-conditional-inference-and-gibbs-sampling.html",
-      "after_HTML": "7ef163c4d77c106b06306ccb2a8938c634c4ccfe787ea8817c0c0ecf2aef68d0"
+      "HTML": "7ef163c4d77c106b06306ccb2a8938c634c4ccfe787ea8817c0c0ecf2aef68d0",
+      "review_sha256": "0944b5275d2bc175ee464e808d66c39661cfc056156736ca9939ced79fe779be"
     },
     "14": {
+      "path": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
       "BODY": "c9e25f793ab3c49d1e805050ebbeaabfaaa1f72a3551386268e8120a482f5515",
       "META": "990ddbce69673b13a7b11b2330314a5b457bb5e9113a765fa681025034ee1ad3",
       "CODE": "cfe74841e3ccb1eec1ce5222ea0c266e6424b136ef5fc771a668ea29bb920a61",
-      "HTML": "ff73b1408ee9782d285bd95b05e762397859a358f58d95d63db48f47caab5fd2",
-      "review": "reviews/lecture-14-round2.md",
-      "before_HTML": "ff73b1408ee9782d285bd95b05e762397859a358f58d95d63db48f47caab5fd2",
-      "review_sha256": "f159cf59fd082dd3cca253022e99026a1dc15a49787ce8f45c1462a35e6c8f46",
-      "path": "lecture-14-learning-with-hidden-variables-and-expectation-maximization.html",
-      "after_HTML": "51d4e66fc0f997665835d6af75c25719213c657659e30ff989f8b9db688ab24d"
+      "HTML": "51d4e66fc0f997665835d6af75c25719213c657659e30ff989f8b9db688ab24d",
+      "review_sha256": "f159cf59fd082dd3cca253022e99026a1dc15a49787ce8f45c1462a35e6c8f46"
     },
     "15": {
+      "path": "lecture-15-propositional-logic-and-justified-answers.html",
       "BODY": "02ba88e1491d36f31dd3460abfd797242c75b2285e59f21d07b9241107a9823d",
       "META": "890fb6379b146949837e3f31aed8119b3e0293576b724d0ff6d3a72bd21a6f1f",
       "CODE": "c390eb2111c50d322d261f7662699376449d74266c3dd284469d0eeaf198c12b",
-      "HTML": "718403ba7eba541066584bba32b0d7c25b2a621ede683b4a6f9e2232f6730743",
-      "review": "reviews/lecture-15-round2.md",
-      "before_HTML": "718403ba7eba541066584bba32b0d7c25b2a621ede683b4a6f9e2232f6730743",
-      "review_sha256": "7a2d801426584f62dd64718a891bd2dbf1751ec6368107d115c701f74ff2ae32",
-      "path": "lecture-15-propositional-logic-and-justified-answers.html",
-      "after_HTML": "c9b2542b569d6494e107a863644139b3feee93bffbe38184a22466f8f7c512f8"
+      "HTML": "c9b2542b569d6494e107a863644139b3feee93bffbe38184a22466f8f7c512f8",
+      "review_sha256": "7a2d801426584f62dd64718a891bd2dbf1751ec6368107d115c701f74ff2ae32"
     },
     "16": {
+      "path": "lecture-16-first-order-logic-and-structured-inference.html",
       "BODY": "b19746ad0dd4da0c5590ee473c8eca0647a47bc8c04c5d2e0c6f9e7ee968382c",
       "META": "c0cf3a63e38832ca4e454dc025f1e91c5eb4bc8f0c706b527acb4f6a5aea8ef2",
       "CODE": "1cbd3d0c91c987cbe8873c4dd320805f20bfa02be3134bffe4abc14b0a0936c1",
-      "HTML": "444cfa264a26b738655315aafcab88fe5a154a67209b8db16eed00781b6253fe",
-      "review": "reviews/lecture-16-round1.md",
-      "before_HTML": "444cfa264a26b738655315aafcab88fe5a154a67209b8db16eed00781b6253fe",
-      "review_sha256": "df3ef458ab3cd58e3e8c5a385a021234ab662a3ca8dbeef768b6cb54808dd30c",
-      "path": "lecture-16-first-order-logic-and-structured-inference.html",
-      "after_HTML": "444cfa264a26b738655315aafcab88fe5a154a67209b8db16eed00781b6253fe"
+      "HTML": "0927a4285eae226767098c7d671acbfe7b4ede0eac18dd01fe776bcb80179f3f",
+      "review_sha256": "df3ef458ab3cd58e3e8c5a385a021234ab662a3ca8dbeef768b6cb54808dd30c"
+    },
+    "17": {
+      "path": "lecture-17-language-models-and-sequence-generation.html",
+      "BODY": "e2cbf131185412739961decb65fb1e8f56ccfc026596444286b9a24ce80ed73d",
+      "META": "bda0fba39f60ca27c65e8766a4aea246725f340200f8d44ad909c1b7375daeac",
+      "CODE": "8fcb1c1141d5e27774d622fd4918fedf5a902fd5839217c40998812f476bb9d7",
+      "HTML": "23934073a8dac009b8f5a4e435265ab249cf136f20b912591bb067115423dc19",
+      "review_sha256": "de87ba8ad7ac22c0d5489c01077dd11db8b4c798a5ee0582360fb0f5fb9565c5"
+    },
+    "18": {
+      "path": "lecture-18-ai-society-objectives-audits-and-release.html",
+      "BODY": "a473d2529fc3afe6320e6663a69fbf0392acddd4065ef68fd3f5e40f3dbb7cf5",
+      "META": "cde77c4decfdd6a7702c641f65e0f51af053cf04f356fa8acdef576ee5c23bd4",
+      "CODE": "81abf13806c338917c418b27f13814b2302cafe37f40b197bb53cb127f60fb4e",
+      "HTML": "279bd31bad1c1f2858c25cd312abf15a2762c575ac510fafd6718cc9e0882947",
+      "review_sha256": "c4209e32fa030360e8be4af8dd76337f75f16990c30c3efc885ef2c897b8df5d"
+    },
+    "19": {
+      "path": "lecture-19-ai-supply-chains-and-economic-value.html",
+      "BODY": "89dfd3321c5fabdb46ff7290cd2fd6ebfb3caa1dee94bcdd83196c97064428e2",
+      "META": "f29abc2f87d06c4e54be5390230dec3c0526cfc4fa48a5f298d102fc5954bc79",
+      "CODE": "9ada1d9cc7ac2544880f210afe5abd52b660f9b5343ea4003c5b8c52ed481187",
+      "HTML": "0f04f1ee1a9663223effc98f6f4a7618ace80137b6e1ee930f3ec6c465daa9cc",
+      "review_sha256": "c91004f228b83077b503c9d453c36b4d01451322fd98f27ca2fab511415d9b85"
+    },
+    "20": {
+      "path": "lecture-20-research-decisions-and-evidence.html",
+      "BODY": "dee255ec1b8077d86d33970ecbc533e3a8368e34cee2e78a9d337394c4842fec",
+      "META": "018aebbe3a121658005873e2ed0c8d1c1b0e86d161aaac37ab30d0bbfa3e267d",
+      "CODE": "94f1ad7eab12210f9dc0f4baa7de780d3a29a6eaddf116a92f82883effdeb459",
+      "HTML": "f3bea9e4da62ff2d43529165708a5a3c9ffc62070cfda33e4d3e78f35fa9c836",
+      "review_sha256": "d3acc157bd48f0d90ad70e57ca5db6b7939d6146696e829e30274af67340aa23"
     }
   },
+  "reader_report": "reader-validation.json",
+  "static": {
+    "status": "passed",
+    "html_files": 25,
+    "local_links_checked": 319,
+    "timestamps_checked": 271,
+    "chapter_pages_with_dollar_math": 0,
+    "failures": [],
+    "warnings": []
+  },
+  "browser_viewport_checks": 48,
+  "Python_listings_checked": 25,
+  "programs_executed": 20,
+  "rendered_paragraphs_per_viewport": 2125,
+  "human_accessibility": "not performed",
+  "publication": "not performed; local delivery",
   "limits": [
-    "Chapters17-20 independent acceptance/integration and book-wide review pending; reviewed course lab and learning route integrated",
-    "No publication performed"
+    "Required human keyboard/screen-reader audit remains unperformed",
+    "Source speech recognition is automatic, not human certified",
+    "Finite teaching checks do not establish deployment performance or safety"
   ]
 }

@@ -1,0 +1,516 @@
+{
+  "title": "Research after the course: choose a question, design evidence, revise a decision",
+  "number": 20,
+  "video_id": "5u5I5jvWR5k",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "Author candidate; independent6b/7/8pending",
+  "sections": [
+    {
+      "section": "case",
+      "start": 5.14,
+      "end": 89.31,
+      "lecture_material": "introduction",
+      "research_extension": null,
+      "teaching_construction": "What should the service team investigate next?",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite states/actions/prior/utility/channel/cost and consequential service experiment",
+          "origin": "Original research decision model"
+        }
+      ]
+    },
+    {
+      "section": "background",
+      "start": 89.31,
+      "end": 350.21,
+      "lecture_material": "research background",
+      "research_extension": null,
+      "teaching_construction": "1. Separate a reusable learning principle from a particular architecture",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Research recollection and architecture/objective/capability distinction",
+          "origin": "Recording autobiographical context; original conceptual analysis"
+        }
+      ]
+    },
+    {
+      "section": "beyond-lab",
+      "start": 350.21,
+      "end": 522.66,
+      "lecture_material": "AI beyond laboratory",
+      "research_extension": null,
+      "teaching_construction": "2. Moving into use adds new objects to the research question",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Public prominence motivates broader research objects",
+          "origin": "Recording assessment"
+        },
+        {
+          "class": "definition",
+          "claim": "Service states and constraints require layer-specific evidence",
+          "origin": "Original continuation of Chapters18–19"
+        }
+      ]
+    },
+    {
+      "section": "perception",
+      "start": 522.66,
+      "end": 657.3,
+      "lecture_material": "public perception",
+      "research_extension": null,
+      "teaching_construction": "3. An infrastructure view reveals consequences that a conversation can hide",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Infrastructure decision process differs from visible conversational fluency",
+          "origin": "Recording theme with original routing case"
+        }
+      ]
+    },
+    {
+      "section": "prediction",
+      "start": 657.3,
+      "end": 825.89,
+      "lecture_material": "language modeling and reasoning",
+      "research_extension": "Turpin NeurIPS2023 PDF1–3/page2table",
+      "teaching_construction": "4. Predictive loss, decision accuracy and faithful explanation differ",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Log loss, Brier loss, threshold accuracy, entropy and explanation faithfulness",
+          "origin": "Original explicit finite metric definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Concavity gives conditional entropy reduction and Bayes-optimal expected log loss interpretation",
+          "origin": "Original finite proof with support assumptions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Lower log/Brier loss with worse threshold accuracy and realized-context boundary",
+          "origin": "Original exact fixtures"
+        },
+        {
+          "class": "empirical result",
+          "claim": "Explanations omit influential prompt features in tested historical models and protocols",
+          "origin": "Turpin NeurIPS2023 PDF1–3/page2table"
+        }
+      ]
+    },
+    {
+      "section": "academia",
+      "start": 825.89,
+      "end": 1083.66,
+      "lecture_material": "academic research",
+      "research_extension": null,
+      "teaching_construction": "5. Choose an audit whose evidence survives the evaluator's incentives",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Research opportunities and incentives are heterogeneous",
+          "origin": "Recording assessment with bounded organizational claims"
+        },
+        {
+          "class": "theorem",
+          "claim": "Two structural models have identical observations but distinct specified intervention consequences",
+          "origin": "Original two-model nonidentifiability construction"
+        }
+      ]
+    },
+    {
+      "section": "problem-selection",
+      "start": 1083.66,
+      "end": 1312.61,
+      "lecture_material": "education jobs and problem selection",
+      "research_extension": null,
+      "teaching_construction": "6. Problem selection precedes implementation efficiency",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "A population, outcome, constraint and action change specify a research question",
+          "origin": "Recording theme with original service decision"
+        }
+      ]
+    },
+    {
+      "section": "cross-disciplinary",
+      "start": 1312.61,
+      "end": 1474.86,
+      "lecture_material": "cross-disciplinary outlook",
+      "research_extension": null,
+      "teaching_construction": "7. A new domain changes what a successful prediction means",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Other modalities and disciplines offer research questions",
+          "origin": "Recording direction, no universal transfer guarantee"
+        },
+        {
+          "class": "definition",
+          "claim": "Domain criteria alter units, validation and cost of errors",
+          "origin": "Original model boundary"
+        }
+      ]
+    },
+    {
+      "section": "evaluation",
+      "start": 1474.86,
+      "end": 1613.38,
+      "lecture_material": "evaluation and discoveries",
+      "research_extension": "Turing1950 actual PDF1–2; cached incorrect header not adopted",
+      "teaching_construction": "8. A criterion is a protocol, not the whole definition of progress",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Original imitation-game criterion differs from modern colloquial tests",
+          "origin": "Turing1950 actual PDF1–2; cached incorrect header not adopted"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Development selection does not certify held-out superiority",
+          "origin": "Original exact two-candidate fixture"
+        },
+        {
+          "class": "definition",
+          "claim": "Discovery claims require novelty/attribution/independent validation criteria",
+          "origin": "Original evaluation protocol; no ungameability guarantee"
+        }
+      ]
+    },
+    {
+      "section": "executable",
+      "start": 1613.38,
+      "end": 1814.61,
+      "lecture_material": "course redesign",
+      "research_extension": null,
+      "teaching_construction": "9. Executable objects expose ambiguities that a diagram can conceal",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Explicit program objects reveal posterior, domain and effect boundaries",
+          "origin": "Recording executable-lecture theme with original implementation analysis"
+        }
+      ]
+    },
+    {
+      "section": "connections",
+      "start": 1814.61,
+      "end": 1931.9,
+      "lecture_material": "search MDP and language models",
+      "research_extension": null,
+      "teaching_construction": "10. Reuse the earlier models through explicit correspondences",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Search/MDP/graphical/logic/learning correspondences retain prior assumptions",
+          "origin": "Original concrete course-object synthesis; pretraining is not RL"
+        }
+      ]
+    },
+    {
+      "section": "foundations",
+      "start": 1931.9,
+      "end": 2072.27,
+      "lecture_material": "foundations and classes",
+      "research_extension": null,
+      "teaching_construction": "11. A foundation is the ability to expose a model's assumptions",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Broader foundations and course-era class discussion",
+          "origin": "Recording perspective; no current prerequisite certification"
+        },
+        {
+          "class": "definition",
+          "claim": "Problem/model/algorithm/evidence inspection transfers across architectures",
+          "origin": "Original synthesis"
+        }
+      ]
+    },
+    {
+      "section": "research-taste",
+      "start": 2072.27,
+      "end": 2252.59,
+      "lecture_material": "research taste",
+      "research_extension": null,
+      "teaching_construction": "12. An informative experiment can be worth more than a guaranteed improvement",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite baseline/informed/gross/net values under supplied prior/channel/utility",
+          "origin": "Original finite Bayes decision"
+        },
+        {
+          "class": "theorem",
+          "claim": "Gross value is nonnegative when baseline actions remain available and utilities fixed",
+          "origin": "Original maximum/law-of-total-probability proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Perfect/noisy information and cost trade-offs",
+          "origin": "Original exact finite fixtures"
+        }
+      ]
+    },
+    {
+      "section": "career",
+      "start": 2253.23,
+      "end": 2579.55,
+      "lecture_material": "career learning",
+      "research_extension": null,
+      "teaching_construction": "13. Exploration is a useful analogy with limits",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Learning/collaboration preferences and exploration analogy",
+          "origin": "Recording preferences, no universal career utility"
+        },
+        {
+          "class": "definition",
+          "claim": "Changing preferences/actions/environment limit stationary decision analogy",
+          "origin": "Original scope boundary"
+        }
+      ]
+    },
+    {
+      "section": "collaboration",
+      "start": 2579.55,
+      "end": 2928.5,
+      "lecture_material": "adaptability and collaboration",
+      "research_extension": null,
+      "teaching_construction": "14. Adaptation and collaboration should produce inspectable evidence",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Adaptability/collaboration versus comparison pressure",
+          "origin": "Recording advice with no guarantees"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Paired flip rate and accuracies require preserved labels/task identity",
+          "origin": "Original contingency fixture"
+        }
+      ]
+    },
+    {
+      "section": "speculation",
+      "start": 2928.5,
+      "end": 3017.18,
+      "lecture_material": "bubble assessment",
+      "research_extension": null,
+      "teaching_construction": "15. Separate a market narrative from the evidence for a project",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Market analogy and bubble assessment are attributed and dated",
+          "origin": "Recording speculation; no current financial recommendation"
+        }
+      ]
+    },
+    {
+      "section": "personal-background",
+      "start": 3017.18,
+      "end": 3107.49,
+      "lecture_material": "background",
+      "research_extension": null,
+      "teaching_construction": "16. A research path can be discussed without turning it into a template",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Mathematics/software interests provide autobiographical context",
+          "origin": "Recording recollection; no career template"
+        }
+      ]
+    },
+    {
+      "section": "transparency",
+      "start": 3107.49,
+      "end": 3335.89,
+      "lecture_material": "transparency",
+      "research_extension": "2407.12929v2 PDF1–2",
+      "teaching_construction": "17. Disclosure helps formulate tests; it does not certify their outcomes",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Organizational motives are attributed possibilities, not findings about every firm",
+          "origin": "Recording assessment"
+        },
+        {
+          "class": "empirical result",
+          "claim": "Dated FMTI collection/sample changes and opacity findings",
+          "origin": "2407.12929v2 PDF1–2"
+        },
+        {
+          "class": "definition",
+          "claim": "Disclosure permits scrutiny without certifying quality/safety",
+          "origin": "Original evidence boundary"
+        }
+      ]
+    },
+    {
+      "section": "music",
+      "start": 3336.24,
+      "end": 3430.21,
+      "lecture_material": "music and interdisciplinary work",
+      "research_extension": null,
+      "teaching_construction": "18. Interdisciplinary work starts with a shared question",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Musical interests motivate interdisciplinary connection",
+          "origin": "Recording recollection; no expanded project-history claim"
+        },
+        {
+          "class": "definition",
+          "claim": "Shared sequence representation does not determine artistic utility",
+          "origin": "Original interdisciplinary boundary"
+        }
+      ]
+    },
+    {
+      "section": "engagement",
+      "start": 3430.21,
+      "end": 3486.7,
+      "lecture_material": "research engagement",
+      "research_extension": null,
+      "teaching_construction": "19. The first contribution can be a precise question about an existing result",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Read and engage with existing work; access differs",
+          "origin": "Recording recommendation with original access limit"
+        }
+      ]
+    },
+    {
+      "section": "conclusion",
+      "start": 3486.77,
+      "end": 3522.45,
+      "lecture_material": "conclusion",
+      "research_extension": null,
+      "teaching_construction": "20. Carry the model, the evidence and the boundary forward",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Carry explicit objects, scoped evidence and counterexamples into research decisions",
+          "origin": "Original book-wide conceptual synthesis"
+        }
+      ]
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "21. Execute finite evaluation and experiment decisions",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Bounded exact finite score/paired/policy/intervention contracts",
+          "origin": "Original stdlib APIs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Actual listing/snippet/stdout/23789oracles/PEP8pass",
+          "origin": "Author execution; independent acceptance pending"
+        }
+      ]
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "22. Six exercises with fully worked solutions",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Six worked score/entropy/intervention/VOI/zero-support arguments",
+          "origin": "Original finite reasoning"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Complete numeric and selection/sensitivity fixtures",
+          "origin": "Original exact solutions"
+        }
+      ]
+    },
+    {
+      "section": "sources",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "23. Source and inference boundaries",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Actual primary page scopes and attributed conversation distinguish original derivations",
+          "origin": "Original provenance limits"
+        }
+      ]
+    }
+  ],
+  "authored_body_sha256": "dee255ec1b8077d86d33970ecbc533e3a8368e34cee2e78a9d337394c4842fec",
+  "references": [
+    {
+      "title": "Turing, Computing Machinery and Intelligence (1950)",
+      "url": "https://www.csee.umbc.edu/courses/471/papers/turing.pdf",
+      "supports": "Turing, Computing Machinery and Intelligence (1950), actual retained PDF pages 1–2: original imitation-game formulation and criterion discussion. The cached reprint's incorrect volume header is not reused as bibliographic metadata."
+    },
+    {
+      "title": "Turpin et al., Language Models Don't Always Say What They Think (NeurIPS 2023)",
+      "url": "https://papers.nips.cc/paper_files/paper/2023/file/ed3fea9033a80fea1376299fa7863f4a-Paper-Conference.pdf",
+      "supports": "Turpin et al., Language Models Don't Always Say What They Think (NeurIPS 2023), actual PDF pages 1–3 and inspected page 2 table: specified biased prompts and historical models; no universal current-model or full-appendix certification."
+    },
+    {
+      "title": "The 2024 Foundation Model Transparency Index",
+      "url": "https://arxiv.org/abs/2407.12929v2",
+      "supports": "The 2024 Foundation Model Transparency Index, March 4, 2025 retained version, actual PDF pages 1–2: dated indicator studies, collection changes and scoped opacity findings."
+    }
+  ],
+  "program": {
+    "path": "programs/chapter20.py",
+    "sha256": "94f1ad7eab12210f9dc0f4baa7de780d3a29a6eaddf116a92f82883effdeb459",
+    "stdout_sha256": "1da4c91320021f96d23701ba8387279718a0c318d4187a7558e0fa5e99bcd128",
+    "contract": "Exact supplied finite decision/evaluation/intervention examples; stdlib",
+    "implementation_evidence": "23789author assertions,actual snippet/standalone,pycodestyle0"
+  },
+  "limits": [
+    "ASR not human-verified",
+    "No matched fireside deck",
+    "No current company motives/model ranking/career/market guarantee",
+    "Finite causal models do not identify a real LLM mechanism",
+    "Unknown prior/channel/utility not empirically inferred",
+    "Human accessibility not performed"
+  ]
+}

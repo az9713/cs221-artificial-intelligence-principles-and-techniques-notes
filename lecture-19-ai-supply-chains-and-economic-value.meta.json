@@ -1,0 +1,434 @@
+{
+  "title": "AI supply chains: from a capable model to economic value",
+  "number": 19,
+  "video_id": "lPx5PF1ttkc",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "Round1 B1/B2 and optional P1/P2 author repairs applied; independent round2 pending",
+  "sections": [
+    {
+      "section": "case",
+      "start": 5.39,
+      "end": 119.65,
+      "lecture_material": "introduction",
+      "research_extension": null,
+      "teaching_construction": "A successful service still needs a feasible production plan",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Stipulated service unit, planning period, asset/organization graphs and economic decision",
+          "origin": "Original continuation of Chapter18 case"
+        }
+      ]
+    },
+    {
+      "section": "questions",
+      "start": 119.65,
+      "end": 592.08,
+      "lecture_material": "economic questions and firms",
+      "research_extension": "31161 PDF1–2/4–5/15–16",
+      "teaching_construction": "1. Identify the economic outcome before estimating an effect",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Unit cost, labor productivity, profit and counterfactual effects measure different objects",
+          "origin": "Original explicit outcome definitions"
+        },
+        {
+          "class": "empirical result",
+          "claim": "Dated customer-support sample, issues-resolved-per-hour outcome and heterogeneous estimated effects; identification depends on the stated observational design",
+          "origin": "Generative AI at Work, retained April 2023/November 2023 revision, PDF pages 1–2, 4–5 and 15–16; not randomized assignment or an aggregate employment/wage estimate"
+        }
+      ]
+    },
+    {
+      "section": "firms",
+      "start": 592.4,
+      "end": 736.88,
+      "lecture_material": "benchmarks versus firms",
+      "research_extension": null,
+      "teaching_construction": "2. A benchmark measures a task; a firm chooses a strategy",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Benchmark equality does not determine price, cost, strategy or vertical integration",
+          "origin": "Recording concepts with original matched-quality comparison"
+        }
+      ]
+    },
+    {
+      "section": "graphs",
+      "start": 738.67,
+      "end": 854.32,
+      "lecture_material": "asset and organization graphs",
+      "research_extension": null,
+      "teaching_construction": "3. Track assets and organizations in parallel",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Technical assets and organizational supply/control relations are separate graphs",
+          "origin": "Recording distinction with original responsibility table"
+        }
+      ]
+    },
+    {
+      "section": "compute",
+      "start": 854.32,
+      "end": 1262.02,
+      "lecture_material": "compute supply chain",
+      "research_extension": null,
+      "teaching_construction": "4. A serial capacity constraint cannot be repaired at the wrong stage",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Ideal steady-state serial flow equals minimum compatible stage capacity",
+          "origin": "Original upper-bound/attainability proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Nonbinding-stage and tied-bottleneck improvements",
+          "origin": "Original exact finite examples"
+        }
+      ]
+    },
+    {
+      "section": "data",
+      "start": 1262.02,
+      "end": 1868.91,
+      "lecture_material": "data economics",
+      "research_extension": null,
+      "teaching_construction": "5. Data acquisition creates costs and obligations through different transactions",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Acquisition method, access, rights, quality and costs differ",
+          "origin": "Recording topic and original ledger"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Conditional per-work arithmetic does not identify license price or legal outcome",
+          "origin": "Original stipulated division; no recorded settlement certification"
+        }
+      ]
+    },
+    {
+      "section": "distribution",
+      "start": 1869.84,
+      "end": 2211.82,
+      "lecture_material": "distribution and integration",
+      "research_extension": null,
+      "teaching_construction": "6. Distribution determines feasible applications before it determines costs",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Release access changes feasible applications and operational obligations",
+          "origin": "Recording distinctions with original service contract"
+        },
+        {
+          "class": "theorem",
+          "claim": "Linear serving-cost crossover and parallel-line cases",
+          "origin": "Original algebra"
+        },
+        {
+          "class": "engineering check",
+          "claim": "5000crossover and10000costs under matched quality/capacity assumptions",
+          "origin": "Original exact fixture"
+        }
+      ]
+    },
+    {
+      "section": "forecasting",
+      "start": 2211.98,
+      "end": 2551.22,
+      "lecture_material": "forecasting frameworks",
+      "research_extension": null,
+      "teaching_construction": "7. A forecast needs a quantity, horizon and mechanism",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Level changes and constant per-period rates require a measure and horizon",
+          "origin": "Original explicit output model"
+        },
+        {
+          "class": "theorem",
+          "claim": "Repeated constant-rate recurrence gives compounded multiplier",
+          "origin": "Original iteration argument"
+        }
+      ]
+    },
+    {
+      "section": "macro",
+      "start": 2551.86,
+      "end": 2810.67,
+      "lecture_material": "macro forecasts and GPTs",
+      "research_extension": "32487 PDF1–3/5–7",
+      "teaching_construction": "8. Translate task savings through explicit exposure and adoption",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "The cited task framework distinguishes exposure, economic adoption, cost savings, TFP and GDP; the main ten-year exercise excludes a broad scientific-discovery transformation",
+          "origin": "The Simple Macroeconomics of AI, retained May 2024 working paper, PDF pages 1–3 and 5–7; description of the cited model's scope"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Reported conditional ten-year model estimates: baseline at most roughly 0.66% TFP; revised assumptions give 0.53% TFP and 0.90% GDP upper bounds; these are not realized outcomes or annual rates",
+          "origin": "The Simple Macroeconomics of AI, retained May 2024 working paper, PDF pages 2–3 and 5–7; values and scenario qualifications checked against the original, without reproducing its full general-equilibrium computation or proof"
+        },
+        {
+          "class": "theorem",
+          "claim": "Fixed task-cost partition gives weighted exposure/adoption/net-savings identity and convex bound",
+          "origin": "Original accounting proof; not Hulten/general-equilibrium theorem"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exposed/adopted/saving product exact 207/31250",
+          "origin": "Recomputed PDF page 6 inputs; precision is arithmetic only"
+        }
+      ]
+    },
+    {
+      "section": "complements",
+      "start": 2811.6,
+      "end": 3127.97,
+      "lecture_material": "GPT properties and J-curve",
+      "research_extension": "4148 PDF1–2;25148 PDF1–5/13–14",
+      "teaching_construction": "9. Complementary investment separates invention from realized productivity",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "General-purpose-technology criteria comprise pervasiveness, continuing technical improvement and downstream innovation complementarities",
+          "origin": "General Purpose Technologies: Engines of Growth?, retained August 1992 working paper, PDF pages 1–2; conceptual criteria from the original abstract, not the later journal edition"
+        },
+        {
+          "class": "definition",
+          "claim": "The productivity J-curve names a conditional measurement framework involving intangible investment and later capital services; the framework does not impose a universal time pattern",
+          "origin": "The Productivity J-Curve, retained October 2018/January 2020 revision, PDF pages 1–5 and 13–14; description of the cited framework and explicit pattern limitation, without reproducing its full growth-accounting derivation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Signed additive wedge examples illustrate sign changes without universal trajectory",
+          "origin": "Original illustration; not published TFP formula"
+        }
+      ]
+    },
+    {
+      "section": "gdp",
+      "start": 3127.97,
+      "end": 3485.5,
+      "lecture_material": "GDP and consumer value",
+      "research_extension": "BEA FAQ1250complete retained article",
+      "teaching_construction": "10. Output accounting and consumer value measure different objects",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Ad-funded provider output in GDP differs from consumer welfare; the separate digital-economy-estimate omission statement refers to the August 2020 vintage",
+          "origin": "BEA FAQ 1250, complete retained article; official accounting explanation with its stated estimate vintage, not a new estimate of free-service welfare"
+        },
+        {
+          "class": "definition",
+          "claim": "Nominal/real/per-capita measures and WTP/WTA differ",
+          "origin": "Original educational definitions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Conditional 100-user monthly-10 annual-12000 example",
+          "origin": "Original stipulated extrapolation; recorded empirical survey not adopted"
+        }
+      ]
+    },
+    {
+      "section": "aggregation",
+      "start": 3485.5,
+      "end": 3747.25,
+      "lecture_material": "sector aggregation",
+      "research_extension": null,
+      "teaching_construction": "11. Choose aggregation weights before summing sector effects",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Fixed normalized sector shares give convex bounds",
+          "origin": "Original finite approximation proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Value-added telescoping and gross-output ratios sum7/5",
+          "origin": "Original two-stage ledger; no network productivity theorem"
+        }
+      ]
+    },
+    {
+      "section": "production",
+      "start": 3747.25,
+      "end": 3949.87,
+      "lecture_material": "production and labor",
+      "research_extension": null,
+      "teaching_construction": "12. Constant returns does not mean equal optimal input allocations",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Joint homogeneity and unique interior Cobb–Douglas budget optimum under stated positive domains",
+          "origin": "Original algebra, logarithmic derivative and concavity proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Unequal allocation fourth powers27versus16",
+          "origin": "Original exact counterexample"
+        }
+      ]
+    },
+    {
+      "section": "ideas",
+      "start": 3951.09,
+      "end": 4121.49,
+      "lecture_material": "nonrival ideas",
+      "research_extension": null,
+      "teaching_construction": "13. More productive work and faster idea production are different growth mechanisms",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Nonrival reuse differs from production cost and access",
+          "origin": "Recording distinction with original scope"
+        },
+        {
+          "class": "theorem",
+          "claim": "Specified multiplicative/additive idea recurrences have different level/growth paths",
+          "origin": "Original iteration; no Romer-model or empirical-growth certification"
+        }
+      ]
+    },
+    {
+      "section": "uncertainty",
+      "start": 4123.12,
+      "end": 4469.62,
+      "lecture_material": "discussion and uncertainty",
+      "research_extension": null,
+      "teaching_construction": "14. Identify the measurement that would change the decision",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Recorded forecast/resource assessments remain qualified judgments",
+          "origin": "Recording discussion; no verified current national bottleneck"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Decision-specific measurements and causal/aggregation requirements",
+          "origin": "Original service synthesis"
+        }
+      ]
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "15. Execute the specified finite accounting models",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Bounded exact finite teaching API and failure contracts",
+          "origin": "Original standard-library program"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Actual stdout/snippet,9755reference assertions andPEP8pass",
+          "origin": "Author execution; independent review pending"
+        }
+      ]
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "16. Six exercises with fully worked solutions",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Worked serial-flow, cost, savings, allocation and recurrence reasoning under stated models",
+          "origin": "Original six solutions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Capacity, double-counting and growth counterexamples",
+          "origin": "Original exact fixtures"
+        }
+      ]
+    },
+    {
+      "section": "sources",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "17. Source scope and model boundaries",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Dated paper versions, original constructions and unsupported empirical quantities distinguished",
+          "origin": "Original provenance limits"
+        }
+      ]
+    }
+  ],
+  "authored_body_sha256": "89dfd3321c5fabdb46ff7290cd2fd6ebfb3caa1dee94bcdd83196c97064428e2",
+  "references": [
+    {
+      "title": "Generative AI at Work",
+      "url": "https://www.nber.org/papers/w31161",
+      "supports": "Generative AI at Work, retained April 2023/November 2023 revision, PDF 1–2,4–5,15–16: sample, outcome, heterogeneous findings, specification and identification limits."
+    },
+    {
+      "title": "The Simple Macroeconomics of AI",
+      "url": "https://www.nber.org/papers/w32487",
+      "supports": "The Simple Macroeconomics of AI, retained May 2024 working paper, PDF 1–3,5–7: task-cost framework and separate baseline/revised ten-year estimates; full general-equilibrium proof is not reproduced."
+    },
+    {
+      "title": "General Purpose Technologies: Engines of Growth?",
+      "url": "https://www.nber.org/papers/w4148",
+      "supports": "General Purpose Technologies: Engines of Growth?, August 1992 working paper, PDF 1–2: conceptual criteria; this is not the later journal edition or an audited full-model proof."
+    },
+    {
+      "title": "The Productivity J-Curve",
+      "url": "https://www.nber.org/papers/w25148",
+      "supports": "The Productivity J-Curve, October 2018/January 2020 revision, PDF 1–5,13–14: intangible investment and measurement mechanism, explicit time-pattern boundary and toy figure."
+    },
+    {
+      "title": "BEA explanation of free digital services",
+      "url": "https://www.bea.gov/help/faq/1250",
+      "supports": "BEA explanation of free digital services: ad-funded output versus consumer welfare, with the separate digital-estimate vintage kept explicit."
+    }
+  ],
+  "program": {
+    "path": "programs/chapter19.py",
+    "sha256": "9ada1d9cc7ac2544880f210afe5abd52b660f9b5343ea4003c5b8c52ed481187",
+    "stdout_sha256": "a8e4dabcfc97ffe5062577cc91f99b7f23e533bde2882ac707e62e64f45e0609",
+    "contract": "Exact supplied finite accounting and production models; standard library",
+    "implementation_evidence": "9755author assertions, actual snippet/standalone and pycodestyle pass"
+  },
+  "limits": [
+    "ASR not human-verified",
+    "No matched guest deck",
+    "No current company/market/security/legal certification",
+    "No causal/GDP forecast from finite fixtures",
+    "No general-equilibrium or Romer full-model proof reproduced"
+  ]
+}

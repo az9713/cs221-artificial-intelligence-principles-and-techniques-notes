@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="dee255ec1b8077d86d33970ecbc533e3a8368e34cee2e78a9d337394c4842fec"><title>Research after the course: choose a question, design evidence, revise a decision · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><h1>Research after the course: choose a question, design evidence, revise a decision</h1>
+<p class="subtitle">Chapter 20 · Foundations become useful when they determine what to measure next.</p>
+<section id="case">
+<h2>What should the service team investigate next? <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=5">[00:05–01:29]</a></h2>
+<p>The university service developed in Chapters 18–19 has a feasible cost plan, but its team still faces an unresolved question: should it deploy a limited version, improve the model, or investigate why performance deteriorates for a particular class of requests? A longer answer, a better benchmark score and a persuasive explanation would each be evidence about something. They would not necessarily answer the same question.</p>
+<p>The final lecture is a <a href="https://www.youtube.com/watch?v=5u5I5jvWR5k">moderated conversation with Percy Liang</a> about research, education and AI's outlook. This chapter preserves its substantive sequence while turning its central research theme into an explicit decision model. Predictions, recollections and career preferences remain the speaker's judgments. The mathematical examples and code are original constructions, not measurements of a current model or prescriptions for a reader's career.</p>
+<p>Let \(\Theta\) be a finite set of possible states relevant to our research decision, \(\mathcal A\) a finite set of available actions, and \(\pi(\theta)\) a supplied prior probability on \(\theta\in\Theta\). An action \(a\in\mathcal A\) has utility \(U(a,\theta)\) in explicitly chosen common units. An experiment produces an observation \(o\) from a finite outcome set \(\mathcal O\), with supplied conditional probabilities \(P(o\mid\theta)\). Its cost \(c\geq0\) uses the same utility units.</p>
+<p>The research task is to specify what an observation would change, then choose an informative experiment whose consequences justify its cost under the stated model. We will use this model to connect predictive evaluation, causal explanation, verification and research choices. It is deliberately finite; it does not presume that human careers or scientific discovery have stationary, known probabilities.</p>
+</section>
+<section id="background">
+<h2>1. Separate a reusable learning principle from a particular architecture <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=89">[01:29–05:50]</a></h2>
+<p>The conversation recalls a transition from manually designed language rules toward statistical language modeling. Liang describes discovering useful word structure through a generative model before today's transformer systems. Those statements are autobiographical source material, not an independently audited history of a particular corpus or architecture.</p>
+<p>The transferable distinction is between a model family, a training objective and an observed capability. A probabilistic family specifies which conditional distributions can be represented. A learning procedure chooses parameters using data and an objective. An evaluation then asks whether that fitted model performs a declared task. Replacing the architecture need not replace the principle of likelihood estimation, but preserving the objective does not guarantee the same capabilities.</p>
+<p>Chapter 17 makes these objects explicit for finite language models. A text distribution, its estimator and the decoding procedure are separate. A cluster that looks meaningful can motivate a hypothesis about learned structure; downstream usefulness still needs an evaluation. Research starts when we ask what evidence would distinguish a useful mechanism from an attractive interpretation.</p>
+</section>
+<section id="beyond-lab">
+<h2>2. Moving into use adds new objects to the research question <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=350">[05:50–08:42]</a></h2>
+<p>The speaker characterizes AI's increased public and organizational prominence as a transition beyond laboratory research. That observation motivates broadening an evaluation rather than declaring technical questions solved. A deployed service introduces users, operating constraints, incentives, data pathways and consequences outside a model's training objective.</p>
+<p>For the university team, deployment changes the relevant state space \(\Theta\). It may include whether failures arise from missing information, retrieval errors, an unsuitable objective, or a costly verification bottleneck. These possibilities imply different interventions. More training data is not automatically the right experiment for every state.</p>
+<p>Chapter 18 supplies the stakeholder and impact distinctions; Chapter 19 supplies costs and capacities. Together they prevent a common substitution: treating a demonstration of model capability as a complete service decision. A research claim should identify which layer changed and which observations bear on that layer.</p>
+</section>
+<section id="perception">
+<h2>3. An infrastructure view reveals consequences that a conversation can hide <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=522">[08:42–10:57]</a></h2>
+<p>The conversation contrasts dramatic portrayals of AI with systems that operate through ordinary infrastructure. We do not adopt its broad cultural comparisons as measured findings. The useful analytical question is where a system makes consequential decisions, including decisions users do not directly observe.</p>
+<p>Suppose the service's recommendation system routes difficult questions to human reviewers. Its visible conversational fluency can improve while its routing policy sends the wrong requests to an overloaded queue. Evaluating only the final generated text misses a mechanism that controls the actual outcome.</p>
+<p>Map the service as states, actions, transitions and information available to each actor. Identify what the evaluator can observe and what remains hidden. This is the same discipline used in search, MDPs and graphical models: a familiar interface does not specify the underlying decision process.</p>
+</section>
+<section id="prediction">
+<h2>4. Predictive loss, decision accuracy and faithful explanation differ <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=657">[10:57–13:45]</a></h2>
+<p>A language model supplies conditional next-token probabilities under a declared tokenization and context. For a target token \(y\) and a supplied predictive distribution \(p\), negative log loss is \(-\log p(y)\). Its value depends on the target and context; it is not a scalar definition of intelligence. For a fixed sample of \(n\) targets with positive assigned probabilities, mean log loss is the negative logarithm of their probability product divided by \(n\).</p>
+<p>To see why prediction and decision metrics differ, consider two original binary cases with labels \((1,0)\). Let \(p_i\) be the predicted probability of label 1 on case \(i\). The decision rule returns 1 only when \(p_i&gt;1/2\), assigning the tie to 0. Model A gives probabilities \((3/5,2/5)\); B gives \((99/100,51/100)\).</p>
+<p>A gets both threshold decisions correct, while B gets only the first correct. Their accuracies are 1 and \(1/2\). Yet the target-probability products are \((3/5)(3/5)=9/25\) for A and \((99/100)(49/100)=4851/10000\) for B. B's larger product gives lower mean negative log loss on this same pair. We interpret the product as a likelihood under the supplied independent-case model, not as proof of independence in real evaluation data.</p>
+<p>The mean Brier loss is \(n^{-1}\sum_i(p_i-y_i)^2\), a probability-error measure. A's value is \(4/25\); B's is \((1/10000+2601/10000)/2=1301/10000\), also smaller. Thus neither lower Brier loss nor lower log loss guarantees higher accuracy at a fixed threshold. Each measure tests a different property of the same predictions.</p>
+<p>More conditioning information has a qualified mathematical benefit. Let \(Y\) be a finite target, \(C\) a context and \(D\) an additional observation, with a supplied joint distribution. For a fixed positive-probability context \(c\), the target distribution satisfies \(P(Y\mid c)=\sum_dP(d\mid c)P(Y\mid c,d)\), omitting zero-mass branches. For any finite probability vector \(r\), Shannon entropy is \(H(r)=-\sum_y r_y\log r_y\), with \(0\log0=0\).</p>
+<p>The function \(-x\log x\) has second derivative \(-1/x&lt;0\) for \(x&gt;0\) and extends continuously to zero. Entropy is therefore concave. Applying concavity to the mixture above, then averaging over \(c\), gives</p>
+\[H(Y\mid C)\geq H(Y\mid C,D).\]
+<p>This concerns expected uncertainty of the true conditional distribution. Bayes-optimal expected log loss equals that entropy: for any alternative predictive distribution \(q\), its cross-entropy is \(H(r)+\sum_y r_y\log(r_y/q_y)\), and the second term is nonnegative. One proof applies \(\log x\leq x-1\) to \(q_y/r_y\), then sums over the positive support; a missing predicted mass gives infinite loss. Equality holds when the distributions match on the relevant support.</p>
+<p>A finite learned model need not represent or learn the optimal distribution, and extending its context can make its actual predictions worse. A particular realized target can also become less probable even while expected entropy falls. The speaker's intuition about useful long-context modeling motivates a test; it does not remove these qualifications.</p>
+<p>Reasoning text adds another object. <a href="https://papers.nips.cc/paper_files/paper/2023/file/ed3fea9033a80fea1376299fa7863f4a-Paper-Conference.pdf">Turpin and colleagues' NeurIPS 2023 paper</a>, actual PDF pages 1–3, tests GPT-3.5 and Claude 1.0 with particular biasing prompts and benchmarks. It shows cases where explanations omit prompt features that influence predictions. Those historical experiments establish a scoped failure of explanation faithfulness, not a universal failure of reasoning text or a present-day model ranking.</p>
+<p>Our service must distinguish answer correctness, computational usefulness and a faithful account of causal influences. A trace can be useful for checking a derivation without being a complete account of why a system generated it. The recording's joking conjecture about token costs supplies no evidence of vendor misconduct.</p>
+</section>
+<section id="academia">
+<h2>5. Choose an audit whose evidence survives the evaluator's incentives <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=825">[13:45–18:03]</a></h2>
+<p>The speaker argues for research beyond the currently successful paradigm and for evaluations that may expose inconvenient failures. These are judgments about opportunities and incentives. Neither academia nor industry is a homogeneous actor, and affiliation alone does not establish independence, access or lack of conflicts.</p>
+<p>For the university service, an audit can specify its protocol before inspecting outcomes, preserve unsuccessful cases, and use a reviewer who did not choose the model. These steps make the claim easier to inspect. They do not guarantee that a sampling design is representative or that a metric measures the desired consequence.</p>
+<p>Consider two original structural mechanisms. Let \(U\) be a Bernoulli latent variable with \(P(U=1)=1/2\), \(T\) a displayed trace bit and \(Y\) an answer bit. Mechanism M1 sets \(T=U\) and \(Y=T\). Mechanism M2 sets \(T=U\) and \(Y=U\). Observationally both produce \((T,Y)=(0,0)\) or \((1,1)\), each with probability \(1/2\).</p>
+<p>Consequently, perfect trace–answer agreement does not distinguish the mechanisms. A specified intervention replacing the trace equation by \(T:=0\) does distinguish them: M1 gives \(P(Y=1)=0\), while M2 retains \(P(Y=1)=1/2\). The argument follows from replacing one structural equation while retaining the latent distribution, not from conditioning on the observed event \(T=0\).</p>
+<p>In a real model, editing a textual trace can also change parsing, distribution, instructions or other internal computation. Those effects require controls before claiming the edited text identifies a causal mechanism. The toy proves observational nonidentifiability in its two-model class; it does not identify a real language model's mechanism.</p>
+</section>
+<section id="problem-selection">
+<h2>6. Problem selection precedes implementation efficiency <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=1083">[18:03–21:52]</a></h2>
+<p>The conversation emphasizes deciding what should be built as tools make some implementations easier. We retain that emphasis without turning a course-era labor-market remark into a verified current employment forecast. Implementation speed matters after the task and acceptance criterion have been chosen.</p>
+<p>For the service team, “build a better assistant” is too broad to determine an experiment. “Reduce unsupported policy answers for a defined request distribution without increasing the stated review budget” identifies a population, outcome and constraint. It can then be compared with a baseline and broken into tractable mechanisms.</p>
+<p>Write down which action a result would change. If every possible result leads to deploying the same system under the same constraints, the experiment may have learning value but has no immediate decision value in this model. That distinction keeps curiosity, decision utility and publication incentives from being conflated.</p>
+</section>
+<section id="cross-disciplinary">
+<h2>7. A new domain changes what a successful prediction means <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=1312">[21:52–24:34]</a></h2>
+<p>Liang suggests looking beyond familiar assistants toward other data modalities and disciplines. This is a research direction, not a claim that a language-model recipe transfers without change. Domain expertise determines the relevant measurement, uncertainty, constraints and cost of error.</p>
+<p>A sequence model for a physical measurement needs a definition of time, units and missing observations. A candidate biological design needs an experimental validation protocol. A generated music passage needs a declared objective and evaluation context. The objects differ even when their computational representation is a sequence.</p>
+<p>The service's research model remains useful as a planning language: enumerate actions, possible failure states and informative observations. It becomes misleading if those states or utilities erase the domain's central distinctions. Collaboration can improve that specification before any larger model is trained.</p>
+</section>
+<section id="evaluation">
+<h2>8. A criterion is a protocol, not the whole definition of progress <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=1474">[24:34–26:53]</a></h2>
+<p><a href="https://www.csee.umbc.edu/courses/471/papers/turing.pdf">Turing's 1950 Computing Machinery and Intelligence</a>, retained PDF pages 1–2, replaces a broad thinking question with an imitation-game question and discusses that criterion. Its original setup and a modern conversational benchmark are not identical. Passing a particular test does not establish universal reliability or exhaust useful machine capabilities.</p>
+<p>The speaker proposes scientific discovery as a more consequential direction for evaluation. A discovery claim still needs operational criteria: what is new, how attribution is established, which independent check validates it, and whether the result survives replication. Fluent novelty claims and cherry-picked candidates can game a poorly specified discovery benchmark.</p>
+<p>Suppose A scores \(9/10\) and B \(4/5\) on a development set used to choose a candidate. On a supplied held-out set A scores \(1/2\) and B \(4/5\). Selecting A by development performance does not certify held-out superiority; the second observation directly contradicts it in this fixture. The example establishes that selection and evaluation are different operations, not the frequency with which overfitting occurs in a population.</p>
+<p>For the service, preserve the distinction between exploratory failures used to redesign a system and a final evaluation protocol. Once the held-out results guide further choices, that set becomes part of development information. A new independent evaluation may then be needed for the revised claim.</p>
+</section>
+<section id="executable">
+<h2>9. Executable objects expose ambiguities that a diagram can conceal <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=1613">[26:53–30:14]</a></h2>
+<p>The conversation explains the course's move toward executable material and more explicit social-impact content. The purpose of the code in this book is inspectability: a state, probability, axis convention or failure branch should have a concrete interpretation.</p>
+<p>For example, a diagram labeled “information helps” omits the experiment channel, posterior, action set and cost. The implementation later in this chapter requires every one of those objects. A zero-probability outcome returns no posterior, rather than dividing by zero and inventing a result. The code thus makes a mathematical boundary visible.</p>
+<p>Executable definitions do not make the supplied assumptions true. A flawlessly implemented utility table can encode a poor objective; a passing finite example does not prove a general theorem. The book pairs code with model definitions, proofs and counterexamples so that each form of evidence has a declared role.</p>
+</section>
+<section id="connections">
+<h2>10. Reuse the earlier models through explicit correspondences <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=1814">[30:14–32:11]</a></h2>
+<table><thead><tr><th>Course object</th><th>Research-system correspondence</th><th>Boundary to preserve</th></tr></thead><tbody>
+<tr><td>Search state, action, objective</td><td>Candidate solution, revision, acceptance cost</td><td>A fluent generator does not supply an admissible heuristic or optimality proof.</td></tr>
+<tr><td>MDP policy and environment</td><td>Choice of experiment or tool use over time</td><td>State sufficiency, transition law, horizon and return still need definition.</td></tr>
+<tr><td>Graphical-model joint and evidence</td><td>Uncertain failure cause and observed test</td><td>Conditioning needs a positive-probability event; dependence matters.</td></tr>
+<tr><td>Logic premise and entailment</td><td>Specified requirement and justified consequence</td><td>A proof certifies the stated premises and semantics, not real-world truth.</td></tr>
+<tr><td>Learning objective and distribution</td><td>Fitted predictor and evaluation population</td><td>Optimization success does not certify generalization or utility.</td></tr>
+</tbody></table>
+<p>An inference-time generator can explore candidates, so search concepts help organize states, proposals and verification. An RL-trained policy can optimize a stated return in an environment model. Next-token pretraining itself is not reinforcement learning, and an analogy with an MDP does not remove partial observability or evaluation budgets.</p>
+<p>The service team should state which correspondence it actually implements. Calling a process an “agent” supplies none of its transition assumptions. Conversely, a simple finite search or exact posterior can answer a useful research question without an elaborate agent architecture.</p>
+</section>
+<section id="foundations">
+<h2>11. A foundation is the ability to expose a model's assumptions <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=1931">[32:11–34:32]</a></h2>
+<p>The speaker distinguishes short-term tool familiarity from a broader understanding of how systems are built. Course-era comments about subsequent classes are not current enrollment rules; prerequisites and offerings require their own dated sources.</p>
+<p>The book's reusable skill is to move among a consequential problem, an explicit model, an algorithm and evidence. If a system changes its architecture, we can still ask what it predicts, which objective it optimizes, what the information state contains and what a returned certificate establishes.</p>
+<p>For the university project, this skill prevents both excessive abstraction and implementation without a question. A short exact experiment can identify which larger undertaking is warranted. The next section calculates that decision value.</p>
+</section>
+<section id="research-taste">
+<h2>12. An informative experiment can be worth more than a guaranteed improvement <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=2072">[34:32–37:32]</a></h2>
+<p>The conversation describes research as a consequential bet with a concrete first step, including an example about decentralized training. We retain the problem-selection principle without asserting that an illustrative systems proposal has solved its communication, optimization or governance constraints.</p>
+<p>Under the finite model, the best action without an experiment has value \(V_0=\max_a\sum_\theta\pi(\theta)U(a,\theta)\). The observation marginal is \(P(o)=\sum_\theta\pi(\theta)P(o\mid\theta)\). For \(P(o)&gt;0\), Bayes' rule gives \(\pi(\theta\mid o)=\pi(\theta)P(o\mid\theta)/P(o)\).</p>
+<p>After observing \(o\), choose the best remaining action. The expected value before paying the experiment's cost is</p>
+\[V_1=\sum_{o:P(o)&gt;0}P(o)\max_a\sum_\theta\pi(\theta\mid o)U(a,\theta).\]
+<p>The gross value of information is \(V_1-V_0\); its net value is \(V_1-V_0-c\). These quantities use the supplied prior, channel and utilities. They are not an empirical estimate of a research project's benefit.</p>
+<p>Why is gross value nonnegative? Let \(a_0\) be a baseline maximizing action. If that action remains available after every outcome, the posterior maximum is at least its posterior value. Multiply by each outcome probability and sum. The law of total probability reconstructs \(\sum_\theta\pi(\theta)U(a_0,\theta)=V_0\). Hence \(V_1\geq V_0\). Cost, unavailable actions or changed utilities can invalidate a claim that net value is nonnegative.</p>
+<p>In the original two-state example, states “repair fails” and “repair succeeds” each have prior probability \(1/2\). A safe action has utility \((2,2)\), and the repair action \((0,3)\). Baseline expected values are 2 and \(3/2\), so the safe action is best. Perfect information chooses safe in the first state and repair in the second, giving \(V_1=(2+3)/2=5/2\).</p>
+<p>Gross information value is \(1/2\). At cost \(2/5\), net value is \(1/10\); at cost \(3/5\), net value is \(-1/10\). Even perfect information need not justify its cost. A cheap experiment that changes the decision can be preferable to a costly experiment producing a more impressive artifact.</p>
+</section>
+<section id="career">
+<h2>13. Exploration is a useful analogy with limits <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=2253">[37:33–42:59]</a></h2>
+<p>Liang emphasizes learning, working with compatible collaborators and considering several career settings. Those priorities are attributed preferences, not a universal utility function. A reader can value stability, family obligations, health, mission, income or intellectual growth differently.</p>
+<p>Our finite experiment model explains one part of exploration: an observation can change a later choice. It does not turn a human life into a stationary bandit problem. Choices can alter skills, preferences, available actions and the environment; some are costly or hard to reverse. The “same actions remain available” premise in the information-value proof can fail.</p>
+<p>A bounded trial can nevertheless be framed precisely: which uncertainty does it address, what would change afterward, what does it cost, and which alternatives remain available? That is a planning question, not a theorem promising a particular career outcome.</p>
+</section>
+<section id="collaboration">
+<h2>14. Adaptation and collaboration should produce inspectable evidence <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=2579">[42:59–48:48]</a></h2>
+<p>The conversation responds to comparison pressure and emphasizes adaptation, practical skills and collaboration. We do not infer that a particular credential never matters, that one skill guarantees employment, or that every reader should optimize speed of learning above all else.</p>
+<p>In research, a useful collaboration can separate proposing a hypothesis, implementing the measurement and independently checking the result. Agreement among collaborators is not independence when everyone relies on the same untested assumption. A preserved failure example can reveal a shared mistake more effectively than several agreeing summaries.</p>
+<p>For the service, suppose four labeled cases have original answers \((1,0,1,0)\). A nuisance perturbation produces \((0,0,1,1)\), while the task labels remain \((1,0,1,0)\). Two of four answers flip, and accuracy falls from 1 to \(1/2\). These paired observations establish sensitivity in this sample.</p>
+<p>The intervention must preserve the intended task: changing an answer option's position requires mapping the response back to the same semantic label. A changed distribution or ambiguous rewritten question can defeat that premise. The flip rate alone does not establish whether every original or changed answer is correct, nor identify the internal mechanism. Keeping paired case identities and ground truth exposes those distinctions.</p>
+</section>
+<section id="speculation">
+<h2>15. Separate a market narrative from the evidence for a project <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=2928">[48:48–50:17]</a></h2>
+<p>The recording contains a speculative bubble assessment and an analogy with an earlier technological transition. These are the speaker's judgments at the time, not a verified current valuation analysis or investment recommendation. Unreliable machine-transcribed chronology is not promoted into an exact historical date.</p>
+<p>A project should not require proving an entire market narrative before its first experiment. The university can test its defined failure mode, cost and adoption assumptions. Those measurements address its decision even if expectations elsewhere are exaggerated or understated.</p>
+</section>
+<section id="personal-background">
+<h2>16. A research path can be discussed without turning it into a template <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=3017">[50:17–51:47]</a></h2>
+<p>Liang recalls interests in mathematics, theory, physics and building software. These are autobiographical context for the conversation. They do not establish a necessary sequence of degrees or interests for a successful researcher.</p>
+<p>The relevant lesson for this project is to connect an interest to a question and an experiment. A mathematical skill can sharpen a proof; domain knowledge can expose a bad objective; implementation can reveal a hidden assumption. None substitutes for all the others.</p>
+</section>
+<section id="transparency">
+<h2>17. Disclosure helps formulate tests; it does not certify their outcomes <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=3107">[51:47–55:35]</a></h2>
+<p>The speaker discusses competition, legal concerns and reporting effort as possible explanations for limited disclosure. Those are attributed assessments, not independently verified motives of every organization. Missing information alone is not proof of illegal conduct.</p>
+<p><a href="https://arxiv.org/abs/2407.12929v2">The 2024 Foundation Model Transparency Index paper</a>, retained March 4, 2025 version, PDF pages 1–2, reports its 2023/2024 indicator studies. It changes from public searches over ten developers to report collection over fourteen, with means of 37 and 58 and a separate common-developer comparison. It documents particular sustained areas of opacity. This evidence does not establish an unqualified five-year decline, a current leaderboard or the causal effect of the index.</p>
+<p>Chapter 18's disclosure flags are therefore useful inputs to questions, not safety scores. For the service, missing evaluation-population information tells us which claim is difficult to assess. A disclosed population allows inspection but does not guarantee sampling quality.</p>
+<p>Public understanding also needs meaningful denominators and units. A count of generated tokens, a training-resource estimate and a verified completion rate describe different activities. A report that states its protocol, unsupported claims and revision history can make disagreement productive without implying that disclosure has settled the underlying impact.</p>
+</section>
+<section id="music">
+<h2>18. Interdisciplinary work starts with a shared question <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=3336">[55:36–57:10]</a></h2>
+<p>The conversation connects musical interests with interdisciplinary research. We retain that connection without expanding an unverified project history or copying musical material. A common representation can enable collaboration, but collaborators still need a common account of success.</p>
+<p>For example, a sequence predictor, a musician and a listener may evaluate different properties of the same output. Before aggregating them, specify whose judgment, under which task and with what evidence. This returns to the utility and stakeholder distinctions rather than assuming a probability model alone defines artistic value.</p>
+</section>
+<section id="engagement">
+<h2>19. The first contribution can be a precise question about an existing result <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=3430">[57:10–58:06]</a></h2>
+<p>The speaker suggests reading work, engaging with its authors and using projects as starting points. Public papers and artifacts offer opportunities for scrutiny, but research is not universally open: data, code, access and contractual constraints differ. A named current program should not be inferred from garbled transcription.</p>
+<p>A concrete contribution can reproduce a specified result, test an omitted assumption, construct a counterexample, or propose a discriminating experiment. State exactly which version and claim you examined. When engaging with another researcher, a specific mechanism or evidence question is more actionable than a generic claim that the subject is important.</p>
+</section>
+<section id="conclusion">
+<h2>20. Carry the model, the evidence and the boundary forward <a class="timestamp" href="https://youtu.be/5u5I5jvWR5k?t=3486">[58:06–58:42]</a></h2>
+<p>The course ends, but its objects remain usable. Search distinguishes feasible candidates from optimality. MDPs distinguish a return objective from an observed policy. Graphical models distinguish a joint distribution from the evidence event. Logic distinguishes entailment from a witness or probability-one claim. Learning distinguishes an optimized objective from performance in a new population.</p>
+<p>The final research discipline is to ask a consequential question, specify its objects, derive what follows, design a check and preserve what the check does not establish. For the university team, this turns “make the assistant better” into a sequence of defensible decisions about failures, costs, information and outcomes.</p>
+<p>A successful first experiment need not settle the whole project. It should make the next decision better justified. An unsuccessful result can do the same when it rules out a mechanism or reveals a false premise. That is the connection between foundational models and useful research.</p>
+</section>
+<section id="implementation">
+<h2>21. Execute finite evaluation and experiment decisions</h2>
+<p>The original standard-library program computes binary accuracy, Brier loss and target-probability product; paired flip/accuracy measurements; finite experiment value; and the two stipulated structural interventions. Inputs are supplied, not fetched or estimated. Functions preserve their inputs and return exact fractions, tuples and dictionaries, with no network or file effects. Only the demonstration prints output.</p>
+<p>Scalar inputs are integers or <code>Fraction</code>, excluding Boolean and floating-point values; each input numerator and denominator is at most 128 bits. Intermediate exact arithmetic is not capped or rounded. Binary samples use one to 64 cases with exact integer labels 0 or 1. Finite decisions have at most 16 states, actions and outcomes. Priors and channel rows must sum exactly to one; utility rows align with states and channel rows with outcomes. Type failures raise <code>TypeError</code>; domain, shape and budget failures raise <code>ValueError</code>.</p>
+<p>The experiment cost is nonnegative and expressed in the utility's units. Ties choose the first action. Impossible outcomes have zero mass and <code>None</code> posterior/action, contributing nothing to expected value. Binary threshold ties choose label 0. Zero target-probability product is permitted; negative log loss would then be infinite, and the code does not attempt to take its logarithm.</p>
+<div class="codewrap" id="runnable-example"><pre><code>from fractions import Fraction
+from programs.chapter20 import experiment_value
+result = experiment_value([Fraction(1, 2), Fraction(1, 2)],
+                          [[2, 2], [0, 3]], [[1, 0], [0, 1]])
+print(result['baseline_value'], result['informed_value'])
+print(result['information_value'])</code></pre></div>
+<div class="codewrap" id="example-output"><pre><code>2 5/2
+1/2
+</code></pre></div>
+<p>Run the example from the repository root or execute <code>python programs/chapter20.py</code> using the <a href="programs/chapter20.py">complete program</a>. Its intervention API replaces the trace in an explicit toy model; it neither queries a real language model nor establishes that a textual edit is a valid real-system intervention.</p>
+<div class="codewrap" id="program-source"><pre><code>&quot;&quot;&quot;Finite exact research-design examples, not model or career predictions.
+
+Scalar inputs: int/Fraction, excluding bool/float, at most128bits per input
+numerator/denominator. Intermediate exact arithmetic is not capped or rounded.
+Functions preserve inputs; no I/O except demo. Invalid types raise TypeError;
+invalid shapes/domains/resource budgets raise ValueError. Priors, utilities,
+channels and intervention mechanisms are supplied rather than estimated.
+&quot;&quot;&quot;
+from fractions import Fraction as F
+
+
+def _number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, F)):
+        raise TypeError(&#x27;Use int or Fraction, not bool/float.&#x27;)
+    value = F(value)
+    bits = max(abs(value.numerator).bit_length(),
+               value.denominator.bit_length())
+    if bits &gt; 128:
+        raise ValueError(&#x27;Scalar input exceeds128bits.&#x27;)
+    return value
+
+
+def _vector(values, limit=16, probability=False):
+    if not isinstance(values, (list, tuple)):
+        raise TypeError(&#x27;Use list or tuple vectors.&#x27;)
+    if not 1 &lt;= len(values) &lt;= limit:
+        raise ValueError(&#x27;Vector size outside declared budget.&#x27;)
+    result = tuple(_number(v) for v in values)
+    if probability and any(not 0 &lt;= v &lt;= 1 for v in result):
+        raise ValueError(&#x27;Probabilities must be in[0,1].&#x27;)
+    return result
+
+
+def _distribution(values):
+    result = _vector(values, probability=True)
+    if sum(result) != 1:
+        raise ValueError(&#x27;Distribution must sum exactly to one.&#x27;)
+    return result
+
+
+def _bits(values):
+    if not isinstance(values, (list, tuple)):
+        raise TypeError(&#x27;Use list or tuple labels.&#x27;)
+    if not 1 &lt;= len(values) &lt;= 64:
+        raise ValueError(&#x27;Label count must be1..64.&#x27;)
+    if any(type(v) is not int for v in values):
+        raise TypeError(&#x27;Labels must be exact integers, not bool.&#x27;)
+    if any(v not in (0, 1) for v in values):
+        raise ValueError(&#x27;Labels must be0or1.&#x27;)
+    return tuple(values)
+
+
+def binary_scores(probabilities, labels):
+    &quot;&quot;&quot;p=P(label1); decision is1iff p&gt;1/2. Joint likelihood assumes product.
+
+    Returns accuracy, mean Brier loss and product likelihood, not log loss.
+    Zero likelihood is allowed and corresponds to infinite negative log loss.
+    A supplied held-out sample is not checked for independence or leakage.
+    &quot;&quot;&quot;
+    probabilities = _vector(probabilities, 64, probability=True)
+    labels = _bits(labels)
+    if len(probabilities) != len(labels):
+        raise ValueError(&#x27;Matched probability and label counts required.&#x27;)
+    n = len(labels)
+    product = F(1)
+    correct = 0
+    squared = F(0)
+    for p, y in zip(probabilities, labels):
+        product *= p if y else 1-p
+        correct += int(int(p &gt; F(1, 2)) == y)
+        squared += (p-y)**2
+    return {&#x27;accuracy&#x27;: F(correct, n), &#x27;brier&#x27;: squared/n,
+            &#x27;likelihood&#x27;: product}
+
+
+def paired_changes(original, perturbed, labels):
+    &quot;&quot;&quot;Same ordered labeled cases, unchanged labels; no semantic check made.&quot;&quot;&quot;
+    original, perturbed, labels = map(_bits, (original, perturbed, labels))
+    if len({len(original), len(perturbed), len(labels)}) != 1:
+        raise ValueError(&#x27;Matched paired case counts required.&#x27;)
+    n = len(labels)
+    flips = sum(a != b for a, b in zip(original, perturbed))
+    before = sum(a == y for a, y in zip(original, labels))
+    after = sum(b == y for b, y in zip(perturbed, labels))
+    return {&#x27;flip_rate&#x27;: F(flips, n), &#x27;accuracy_before&#x27;: F(before, n),
+            &#x27;accuracy_after&#x27;: F(after, n)}
+
+
+def experiment_value(prior, utilities, channel, cost=0):
+    &quot;&quot;&quot;Bayes decision: utilities[action][state], channel[state][outcome].
+
+    Prior and each channel row normalized. At most16states/actions/outcomes.
+    All original actions stay available after observation; cost in same units
+    as utility, paid once regardless of outcome. First action wins exact ties.
+    Zero-probability outcomes have None posterior/action and contribute zero.
+    &quot;&quot;&quot;
+    prior = _distribution(prior)
+    if not isinstance(utilities, (list, tuple)):
+        raise TypeError(&#x27;Use list or tuple utility rows.&#x27;)
+    if not 1 &lt;= len(utilities) &lt;= 16:
+        raise ValueError(&#x27;Action count must be1..16.&#x27;)
+    utilities = tuple(_vector(row) for row in utilities)
+    if any(len(row) != len(prior) for row in utilities):
+        raise ValueError(&#x27;Each action needs one utility per state.&#x27;)
+    if not isinstance(channel, (list, tuple)):
+        raise TypeError(&#x27;Use list or tuple channel rows.&#x27;)
+    if len(channel) != len(prior):
+        raise ValueError(&#x27;Each state needs one channel row.&#x27;)
+    channel = tuple(_distribution(row) for row in channel)
+    if len({len(row) for row in channel}) != 1:
+        raise ValueError(&#x27;Equal outcome counts required.&#x27;)
+    cost = _number(cost)
+    if cost &lt; 0:
+        raise ValueError(&#x27;Experiment cost must be nonnegative.&#x27;)
+    expected = tuple(sum(p*u for p, u in zip(prior, row))
+                     for row in utilities)
+    baseline = max(expected)
+    before_action = expected.index(baseline)
+    outcomes = []
+    informed = F(0)
+    for o in range(len(channel[0])):
+        joint = tuple(p*row[o] for p, row in zip(prior, channel))
+        mass = sum(joint)
+        if mass == 0:
+            outcomes.append({&#x27;mass&#x27;: mass, &#x27;posterior&#x27;: None,
+                             &#x27;action&#x27;: None})
+            continue
+        posterior = tuple(p/mass for p in joint)
+        values = tuple(sum(p*u for p, u in zip(posterior, row))
+                       for row in utilities)
+        best = max(values)
+        action = values.index(best)
+        informed += mass*best
+        outcomes.append({&#x27;mass&#x27;: mass, &#x27;posterior&#x27;: posterior,
+                         &#x27;action&#x27;: action})
+    return {&#x27;baseline_action&#x27;: before_action, &#x27;baseline_value&#x27;: baseline,
+            &#x27;outcomes&#x27;: tuple(outcomes), &#x27;informed_value&#x27;: informed,
+            &#x27;information_value&#x27;: informed-baseline,
+            &#x27;net_information_value&#x27;: informed-baseline-cost}
+
+
+def toy_intervention(mechanism, forced_trace, latent_probability=F(1, 2)):
+    &quot;&quot;&quot;Two stipulated models: trace=U; answer=trace or answer=U.
+
+    Force trace to0or1 while retaining U&#x27;s distribution. This is a structural
+    intervention in an explicit toy model, not an operation on a real LLM.
+    &quot;&quot;&quot;
+    if not isinstance(mechanism, str):
+        raise TypeError(&#x27;Mechanism name must be a string.&#x27;)
+    if mechanism not in (&#x27;mediated&#x27;, &#x27;common-cause&#x27;):
+        raise ValueError(&#x27;Unknown mechanism.&#x27;)
+    if type(forced_trace) is not int:
+        raise TypeError(&#x27;Forced trace must be an integer.&#x27;)
+    if forced_trace not in (0, 1):
+        raise ValueError(&#x27;Forced trace must be0or1.&#x27;)
+    probability = _number(latent_probability)
+    if not 0 &lt;= probability &lt;= 1:
+        raise ValueError(&#x27;Latent probability must be in[0,1].&#x27;)
+    return F(forced_trace) if mechanism == &#x27;mediated&#x27; else probability
+
+
+def demo():
+    labels = [1, 0]
+    a = binary_scores([F(3, 5), F(2, 5)], labels)
+    b = binary_scores([F(99, 100), F(51, 100)], labels)
+    print(&#x27;accuracy A,B:&#x27;, a[&#x27;accuracy&#x27;], b[&#x27;accuracy&#x27;])
+    print(&#x27;likelihood A,B:&#x27;, a[&#x27;likelihood&#x27;], b[&#x27;likelihood&#x27;])
+    print(&#x27;Brier A,B:&#x27;, a[&#x27;brier&#x27;], b[&#x27;brier&#x27;])
+    result = experiment_value([F(1, 2), F(1, 2)],
+                              [[2, 2], [0, 3]], [[1, 0], [0, 1]],
+                              F(2, 5))
+    print(&#x27;baseline/informed:&#x27;, result[&#x27;baseline_value&#x27;],
+          result[&#x27;informed_value&#x27;])
+    print(&#x27;gross/net information:&#x27;, result[&#x27;information_value&#x27;],
+          result[&#x27;net_information_value&#x27;])
+    print(&#x27;forced trace0 probabilities:&#x27;, toy_intervention(&#x27;mediated&#x27;, 0),
+          toy_intervention(&#x27;common-cause&#x27;, 0))
+    paired = paired_changes([1, 0, 1, 0], [0, 0, 1, 1], [1, 0, 1, 0])
+    print(&#x27;paired flip rate:&#x27;, paired[&#x27;flip_rate&#x27;])
+    print(&#x27;Supplied finite research designs; no empirical certification.&#x27;)
+
+
+if __name__ == &#x27;__main__&#x27;:
+    demo()
+</code></pre></div>
+<div class="codewrap" id="program-output"><pre><code>accuracy A,B: 1 1/2
+likelihood A,B: 9/25 4851/10000
+Brier A,B: 4/25 1301/10000
+baseline/informed: 2 5/2
+gross/net information: 1/2 1/10
+forced trace0 probabilities: 0 1/2
+paired flip rate: 1/2
+Supplied finite research designs; no empirical certification.
+</code></pre></div>
+<p>The author reference checks enumerate joint outcome masses, paired contingency tables and all outcome-to-action policies in finite cases. Policy enumeration independently checks experiment value without copying the posterior-based implementation. Invalid inputs, zero-mass branches, tie conventions and legal axis budgets are checked. These results validate the declared finite APIs rather than any actual model, discovery or career outcome.</p>
+</section>
+<section id="exercises">
+<h2>22. Six exercises with fully worked solutions</h2>
+<h3>Exercise 1 — Compare probability quality and a threshold decision</h3>
+<p>For labels \((1,0)\), recompute the accuracy, likelihood and Brier losses of A's \((3/5,2/5)\) and B's \((99/100,51/100)\). Does B's lower log loss imply higher accuracy?</p>
+<details class="solution"><summary>Solution</summary><p>A's decisions are \((1,0)\), so accuracy is 1. B's are \((1,1)\), so accuracy is \(1/2\). Target-probability products are \(9/25=3600/10000\) and \(4851/10000\); logarithm is increasing, so negating the log gives B lower mean log loss.</p><p>The squared residuals for A are each \(4/25\). B's are \(1/10000\) and \(2601/10000\), averaging \(1301/10000\). Better probability-error measures coexist with a worse threshold decision because the threshold discards probability magnitudes after classification. No general accuracy implication follows.</p></details>
+<h3>Exercise 2 — More information need not improve every realized probability</h3>
+<p>A fair binary target is observed through a perfectly revealing additional context. Compare expected optimal entropy before and after observing it. What can happen to the probability of target 1 on an individual branch?</p>
+<details class="solution"><summary>Solution</summary><p>Before observation the distribution is \((1/2,1/2)\), with entropy \(\log2\). After perfect revelation each conditional distribution is a point mass, with entropy zero, so expected conditional entropy is zero.</p><p>On the branch revealing target 0, the conditional probability of target 1 falls from \(1/2\) to zero. The entropy result is an expected distribution-level statement; it did not require every candidate target's conditional probability to rise. A learned predictor may also fail to exploit the context, so its empirical loss needs separate measurement.</p></details>
+<h3>Exercise 3 — Observational agreement does not identify a mediator</h3>
+<p>Use M1: \(T=U,Y=T\), and M2: \(T=U,Y=U\), with fair \(U\). Compare their observational joint distributions, their conditional answer given \(T=0\), and their answer when \(T:=0\) is imposed externally.</p>
+<details class="solution"><summary>Solution</summary><p>Both observational joints put mass \(1/2\) at \((0,0)\) and \((1,1)\). In either model, conditioning on observed \(T=0\) selects \(U=0\), so the answer is 0.</p><p>An intervention replaces the trace equation and does not select \(U\). M1's answer becomes the forced trace, so \(P(Y=1)=0\). M2's answer remains the fair latent bit, so \(P(Y=1)=1/2\). Identical observations and conditional distributions therefore coexist with different intervention consequences.</p></details>
+<h3>Exercise 4 — A noisy experiment can have a smaller but positive value</h3>
+<p>Use the safe utilities \((2,2)\), repair utilities \((0,3)\) and equal prior. An experiment reports the correct state with probability \(3/4\), symmetrically. Compute gross information value and net value at cost \(1/10\).</p>
+<details class="solution"><summary>Solution</summary><p>Each reported state has marginal probability \(1/2\). After a “success” report, success posterior is \(3/4\); repair expected utility is \(9/4\), exceeding safe utility 2. After a “failure” report, success posterior is \(1/4\); repair value \(3/4\) is below 2.</p><p>Expected informed value is \((9/4+2)/2=17/8\). Baseline is 2, so gross value is \(1/8\), less than perfect information's \(1/2\). Subtracting \(1/10\) gives \(1/40\). This is positive under the supplied utilities and channel, not a claim that any real experiment has these probabilities.</p></details>
+<h3>Exercise 5 — An impossible outcome supplies no posterior</h3>
+<p>A prior is \((1,0)\) and an experiment channel is perfectly revealing. Which outcome has zero probability? Explain its contribution to expected information value and whether the prior-zero state can be learned from this model.</p>
+<details class="solution"><summary>Solution</summary><p>The second outcome has mass \(1\cdot0+0\cdot1=0\). Dividing its joint state masses by zero is undefined, so the implementation returns no posterior or action for that branch and adds zero to expected value.</p><p>The first outcome has posterior \((1,0)\), identical to the prior, so information value is zero. The prior-zero state cannot acquire positive posterior under this finite model from any positive-mass observation. If reality can be in that state, the prior/model needs revision; the zero branch is not a valid certificate that reality excludes it.</p></details>
+<h3>Exercise 6 — Distinguish sensitivity, correctness and selection</h3>
+<p>For the four paired cases in the collaboration section, compute flip rate and both accuracies. Can the flip rate alone establish either accuracy? Then compare the development/held-out A/B fixture and state what selecting A establishes.</p>
+<details class="solution"><summary>Solution</summary><p>Cases 1 and 4 flip, so flip rate is \(2/4=1/2\). The original answers equal all four labels; the perturbed answers equal labels on cases 2 and 3, so accuracies are 1 and \(1/2\). If the ground truth were different, the same answer pair would retain its flip rate while its accuracies changed. Sensitivity alone is not correctness.</p><p>Development selection chooses A because \(9/10&gt;4/5\). Held-out performance favors B because \(1/2&lt;4/5\). Selecting A establishes an ordering on the inspected development metric, not a held-out or deployment guarantee. Once results guide another design choice, preserve their role as development information for the next evaluation.</p></details>
+</section>
+<section id="sources">
+<h2>23. Source and inference boundaries</h2>
+<ul>
+<li><a href="https://www.csee.umbc.edu/courses/471/papers/turing.pdf">Turing, Computing Machinery and Intelligence (1950)</a>, actual retained PDF pages 1–2: original imitation-game formulation and criterion discussion. The cached reprint's incorrect volume header is not reused as bibliographic metadata.</li>
+<li><a href="https://papers.nips.cc/paper_files/paper/2023/file/ed3fea9033a80fea1376299fa7863f4a-Paper-Conference.pdf">Turpin et al., Language Models Don't Always Say What They Think (NeurIPS 2023)</a>, actual PDF pages 1–3 and inspected page 2 table: specified biased prompts and historical models; no universal current-model or full-appendix certification.</li>
+<li><a href="https://arxiv.org/abs/2407.12929v2">The 2024 Foundation Model Transparency Index</a>, March 4, 2025 retained version, actual PDF pages 1–2: dated indicator studies, collection changes and scoped opacity findings.</li>
+</ul>
+<p>The recording is machine-transcribed conversation, not a human-verified quotation source. No matching official fireside-chat slide deck is substituted. Personal recollections, forecasts, organizational motives and career preferences are attributed or bounded; unverified numbers and garbled names are not upgraded to facts. The entropy, score, causal-mechanism and information-value arguments are original finite derivations whose assumptions are visible.</p>
+</section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-19-ai-supply-chains-and-economic-value.html">Previous available chapter</a><a href="index.html">Lecture index</a><span>End of selected recordings</span></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

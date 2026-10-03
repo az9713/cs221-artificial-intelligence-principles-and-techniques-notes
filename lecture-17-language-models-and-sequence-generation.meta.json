@@ -1,0 +1,509 @@
+{
+  "title": "Language models and sequence generation",
+  "number": 17,
+  "video_id": "3orP3u2-jcg",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "author draft; different-editor gate6b and passes7/8 pending",
+  "authored_body_sha256": "e2cbf131185412739961decb65fb1e8f56ccfc026596444286b9a24ce80ed73d",
+  "sections": [
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original-only support section; no recording span assigned.",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Newswire task, text probability versus source-supported claim",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Newswire task, text probability versus source-supported claim",
+          "provenance": "original stipulated teaching case"
+        }
+      ]
+    },
+    {
+      "section": "industrial",
+      "start": 5.26,
+      "end": 342.32,
+      "lecture_material": "Dated model/data scale and illustrative compute/storage accounting",
+      "research_extension": "Llama405B/15.6T/3.8e25 and Qwen36T reported historical scale (actual primary Llama PDF1/QwenPDF3)",
+      "teaching_construction": "6NM arithmetic, stipulated accelerator-days/dollars and token/word byte conversions",
+      "evidence_class": "empirical result",
+      "claim_provenance": [
+        {
+          "evidence_class": "empirical result",
+          "claim": "Llama405B/15.6T/3.8e25 and Qwen36T reported historical scale",
+          "provenance": "actual primary Llama PDF1/QwenPDF3"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "6NM arithmetic, stipulated accelerator-days/dollars and token/word byte conversions",
+          "provenance": "original dimensioned cost model; no current price or measured utilization"
+        }
+      ]
+    },
+    {
+      "section": "representation",
+      "start": 342.32,
+      "end": 917.57,
+      "lecture_material": "Whole-word IDs, embedding/logit axes, probability normalization and autoregression",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Tokens/IDs/BOS/EOS and position/feature/vocabulary axes; Declared prefix IDs, source vector1.26 and normalized sparse teaching kernel",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Tokens/IDs/BOS/EOS and position/feature/vocabulary axes",
+          "provenance": "recording/deck; original consistent map and explicit axes"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Declared prefix IDs, source vector1.26 and normalized sparse teaching kernel",
+          "provenance": "actual slides22/26; original correction"
+        }
+      ]
+    },
+    {
+      "section": "probability",
+      "start": 917.57,
+      "end": 1172.72,
+      "lecture_material": "Chain rule, sequence likelihood and autoregressive versus bidirectional prediction",
+      "research_extension": "Masked-position conditioning differs from causal factorization (BERTPDF4; original comparison)",
+      "teaching_construction": "Fixed-horizon normalization, completed mass identity and uniform EOS stopping bound; Geometric and never-EOS/summable-hazard counterexamples; Masked-position conditioning differs from causal factorization",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Fixed-horizon normalization, completed mass identity and uniform EOS stopping bound",
+          "provenance": "original finite sum/survival proof"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Geometric and never-EOS/summable-hazard counterexamples",
+          "provenance": "original teaching constructions"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Masked-position conditioning differs from causal factorization",
+          "provenance": "BERTPDF4; original comparison"
+        }
+      ]
+    },
+    {
+      "section": "counts",
+      "start": 1173.23,
+      "end": 1383.42,
+      "lecture_material": "N-grams, word-count likelihood, limited context and sparse support",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Document-bounded bigram counts and additive smoothing; Row MLE via entropy/KL and smoothing uniform EOS bound; Three-document reaction2/3,1/3 versus3/14,2/14 and undefined-row contract",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Document-bounded bigram counts and additive smoothing",
+          "provenance": "recording context; original explicit count conventions"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Row MLE via entropy/KL and smoothing uniform EOS bound",
+          "provenance": "original finite derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Three-document reaction2/3,1/3 versus3/14,2/14 and undefined-row contract",
+          "provenance": "original counts/program"
+        }
+      ]
+    },
+    {
+      "section": "training",
+      "start": 1383.42,
+      "end": 1502.83,
+      "lecture_material": "Shifted input/targets and causal whole-sequence training",
+      "research_extension": "Decoder causality must hold throughout dependencies (AttentionPDF3–5; original failure example)",
+      "teaching_construction": "Shifted targets, valid masks and token-mean objective; Softmax logit gradient and shared-parameter accumulation; Token2.75 versus document2.5, target-gradient and fused extreme-loss fixtures; Decoder causality must hold throughout dependencies",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Shifted targets, valid masks and token-mean objective",
+          "provenance": "recording/deck48; original semantic axes/normalization"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Softmax logit gradient and shared-parameter accumulation",
+          "provenance": "original differentiation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Token2.75 versus document2.5, target-gradient and fused extreme-loss fixtures",
+          "provenance": "original finite arithmetic/program"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Decoder causality must hold throughout dependencies",
+          "provenance": "AttentionPDF3–5; original failure example"
+        }
+      ]
+    },
+    {
+      "section": "tasks",
+      "start": 1502.83,
+      "end": 1893.39,
+      "lecture_material": "Task conditioning, prompted applications and prediction/reasoning distinction",
+      "research_extension": "Input/task/output conditioning and decoder/application-score distinction (GPT2PDF1–2; original newswire evaluation)",
+      "teaching_construction": "Input/task/output conditioning and decoder/application-score distinction; Greedyaa9/25 versus MAPba2/5; exact sampling law",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Input/task/output conditioning and decoder/application-score distinction",
+          "provenance": "GPT2PDF1–2; original newswire evaluation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Greedyaa9/25 versus MAPba2/5; exact sampling law",
+          "provenance": "original finite counterexample/program"
+        }
+      ]
+    },
+    {
+      "section": "scaling",
+      "start": 1893.68,
+      "end": 2295.18,
+      "lecture_material": "Empirical scaling, allocation tradeoffs and diminishing-loss motivation",
+      "research_extension": "Reported scaling trends and measured versus extrapolated allocation (KaplanPDF1–2,ChinchillaPDF1–2/5–6,LlamaPDF8)",
+      "teaching_construction": "Unique positive optimum of stipulated fitted-form surrogate under kappaNM budget; Unit-coefficient10/10 versus100/1 allocation",
+      "evidence_class": "empirical result",
+      "claim_provenance": [
+        {
+          "evidence_class": "empirical result",
+          "claim": "Reported scaling trends and measured versus extrapolated allocation",
+          "provenance": "KaplanPDF1–2,ChinchillaPDF1–2/5–6,LlamaPDF8"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Unique positive optimum of stipulated fitted-form surrogate under kappaNM budget",
+          "provenance": "original continuous conditional derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Unit-coefficient10/10 versus100/1 allocation",
+          "provenance": "original stipulated finite arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "architecture",
+      "start": 2296.08,
+      "end": 2751.22,
+      "lecture_material": "Flattened MLP count, attention sharing/input routing, causal mask and prefix cache",
+      "research_extension": "Projected scaled-dot-product head and positionwise feed-forward sharing (AttentionPDF3–5)",
+      "teaching_construction": "Causal stack induction for unchanged-prefix key/value cache; DVT² flattened count, fixed-ReLU sensitivity and attention3/4-to0 example",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Projected scaled-dot-product head and positionwise feed-forward sharing",
+          "provenance": "AttentionPDF3–5"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Causal stack induction for unchanged-prefix key/value cache",
+          "provenance": "original dependency proof with fixed evaluation/position/mask assumptions"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "DVT² flattened count, fixed-ReLU sensitivity and attention3/4-to0 example",
+          "provenance": "original exact count/counterexamples correcting broad source implications"
+        }
+      ]
+    },
+    {
+      "section": "pretraining",
+      "start": 2751.22,
+      "end": 3262.38,
+      "lecture_material": "Selected data mixtures, pre-training and context demonstrations versus fine-tuning",
+      "research_extension": "Domain-mixture loss, heldout grouping and context versus parameter update (original objective/evaluation; GPT3PDF6–7 definitions); Reported Qwen multilingual/synthetic stages and bounded GPT3 experiments (QwenPDF3–4;GPT3PDF1/3/6–7)",
+      "teaching_construction": "Domain-mixture loss, heldout grouping and context versus parameter update",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Domain-mixture loss, heldout grouping and context versus parameter update",
+          "provenance": "original objective/evaluation; GPT3PDF6–7 definitions"
+        },
+        {
+          "evidence_class": "empirical result",
+          "claim": "Reported Qwen multilingual/synthetic stages and bounded GPT3 experiments",
+          "provenance": "QwenPDF3–4;GPT3PDF1/3/6–7"
+        }
+      ]
+    },
+    {
+      "section": "preferences",
+      "start": 3262.93,
+      "end": 3609.92,
+      "lecture_material": "Supervised post-training, preference reward and RL-style sequence objectives",
+      "research_extension": "SFT, paired logistic rewards, sequence KL/PPO objective and alternate Llama recipe (InstructPDF2–3/6/8–9 and LlamaPDF2; reported method semantics)",
+      "teaching_construction": "Finite support-constrained exponential tilt unique optimum; Reaction preference2/3,1/3 reverses to1/3,2/3",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "SFT, paired logistic rewards, sequence KL/PPO objective and alternate Llama recipe",
+          "provenance": "InstructPDF2–3/6/8–9 and LlamaPDF2; reported method semantics"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Finite support-constrained exponential tilt unique optimum",
+          "provenance": "original KL identity/proof; not PPO/neural convergence"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Reaction preference2/3,1/3 reverses to1/3,2/3",
+          "provenance": "original finite utility example"
+        }
+      ]
+    },
+    {
+      "section": "safety",
+      "start": 3609.92,
+      "end": 3919.34,
+      "lecture_material": "Attributed historical refusal/failure examples and prompt sensitivity",
+      "research_extension": "Reported model residual mistakes (InstructPDF4 only; no timeless claim for all systems)",
+      "teaching_construction": "Prompt-distribution failure functional and distribution-shift limits; Zero-failure binomial confidence construction under identical independent trials; 100-trial bound0.029513",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Prompt-distribution failure functional and distribution-shift limits",
+          "provenance": "original evaluation framing; dated recording examples"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Zero-failure binomial confidence construction under identical independent trials",
+          "provenance": "original elementary statistical derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "100-trial bound0.029513",
+          "provenance": "original numerical computation"
+        },
+        {
+          "evidence_class": "empirical result",
+          "claim": "Reported model residual mistakes",
+          "provenance": "InstructPDF4 only; no timeless claim for all systems"
+        }
+      ]
+    },
+    {
+      "section": "tokenization",
+      "start": 3919.34,
+      "end": 4054.62,
+      "lecture_material": "Subword/byte BPE and inference segmentation",
+      "research_extension": "Character BPE within-word algorithm/unknown-character qualification (SennrichPDF3–4; QwenPDF3 byte-level identification)",
+      "teaching_construction": "Ordered concatenating merges preserve original bytes; ababa/aaa segmentation and arbitrary-byte reconstruction",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Character BPE within-word algorithm/unknown-character qualification",
+          "provenance": "SennrichPDF3–4; QwenPDF3 byte-level identification"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Ordered concatenating merges preserve original bytes",
+          "provenance": "original induction"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "ababa/aaa segmentation and arbitrary-byte reconstruction",
+          "provenance": "original program; no production-tokenizer replica"
+        }
+      ]
+    },
+    {
+      "section": "systems",
+      "start": 4054.62,
+      "end": 4386.72,
+      "lecture_material": "Weight/training memory, precision, parallelism and memory-efficient computation",
+      "research_extension": "FlashAttention tiling/recomputation mechanism (FlashPDF1–4; no transferred speedup)",
+      "teaching_construction": "Raw weight/state/KV units and ideal memory/compute bound; Global token-weighted gradients and contracted/output partition identities",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "evidence_class": "engineering check",
+          "claim": "Raw weight/state/KV units and ideal memory/compute bound",
+          "provenance": "original stipulated engineering model; no performance benchmark"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Global token-weighted gradients and contracted/output partition identities",
+          "provenance": "original algebra with fixed counts and semantic axes"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "FlashAttention tiling/recomputation mechanism",
+          "provenance": "FlashPDF1–4; no transferred speedup"
+        }
+      ]
+    },
+    {
+      "section": "ecosystem",
+      "start": 4386.72,
+      "end": 4779.89,
+      "lecture_material": "Dated industrial/model access, agents/multimodal/research topics and recap",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Model access/disclosure/behavior distinctions and agent interaction domain",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Model access/disclosure/behavior distinctions and agent interaction domain",
+          "provenance": "recording dated taxonomy; original bounded synthesis"
+        }
+      ]
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original-only support section; no recording span assigned.",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Finite validated API shapes/types/budgets/effects and censoring semantics",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Finite validated API shapes/types/budgets/effects and censoring semantics",
+          "provenance": "original program"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Actually executed report, exact mass/decoding and bounded floating computations",
+          "provenance": "actual chapter program and separately designed author references"
+        }
+      ]
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original-only support section; no recording span assigned.",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "Stopping/KL/cache/byte preservation and surrogate reasoning; Six finite numerical/counterexample calculations",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Stopping/KL/cache/byte preservation and surrogate reasoning",
+          "provenance": "original full mathematical solutions"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Six finite numerical/counterexample calculations",
+          "provenance": "original worked solutions; source-method claims remain separately cited"
+        }
+      ]
+    },
+    {
+      "section": "references",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original-only support section; no recording span assigned.",
+      "research_extension": "No separate research claim beyond specified claim rows.",
+      "teaching_construction": "",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Exact versions and claim-page scope limits",
+          "provenance": "actual retained source receipts; no source-wide replication"
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Stanford CS221, Ken Liu, Introduction to Language Models, November 17, 2025, pinned official slide deck",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/language_models.pdf",
+      "version": "pinned official deck",
+      "supports": "representation, chain rule, n-grams, shifted targets, task conditioning, architecture, pre/post-training, tokenization, systems, and dated ecosystem overview. The chapter corrects illustrative ID/normalization and unit discrepancies; its program is original."
+    },
+    {
+      "title": "The Llama 3 Herd of Models",
+      "url": "https://arxiv.org/abs/2407.21783v3",
+      "version": "v3",
+      "supports": ", retained v3 PDF pages 1–2 and 8: reported 405B/15.6T/3.8e25 scale, post-training recipe, measured iso-compute fits versus extrapolation. These are reported historical values."
+    },
+    {
+      "title": "Qwen3 Technical Report",
+      "url": "https://arxiv.org/abs/2505.09388v1",
+      "version": "v1",
+      "supports": ", PDF pages 1, 3–4: 36T training tokens, byte-level tokenizer identification, diverse/synthetic data and stages. Token-to-word/byte conversions here are separate assumptions."
+    },
+    {
+      "title": "Vaswani et al., Attention Is All You Need",
+      "url": "https://arxiv.org/abs/1706.03762v7",
+      "version": "v7",
+      "supports": ", PDF pages 3–5, §§3.1–3.4: shifted targets, causal masking, projected scaled dot-product attention, positionwise feed-forward sharing. Cache induction and numerical constructions are original extensions."
+    },
+    {
+      "title": "Devlin et al., BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+      "url": "https://arxiv.org/abs/1810.04805v2",
+      "version": "v2",
+      "supports": ", PDF page 4, §3.1: masked-position objective and its replacement scheme, distinct from autoregressive generation."
+    },
+    {
+      "title": "Radford et al., Language Models are Unsupervised Multitask Learners",
+      "url": "https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf",
+      "version": "official 2019 report",
+      "supports": ", 2019 report PDF pages 1–2, §2: task/input/output conditioning and bounded task-transfer experiments."
+    },
+    {
+      "title": "Brown et al., Language Models are Few-Shot Learners",
+      "url": "https://arxiv.org/abs/2005.14165v4",
+      "version": "v4",
+      "supports": ", PDF pages 1, 3, 6–7: definition and evaluation distinction between task fine-tuning and fixed-parameter context demonstrations; reported successes do not certify all tasks."
+    },
+    {
+      "title": "Kaplan et al., Scaling Laws for Neural Language Models",
+      "url": "https://arxiv.org/abs/2001.08361v1",
+      "version": "v1",
+      "supports": ", PDF pages 1–2: empirical loss-scaling scope. The chapter makes no unrestricted extrapolation or current leaderboard claim."
+    },
+    {
+      "title": "Hoffmann et al., Training Compute-Optimal Large Language Models",
+      "url": "https://arxiv.org/abs/2203.15556v1",
+      "version": "v1",
+      "supports": ", retained v1 PDF pages 1–2 and 5–6: fixed-compute tradeoff, measured curves, and proposed parametric loss form. The allocation derivation and unit-coefficient example are original conditional mathematics."
+    },
+    {
+      "title": "Ouyang et al., Training language models to follow instructions with human feedback",
+      "url": "https://arxiv.org/abs/2203.02155v1",
+      "version": "v1",
+      "supports": ", PDF pages 1–9, especially Figure 2 and §3.5: SFT/comparison/reward/PPO pipeline, labeler-population limits, logistic comparison fitting, reference log-ratio penalty, and residual mistakes. The finite tilt is an original idealized optimization, not the reported PPO implementation."
+    },
+    {
+      "title": "Sennrich, Haddow, and Birch, Neural Machine Translation of Rare Words with Subword Units",
+      "url": "https://aclanthology.org/P16-1162/",
+      "version": "ACL P16-1162",
+      "supports": ", PDF pages 3–4, §3.2, Algorithm 1, Figure 1, and footnote 3: character-based within-word BPE and coverage qualification. The byte program is a separate declared construction."
+    },
+    {
+      "title": "Dao et al., FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "url": "https://arxiv.org/abs/2205.14135v2",
+      "version": "v2",
+      "supports": ", PDF pages 1–4, §§2–3: memory hierarchy, arithmetic intensity, tiling and recomputation. No published speedup is transferred to this CPU program."
+    }
+  ],
+  "program": "programs/chapter17.py",
+  "implementation_evidence": {
+    "source_sha256": "8fcb1c1141d5e27774d622fd4918fedf5a902fd5839217c40998812f476bb9d7",
+    "stdout_sha256": "23293add5c3638c519b242c09c6bdbf38c3b9b60425ad65283e2b9bf8d4ffd34",
+    "status": "actual exact source/stdout embedded; author finite checks only"
+  },
+  "visual_scope": "All119official slide texts read; eight specified official visuals, four earlier selected primary visuals and three additional primary visuals viewed. Not human listening or full-paper figure verification."
+}

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="2cf63c537ad2c7fa0aa5350f648864ce93e2a95d62c207255a2ccdc1009b106c"><title>Search problems, reusable futures, and approximate planning · CS221: Artificial Intelligence: Principles and Techniques</title>
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="ed6e1ade5efd95ebdfb6732bc4d84de76c84fe18d536f631aa7fd2b1e51cfe31"><title>Search problems, reusable futures, and approximate planning · CS221: Artificial Intelligence: Principles and Techniques</title>
 <link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
 <script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
 <body><a class="skip" href="#main">Skip to content</a>
@@ -136,13 +136,15 @@
 <p>The travel factory accepts destination 1–200, an optional ticket count 0–20, and a Boolean consecutive-tram restriction. Exact solvers reject a start-reachable nonterminal cycle. Exhaustive traversal has an entered-prefix budget, default 100,000 and configurable up to 1,000,000. The beam supports width 1–10,000, horizon 0–1000, and a candidate-pool cap 200,000. Sampling supports 1–10,000 trials, horizon 0–1000, a signed 64-bit integer seed, and a declared action-work bound 100,000. These operational limits raise <code>ValueError</code>; they are not proofs that a mathematical graph is unsolvable.</p>
 <p>Successful routines return complete immutable <code>Solution</code> records containing states, actions, and exact total cost. When an algorithm returns no complete path, its solution component is <code>None</code>. Malformed input, unsupported numeric types, violated bounds, or an inapplicable DAG solver raise <code>ValueError</code>. A start-goal answer is a real solution with one state, no actions, and cost zero. Sampling also reports its number of completed trials, preserving the distinction between completion and best cost.</p>
 <p>The pass-at-k function returns an exact <code>Fraction</code> for integer pool counts. Its bounds are 1≤total≤100,000,0≤correct≤total, and 1≤k≤total. The safe JSON predicate accepts strings of at most 1000 characters. Malformed or rejected candidate content returns <code>False</code>; an unsupported argument type or exceeded string bound raises <code>ValueError</code>. It rejects duplicate object keys explicitly rather than allowing the parser's last key to silently replace an earlier answer.</p>
-<details><summary>Complete original standard-library program</summary><pre><code class="language-python" id="chapter-program">&quot;&quot;&quot;Original finite-search lab. Standard library only; no model, network or eval.
+<details><summary>Complete original standard-library program</summary><pre><code class="language-python" id="chapter-program">&#x27;Original finite-search lab. Standard library only; no &#x27; \
+    &#x27;model, network or eval.\n\nExact integer/Fraction costs; &#x27; \
+    &#x27;graphs are copied and frozen. Algorithms stop on\nfirst &#x27; \
+    &#x27;arrival at a goal. Failure returns None; malformed &#x27; \
+    &#x27;inputs, cycles passed\nto DAG solvers, or declared &#x27; \
+    &#x27;resource caps raise ValueError. Seeded sampling is\na &#x27; \
+    &#x27;reproducible finite trace, not evidence of statistical &#x27; \
+    &#x27;independence.\n&#x27;
 
-Exact integer/Fraction costs; graphs are copied and frozen. Algorithms stop on
-first arrival at a goal. Failure returns None; malformed inputs, cycles passed
-to DAG solvers, or declared resource caps raise ValueError. Seeded sampling is
-a reproducible finite trace, not evidence of statistical independence.
-&quot;&quot;&quot;
 from collections import deque
 from dataclasses import dataclass
 from fractions import Fraction
@@ -154,13 +156,15 @@ import json
 
 def integer(value, name, low, high):
     if type(value) is not int or not low &lt;= value &lt;= high:
-        raise ValueError(f&#x27;{name} must be an integer in [{low}, {high}]&#x27;)
+        raise ValueError(f&quot;{name} must be an integer in [{low}, {high}]&quot;)
     return value
 
 
 def name(value, label):
     if type(value) is not str or not value or len(value) &gt; 100:
-        raise ValueError(f&#x27;{label} must be a nonempty string of at most100 characters&#x27;)
+        raise ValueError(
+            f&quot;{label} must be a nonempty string of at most100 characters&quot;
+        )
     return value
 
 
@@ -172,49 +176,76 @@ class Edge:
 
 
 class Problem:
-    &quot;&quot;&quot;Validated snapshot: dict[str, sequence[Edge]], start, iterable of goals.&quot;&quot;&quot;
-    __slots__ = (&#x27;graph&#x27;, &#x27;start&#x27;, &#x27;goals&#x27;)
+    &quot;Validated snapshot: dict[str, sequence[Edge]], start, iterable of goals.&quot;
+
+    __slots__ = (&quot;graph&quot;, &quot;start&quot;, &quot;goals&quot;)
 
     def __init__(self, graph, start, goals):
         if type(graph) is not dict or not 1 &lt;= len(graph) &lt;= 10000:
-            raise ValueError(&#x27;graph must be a dict with1..10000 states&#x27;)
-        nodes = {name(s, &#x27;state&#x27;) for s in graph}
-        start = name(start, &#x27;start&#x27;)
-        if start not in nodes or type(goals) not in (tuple, list, set, frozenset):
-            raise ValueError(&#x27;start must be a state; goals must be a finite collection&#x27;)
-        frozen_goals = frozenset(name(g, &#x27;goal&#x27;) for g in goals)
+            raise ValueError(&quot;graph must be a dict with1..10000 states&quot;)
+        nodes = {name(s, &quot;state&quot;) for s in graph}
+        start = name(start, &quot;start&quot;)
+        if start not in nodes or type(goals) not in (
+            tuple,
+            list,
+            set,
+            frozenset,
+        ):
+            raise ValueError(
+                &quot;start must be a state; goals must be a finite collection&quot;
+            )
+        frozen_goals = frozenset(name(g, &quot;goal&quot;) for g in goals)
         if not frozen_goals &lt;= nodes:
-            raise ValueError(&#x27;goals must be graph states&#x27;)
+            raise ValueError(&quot;goals must be graph states&quot;)
         copied = {}
         count = 0
         for state, edges in graph.items():
             if type(edges) not in (tuple, list):
-                raise ValueError(&#x27;adjacency must be tuple or list&#x27;)
+                raise ValueError(&quot;adjacency must be tuple or list&quot;)
             actions = set()
             row = []
             for edge in edges:
                 if type(edge) is not Edge:
-                    raise ValueError(&#x27;adjacency entries must be Edge objects&#x27;)
-                action, target = name(edge.action, &#x27;action&#x27;), name(edge.target, &#x27;target&#x27;)
+                    raise ValueError(&quot;adjacency entries must be Edge objects&quot;)
+                action, target = (
+                    name(edge.action, &quot;action&quot;),
+                    name(edge.target, &quot;target&quot;),
+                )
                 if action in actions or target not in nodes:
-                    raise ValueError(&#x27;actions must be unique per state; targets must exist&#x27;)
+                    raise ValueError(
+                        (
+                            (
+                                &#x27;actions must be unique per state; &#x27;
+                                &#x27;targets must exist&#x27;
+                            )
+                        )
+                    )
                 if type(edge.cost) not in (int, Fraction):
-                    raise ValueError(&#x27;cost must be an integer or Fraction, excluding bool&#x27;)
+                    raise ValueError(
+                        &quot;cost must be an integer or Fraction, excluding bool&quot;
+                    )
                 cost = Fraction(edge.cost)
                 if abs(cost) &gt; 1000000 or cost.denominator &gt; 1000000:
-                    raise ValueError(&#x27;cost magnitude and denominator must be at most1000000&#x27;)
+                    raise ValueError(
+                        (
+                            (
+                                &#x27;cost magnitude and denominator &#x27;
+                                &#x27;must be at most1000000&#x27;
+                            )
+                        )
+                    )
                 row.append(Edge(action, target, cost))
                 actions.add(action)
                 count += 1
                 if count &gt; 100000:
-                    raise ValueError(&#x27;at most100000 edges supported&#x27;)
+                    raise ValueError(&quot;at most100000 edges supported&quot;)
             copied[state] = tuple(row)
-        object.__setattr__(self, &#x27;graph&#x27;, MappingProxyType(copied))
-        object.__setattr__(self, &#x27;start&#x27;, start)
-        object.__setattr__(self, &#x27;goals&#x27;, frozen_goals)
+        object.__setattr__(self, &quot;graph&quot;, MappingProxyType(copied))
+        object.__setattr__(self, &quot;start&quot;, start)
+        object.__setattr__(self, &quot;goals&quot;, frozen_goals)
 
     def __setattr__(self, key, value):
-        raise AttributeError(&#x27;Problem is immutable&#x27;)
+        raise AttributeError(&quot;Problem is immutable&quot;)
 
 
 @dataclass(frozen=True)
@@ -226,7 +257,7 @@ class Solution:
 
 def problem(value):
     if type(value) is not Problem:
-        raise ValueError(&#x27;a validated Problem is required&#x27;)
+        raise ValueError(&quot;a validated Problem is required&quot;)
     return value
 
 
@@ -235,14 +266,16 @@ def outgoing(p, state):
 
 
 def travel(n, tickets=None, forbid_consecutive=False):
-    integer(n, &#x27;n&#x27;, 1, 200)
+    integer(n, &quot;n&quot;, 1, 200)
     if tickets is not None:
-        integer(tickets, &#x27;tickets&#x27;, 0, 20)
+        integer(tickets, &quot;tickets&quot;, 0, 20)
     if type(forbid_consecutive) is not bool:
-        raise ValueError(&#x27;forbid_consecutive must be bool&#x27;)
+        raise ValueError(&quot;forbid_consecutive must be bool&quot;)
+
     def key(state):
         i, k, last = state
-        return f&#x27;{i}|{k if k is not None else &quot;u&quot;}|{int(last)}&#x27;
+        return f&quot;{i}|{k if k is not None else &#x27;u&#x27;}|{int(last)}&quot;
+
     start = (1, tickets, False)
     pending, seen, graph, goals = deque([start]), {start}, {}, []
     while pending:
@@ -252,10 +285,19 @@ def travel(n, tickets=None, forbid_consecutive=False):
         if i == n:
             goals.append(key(state))
         else:
-            successors.append((&#x27;walk&#x27;, (i + 1, k, False), 1))
+            successors.append((&quot;walk&quot;, (i + 1, k, False), 1))
             if 2 * i &lt;= n and (k is None or k &gt; 0) and not last:
-                successors.append((&#x27;tram&#x27;, (2 * i, None if k is None else k - 1,
-                                            forbid_consecutive), 2))
+                successors.append(
+                    (
+                        (&quot;tram&quot;),
+                        (
+                            2 * i,
+                            None if k is None else k - 1,
+                            forbid_consecutive,
+                        ),
+                        2,
+                    )
+                )
         graph[key(state)] = [Edge(a, key(t), c) for a, t, c in successors]
         for _, target, _ in successors:
             if target not in seen:
@@ -265,7 +307,7 @@ def travel(n, tickets=None, forbid_consecutive=False):
 
 
 def dag_order(p):
-    &quot;&quot;&quot;Topological order of start-reachable states, goals treated as absorbing.&quot;&quot;&quot;
+    &quot;Topological order of start-reachable states, goals treated as absorbing.&quot;
     problem(p)
     reachable, discovered, stack = {p.start}, [], [p.start]
     while stack:
@@ -289,7 +331,9 @@ def dag_order(p):
             if indegree[edge.target] == 0:
                 ready.append(edge.target)
     if len(order) != len(reachable):
-        raise ValueError(&#x27;DAG solver requires acyclic start-reachable nonterminal graph&#x27;)
+        raise ValueError(
+            &quot;DAG solver requires acyclic start-reachable nonterminal graph&quot;
+        )
     return order
 
 
@@ -297,7 +341,9 @@ def exact_dag(p):
     order = dag_order(p)
     values, choices = {}, {}
     for state in reversed(order):
-        best, choice = (Fraction(0), None) if state in p.goals else (None, None)
+        best, choice = (
+            (Fraction(0), None) if state in p.goals else (None, None)
+        )
         for edge in outgoing(p, state):
             suffix = values[edge.target]
             if suffix is not None:
@@ -318,29 +364,34 @@ def exact_dag(p):
 
 def exhaustive(p, max_visits=100000):
     dag_order(p)
-    integer(max_visits, &#x27;max_visits&#x27;, 1, 1000000)
+    integer(max_visits, &quot;max_visits&quot;, 1, 1000000)
     stack = [Solution((p.start,), (), Fraction(0))]
     best, visits = None, 0
     while stack:
         path = stack.pop()
         visits += 1
         if visits &gt; max_visits:
-            raise ValueError(&#x27;exhaustive visit budget exceeded&#x27;)
+            raise ValueError(&quot;exhaustive visit budget exceeded&quot;)
         state = path.states[-1]
         if state in p.goals:
             if best is None or path.cost &lt; best.cost:
                 best = path
         else:
             for edge in reversed(outgoing(p, state)):
-                stack.append(Solution(path.states + (edge.target,),
-                                      path.actions + (edge.action,), path.cost + edge.cost))
+                stack.append(
+                    Solution(
+                        path.states + (edge.target,),
+                        path.actions + (edge.action,),
+                        path.cost + edge.cost,
+                    )
+                )
     return best, visits
 
 
 def beam(p, width, horizon):
     problem(p)
-    integer(width, &#x27;width&#x27;, 1, 10000)
-    integer(horizon, &#x27;horizon&#x27;, 0, 1000)
+    integer(width, &quot;width&quot;, 1, 10000)
+    integer(horizon, &quot;horizon&quot;, 0, 1000)
     candidates = [Solution((p.start,), (), Fraction(0))]
     for _ in range(horizon):
         pool = []
@@ -349,12 +400,20 @@ def beam(p, width, horizon):
             if state in p.goals:
                 pool.append(path)
             else:
-                pool.extend(Solution(path.states + (e.target,), path.actions + (e.action,),
-                                     path.cost + e.cost) for e in outgoing(p, state))
+                pool.extend(
+                    Solution(
+                        path.states + (e.target,),
+                        path.actions + (e.action,),
+                        path.cost + e.cost,
+                    )
+                    for e in outgoing(p, state)
+                )
             if len(pool) &gt; 200000:
-                raise ValueError(&#x27;beam candidate budget exceeded&#x27;)
+                raise ValueError(&quot;beam candidate budget exceeded&quot;)
         candidates = sorted(pool, key=lambda path: path.cost)[:width]
-        if not candidates or all(path.states[-1] in p.goals for path in candidates):
+        if not candidates or all(
+            path.states[-1] in p.goals for path in candidates
+        ):
             break
     complete = [path for path in candidates if path.states[-1] in p.goals]
     return min(complete, key=lambda path: path.cost, default=None)
@@ -362,11 +421,11 @@ def beam(p, width, horizon):
 
 def best_sample(p, trials, horizon, seed=0):
     problem(p)
-    integer(trials, &#x27;trials&#x27;, 1, 10000)
-    integer(horizon, &#x27;horizon&#x27;, 0, 1000)
-    integer(seed, &#x27;seed&#x27;, -(2 ** 63), 2 ** 63 - 1)
+    integer(trials, &quot;trials&quot;, 1, 10000)
+    integer(horizon, &quot;horizon&quot;, 0, 1000)
+    integer(seed, &quot;seed&quot;, -(2**63), 2**63 - 1)
     if trials * max(horizon, 1) &gt; 100000:
-        raise ValueError(&#x27;sampling action budget exceeded&#x27;)
+        raise ValueError(&quot;sampling action budget exceeded&quot;)
     rng, best, completed = Random(seed), None, 0
     for _ in range(trials):
         states, actions, cost, state = [p.start], [], Fraction(0), p.start
@@ -390,39 +449,72 @@ def best_sample(p, trials, horizon, seed=0):
 
 
 def pass_at_k(total, correct, k):
-    integer(total, &#x27;total&#x27;, 1, 100000)
-    integer(correct, &#x27;correct&#x27;, 0, total)
-    integer(k, &#x27;k&#x27;, 1, total)
+    integer(total, &quot;total&quot;, 1, 100000)
+    integer(correct, &quot;correct&quot;, 0, total)
+    integer(k, &quot;k&quot;, 1, total)
     return 1 - Fraction(comb(total - correct, k), comb(total, k))
 
 
 def safe_answer(text):
-    &quot;&quot;&quot;Hard verifier for the stipulated answer to3+7*3, not general reasoning.&quot;&quot;&quot;
+    &quot;Hard verifier for the stipulated answer to3+7*3, not general reasoning.&quot;
     if type(text) is not str or len(text) &gt; 1000:
-        raise ValueError(&#x27;candidate must be a string of at most1000 characters&#x27;)
+        raise ValueError(
+            &quot;candidate must be a string of at most1000 characters&quot;
+        )
+
     def pairs(items):
         result = {}
         for key, value in items:
             if key in result:
-                raise ValueError(&#x27;duplicate JSON key&#x27;)
+                raise ValueError(&quot;duplicate JSON key&quot;)
             result[key] = value
         return result
+
     try:
-        value = json.loads(text, object_pairs_hook=pairs,
-                           parse_constant=lambda token: (_ for _ in ()).throw(ValueError(token)))
+        value = json.loads(
+            text,
+            object_pairs_hook=pairs,
+            parse_constant=lambda token: (_ for _ in ()).throw(
+                ValueError(token)
+            ),
+        )
     except (ValueError, RecursionError):
         return False
-    return type(value) is dict and set(value) == {&#x27;answer&#x27;} and type(value[&#x27;answer&#x27;]) is int and value[&#x27;answer&#x27;] == 24
+    return (
+        type(value) is dict
+        and set(value) == {&quot;answer&quot;}
+        and type(value[&quot;answer&quot;]) is int
+        and value[&quot;answer&quot;] == 24
+    )
 
 
 def fixture(nonmonotonic=False):
     if not nonmonotonic:
-        rows = {&#x27;s&#x27;: [(&#x27;a&#x27;, 1), (&#x27;b&#x27;, 2)], &#x27;a&#x27;: [(&#x27;g&#x27;, 100)], &#x27;b&#x27;: [(&#x27;g&#x27;, 0)], &#x27;g&#x27;: []}
+        rows = {
+            &quot;s&quot;: [(&quot;a&quot;, 1), (&quot;b&quot;, 2)],
+            &quot;a&quot;: [(&quot;g&quot;, 100)],
+            &quot;b&quot;: [(&quot;g&quot;, 0)],
+            &quot;g&quot;: [],
+        }
     else:
-        rows = {&#x27;s&#x27;: [(&#x27;a&#x27;, 1), (&#x27;b&#x27;, 2)], &#x27;a&#x27;: [(&#x27;a1&#x27;, 4), (&#x27;a2&#x27;, Fraction(9, 2))],
-                &#x27;b&#x27;: [(&#x27;b1&#x27;, 0), (&#x27;b2&#x27;, 0)], &#x27;a1&#x27;: [(&#x27;g&#x27;, 0)], &#x27;a2&#x27;: [(&#x27;g&#x27;, 0)],
-                &#x27;b1&#x27;: [(&#x27;g&#x27;, 100)], &#x27;b2&#x27;: [(&#x27;g&#x27;, 100)], &#x27;g&#x27;: []}
-    return Problem({s: [Edge(f&#x27;to_{t}&#x27;, t, c) for t, c in edges] for s, edges in rows.items()}, &#x27;s&#x27;, [&#x27;g&#x27;])
+        rows = {
+            (&quot;s&quot;): [((&quot;a&quot;), 1), ((&quot;b&quot;), 2)],
+            (&quot;a&quot;): [((&quot;a1&quot;), 4), ((&quot;a2&quot;), Fraction(9, 2))],
+            (&quot;b&quot;): [((&quot;b1&quot;), 0), ((&quot;b2&quot;), 0)],
+            (&quot;a1&quot;): [((&quot;g&quot;), 0)],
+            (&quot;a2&quot;): [((&quot;g&quot;), 0)],
+            &quot;b1&quot;: [(&quot;g&quot;, 100)],
+            &quot;b2&quot;: [(&quot;g&quot;, 100)],
+            &quot;g&quot;: [],
+        }
+    return Problem(
+        {
+            s: [Edge(f&quot;to_{t}&quot;, t, c) for t, c in edges]
+            for s, edges in rows.items()
+        },
+        &quot;s&quot;,
+        [&quot;g&quot;],
+    )
 
 
 def report():
@@ -432,22 +524,47 @@ def report():
         exact, values = exact_dag(p)
         full, visits = exhaustive(p)
         assert exact.cost == full.cost
-        travel_rows[str(n)] = {&#x27;cost&#x27;: int(exact.cost), &#x27;visits&#x27;: visits, &#x27;states&#x27;: len(values),
-                               &#x27;route&#x27;: [s.split(&#x27;|&#x27;)[0] for s in exact.states]}
+        travel_rows[str(n)] = {
+            (&quot;cost&quot;): int(exact.cost),
+            (&quot;visits&quot;): visits,
+            (&quot;states&quot;): len(values),
+            (&quot;route&quot;): [s.split((&quot;|&quot;))[0] for s in exact.states],
+        }
     sample, completed = best_sample(travel(17), 100, 20, 7)
     constrained, _ = exact_dag(travel(17, 2, True))
-    widths = {&#x27;greedy_failure&#x27;: [int(beam(fixture(), b, 2).cost) for b in (1, 2)],
-              &#x27;nonmonotonic&#x27;: [int(beam(fixture(True), b, 3).cost) for b in (1, 2)]}
-    return {&#x27;travel&#x27;: travel_rows, &#x27;two_tickets_no_consecutive_cost&#x27;: int(constrained.cost),
-            &#x27;sampling_seed7&#x27;: {&#x27;best_cost&#x27;: int(sample.cost), &#x27;complete_trials&#x27;: completed},
-            &#x27;beam_width1_width2&#x27;: widths, &#x27;rare_path_miss_1000&#x27;: round(exp(1000 * log1p(-2 ** -20)), 12),
-            &#x27;pool_pass_at_k_N5_C2&#x27;: [str(pass_at_k(5, 2, k)) for k in range(1, 6)],
-            &#x27;safe_answer&#x27;: [safe_answer(t) for t in (&#x27;{&quot;answer&quot;:24}&#x27;, &#x27;{&quot;answer&quot;:23}&#x27;, &#x27;{&quot;answer&quot;:true}&#x27;,
-                                                       &#x27;{&quot;answer&quot;:24,&quot;answer&quot;:23}&#x27;, &#x27;__import__(&quot;os&quot;)&#x27;)],
-            &#x27;finite_bonus_scores&#x27;: {&#x27;valid&#x27;: 200 - 100, &#x27;invalid&#x27;: 1}}
+    widths = {
+        (&quot;greedy_failure&quot;): [int(beam(fixture(), b, 2).cost) for b in (1, 2)],
+        (&quot;nonmonotonic&quot;): [
+            int(beam(fixture(True), b, 3).cost) for b in (1, 2)
+        ],
+    }
+    return {
+        (&quot;travel&quot;): travel_rows,
+        (&quot;two_tickets_no_consecutive_cost&quot;): int(constrained.cost),
+        (&quot;sampling_seed7&quot;): {
+            (&quot;best_cost&quot;): int(sample.cost),
+            (&quot;complete_trials&quot;): completed,
+        },
+        (&quot;beam_width1_width2&quot;): widths,
+        (&quot;rare_path_miss_1000&quot;): round(exp(1000 * log1p(-(2**-20))), 12),
+        (&quot;pool_pass_at_k_N5_C2&quot;): [
+            str(pass_at_k(5, 2, k)) for k in range(1, 6)
+        ],
+        (&quot;safe_answer&quot;): [
+            safe_answer(t)
+            for t in (
+                (&#x27;{&quot;answer&quot;:24}&#x27;),
+                (&#x27;{&quot;answer&quot;:23}&#x27;),
+                (&#x27;{&quot;answer&quot;:true}&#x27;),
+                (&#x27;{&quot;answer&quot;:24,&quot;answer&quot;:23}&#x27;),
+                (&#x27;__import__(&quot;os&quot;)&#x27;),
+            )
+        ],
+        &quot;finite_bonus_scores&quot;: {&quot;valid&quot;: 200 - 100, &quot;invalid&quot;: 1},
+    }
 
 
-if __name__ == &#x27;__main__&#x27;:
+if __name__ == &quot;__main__&quot;:
     print(json.dumps(report(), indent=2))
 </code></pre></details>
 <p>The actual default stdout is:</p><pre><code id="chapter-stdout">{

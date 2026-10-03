@@ -1,9 +1,10 @@
-"""Original finite MDP examples for Chapter 7; Python standard library only.
+'Original finite MDP examples for Chapter 7; Python ' \
+    'standard library only.\n\nExact rational probabilities; ' \
+    'binary64 rewards/iterates; bounded finite inputs.\n' \
+    'Invalid inputs raise ValueError. Exhausted ' \
+    'iteration/rollout budgets raise\nRuntimeError, never a ' \
+    'silently completed episode. No file/network effects.\n'
 
-Exact rational probabilities; binary64 rewards/iterates; bounded finite inputs.
-Invalid inputs raise ValueError. Exhausted iteration/rollout budgets raise
-RuntimeError, never a silently completed episode. No file/network effects.
-"""
 from dataclasses import dataclass
 from decimal import Decimal, localcontext
 from fractions import Fraction
@@ -33,7 +34,9 @@ def probability(value):
     if type(value) is int:
         value = Fraction(value)
     if not isinstance(value, Fraction) or not 0 < value <= 1:
-        raise ValueError("outcome probabilities must be positive int/Fraction")
+        raise ValueError(
+            ("outcome probabilities must be positive int/Fraction")
+        )
     if value.denominator > 10**12:
         raise ValueError("probability denominator exceeds 10**12")
     return value
@@ -65,17 +68,29 @@ class Model:
                 raise ValueError("each row must contain state and actions")
             state, actions = row
             if not isinstance(state, str) or not state or state in names:
-                raise ValueError("state names must be distinct nonempty strings")
+                raise ValueError(
+                    "state names must be distinct nonempty strings"
+                )
             names.add(state)
             if not isinstance(actions, (tuple, list)) or len(actions) > 16:
-                raise ValueError("actions must be a tuple/list of at most 16 entries")
+                raise ValueError(
+                    "actions must be a tuple/list of at most 16 entries"
+                )
             fixed_actions, action_names = [], set()
             for entry in actions:
                 if not isinstance(entry, (tuple, list)) or len(entry) != 2:
-                    raise ValueError("action entries must contain name and outcomes")
+                    raise ValueError(
+                        "action entries must contain name and outcomes"
+                    )
                 action, outcomes = entry
-                if not isinstance(action, str) or not action or action in action_names:
-                    raise ValueError("action names must be distinct nonempty strings")
+                if (
+                    not isinstance(action, str)
+                    or not action
+                    or action in action_names
+                ):
+                    raise ValueError(
+                        "action names must be distinct nonempty strings"
+                    )
                 action_names.add(action)
                 if not isinstance(outcomes, (tuple, list)):
                     raise ValueError("outcomes must be a tuple/list")
@@ -90,13 +105,17 @@ class Model:
                         raise ValueError("successor must be a state name")
                     fixed.append(Outcome(prob, reward, outcome.successor))
                 if sum((o.probability for o in fixed), Fraction()) != 1:
-                    raise ValueError("each action's exact probability mass must be one")
+                    raise ValueError(
+                        "each action's exact probability mass must be one"
+                    )
                 fixed_actions.append((action, tuple(fixed)))
             canonical.append((state, tuple(fixed_actions)))
         for _, actions in canonical:
             for _, outcomes in actions:
                 if any(o.successor not in names for o in outcomes):
-                    raise ValueError("every successor must be a declared state")
+                    raise ValueError(
+                        "every successor must be a declared state"
+                    )
         object.__setattr__(self, "rows", tuple(canonical))
         object.__setattr__(self, "discount", gamma)
 
@@ -119,8 +138,10 @@ def policy_for(model, policy):
     required = {s for s in table if table[s]}
     if not isinstance(policy, dict) or set(policy) != required:
         raise ValueError("policy must contain exactly the nonterminal states")
-    if any(not isinstance(policy[s], str) or policy[s] not in table[s]
-           for s in required):
+    if any(
+        not isinstance(policy[s], str) or policy[s] not in table[s]
+        for s in required
+    ):
         raise ValueError("policy selects an inadmissible action")
     return dict(policy)
 
@@ -128,12 +149,17 @@ def policy_for(model, policy):
 def action_backup(model, state, action, values):
     fixed = values_for(model, values)
     table = model.table()
-    if (not isinstance(state, str) or not isinstance(action, str)
-            or state not in table or action not in table[state]):
+    if (
+        not isinstance(state, str)
+        or not isinstance(action, str)
+        or state not in table
+        or action not in table[state]
+    ):
         raise ValueError("unknown state or inadmissible action")
-    terms = [float(o.probability) *
-             (o.reward + model.discount * fixed[o.successor])
-             for o in table[state][action]]
+    terms = [
+        float(o.probability) * (o.reward + model.discount * fixed[o.successor])
+        for o in table[state][action]
+    ]
     return finite_real(fsum(terms), "backup")
 
 
@@ -145,10 +171,14 @@ def sweep(model, values, policy=None):
         if not actions:
             updated[state] = 0.0
             continue
-        pairs = [(a, action_backup(model, state, a, fixed)) for a, _ in actions]
+        pairs = [
+            (a, action_backup(model, state, a, fixed)) for a, _ in actions
+        ]
         action, score = max(pairs, key=lambda pair: pair[1])
         greedy[state] = action  # exact float ties retain declaration order
-        updated[state] = score if selected is None else dict(pairs)[selected[state]]
+        updated[state] = (
+            score if selected is None else dict(pairs)[selected[state]]
+        )
     return updated, greedy
 
 
@@ -176,9 +206,16 @@ def iterate(model, policy=None, tolerance=1e-10, max_iterations=10000):
         residual = max(abs(checked[s] - values[s]) for s in values)
         bound = finite_real(residual / (1 - model.discount), "error bound")
         if bound <= tolerance:
-            return Iteration(tuple(values.items()), tuple(greedy.items()),
-                             iteration, residual, bound)
-    raise RuntimeError("iteration budget exhausted before numerical residual test")
+            return Iteration(
+                tuple(values.items()),
+                tuple(greedy.items()),
+                iteration,
+                residual,
+                bound,
+            )
+    raise RuntimeError(
+        "iteration budget exhausted before numerical residual test"
+    )
 
 
 def tram_model(n=10, failure=Fraction(2, 5), discount=1):
@@ -209,7 +246,9 @@ def exact_tram(n=10, failure=Fraction(2, 5), mode="optimal"):
     for state in range(n - 1, 0, -1):
         choices = [("walk", -1 + values[state + 1])]
         if 2 * state <= n:
-            choices.append(("tram", -Fraction(2) / (1 - failure) + values[2 * state]))
+            choices.append(
+                ("tram", -Fraction(2) / (1 - failure) + values[2 * state])
+            )
         if mode == "walk":
             action, value = choices[0]
         elif mode == "tram":
@@ -221,17 +260,38 @@ def exact_tram(n=10, failure=Fraction(2, 5), mode="optimal"):
 
 
 def dice_model(discount=1):
-    return Model((("in", (("quit", (Outcome(Fraction(1), 10, "end"),)),
-                          ("stay", (Outcome(Fraction(1, 3), 4, "end"),
-                                    Outcome(Fraction(2, 3), 4, "in"))))),
-                  ("end", ())), discount)
+    return Model(
+        (
+            (
+                "in",
+                (
+                    ("quit", (Outcome(Fraction(1), 10, "end"),)),
+                    (
+                        "stay",
+                        (
+                            Outcome(Fraction(1, 3), 4, "end"),
+                            Outcome(Fraction(2, 3), 4, "in"),
+                        ),
+                    ),
+                ),
+            ),
+            ("end", ()),
+        ),
+        discount,
+    )
 
 
 def rollout(model, policy, start, rng, max_steps=10000):
     selected = policy_for(model, policy)
     table = model.table()
-    if not isinstance(start, str) or start not in table or not isinstance(rng, Random):
-        raise ValueError("start must be declared and rng must be random.Random")
+    if (
+        not isinstance(start, str)
+        or start not in table
+        or not isinstance(rng, Random)
+    ):
+        raise ValueError(
+            "start must be declared and rng must be random.Random"
+        )
     count(max_steps, "max_steps", 1, 100000)
     state, weight, rewards = start, 1.0, []
     for _ in range(max_steps):
@@ -263,37 +323,51 @@ def mean_and_se(returns):
     mean = float(exact_mean)
     if exact_mean and mean == 0:
         raise ValueError("nonzero mean is below binary64 representability")
-    squares = sum(((x - exact_mean)**2 for x in exact), Fraction())
+    squares = sum(((x - exact_mean) ** 2 for x in exact), Fraction())
     exact_se_squared = squares / (len(xs) * (len(xs) - 1))
     with localcontext() as context:
         context.prec = 80
-        decimal_variance = (Decimal(exact_se_squared.numerator) /
-                            Decimal(exact_se_squared.denominator))
+        decimal_variance = Decimal(exact_se_squared.numerator) / Decimal(
+            exact_se_squared.denominator
+        )
         se = float(decimal_variance.sqrt())
     if exact_se_squared and se == 0:
-        raise ValueError("nonzero standard error is below binary64 representability")
+        raise ValueError(
+            "nonzero standard error is below binary64 representability"
+        )
     return mean, se
 
 
 def main():
     tram = tram_model()
     initial = {str(i): (-100.0 if i < 10 else 0.0) for i in range(1, 11)}
-    print(f"first tram backup at state 5: {action_backup(tram, '5', 'tram', initial):.6f}")
+    print(
+        f"first tram backup at state 5: {
+            action_backup(tram, '5', 'tram', initial):.6f}"
+    )
     for mode in ("walk", "tram", "optimal"):
         values, _ = exact_tram(mode=mode)
         print(f"{mode} start value: {values[1]} ({float(values[1]):.6f})")
     values, policy = exact_tram()
-    print("optimal actions:", " ".join(f"{s}:{policy[s]}" for s in sorted(policy)))
+    print(
+        "optimal actions:",
+        " ".join(f"{s}:{policy[s]}" for s in sorted(policy)),
+    )
     for gamma in (0, 0.5, 0.9, 1):
         stay = 4 / (1 - 2 * gamma / 3)
         print(f"dice discount {gamma}: stay={stay:.6f}, quit=10.000000")
     result = iterate(dice_model(0.5), {"in": "stay"})
-    print(f"discounted evaluation: V={dict(result.values)['in']:.9f}, bound={result.error_bound:.3e}")
+    print(
+        f"discounted evaluation: V={dict(result.values)['in']:.9f}, bound={
+            result.error_bound:.3e}"
+    )
     rng = Random(7)
     fixed_policy = {str(s): a for s, a in policy.items()}
     returns = [rollout(tram, fixed_policy, "1", rng) for _ in range(2000)]
     mean, se = mean_and_se(returns)
-    print(f"2000 original optimal rollouts: mean={mean:.6f}, sample SE={se:.6f}")
+    print(
+        f"2000 original optimal rollouts: mean={mean:.6f}, sample SE={se:.6f}"
+    )
     print(f"analytic optimal return SD: {sqrt(40 / 9):.6f}")
 
 

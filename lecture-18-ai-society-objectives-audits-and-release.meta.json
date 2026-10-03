@@ -1,0 +1,406 @@
+{
+  "title": "AI and society: choosing objectives, auditing evidence and governing a release",
+  "number": 18,
+  "video_id": "071zJXhvNfM",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "Round1 B1 author repairs applied; independent round2 pending",
+  "sections": [
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "teaching_construction": "Which students would the service actually help?",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Stipulated university service, configuration, groups and context",
+          "origin": "Original running case"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null
+    },
+    {
+      "section": "responsibility",
+      "start": 5.2,
+      "end": 240.16,
+      "lecture_material": "technologist responsibility",
+      "teaching_construction": "1. Design choices allocate power and responsibility",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Technical choices allocate responsibility and affect who can act",
+          "origin": "Recording topic with original service application"
+        }
+      ],
+      "evidence_class": "speaker judgment",
+      "research_extension": null
+    },
+    {
+      "section": "principles",
+      "start": 240.16,
+      "end": 385.01,
+      "lecture_material": "ethical principles",
+      "teaching_construction": "2. Ethical principles constrain how an objective is obtained",
+      "claim_provenance": [
+        {
+          "class": "external finding",
+          "claim": "Belmont principles and dated Tuskegee chronology",
+          "origin": "Official HHS and CDC pages checked October 3, 2026"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Ethical constraints cannot be inferred from a supplied performance objective",
+          "origin": "Original service analysis"
+        }
+      ],
+      "evidence_class": "external finding",
+      "research_extension": "Official HHS and CDC pages checked October 3, 2026"
+    },
+    {
+      "section": "dual-use",
+      "start": 385.2,
+      "end": 528.43,
+      "lecture_material": "dual use",
+      "teaching_construction": "3. Dual use changes the question from capability to context",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Use context changes consequences of a capability",
+          "origin": "Recording distinction with original case"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null
+    },
+    {
+      "section": "intent-impact",
+      "start": 528.43,
+      "end": 1009.3,
+      "lecture_material": "benefits misuse and accidents",
+      "teaching_construction": "4. Intent and impact describe different failure mechanisms",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Intent and impact distinguish benefits, misuse and accidents",
+          "origin": "Recording taxonomy with original case boundaries"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null
+    },
+    {
+      "section": "ecosystem",
+      "start": 1009.55,
+      "end": 1240.48,
+      "lecture_material": "ecosystem",
+      "teaching_construction": "5. Follow the dependencies upstream and the consequences downstream",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Upstream dependencies and downstream actors affect a release decision",
+          "origin": "Recording ecosystem distinction with original service map"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null
+    },
+    {
+      "section": "group-audit",
+      "start": 1240.48,
+      "end": 1710.48,
+      "lecture_material": "inequality and subgroup audit",
+      "teaching_construction": "6. Average performance can hide the population that needs a repair",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Finite group mixture risk is bounded by the worst group and a simplex vertex attains it",
+          "origin": "Original explicit convex-mixture proof; Group DRO specified-group model"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact two-group reversal, prevalence threshold and AUC/threshold counterexample",
+          "origin": "Original rational fixtures"
+        },
+        {
+          "class": "external finding",
+          "claim": "Historical subgroup audit tasks and chest-drain AUC results",
+          "origin": "Gender Shades PDF1–2/7; hidden stratification PDF1–4"
+        }
+      ],
+      "evidence_class": "theorem",
+      "research_extension": "Gender Shades PDF1–2/7; hidden stratification PDF1–4"
+    },
+    {
+      "section": "alignment",
+      "start": 1710.48,
+      "end": 2158.54,
+      "lecture_material": "alignment and oversight",
+      "teaching_construction": "7. Alignment requires a specification, a value choice and credible oversight",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Proxy specification, stakeholder aggregation and oversight are distinct choices",
+          "origin": "Recording topic with original finite action model"
+        },
+        {
+          "class": "theorem",
+          "claim": "Uniform proxy error bounds selected-action regret by twice that error",
+          "origin": "Original finite proof and tight tie fixture"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Proxy regret, stakeholder weighting, rescaling and oversight premise counterexamples",
+          "origin": "Original exact teaching constructions"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null
+    },
+    {
+      "section": "rights",
+      "start": 2158.54,
+      "end": 2745.84,
+      "lecture_material": "copyright frameworks",
+      "teaching_construction": "8. Data provenance and permissions require questions beyond model accuracy",
+      "claim_provenance": [
+        {
+          "class": "external finding",
+          "claim": "Limited U.S. expression, fair-use factors, post-1977 terms and CC conditions",
+          "origin": "Official Title17 §§102/103/107/302 and CC overview checked October3,2026"
+        },
+        {
+          "class": "definition",
+          "claim": "Access, permissions and provenance are separate ledger fields",
+          "origin": "Original educational ledger; no legal verdict"
+        }
+      ],
+      "evidence_class": "external finding",
+      "research_extension": "Official Title17 §§102/103/107/302 and CC overview checked October3,2026"
+    },
+    {
+      "section": "memorization",
+      "start": 2746.45,
+      "end": 3223.28,
+      "lecture_material": "training memorization and legal boundaries",
+      "teaching_construction": "9. Token probability, extraction and legal consequence are distinct claims",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Conditional trajectory probabilities multiply; independent repeated attempts have the stated complement formula",
+          "origin": "Original probability derivations under explicit assumptions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Long-trajectory and correlated-attempt counterexamples",
+          "origin": "Original rational calculations"
+        },
+        {
+          "class": "external finding",
+          "claim": "Versioned model/work extraction protocols and scope",
+          "origin": "Cooper et al.2505.12546v1 PDF1–4; no unverified whole-book quantity"
+        }
+      ],
+      "evidence_class": "theorem",
+      "research_extension": "Cooper et al.2505.12546v1 PDF1–4; no unverified whole-book quantity"
+    },
+    {
+      "section": "transparency",
+      "start": 3223.41,
+      "end": 3546.14,
+      "lecture_material": "transparency",
+      "teaching_construction": "10. Disclosure permits scrutiny without certifying the disclosed system",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "A Boolean disclosure fraction measures supplied disclosure flags",
+          "origin": "Original finite model"
+        },
+        {
+          "class": "external finding",
+          "claim": "Dated FMTI indicator and developer comparisons with changed collection methods",
+          "origin": "2407.12929 PDF1–2; no causal or safety certification"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": "2407.12929 PDF1–2; no causal or safety certification"
+    },
+    {
+      "section": "release",
+      "start": 3546.14,
+      "end": 4077.09,
+      "lecture_material": "openness and marginal risk",
+      "teaching_construction": "11. Openness is a vector of access decisions; risk needs an alternative",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Release access is a vector; marginal harm compares specified counterfactuals",
+          "origin": "Recording distinctions and original finite model"
+        },
+        {
+          "class": "external finding",
+          "claim": "Attributed open-model risk framework and uncertainty",
+          "origin": "2403.07918v1 PDF1–2/6"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Probability/severity and defense examples show that lower probability need not mean lower expected harm",
+          "origin": "Original exact counterfactual calculations"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": "2403.07918v1 PDF1–2/6"
+    },
+    {
+      "section": "synthesis",
+      "start": 4077.09,
+      "end": 4324.11,
+      "lecture_material": "synthesis",
+      "teaching_construction": "12. An audit earns a scoped conclusion and identifies the next decision",
+      "claim_provenance": [
+        {
+          "class": "engineering check",
+          "claim": "Scoped audit conclusions require stated populations, assumptions and next decisions",
+          "origin": "Original synthesis of the service case"
+        }
+      ],
+      "evidence_class": "engineering check",
+      "research_extension": null
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "teaching_construction": "13. An exact finite audit laboratory",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Exact bounded standard-library audit, ranking, choice, trajectory, harm and disclosure contracts",
+          "origin": "Original APIs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Standalone output, runnable snippet and14193 finite author assertions",
+          "origin": "Actual author execution; independent review pending"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "teaching_construction": "14. Six exercises with fully worked solutions",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Worked mixture, regret and probability derivations under explicit finite assumptions",
+          "origin": "Original solution proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Six full solutions cover ranking, weights, extraction and counterfactual harm",
+          "origin": "Original exact fixtures"
+        }
+      ],
+      "evidence_class": "theorem",
+      "research_extension": null
+    },
+    {
+      "section": "sources",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "teaching_construction": "15. Sources and the boundaries of this treatment",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Source scopes distinguish dated research, official statutory text and original teaching constructions",
+          "origin": "Original provenance boundary"
+        }
+      ],
+      "evidence_class": "definition",
+      "research_extension": null
+    }
+  ],
+  "authored_body_sha256": "a473d2529fc3afe6320e6663a69fbf0392acddd4065ef68fd3f5e40f3dbb7cf5",
+  "references": [
+    {
+      "title": "Official executable Lecture 18 material",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/society.py",
+      "supports": "Official executable Lecture 18 material: topic sequence, source pointers and the upstream/downstream, intent/impact and openness distinctions. Historical or imprecise claims are corrected beside the relevant sections."
+    },
+    {
+      "title": "Belmont Report",
+      "url": "https://www.hhs.gov/ohrp/regulations-and-policy/belmont-report/read-the-belmont-report/index.html",
+      "supports": "Belmont Report and CDC chronology: ethical framework and dated historical correction; the chapter's educational application is original."
+    },
+    {
+      "title": "CDC chronology",
+      "url": "https://www.cdc.gov/tuskegee/about/index.html",
+      "supports": "Belmont Report and CDC chronology: ethical framework and dated historical correction; the chapter's educational application is original."
+    },
+    {
+      "title": "Gender Shades",
+      "url": "https://proceedings.mlr.press/v81/buolamwini18a/buolamwini18a.pdf",
+      "supports": "Gender Shades, PDF pages 1–2 and 7: task, dataset and subgroup scope; no claim of a universal current system disparity or causal audit effect."
+    },
+    {
+      "title": "Group DRO",
+      "url": "https://arxiv.org/abs/1911.08731",
+      "supports": "Group DRO, PDF pages 1–3: specified-group mixtures, empirical/population distinction and worst-group generalization limits."
+    },
+    {
+      "title": "Hidden stratification",
+      "url": "https://arxiv.org/abs/1909.12475",
+      "supports": "Hidden stratification, PDF pages 1–4: subgroup-audit methods and the chest-drain AUC results, not a clinical recommendation."
+    },
+    {
+      "title": "Title 17 §§102–103 and 107",
+      "url": "https://www.copyright.gov/title17/92chap1.html",
+      "supports": "Title 17 §§102–103 and 107, §302, and the CC overview: limited U.S. statutory and license distinctions checked October 3, 2026; no case-specific legal verdict."
+    },
+    {
+      "title": "§302",
+      "url": "https://www.copyright.gov/title17/92chap3.html",
+      "supports": "Title 17 §§102–103 and 107, §302, and the CC overview: limited U.S. statutory and license distinctions checked October 3, 2026; no case-specific legal verdict."
+    },
+    {
+      "title": "CC overview",
+      "url": "https://creativecommons.org/cc-licenses/",
+      "supports": "Title 17 §§102–103 and 107, §302, and the CC overview: limited U.S. statutory and license distinctions checked October 3, 2026; no case-specific legal verdict."
+    },
+    {
+      "title": "Versioned probabilistic extraction study",
+      "url": "https://arxiv.org/abs/2505.12546v1",
+      "supports": "Versioned probabilistic extraction study, PDF pages 1–4: extraction terminology and protocol dependence. Its interpretations are attributed; later revisions and unverified whole-book quantities are not substituted."
+    },
+    {
+      "title": "2024 FMTI",
+      "url": "https://arxiv.org/abs/2407.12929",
+      "supports": "2024 FMTI, PDF pages 1–2: dated indicators, comparison method and disclosure findings, not a safety certificate."
+    },
+    {
+      "title": "Open foundation models position paper",
+      "url": "https://arxiv.org/abs/2403.07918v1",
+      "supports": "Open foundation models position paper, PDF pages 1–2 and 6: release properties, counterfactual marginal-risk framework and acknowledged uncertainty."
+    }
+  ],
+  "program": {
+    "path": "programs/chapter18.py",
+    "sha256": "81abf13806c338917c418b27f13814b2302cafe37f40b197bb53cb127f60fb4e",
+    "stdout_sha256": "9141b7b24de5a59ce3d0c307312b1bdc3f83de8a0bc5380864a7c50751a963f7",
+    "contract": "Bounded supplied finite exact arithmetic; standard library; no empirical certification",
+    "implementation_evidence": "14193 author assertions and actual standalone/snippet output"
+  },
+  "limits": [
+    "ASR is not human-verified captioning",
+    "Group and action assumptions are supplied, not empirically inferred",
+    "No clinical recommendation, legal verdict, training-membership certificate or release safety certification",
+    "Historical research versions do not establish current model properties"
+  ]
+}

@@ -410,9 +410,9 @@
     "No different-editor acceptance or complete-course validation implied by author checks."
   ],
   "program": "programs/chapter03.py",
-  "body_sha256": "426eeffceeca7168b53a6474a516945b09fad5e8c897b9577c3254be430e7d1a",
+  "body_sha256": "39fa6d7fff6ce1afbf8ea841ad37c1e613ee1f4a1bb85b9ac7cebaf8ff7ef992",
   "implementation": {
-    "program_sha256": "a9525bcc62ea3c05296904b6effe4d3a48b2efc3bf143e8e106cd9b9ae9660ab",
+    "program_sha256": "7375fec2ae8f1c20855a4552a68468179446a2a1573cb9d0a0162386ab9a08f9",
     "stdout_sha256": "352979907d4880b9647b3b2c11a44f64e8e1f7a992083ed99eead9a82a9c6d4d",
     "runtime": "Python standard library; diagnostic report only"
   }
