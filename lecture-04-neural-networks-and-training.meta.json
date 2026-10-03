@@ -1,0 +1,408 @@
+{
+  "title": "Neural networks: representation, differentiation, and stable training",
+  "number": 4,
+  "video_id": "89NND-Ca0yY",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "Draft: author checks complete; independent science-editor gate pending",
+  "sections": [
+    {
+      "section": "graph",
+      "start": 5.49,
+      "end": 819.5,
+      "lecture_material": "Transition from hand-built graphs to PyTorch; eager values, gradient tracking, detach and no-grad.",
+      "research_extension": "Pinned PyTorch 2.11 autograd, detach and no_grad contracts; leaf accumulation, storage, factory and mode boundaries.",
+      "teaching_construction": "Dimensionless delivery-robot warning case; graph-cut scalar derivative and separation of prediction from action.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Graph, value, tracked leaf and API contracts",
+          "origin": "Recording topic plus official 2.11 documentation"
+        },
+        {
+          "class": "theorem",
+          "claim": "Scalar chain derivative 32 and detached direct-route derivative 1",
+          "origin": "Original finite derivation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Storage, factory exception, eval mode and accumulation probes",
+          "origin": "Original executed CPU fixtures"
+        }
+      ]
+    },
+    {
+      "section": "objective",
+      "start": 819.5,
+      "end": 1596.05,
+      "lecture_material": "Linear module, logits into cross entropy, backward versus step, full training loop and gradient clearing.",
+      "research_extension": "Linear output-by-input storage and cross entropy logits/target contracts in 2.11.",
+      "teaching_construction": "Softmax derivative, binary reduction, logit-versus-probability numerical example, weighted chunk accumulation.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Linear and CrossEntropyLoss shape/input semantics",
+          "origin": "Recording plus official 2.11 contracts"
+        },
+        {
+          "class": "theorem",
+          "claim": "Unweighted softmax and binary cross entropy derivatives; chunk normalization identity",
+          "origin": "Original derivations"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Two-logit loss values and original API equality/misuse probes",
+          "origin": "Original finite computations"
+        }
+      ]
+    },
+    {
+      "section": "features",
+      "start": 1596.05,
+      "end": 2064.11,
+      "lecture_material": "Circle decision boundary, explicit nonlinear feature map, fixed-feature reuse, learned features and kernel pointer.",
+      "research_extension": "No separate external theorem or empirical result.",
+      "teaching_construction": "Origin/antipodal affine impossibility; warning disk and exact expansion of recorded shifted circle.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Fixed and learned feature maps",
+          "origin": "Recording mechanism"
+        },
+        {
+          "class": "theorem",
+          "claim": "Affine impossibility and circle expansion",
+          "origin": "Original finite proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Circle scores at specified points",
+          "origin": "Original arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "affine",
+      "start": 2064.11,
+      "end": 2430.7,
+      "lecture_material": "Two affine layers collapse; hidden-width bottleneck caveat and different parameterization.",
+      "research_extension": "Official executable module supplies the affine-network and bias context.",
+      "teaching_construction": "Full bias collapse; necessary rank for a specified matrix, min(m,d) sufficiency; scalar factor stationary example.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Two affine maps and hidden dimensions",
+          "origin": "Recording topic"
+        },
+        {
+          "class": "theorem",
+          "claim": "Effective map/bias, rank bound and factor construction",
+          "origin": "Original linear algebra proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Zero scalar factors versus direct-weight derivative",
+          "origin": "Original counterexample"
+        }
+      ]
+    },
+    {
+      "section": "activation",
+      "start": 2430.7,
+      "end": 2930.1,
+      "lecture_material": "Elementwise ReLU, learned hidden features, MLP terminology, dead units, sigmoid saturation and activation choices.",
+      "research_extension": "Recorded maximum implementation checked at zero on installed PyTorch 2.11; official autograd nondifferentiability convention.",
+      "teaching_construction": "Diamond versus disk, complete two-unit forward/backward/update trace, conditional dead-unit statement.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "ReLU/MLP/hidden activations and backward convention",
+          "origin": "Recording mechanism plus stated original convention"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite piecewise-affine geometry, backward chain and inactive-unit data-loss route",
+          "origin": "Original reasoning"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Maximum .5 versus relu 0 at zero; nine parameter derivatives and one-step loss",
+          "origin": "Original executed fixtures"
+        }
+      ]
+    },
+    {
+      "section": "depth",
+      "start": 2930.1,
+      "end": 3307.46,
+      "lecture_material": "Deeper composition, feature-hierarchy intuition, scalar vanishing/exploding products and matrix analogy.",
+      "research_extension": "Official scalar loop reuses one trainable weight; no higher-dimensional approximation theorem imported.",
+      "teaching_construction": "One-dimensional continuous compact-interval interpolation proof, shared/untied/input derivatives, Jacobian norm and shear counterexample.",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Layer feature hierarchy as intuition, not a guaranteed semantic sequence",
+          "origin": "Recording explicitly informal explanation"
+        },
+        {
+          "class": "theorem",
+          "claim": "Bounded one-dimensional approximation construction and product/norm identities",
+          "origin": "Original mathematical proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Depth20 arithmetic and eigenvalue-one shear amplification",
+          "origin": "Original counterexamples"
+        }
+      ]
+    },
+    {
+      "section": "residual",
+      "start": 3307.46,
+      "end": 3539.38,
+      "lecture_material": "Additive skip path, scalar multiplier 1+w and example training-curve improvement.",
+      "research_extension": "He et al. arXiv1512.03385v1 PDF2 Figure2 and PDF3 §3.2: additive/projection shortcuts and post-addition ReLU.",
+      "teaching_construction": "Cancellation/explosion examples and local singular-value bounds under norm(JF)<1; depth and architecture qualification.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Residual/projected shortcut and source architecture",
+          "origin": "Recording plus pinned original"
+        },
+        {
+          "class": "theorem",
+          "claim": "I+JF and norm-hypothesis lower/upper bounds",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Scalar residual cancellation and twenty-block amplification",
+          "origin": "Original finite cases"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Reported small-demo training improvement, no universal speedup",
+          "origin": "Attributed recording example; curve not remeasured"
+        }
+      ]
+    },
+    {
+      "section": "normalization",
+      "start": 3539.38,
+      "end": 3780.56,
+      "lecture_material": "Within-layer mean/variance normalization, epsilon, gain/shift, LayerNorm module and placement pointer.",
+      "research_extension": "Ba et al. arXiv1607.06450v1 PDF2–3 equations3–5; pinned LayerNorm and var conventions.",
+      "teaching_construction": "Population/sample contrast, variance v/(v+epsilon), constant input, affine statistics, lost common offset and epsilon scale limit.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Within-example axes, population variance, gain, shift and 2.11 API convention",
+          "origin": "Recording mechanism plus primary definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Normalized variance and common-shift/scale identities under stated conditions",
+          "origin": "Original algebra"
+        },
+        {
+          "class": "engineering check",
+          "claim": "(1,3) with epsilon3, constant input and sample-versus-population CPU outputs",
+          "origin": "Original finite computations"
+        }
+      ]
+    },
+    {
+      "section": "initialization",
+      "start": 3780.56,
+      "end": 3961.55,
+      "lecture_material": "Wide dot-product scale, fan-in scaling, Xavier attribution and optional normal truncation.",
+      "research_extension": "Glorot/Bengio2010 PDF4–5 §4.2.1 equations4–16: near-linear forward/backward conditions and compromise variance.",
+      "teaching_construction": "Independent centered-weight second-moment proof, complete four-weight enumeration, ReLU second moment, truncation boundary.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Source Xavier scheme and fan-in/fan-out counts",
+          "origin": "Pinned primary definition"
+        },
+        {
+          "class": "theorem",
+          "claim": "One-layer variance and symmetric ReLU second-moment identities with hypotheses",
+          "origin": "Original moment derivations"
+        },
+        {
+          "class": "engineering check",
+          "claim": "d16384 scale and d4 sign enumeration; fan-in versus Xavier variance",
+          "origin": "Original arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "sampling",
+      "start": 3961.55,
+      "end": 4299.7,
+      "lecture_material": "Full gradients versus sampled batches, shuffled epochs, SGD gradient-source distinction, Adam mentioned without derivation, summary.",
+      "research_extension": "No external empirical optimizer comparison claimed.",
+      "teaching_construction": "Fixed-parameter unbiasedness, conditional remaining-set counterexample, short-batch weighting and changing-parameter boundary.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "SGD, batch and epoch conventions",
+          "origin": "Recording mechanism"
+        },
+        {
+          "class": "theorem",
+          "claim": "Uniform sampling/subset unbiasedness at fixed parameters and weighted partition identity",
+          "origin": "Original finite probability proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Gradients1/3/9 means13/3,6,5.5 and sample-weighted13/3",
+          "origin": "Original arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate recording claim: original supporting material.",
+      "research_extension": "Optional library-version observations cite 2.11; runnable program is standard library.",
+      "teaching_construction": "Original finite model, shape/range/error/mutation contracts, numerical derivative diagnostic and exact executed stdout.",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "class": "engineering check",
+          "claim": "Actual program, snippet, stdout and invalid-input checks",
+          "origin": "Original implementation"
+        }
+      ]
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate recording claim: original supporting material.",
+      "research_extension": "Source API and mechanism statements scoped in the main text.",
+      "teaching_construction": "Six original fully reasoned solutions: graph, rank, gradients/geometry, depth/residual, normalization/moments, sampling/evaluation.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Exercise conditional derivations and counterexample logic",
+          "origin": "Original proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exercise finite arithmetic and update values",
+          "origin": "Original numerical checks"
+        }
+      ]
+    },
+    {
+      "section": "boundaries",
+      "start": null,
+      "end": null,
+      "lecture_material": "Summary of the substantive recording order.",
+      "research_extension": "Pinned original lecture snapshot and version/source scope.",
+      "teaching_construction": "Explicit distinction between finite checks, optimization, empirical evaluation and physical safety.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Source/provenance and model boundaries",
+          "origin": "Recording provenance plus stated original scope"
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Understanding the difficulty of training deep feedforward neural networks",
+      "url": "https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf",
+      "supports": "PDF4–5 §4.2.1; equations4–16: near-linear variance assumptions, separate fan-in/fan-out requirements and compromise initialization."
+    },
+    {
+      "title": "Deep Residual Learning for Image Recognition, arXiv1512.03385v1",
+      "url": "https://arxiv.org/pdf/1512.03385v1",
+      "supports": "PDF2 Figure2 and PDF3 §3.2 equations1–2: additive residual mapping, projected shortcut, and post-addition ReLU architecture."
+    },
+    {
+      "title": "Layer Normalization, arXiv1607.06450v1",
+      "url": "https://arxiv.org/pdf/1607.06450v1",
+      "supports": "PDF2–3 equations3–5: within-example hidden-unit population statistics and gain/bias; ideal equations do not include teaching epsilon."
+    },
+    {
+      "title": "PyTorch 2.11: Autograd mechanics",
+      "url": "https://docs.pytorch.org/docs/2.11/notes/autograd.html",
+      "supports": "How autograd encodes history; Setting requires_grad; non-differentiable operations; evaluation-mode distinction."
+    },
+    {
+      "title": "PyTorch 2.11: Tensor.detach",
+      "url": "https://docs.pytorch.org/docs/2.11/generated/torch.Tensor.detach.html",
+      "supports": "Graph detachment and shared storage note."
+    },
+    {
+      "title": "PyTorch 2.11: no_grad",
+      "url": "https://docs.pytorch.org/docs/2.11/generated/torch.no_grad.html",
+      "supports": "Ordinary reverse-recording suppression, factory-function exception and forward-AD limitation."
+    },
+    {
+      "title": "PyTorch 2.11: Linear",
+      "url": "https://docs.pytorch.org/docs/2.11/generated/torch.nn.Linear.html",
+      "supports": "Affine operation, output-by-input weights, batch shape."
+    },
+    {
+      "title": "PyTorch 2.11: CrossEntropyLoss",
+      "url": "https://docs.pytorch.org/docs/2.11/generated/torch.nn.CrossEntropyLoss.html",
+      "supports": "Logits input, index/probability targets and log normalization."
+    },
+    {
+      "title": "PyTorch 2.11: LayerNorm",
+      "url": "https://docs.pytorch.org/docs/2.11/generated/torch.nn.LayerNorm.html",
+      "supports": "Population variance, trailing normalized axes, epsilon inside square root, learned elementwise gain/shift."
+    },
+    {
+      "title": "PyTorch 2.11: torch.var",
+      "url": "https://docs.pytorch.org/docs/2.11/generated/torch.var.html",
+      "supports": "Default correction=1 and sample-versus-population normalization distinction."
+    },
+    {
+      "title": "Official CS221 deep_learning.py, retained Autumn 2025 snapshot",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/deep_learning.py",
+      "supports": "Executable lecture topic sequence and literal maximum, shared-weight scalar loop and manual var context; not copied book implementation."
+    }
+  ],
+  "transcript_sha256": "acd6b602bcd2d0a091651da5c6ff49589d329dd3ae3b909520ed06384f04fbec",
+  "transcript_segment_count": 147,
+  "transcript_text_sha256": "d28b2e5f6f2db9641a3a274601cd5ffa2e7f54cee9f91b03928a6f772486cde4",
+  "transcript_first_start_seconds": 5.49,
+  "transcript_last_end_seconds": 4299.7,
+  "audio_sha256": "0110037150b2185dab7323008ae6f642ce3263312e25482dc67e59d04932638a",
+  "audio_duration_seconds": 4305.161,
+  "authored_body_sha256": "095b221f476e3c8a006d3c59ee2747cf340ec3270ecb18826d85ae72355967e9",
+  "program": "programs/chapter04.py",
+  "program_sha256": "9d0966317c21d58b3480efabc54af091a68f4688ee45b5e527e32e9bdf31081e",
+  "implementation": {
+    "dependencies": "Python standard library",
+    "optional_api_version": "PyTorch2.11.0+cu128 CPU observations; not needed for runnable program",
+    "input_contract": "Finite converted int/float, excluding bool, magnitude<=1e6; fixed lengths; strict integer target0/1; nonmutating; ValueError boundaries",
+    "arithmetic": "Binary64 rounded arithmetic; small quantities may underflow and sigmoid may saturate"
+  },
+  "limitations": [
+    "Machine ASR, not publisher or human-authored captions.",
+    "No complete slide inspection claim.",
+    "No deployed collision detector, framework benchmark or optimizer convergence certificate.",
+    "One-dimensional approximation construction only; no unverified higher-dimensional universal theorem.",
+    "Contemporary pinned API contracts do not establish historical installed version.",
+    "No independent editorial acceptance or root reader validation yet."
+  ]
+}

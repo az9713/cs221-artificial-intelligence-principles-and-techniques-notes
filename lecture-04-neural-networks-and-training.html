@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="095b221f476e3c8a006d3c59ee2747cf340ec3270ecb18826d85ae72355967e9"><title>Neural networks: representation, differentiation, and stable training · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START -->
+<header><p class="eyebrow">CS221 · Autumn 2025 · Lecture 4</p><h1>Neural networks: representation, differentiation, and stable training</h1><p class="lede">A classifier can fail because its decision boundary is impossible, its derivatives are wrong, or its updates cannot travel through the network. These failures require different repairs.</p><p>Independent enhanced chapter accompanying <a href="https://www.youtube.com/watch?v=89NND-Ca0yY">Percy Liang’s Learning III recording</a>. The recording provides the sequence; the robot case, proofs, numerical program, and exercises are original teaching constructions. Library statements below refer explicitly to PyTorch 2.11, rather than asserting which package version ran in the recording.</p></header>
+
+<section><h2 id="graph">1. Learn a warning score, then distinguish values from derivatives <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=5s">00:05</a></h2>
+<p>The delivery robot from Chapter 1 now receives an estimated relative obstacle position. Let \(x=(x_0,x_1)^\top\in\mathbb R^2\) contain horizontal and vertical offsets divided by a stipulated safety radius. The coordinates are dimensionless; they are not raw pixels. A binary label \(y\in\{0,1\}\) indicates whether the example calls for a warning, with one meaning warning. In our geometric teaching data, points strictly inside the unit disk receive label one and points outside receive zero. Boundary points will be excluded. This toy labeling rule omits velocity, uncertainty, and braking distance; it is not an operational safety specification.</p>
+<p>A trainable score \(s_\theta(x)\in\mathbb R\), with parameter vector \(\theta\), supplies the probability estimate \(p_\theta(x)=\sigma(s_\theta(x))\), where \(\sigma(s)=1/(1+e^{-s})\) is the <strong>sigmoid</strong>. A score is a <strong>logit</strong>: an unconstrained number converted into a probability, not a probability itself. We learn from a finite dataset \(\mathcal D=\{(x_i,y_i):i=1,\ldots,n\}\), with positive integer size \(n\). The objective will be a mean classification loss. Learning this probability model remains separate from choosing the go-or-wait policy and its penalties.</p>
+<p>Chapters 2 and 3 developed objectives and reverse differentiation. A <strong>computation graph</strong> records which operations produced an output, so that the chain rule can propagate loss derivatives backward. Three objects must remain distinct: a tensor’s numerical value, its recorded dependence on earlier values, and the accumulated derivative stored for a trainable input. A forward computation can produce a value without keeping a reverse graph. A backward computation can calculate a derivative without changing a parameter.</p>
+<p>For a scalar check, take \(u=2\), \(v=u^2=4\), and \(L=v^2=16\). The chain rule gives \(dL/du=(2v)(2u)=32\). If we instead treat the value of \(v\) as constant when constructing the second square, that route contributes no derivative to \(u\), although its value still equals sixteen. Cutting a dependency is a modeling intervention: it changes which quantity receives credit, not necessarily what the forward computation predicts.</p>
+<p>PyTorch’s ordinary eager execution computes values as operations run and records a reverse graph for tracked operations. A fresh forward pass constructs the graph for that pass. The <a href="https://docs.pytorch.org/docs/2.11/notes/autograd.html#setting-requires-grad">2.11 autograd documentation</a> specifies default gradient accumulation for tracked leaf tensors, such as model parameters. Intermediate tensors can participate in the chain rule without retaining a user-visible <code>.grad</code> by default.</p>
+<p><code>detach()</code> removes a tensor’s gradient connection but <a href="https://docs.pytorch.org/docs/2.11/generated/torch.Tensor.detach.html">shares its storage</a>; it is not an ownership-preserving copy. An in-place write through a detached view can alter the original values. A separate clone is needed when independent storage is required. <a href="https://docs.pytorch.org/docs/2.11/generated/torch.no_grad.html"><code>no_grad()</code></a> suppresses ordinary reverse recording in a region, with a documented factory-function exception; it does not universally disable every differentiation mode. Evaluation mode, <code>model.eval()</code>, changes behavior of mode-sensitive modules and is a separate operation. Neither a forward pass nor setting evaluation mode constitutes an optimizer update.</p></section>
+
+<section><h2 id="objective">2. Cross-entropy and the complete update loop <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=819s">13:39</a></h2>
+<p>For a general \(C\)-class classifier, where integer \(C\ge2\), use column-vector logits \(z\in\mathbb R^C\). Define <strong>softmax</strong> probabilities \(p_k=e^{z_k}/\sum_{j=0}^{C-1}e^{z_j}\). The integer target \(y\in\{0,\ldots,C-1\}\) selects one class. With natural logarithms, the unweighted <strong>cross-entropy</strong> is</p>
+\[\ell(z,y)=-\log p_y=\log\!\left(\sum_j e^{z_j}\right)-z_y,\qquad \frac{\partial\ell}{\partial z_k}=p_k-\mathbf1\{k=y\}.\]
+<p>The derivative follows by differentiating the logarithm: its reciprocal denominator multiplies \(e^{z_k}\), giving \(p_k\); differentiating the selected logit subtracts one only at the target. Here \(\mathbf1\{\cdot\}\) denotes an indicator. Loss is measured in natural-log units. For numerical evaluation, subtract the largest logit before exponentiation and add it back to the log-sum; the probabilities are unchanged by a common shift.</p>
+<p>Our warning model uses two logits \(z=(0,s)\), so \(p_1=\sigma(s)\) and</p>
+\[\ell(s,y)=\log(1+e^s)-ys,\qquad \frac{\partial\ell}{\partial s}=\sigma(s)-y,\qquad J(\theta)=\frac1n\sum_{i=1}^n\ell(s_\theta(x_i),y_i).\]
+<p>At score zero for a warning example, probability is one half, loss is \(\log2\), and the score derivative is \(-1/2\). Increasing the warning score therefore decreases that example’s loss locally. These are per-example statements, not guarantees about the full dataset or future obstacle observations.</p>
+<p><a href="https://docs.pytorch.org/docs/2.11/generated/torch.nn.Linear.html">PyTorch 2.11’s Linear module</a> stores an output-by-input weight matrix. With our column convention an affine map is \(z=Wx+b\), where \(W\in\mathbb R^{C\times d}\), \(b\in\mathbb R^C\), and input dimension \(d=2\) in the robot case. A batch represented by rows uses \(Z=XW^\top+b\), with \(X\in\mathbb R^{B\times d}\) for positive batch size \(B\). The transposition reflects storage convention, not a different model.</p>
+<p>The <a href="https://docs.pytorch.org/docs/2.11/generated/torch.nn.CrossEntropyLoss.html">CrossEntropyLoss input contract</a> accepts logits; targets may be class indices or valid class-probability vectors. Passing already normalized predictions as the first argument applies a new softmax to those predictions and changes the objective. For example, logits \((0,\log3)\) give warning probability \(3/4\) and loss \(\log(4/3)\approx0.287682\). Reusing \((1/4,3/4)\) as logits gives warning probability \(\sigma(1/2)\approx0.622459\), hence loss about 0.474077. Both calls produce a number; only one implements the intended loss.</p>
+<h3>Reset, forward, backward, update</h3>
+<p>A training iteration first selects examples and defines their loss normalization. It clears old parameter gradients, evaluates the model on that batch, computes the scalar loss, calls backward, and finally applies an optimizer step. Gradient descent with positive rate \(\eta\) uses \(\theta^+=\theta-\eta\nabla J(\theta)\), where the gradient \(\nabla J\) collects partial derivatives with respect to the parameter coordinates. Calling backward accumulates derivatives; calling the step uses them to change stored parameters. The framework does not infer when accumulated gradients should be forgotten.</p>
+<p>Accumulation can be intentional when splitting a large batch into smaller chunks. If the intended objective is the mean over \(N\) examples, a chunk of size \(b\) contributes \(b/N\) times its own mean gradient. Backward on unweighted chunk means instead gives each chunk equal influence, even when their sizes differ. A declining development loss checks something useful about the update, but it does not establish calibration or generalization. Conversely, a temporary increase may arise from a large step or a different stochastic batch rather than an incorrect derivative.</p></section>
+
+<section><h2 id="features">3. A linear predictor can use nonlinear features <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=1596s">26:36</a></h2>
+<p>An affine warning score \(s(x)=w^\top x+b\) has a straight decision boundary. It cannot place the origin in a positive region while placing both \((2,0)\) and \((-2,0)\) in strictly negative regions. The origin requires \(b>0\); adding the two outside inequalities gives \(2b&lt;0\), a contradiction. More training cannot find parameters absent from the hypothesis family.</p>
+<p>Our stipulated disk is represented exactly by the fixed feature map \(\phi(x)=(x_0,x_1,x_0^2+x_1^2)^\top\) and score \(s(x)=1-\phi_2(x)\). It is affine in features and nonlinear in raw coordinates. At the origin the score is one; at \((2,0)\) it is minus three. The resulting sigmoid values are soft estimates around the disk boundary, not deterministic certainty about a physical hazard.</p>
+<p>The lecture’s related circle has center \((1,1)\), radius \(\sqrt2\), and positive labels outside. Its score expands as</p>
+\[(x_0-1)^2+(x_1-1)^2-2=x_0^2+x_1^2-2x_0-2x_1=(-2,-2,1)^\top\phi(x).\]
+<p>At \((1,1)\) the score is minus two; at \((3,0)\) it is three. The constants cancel in this particular expansion. They need not cancel for a different circle, and omitting an intercept without checking the expansion would change the boundary. Our warning case reverses the label orientation and uses a different center; these are deliberate teaching choices.</p>
+<p>Fixed features let us reuse a linear optimizer while choosing the representation manually. Learned features instead adjust the transformation itself. Kernel methods, briefly mentioned in the recording, offer another route through suitable inner products of feature representations; not every kernel needs an infinite-dimensional space. Here the explicit three-coordinate map already answers the geometric question. The reason to introduce a neural network is to study learning a representation when that map is not supplied, not to discard a known exact feature construction.</p></section>
+
+<section><h2 id="affine">4. Two affine layers change the parameterization, not the curvature <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=2064s">34:24</a></h2>
+<p>Let hidden width \(h\) and output width \(m\) be positive integers. A two-layer affine network has \(W_1\in\mathbb R^{h\times d}\), \(b_1\in\mathbb R^h\), \(W_2\in\mathbb R^{m\times h}\), and \(b_2\in\mathbb R^m\). Its hidden representation and output are</p>
+\[a=W_1x+b_1,\qquad z=W_2a+b_2=(W_2W_1)x+(W_2b_1+b_2).\]
+<p>Associativity collapses the product, while distributivity carries the bias. The effective weight has matrix rank at most \(h\), since its image lies in the image of \(W_2\). Rank here counts independent directions, not the number of array axes. A rank-one bottleneck cannot produce a rank-two map, regardless of how long training runs.</p>
+<p>Conversely, a matrix of rank \(r\) admits a factorization through \(r\) independent basis directions. Choose a basis for its column space as the columns of \(W_2\), and let \(W_1\) contain the coordinates of its columns in that basis. Pad with zero directions when \(h>r\); choose \(b_1=0\), \(b_2=b\) to reproduce any output bias. Thus a specified matrix requires \(h\ge r\), and every \(m\)-by-\(d\) matrix is representable when \(h\ge\min(m,d)\). Being at least both dimensions, as stated informally in the lecture, is sufficient but unnecessarily restrictive.</p>
+<p>Identical function families do not imply identical optimization trajectories. For a scalar factorization \(s=uvx\), the parameter derivatives contain the other factor: \(\partial s/\partial u=vx\) and \(\partial s/\partial v=ux\). At \(u=v=0\), both are zero even if a directly parameterized weight would have a nonzero derivative. Factorization can change stationary points and conditioning while leaving the representable affine family unchanged. A nonlinear activation is needed to change that family’s geometry.</p></section>
+
+<section><h2 id="activation">5. ReLU changes both the boundary and the backward route <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=2430s">40:30</a></h2>
+<p>An <strong>activation function</strong> transforms an intermediate scalar; applied elementwise, it transforms a vector. The rectified linear unit is \(\rho(a)=\max(0,a)\). Its derivative is one for positive \(a\) and zero for negative \(a\). At zero the classical derivative does not exist. Our program chooses zero as its backward convention. Equivalent forward expressions need not choose the same convention: the lecture’s <code>torch.maximum(x, zeros_like(x))</code> gives derivative one half at an exact tie in the checked 2.11 implementation, whereas <code>torch.relu</code> gives zero. Neither value is a classical derivative at that kink.</p>
+<p>A one-hidden-layer <strong>multilayer perceptron</strong>, or MLP, computes \(a=Wx+b\), hidden activations \(q=\rho(a)\), and warning score \(s=v^\top q+c\). Here \(W\in\mathbb R^{h\times2}\), \(b,v\in\mathbb R^h\), and \(c\in\mathbb R\). The hidden units are coordinates of a learned feature map. Biological neuron language is an analogy for these computations, not a biological model.</p>
+<p>Four hidden units can produce \(|x_0|+|x_1|\), because \(|u|=\rho(u)+\rho(-u)\). The score \(1-|x_0|-|x_1|\) therefore encloses a diamond warning region. It agrees with the disk at the coordinate axes but differs elsewhere: \((0.6,0.6)\) is inside the disk and outside that diamond. Nonlinearity removes the affine impossibility without making every nonlinear boundary identical. A finite ReLU network has finitely many affine regions, so its two-dimensional decision boundary is assembled from straight pieces; an exact smooth circle requires a different feature construction or an approximation criterion.</p>
+<h3>Work one complete reverse trace</h3>
+<p>Take two hidden units, \(x=(1/2,0)^\top\), \(y=1\), \(W=\begin{bmatrix}2&-1\\1&1/2\end{bmatrix}\), \(b=(0,1/2)^\top\), \(v=(1,-1)^\top\), and \(c=0\). Both preactivations and activations equal \((1,1)^\top\); the score is zero and loss is \(\log2\). Write \(\delta=\partial\ell/\partial s=p-y=-1/2\). Backward first reaches the output parameters and then the hidden parameters:</p>
+\[\nabla_v\ell=\delta q=(-1/2,-1/2)^\top,\quad \partial_c\ell=\delta,\quad d_a=\delta v\odot\mathbf1\{a>0\}=(-1/2,1/2)^\top,\]
+\[\nabla_W\ell=d_a x^\top=\begin{bmatrix}-1/4&0\\1/4&0\end{bmatrix},\quad \nabla_b\ell=d_a,\quad \nabla_x\ell=W^\top d_a=(-1/2,3/4)^\top.\]
+<p>The symbol \(\odot\) means elementwise multiplication. The outer product with \(x\) explains why the second weight column receives zero derivative here. The input derivative diagnoses local sensitivity; the parameter derivatives control training. With rate 0.1, updating all parameters gives preactivations \((1.0625,0.9375)\), output weights \((1.05,-0.95)\), and output bias 0.05. The score becomes 0.275 and loss about 0.565071. This single-point decrease verifies the trace; it does not establish a disk classifier.</p>
+<p>A unit inactive on every training example receives zero ordinary data-loss gradient through its incoming weights and bias. This <strong>dead unit</strong> can remain inactive under that training mechanism. New data, parameter coupling, or other objective terms change the conclusion. Leaky ReLU supplies a specified positive slope on its negative branch. Sigmoid instead has derivative \(\sigma(a)(1-\sigma(a))\), which becomes small in both tails. Smooth choices such as GELU and Swish change these patterns, but their names do not guarantee a derivative bounded away from zero or successful optimization. Small derivatives can also reflect a stationary point or a change of numerical scale.</p></section>
+
+<section><h2 id="depth">6. Depth multiplies sensitivities, not just feature descriptions <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=2930s">48:50</a></h2>
+<p>Deeper networks compose several learned transformations. The lecture’s feature hierarchy—edges, parts, objects—is offered as intuition about representations. It is not a theorem that each layer discovers a particular semantic level. Expressivity, optimization, and prediction on new data require separate arguments.</p>
+<p>A bounded approximation statement can be proved directly in one dimension. For a continuous function on a compact interval, uniform continuity lets us choose a sufficiently fine partition so that neighboring values differ little. Linear interpolation on that partition stays uniformly close to the function. A continuous piecewise-linear interpolant with successive slopes \(m_0,m_1,\ldots\) can be written as an affine term plus a sum of slope changes \((m_j-m_{j-1})\rho(x-t_j)\), where \(t_j\) are interior knots. Thus an adequately wide ReLU model can approximate this particular class of functions uniformly. This elementary construction says neither that every arbitrary function is representable nor that gradient descent finds the interpolant. It also does not prove a higher-dimensional universal theorem.</p>
+<p>Now isolate depth in the scalar chain \(f(x)=w_Lw_{L-1}\cdots w_1x\), with positive integer depth \(L\) and independently parameterized scalar weights. Its input derivative is \(\prod_jw_j\); its derivative with respect to one weight \(w_i\) is \(x\prod_{j\ne i}w_j\). If all weights share a single parameter \(w\), differentiating all its occurrences instead gives \(\partial f/\partial w=Lxw^{L-1}\). The lecture’s executable scalar loop uses this shared parameter.</p>
+<p>For \(L=20\), \(x=1\), and \(w=1/2\), the input derivative is \(2^{-20}\approx9.536743\times10^{-7}\), one untied weight derivative is \(2^{-19}\), and the shared derivative is \(20\cdot2^{-19}\approx3.814697\times10^{-5}\). With \(w=2\), they become \(2^{20}\), \(2^{19}\), and \(20\cdot2^{19}\), respectively. A final loss introduces its own derivative as another chain-rule factor. These distinctions matter when comparing displayed forward values with actual parameter gradients.</p>
+<h3>Matrix sensitivity needs singular values</h3>
+<p>For vector layers \(q_{j}=f_j(q_{j-1})\), define the <strong>Jacobian</strong> \(A_j=\partial q_j/\partial q_{j-1}\), the matrix of local partial derivatives. Input sensitivity is the ordered product \(A_L\cdots A_1\). The Euclidean operator norm \(\|A\|_2=\max_{\|u\|_2=1}\|Au\|_2\) is its largest singular value and gives the bound \(\|A_L\cdots A_1\|_2\le\prod_j\|A_j\|_2\). Singular values quantify directional stretching; eigenvalues alone need not do so.</p>
+<p>For example, \(A=\begin{bmatrix}1&10\\0&1\end{bmatrix}\) has both eigenvalues one, but maps the unit vector \((0,1)^\top\) to \((10,1)^\top\), of length \(\sqrt{101}\). Such a matrix is <strong>nonnormal</strong>: it does not commute with its transpose. Moreover \(A^L=\begin{bmatrix}1&10L\\0&1\end{bmatrix}\) amplifies some directions with depth. Replacing the scalar “weight near one” intuition by “all eigenvalues near one” misses this mechanism. Activation derivatives and changing singular-vector directions also enter real Jacobian products.</p></section>
+
+<section><h2 id="residual">7. An identity path helps under conditions <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=3307s">55:07</a></h2>
+<p>A <strong>residual block</strong> adds an input to a learned transformation of the same shape: \(G(q)=q+F(q)\). When differentiable, \(J_G=I+J_F\), where \(I\) is the identity matrix. The additional route can pass information when the learned route is small. The primary <a href="https://arxiv.org/pdf/1512.03385v1">He et al. residual-network paper</a>, §3.2, develops this additive parameterization and a projected shortcut when dimensions differ.</p>
+<p>The scalar model \(F(q)=wq\) has block multiplier \(1+w\). At \(w=0\), the block is exactly identity. At \(w=-1\), it is exactly zero, including its input derivative. At \(w=1\), twenty blocks amplify by \(2^{20}\). An identity term in a sum cannot prevent cancellation by the other term.</p>
+<p>A useful sufficient local condition is \(\|J_F\|_2\le r&lt;1\). For any vector \(u\), the triangle and reverse-triangle inequalities give</p>
+\[(1-r)\|u\|_2\le\|(I+J_F)u\|_2\le(1+r)\|u\|_2.\]
+<p>The lower bound follows from \(\|u+J_Fu\|\ge\|u\|-\|J_Fu\|\); the upper bound adds the two lengths. This excludes complete local cancellation in one block under the hypothesis. Across \(L\) blocks the corresponding bounds are \((1-r)^L\) and \((1+r)^L\), which can still decay or grow greatly. Keeping each learned Jacobian small relative to identity helps, but depth remains consequential.</p>
+<p>The original 2015 paper’s Figure 2 includes a ReLU after the addition. For that full block the Jacobian also includes the post-addition activation derivative; the bare \(I+J_F\) bound is not automatically its lower bound. A projected shortcut has Jacobian \(W_s+J_F\), where \(W_s\) is the projection matrix. State the actual architecture before importing an identity argument. The recording’s faster training curve demonstrates one small example; it does not prove a universal residual-network speedup.</p></section>
+
+<section><h2 id="normalization">8. Normalize specified coordinates, then account for epsilon <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=3539s">58:59</a></h2>
+<p><strong>Layer normalization</strong> computes statistics within one example over specified feature coordinates. For a hidden vector \(q\in\mathbb R^h\), let \(\mu=h^{-1}\sum_jq_j\) and population variance \(v=h^{-1}\sum_j(q_j-\mu)^2\). With positive \(\epsilon\), learned gain \(\gamma\in\mathbb R^h\), and shift \(\beta\in\mathbb R^h\), define</p>
+\[\widehat q_j=\frac{q_j-\mu}{\sqrt{v+\epsilon}},\qquad y_j=\gamma_j\widehat q_j+\beta_j.\]
+<p>The first vector has mean zero and variance \(v/(v+\epsilon)\), obtained by dividing the sum of squared centered entries by the shared denominator squared. It is not exactly unit variance when \(\epsilon>0\). For \(q=(1,3)\), \(\mu=2\), \(v=1\), and deliberately large teaching value \(\epsilon=3\), the normalized vector is \((-1/2,1/2)\), of variance one quarter. Gain two and shift one produce \((0,2)\), whose variance is one. Learned elementwise gains and shifts need not preserve either zero mean or unit variance.</p>
+<p>A constant vector has \(v=0\) and normalizes to zero before the learned shift. Thus normalization does not guarantee that every activation stays away from zero. It can discard information: two vectors differing only by a common additive offset have identical normalized coordinates. If absolute obstacle distance were encoded only as such an offset, the warning classifier could lose it. Placement of normalization is part of the model, not a harmless formatting change.</p><p>The original numerical program centers relative to its first input coordinate before averaging the remaining offsets. This avoids amplifying a rounded absolute mean when a constant decimal input meets a tiny epsilon: bit-identical inputs center to exactly zero. It still uses rounded binary64 arithmetic; distinct nearby coordinates and arbitrary common offsets need not be represented exactly.</p>
+<p>For \(a>0\), scaling the vector by \(a\) changes its normalization denominator to \(\sqrt{a^2v+\epsilon}\). Exact positive-scale invariance holds in the ideal \(\epsilon=0\), nonconstant case; positive epsilon breaks that exact identity. Very small variance makes the stabilizer consequential. Epsilon has the units of a variance if the input coordinates have physical units; our hidden teaching coordinates are dimensionless.</p>
+<p><a href="https://arxiv.org/pdf/1607.06450v1">Ba, Kiros, and Hinton</a>, equations (3)–(5), define per-example hidden-coordinate statistics and learned gain/bias. The <a href="https://docs.pytorch.org/docs/2.11/generated/torch.nn.LayerNorm.html">PyTorch 2.11 LayerNorm specification</a> uses population variance over its stated trailing normalized axes and places epsilon inside the square root. The lecture’s manual <code>x.var()</code> demonstration instead uses the <a href="https://docs.pytorch.org/docs/2.11/generated/torch.var.html">default sample-variance correction</a> in this version. For two entries \((1,3)\), sample variance is two rather than one, so the unstabilized manual result is \((-1/\sqrt2,1/\sqrt2)\). That demo and the module are not identical formulas. We also use gamma for gain and beta for shift, correcting the recording’s spoken name reversal.</p></section>
+
+<section><h2 id="initialization">9. Initialization controls moments under stated assumptions <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=3780s">1:03:00</a></h2>
+<p>Before any update, a wide dot product can have a large scale. Let one preactivation be \(a=\sum_{j=1}^d w_jx_j\), with independent centered weights of common variance \(\tau^2\), independent of the input vector. Here \(E\) averages over random weights and inputs, and \(\operatorname{Var}(a)=E[(a-E[a])^2]\). Suppose each input has second moment \(E[x_j^2]=q\). The input coordinates themselves need not be independent for this one-layer calculation: cross terms vanish because \(E[w_iw_j]=0\) for distinct weights. Expanding the square gives</p>
+\[E[a]=0,\qquad \operatorname{Var}(a)=E[a^2]=\sum_jE[w_j^2]E[x_j^2]=d\tau^2q.\]
+<p>Setting \(\tau^2=1/d\) therefore preserves input second-moment scale in this preactivation calculation. At \(d=16384\), unit weight variance and \(q=1\) give standard deviation 128; fan-in variance \(1/d\) gives standard deviation one. These are ensemble moments, not deterministic bounds on every coordinate or every draw. In our exact four-coordinate fixture, independent weights taking \(\pm1/2\) with equal probability and inputs all one yield variance one across all sixteen assignments.</p>
+<p><strong>Fan-in</strong> counts incoming coordinates; <strong>fan-out</strong> counts outgoing coordinates. <a href="https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf">Glorot and Bengio’s 2010 derivation</a>, §4.2.1, assumes a near-linear activation regime and balances forward and backward variance requirements. Its compromise variance is \(2/(d+m)\) for fan-in \(d\) and fan-out \(m\), corresponding to a uniform distribution on \([-\sqrt{6/(d+m)},\sqrt{6/(d+m)}]\). For \(d=4,m=2\), this is variance \(1/3\), distinct from the fan-in choice \(1/4\). Calling every input-dimension scaling “Xavier” erases that distinction.</p>
+<p>Changing the activation changes the moment argument. For a symmetric preactivation distribution, ReLU has \(E[\rho(a)^2]=E[a^2]/2\), because exactly one of each symmetric pair contributes its squared magnitude. Its output mean generally is positive, so output variance is not simply half the input variance. This observation explains why a nonlinear network requires another analysis; we do not promote the linear calculation into a guarantee across ReLU layers.</p>
+<p>Truncating a normal distribution limits individual weights but changes their variance. A cutoff of three standard deviations and an absolute cutoff of three after choosing a tiny standard deviation are different procedures. Neither ensures that a sum of thousands of bounded terms is small. Input correlations, trained weight correlations, activation asymmetry, and the singular values of the whole Jacobian can all invalidate a naive layer-by-layer moment argument. Sensible initialization provides a starting condition, not a certificate for the trained robot.</p></section>
+
+<section><h2 id="sampling">10. SGD needs a sampling model and a loss normalization <a class="timestamp" href="https://www.youtube.com/watch?v=89NND-Ca0yY&amp;t=3961s">1:06:01</a></h2>
+<p>Define the per-example gradient \(g_i(\theta)=\nabla_\theta\ell_i(\theta)\). The full mean gradient is \(g(\theta)=n^{-1}\sum_i g_i(\theta)\). Computing all examples before every update can be expensive. <strong>Stochastic gradient descent</strong>, or SGD, replaces it with a gradient from randomly selected examples. The optimizer’s algebraic update does not itself determine whether the supplied gradient came from one example, a mini-batch, or the full dataset.</p>
+<p>At fixed \(\theta\), draw index \(I\) uniformly from \(\{1,\ldots,n\}\). Then \(E[g_I(\theta)]=\sum_i(1/n)g_i(\theta)=g(\theta)\). The mean of \(B\) independent such draws remains unbiased. A uniform size-\(B\) subset without replacement also has this expectation: each example has inclusion probability \(B/n\), and division by \(B\) cancels that factor. Biased sampling requires appropriate weights or changes the objective.</p>
+<p>A shuffled epoch draws one permutation and takes consecutive chunks. Its first chunk has the uniform-subset property at a fixed initial parameter. Conditional on earlier selected examples, a later chunk samples from the remaining set. For scalar gradients \((1,3,9)\), the full mean is \(13/3\). After consuming the example with gradient one, the next single draw has conditional mean six. It is not conditionally unbiased for the original full mean.</p>
+<p>Even without conditioning, arithmetic across batches needs care. Partition the fixed gradients into \((1,3)\) and \((9)\). Their means are two and nine. Averaging those means equally gives 5.5, whereas weighting by sample counts gives \((2/3)2+(1/3)9=13/3\). If parameters change between batches, even this weighted sum combines derivatives evaluated at different points; it is no longer the full gradient at one specified parameter.</p>
+<p>The recording mentions Adam but postpones its derivation. We preserve that boundary: choosing an optimizer, learning rate, batch schedule, and normalization can change training, but no universal loss speedup follows from substituting an optimizer name. For the warning model, inspect loss on a fixed development set, held-out performance, score sensitivity near the geometric boundary, and data from changed operating conditions separately. A finite loss decrease verifies an update’s local effect; it does not validate the label rule or the go-or-wait decision policy.</p></section>
+
+<section><h2 id="implementation">11. An original finite program with a checkable contract</h2>
+<p>The accompanying <a href="programs/chapter04.py">chapter04.py</a> implements the two-input, two-ReLU, one-logit model and its analytic parameter gradient. Parameter order is <code>W00,W01,W10,W11,b0,b1,v0,v1,c</code>. Inputs are nonempty lists or tuples of the stated lengths; each scalar is an int or float excluding booleans, converts to finite binary64, and has magnitude at most one million. The target must be integer zero or one. The normalization helper accepts one to ten thousand coordinates and a positive epsilon within the same scalar range.</p>
+<p>Unsupported types, shapes, nonfinite values, excessive magnitudes, unrepresentable integer conversions, and invalid targets raise <code>ValueError</code>. The update helper requires a positive rate, bounded supplied gradients, and a result within the parameter range; it rejects an unsupported update rather than clipping it. The loss-gradient helper may return derivatives larger than the update helper’s accepted input range, in which case the caller must choose a different supported calculation. No input is mutated. Returned values are fresh tuples; the functions have no filesystem or network effects.</p>
+<p>The implementation uses stable sigmoid branches and a stable cross-entropy expression. Finite precision still rounds sums, may underflow exponentially small quantities, and may saturate probabilities to zero or one. This is a finite educational contract, not an arbitrary-precision promise. The central-difference helper rejects an increment lost at the parameter value; its diagnostic comparison also requires avoiding ReLU kinks and choosing an increment whose loss differences are resolved. It cannot certify a derivative merely by returning a number.</p>
+<p>Run the program from the repository root using the standard library:</p>
+<pre><code class="language-bash">python -I -B programs/chapter04.py</code></pre>
+<p>Equivalently, this runnable snippet invokes the original module’s demonstration:</p>
+<pre><code class="language-python">&quot;&quot;&quot;Original finite neural-network fixtures. Standard library; no external effects.
+
+All scalar inputs must be int/float, not bool, convertible to finite binary64,
+and at most 1e6 in magnitude. Shapes are fixed where stated. Rounded arithmetic
+and saturation are intentional; this is not an arbitrary-precision solver.
+Invalid values, shapes, or updates outside the supported range raise ValueError.
+&quot;&quot;&quot;
+import itertools
+import math
+
+LIMIT = 1e6
+
+
+def number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(&#x27;expected an int or float, excluding bool&#x27;)
+    try:
+        value = float(value)
+    except (ValueError, OverflowError) as exc:
+        raise ValueError(&#x27;number is not representable&#x27;) from exc
+    if not math.isfinite(value) or abs(value) &gt; LIMIT:
+        raise ValueError(&#x27;expected finite magnitude at most 1e6&#x27;)
+    return value
+
+
+def vector(values, size=None):
+    if not isinstance(values, (list, tuple)) or not values:
+        raise ValueError(&#x27;expected a nonempty list or tuple&#x27;)
+    if (size is not None and len(values) != size) or len(values) &gt; 10000:
+        raise ValueError(&#x27;unsupported vector length&#x27;)
+    return tuple(number(x) for x in values)
+
+
+def _sigmoid(score):
+    # Internal scores are finite; this avoids exp(positive large value).
+    if score &gt;= 0:
+        return 1. / (1. + math.exp(-score))
+    e = math.exp(score)
+    return e / (1. + e)
+
+
+def loss_gradient(parameters, x, target):
+    &quot;&quot;&quot;Two inputs, two ReLU units, one logit; return loss and nine derivatives.
+
+    Parameter order: W00,W01,W10,W11,b0,b1,v0,v1,c. Target is int 0 or 1.
+    The ReLU backward convention at zero is zero. Inputs are never mutated.
+    &quot;&quot;&quot;
+    w00, w01, w10, w11, b0, b1, v0, v1, c = vector(parameters, 9)
+    x0, x1 = vector(x, 2)
+    if isinstance(target, bool) or not isinstance(target, int) or target not in (0, 1):
+        raise ValueError(&#x27;target must be integer 0 or 1&#x27;)
+    a0 = math.fsum((w00*x0, w01*x1, b0))
+    a1 = math.fsum((w10*x0, w11*x1, b1))
+    h0, h1 = max(0., a0), max(0., a1)
+    score = math.fsum((v0*h0, v1*h1, c))
+    # Binary cross entropy without subtracting two large nearly equal values.
+    loss = max(score, 0.) if target == 0 else max(-score, 0.)
+    loss += math.log1p(math.exp(-abs(score)))
+    # Avoid cancellation of sigmoid(score)-1 for a positive correct-class score.
+    delta = _sigmoid(score) if target == 0 else -_sigmoid(-score)
+    q0 = delta*v0 if a0 &gt; 0 else 0.
+    q1 = delta*v1 if a1 &gt; 0 else 0.
+    gradient = (q0*x0, q0*x1, q1*x0, q1*x1,
+                q0, q1, delta*h0, delta*h1, delta)
+    return loss, gradient
+
+
+def step(parameters, gradient, rate):
+    &quot;&quot;&quot;Return fresh supported parameters; no mutation or gradient accumulation.&quot;&quot;&quot;
+    p = vector(parameters, 9)
+    # Gradients produced above may exceed the scalar-input support limit.
+    # For an externally supplied update require the same finite bounded contract.
+    g = vector(gradient, 9)
+    rate = number(rate)
+    if rate &lt;= 0:
+        raise ValueError(&#x27;rate must be positive&#x27;)
+    return vector([a-rate*b for a,b in zip(p,g)], 9)
+
+
+def normalize(values, epsilon):
+    &quot;&quot;&quot;Within-vector population normalization, before learned gain/shift.&quot;&quot;&quot;
+    x = vector(values)
+    epsilon = number(epsilon)
+    if epsilon &lt;= 0:
+        raise ValueError(&#x27;epsilon must be positive&#x27;)
+    # Center relative to an input anchor: an identical vector stays exactly zero
+    # even when epsilon is tiny, instead of amplifying a rounded absolute mean.
+    shifted = tuple(z-x[0] for z in x)
+    mean_shift = math.fsum(shifted)/len(x)
+    centered = tuple(z-mean_shift for z in shifted)
+    variance = math.fsum(z*z for z in centered)/len(x)
+    denominator = math.sqrt(variance+epsilon)
+    return tuple(z/denominator for z in centered)
+
+
+def finite_difference(parameters, x, target, increment=1e-6):
+    &quot;&quot;&quot;Central numerical check, meaningful only away from ReLU kinks.&quot;&quot;&quot;
+    p = vector(parameters, 9)
+    increment = number(increment)
+    if increment &lt;= 0:
+        raise ValueError(&#x27;increment must be positive&#x27;)
+    result = []
+    for j in range(9):
+        plus, minus = list(p), list(p)
+        plus[j] += increment
+        minus[j] -= increment
+        if plus[j] == p[j] or minus[j] == p[j]:
+            raise ValueError(&#x27;increment is lost to rounding&#x27;)
+        result.append((loss_gradient(plus,x,target)[0]
+                       - loss_gradient(minus,x,target)[0])/(2*increment))
+    return tuple(result)
+
+
+def demo():
+    p = (2.,-1.,1.,.5,0.,.5,1.,-1.,0.)
+    x = (.5,0.)
+    loss, gradient = loss_gradient(p,x,1)
+    updated = step(p,gradient,.1)
+    new_loss = loss_gradient(updated,x,1)[0]
+    numerical = finite_difference(p,x,1)
+    error = max(abs(a-b) for a,b in zip(gradient,numerical))
+    assert error &lt; 1e-8 and new_loss &lt; loss
+    assert p == (2.,-1.,1.,.5,0.,.5,1.,-1.,0.)
+    # Enumerate independent centered weights of variance 1/4 with x=(1,1,1,1).
+    sums = [sum(w) for w in itertools.product((-.5,.5), repeat=4)]
+    variance = math.fsum(z*z for z in sums)/len(sums)
+    assert variance == 1.
+    assert normalize([7.,7.],1e-5) == (0.,0.)
+    print(f&#x27;warning probability before: {_sigmoid(0.):.6f}&#x27;)
+    print(f&#x27;loss before: {loss:.6f}&#x27;)
+    print(&#x27;gradient:&#x27;, &#x27;, &#x27;.join(f&#x27;{z:.6f}&#x27; for z in gradient))
+    print(f&#x27;loss after one step: {new_loss:.6f}&#x27;)
+    print(&#x27;central difference check: passed&#x27;)
+    print(f&#x27;input derivative at depth 20, w=0.5: {.5**20:.12f}&#x27;)
+    print(f&#x27;shared-weight derivative at depth 20, w=0.5: {20*.5**19:.12f}&#x27;)
+    print(f&#x27;residual multiplier when w=-1: {1.+(-1.):.6f}&#x27;)
+    print(&#x27;population normalization:&#x27;, &#x27;, &#x27;.join(f&#x27;{z:.6f}&#x27; for z in normalize([1.,3.],3.)))
+    print(f&#x27;enumerated initialization variance: {variance:.6f}&#x27;)
+    print(f&#x27;full sample mean: {13/3:.6f}; equal-batch mean: {5.5:.6f}&#x27;)
+
+
+if __name__ == &#x27;__main__&#x27;:
+    demo()
+</code></pre>
+<p>Exact displayed output, rounded to the shown precision:</p>
+<pre><code class="language-text">warning probability before: 0.500000
+loss before: 0.693147
+gradient: -0.250000, -0.000000, 0.250000, 0.000000, -0.500000, 0.500000, -0.500000, -0.500000, -0.500000
+loss after one step: 0.565071
+central difference check: passed
+input derivative at depth 20, w=0.5: 0.000000953674
+shared-weight derivative at depth 20, w=0.5: 0.000038146973
+residual multiplier when w=-1: 0.000000
+population normalization: -0.500000, 0.500000
+enumerated initialization variance: 1.000000
+full sample mean: 4.333333; equal-batch mean: 5.500000</code></pre>
+<p>The signed zero in the gradient is a floating-point representation of a zero derivative. The program checks all nine derivatives away from kinks, loss decrease after the stipulated step, input preservation, constant-vector normalization, and a complete initialization enumeration. Its two-unit trace learns from one warning point; it neither fits the entire disk nor reports a trained detector’s measured accuracy. The optional library-semantic observations in earlier sections were checked on CPU with PyTorch 2.11.0+cu128; PyTorch is not required to run this program.</p></section>
+
+<section><h2 id="exercises">12. Exercises with complete reasoning</h2>
+<h3>1. Graph cuts and accumulation</h3><p>For \(u=2\), \(v=u^2\), and \(L=v^2\), compute \(dL/du\). Now treat \(v\) as a detached constant in \(L'=v^2+u\). Explain the forward value, derivative, and what two fresh backward passes accumulate if gradients are not reset. Does detaching guarantee independent storage?</p>
+<details class="solution"><summary>Worked solution</summary><p>The original graph gives \(dL/du=2v\cdot2u=8\cdot4=32\). The altered forward value is \(16+2=18\), but the square now supplies no route to \(u\); only the direct addition contributes, giving derivative one. Two freshly constructed evaluations of this altered graph accumulate one plus one in the same tracked leaf’s gradient field, giving two if it started cleared. That accumulated value is not the derivative of one evaluation; it represents the sum of two objectives. Resetting before each pass leaves one after each pass. This discussion concerns fresh graphs, not permission to reuse saved intermediates from a graph already consumed by backward.</p><p>A detached tensor can still share the original storage. Changing its values in place may change the original tensor, potentially invalidating values needed by backward. Independent storage requires a copy such as a clone. Graph connectivity, accumulated derivatives, and ownership are three distinct contracts. The mathematical derivative one says nothing about safe aliasing.</p></details>
+<h3>2. An affine bottleneck</h3><p>Let \(d=3,m=2\) and \(M=\begin{bmatrix}1&0&0\\0&1&0\end{bmatrix}\). Can a hidden width of one represent \(Mx+b\)? Construct a width-two representation for arbitrary \(b\), and explain why equivalence of functions does not establish identical training.</p>
+<details class="solution"><summary>Worked solution</summary><p>The first two columns of \(M\) are independent, so its rank is two. A product through width one has rank at most one and cannot equal \(M\). Width two suffices: choose \(W_1=M\), \(W_2=I_2\), hidden bias zero, and output bias \(b\). Then \(W_2W_1=M\) and \(W_2b_1+b_2=b\). Width two is less than the input dimension three, demonstrating why requiring width at least both dimensions is too strong. More generally, rank is the necessary bottleneck dimension for a specified linear map.</p><p>Training adjusts two factors rather than the product directly. For the scalar analog \(w=uv\), zero factors make both factor derivatives vanish while the direct derivative with respect to \(w\) may not vanish. Rescaling one factor upward and the other downward preserves the represented map but changes parameter gradient scales. Function-family equivalence therefore does not prove equivalent conditioning, trajectories, or convergence.</p></details>
+<h3>3. One update and one representational counterexample</h3><p>Recompute the two-unit warning trace at \(x=(1/2,0)\), including the input derivative and the updated score for rate 0.1. Then decide whether the four-unit diamond construction agrees with the disk at \((0.6,0.6)\).</p>
+<details class="solution"><summary>Worked solution</summary><p>Both hidden preactivations equal one, so their ReLU derivatives are one. The score is zero, probability one half, and \(\delta=-1/2\). Multiplication by \(v=(1,-1)\) gives hidden derivatives \((-1/2,1/2)\). Multiplication by the input row gives weight derivatives \((-1/4,0)\) and \((1/4,0)\); biases receive the hidden derivatives. The output weights receive \((-1/2,-1/2)\), and the output bias receives \(-1/2\). The input derivative is \(W^\top(-1/2,1/2)=(-1/2,3/4)\).</p><p>After subtracting rate times gradient, the first weight column becomes \((2.025,0.975)\), biases become \((0.05,0.45)\), output weights become \((1.05,-0.95)\), and output bias becomes 0.05. Hidden preactivations are 1.0625 and 0.9375, so the score is \(1.05(1.0625)-0.95(0.9375)+0.05=0.275\). Loss is \(\log(1+e^{-0.275})\approx0.565071\).</p><p>At \((0.6,0.6)\), disk score is \(1-0.36-0.36=0.28>0\); diamond score is \(1-0.6-0.6=-0.2<0\). An update that reduces one example’s loss does not certify the shape of the learned warning region. Derivative correctness and representational suitability require separate checks.</p></details>
+<h3>4. Diagnose two gradient arguments</h3><p>For twenty scalar layers with shared \(w=1/2\) and input one, compare input and shared-weight derivatives. Give a unit-eigenvalue matrix with strong amplification. Can a residual path rule out a zero input derivative?</p>
+<details class="solution"><summary>Worked solution</summary><p>The input derivative is \(w^{20}=2^{-20}\). The shared parameter occurs twenty times, so the product rule sums twenty equal terms, giving \(20w^{19}=20\cdot2^{-19}\). Their ratio is forty; identifying the forward value with the shared parameter derivative would miss every occurrence of the reused weight. An untied individual weight instead has derivative \(2^{-19}\).</p><p>The shear matrix \(\begin{bmatrix}1&10\\0&1\end{bmatrix}\) has eigenvalues one yet stretches \((0,1)\) to length \(\sqrt{101}\). The eigenvalues do not determine this Euclidean amplification; singular values and ordered products are needed. Finally, take residual branch \(F(q)=-q\). Then the total block \(q+F(q)\) is zero and \(I+J_F=0\). Under the additional bound \(\|J_F\|_2&lt;1\), the reverse-triangle argument supplies a positive local lower bound. The bare existence of an identity path supplies no such hypothesis.</p></details>
+<h3>5. Normalization and initialization are different moment calculations</h3><p>Normalize \((1,3)\) with population variance and epsilon three. Apply common gain two and shift one. Compare a constant input. Separately calculate the variance of a four-term sum of independent weights \(\pm1/2\) with fixed input coordinates one. Which claims survive arbitrary learned gains?</p>
+<details class="solution"><summary>Worked solution</summary><p>The mean is two and population variance one. The denominator is \(\sqrt{1+3}=2\), yielding \((-1/2,1/2)\), mean zero and variance one quarter. Common gain two multiplies variance by four, while a common shift leaves variance unchanged, so output \((0,2)\) has mean one and variance one. A constant vector centers to zero and yields the learned shift alone. Nonuniform gains can also change the mean; arbitrary learned gains do not preserve the pre-affine normalization claims.</p><p>For the separate random-weight calculation, each weight has mean zero and variance one quarter. Independence makes cross covariance zero, so the sum’s variance is \(4(1/4)=1\), with mean zero. Equivalently, enumerate the sixteen sign assignments and average their squared sums. This ensemble initialization variance is not the within-vector variance used by layer normalization. It does not guarantee that a particular draw, later trained weights, or nonlinear multi-layer outputs have variance one. Both arguments manipulate moments, but their averaging domains and hypotheses differ.</p></details>
+<h3>6. An epoch, a final short batch, and a claim of success</h3><p>At fixed parameters, per-example scalar gradients are \((1,3,9)\). Compare the full gradient, an independent uniform draw, the second draw conditional on consuming one first, and equal versus sample-weighted means of batches \((1,3)\), \((9)\). What additional evidence is needed when training loss decreases?</p>
+<details class="solution"><summary>Worked solution</summary><p>The full mean is \(13/3\). An independent uniform draw has expectation \((1+3+9)/3\), so it is unbiased for that fixed objective. In a without-replacement epoch, conditioning on having consumed gradient one leaves gradients three and nine, whose next-draw mean is six. This conditional mean differs from \(13/3\); the first-draw symmetry cannot be reused after observing the consumed set.</p><p>The batch means are two and nine. Their equal mean is 5.5 and overweights the singleton. Sample weighting gives \((2/3)2+(1/3)9=13/3\). If parameters are updated after the first batch, the second gradient is evaluated at another parameter and this fixed-point identity no longer describes an epoch’s actual sequence.</p><p>Declining training loss supports fit to the chosen development objective. To assess the robot, freeze preprocessing and model choices, measure held-out probability quality and warning errors under stated operating conditions, and evaluate the action policy’s consequences separately. Examples from the same trajectory can share errors; counting frames does not automatically provide independent environments. The disk labels, loss weights, and decision penalties still require substantive justification even if every derivative and update is correct.</p></details></section>
+
+<section><h2 id="boundaries">13. What the chapter establishes</h2><p>The recording proceeds through graph/API semantics, a complete classification loop, nonlinear fixed features, affine collapse, ReLU, deep sensitivity, residual connections, layer normalization, initialization, and stochastic updates. These mechanisms form one route from the robot’s observations to a learned warning score. The official <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/deep_learning.py">retained executable lecture snapshot</a> supplies implementation context; the program here is independently written.</p><p>The proofs and numerical cases establish finite mathematical and engineering statements under their given hypotheses. They do not benchmark a framework, guarantee convergence, establish a universally optimal architecture, or certify physical collision avoidance. Primary sources support the residual parameterization, normalization definition, initialization compromise, and versioned API contracts where linked. The locally generated captions provide timestamps and may garble technical names. No claim of complete slide inspection or historical installed-package identity is made. The next task is to retain this distinction between a formal model and an execution guarantee when predictions become parts of search and sequential decisions.</p></section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-03-classification-probabilities-and-text.html">Previous available chapter</a><a href="index.html">Lecture index</a><span>Further chapters pending</span></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

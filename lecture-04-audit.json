@@ -1,0 +1,31 @@
+{
+  "chapter": "lecture-04-neural-networks-and-training.html",
+  "checked_at_utc": "2026-10-03T09:29:31.951835+00:00",
+  "status": "independently reviewed and locally validated chapter",
+  "independent_review": {
+    "rounds": 1,
+    "gate_6b": "accepted",
+    "passes_7_8": "accepted",
+    "blocking_defects": 0,
+    "review_report_sha256": "9183b1262577693e0afb3c2c9e12937338c0f81bc0d4b03df1bdb0a8880ee730"
+  },
+  "accepted_scientific_body_sha256": "095b221f476e3c8a006d3c59ee2747cf340ec3270ecb18826d85ae72355967e9",
+  "accepted_metadata_sha256": "7d6dd90e91c70e67e8e7a7fb45450c229d95dcaccc7c7d0316a450c6ebea8469",
+  "accepted_program_sha256": "9d0966317c21d58b3480efabc54af091a68f4688ee45b5e527e32e9bdf31081e",
+  "integrated_html_sha256": "c22754b0b591e1d86e5805b58158cf6d9da9da11bd2eb0847ffd77104c2dc250",
+  "worked_solutions": 6,
+  "source_scope": "Full sequential transcript and official module plus recorded claim-specific primary pages; bounded inspection",
+  "pass_9": {
+    "status": "passed within four-chapter integration scope",
+    "reader_report": "reader-validation.json",
+    "independent_numerical_checks": 226,
+    "privacy_scan": "passed",
+    "human_accessibility": "not performed"
+  },
+  "limits": [
+    "The full twenty-chapter course is incomplete",
+    "No full recording-frame or human ASR accuracy certification",
+    "No human keyboard/screen-reader audit",
+    "No empirical deployment-performance certification"
+  ]
+}

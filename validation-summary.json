@@ -1,0 +1,50 @@
+{
+  "checked_at_utc": "2026-10-03T09:29:31.951835+00:00",
+  "course": "CS221",
+  "chapter_count": 4,
+  "selected_recordings": 20,
+  "status": "Four independently reviewed chapters locally validated; full course in development",
+  "course_complete": false,
+  "human_accessibility": "not performed",
+  "reader_report": "reader-validation.json",
+  "accepted_chapters": {
+    "1": {
+      "body_sha256": "ded1654d52105cb8a2a7a92e9dfa47fb8619bb3876b605780f51a5f18572c396",
+      "metadata_sha256": "11b13303a71fa1f588170d33c8b06fce8845001aa3fb987e53e01be523e3451b",
+      "code_sha256": null,
+      "before_html_sha256": "d5dfcf0e4e896874d636c4617773afbcfa4112e8399be6d44c4e9de2733aee57",
+      "review_sha256": "824eeb551100f3f2ac1151e6baf2aa9cb216664c04a5ff65bff20590f3e3e8b9",
+      "after_html_sha256": "374d562e94868e4fbc89ea116506173b65e12cb0d11c79fd42d2b753b7f255cf"
+    },
+    "2": {
+      "body_sha256": "6c98e9aa2aeb6fa735b31d38fe1b7d1edd62c5d686e87451ba0c538fbea5c832",
+      "metadata_sha256": "66b4eac6b5076a6331a763db438623adf7af1800d1d14fe3e500c67bcd80478e",
+      "code_sha256": "fa0cef934f2436267cf0822d33beea72f829358c61777ad715f5719e86332844",
+      "before_html_sha256": "5f1e5cfdf2cd131aeb76a498a9980754863d734b65b8a2d8db0771c115cc1453",
+      "review_sha256": "05c8a00d8398ebdcff6fc2b878c02add00cde4c00c2fd4d7ab597fdb69417ecf",
+      "after_html_sha256": "5f1e5cfdf2cd131aeb76a498a9980754863d734b65b8a2d8db0771c115cc1453"
+    },
+    "3": {
+      "body_sha256": "426eeffceeca7168b53a6474a516945b09fad5e8c897b9577c3254be430e7d1a",
+      "metadata_sha256": "882df672ad25065d669271c76ff87bae62bae5076be24e3d92d9ef702f17530d",
+      "code_sha256": "a9525bcc62ea3c05296904b6effe4d3a48b2efc3bf143e8e106cd9b9ae9660ab",
+      "before_html_sha256": "f9fbe2fc8b1f662cc1d1a8aa12394cb28a62a93d801aaf6dc3cb83f65900492a",
+      "review_sha256": "7ae40dd596c6526b750db94e7685db0b676cf2f1ea5ecbff8631141aff68fb47",
+      "after_html_sha256": "461c780ce0a7e47cd68f14d5baa64cb9b20098a2fb22839de6d1a8e2cb3e8be2"
+    },
+    "4": {
+      "body_sha256": "095b221f476e3c8a006d3c59ee2747cf340ec3270ecb18826d85ae72355967e9",
+      "metadata_sha256": "7d6dd90e91c70e67e8e7a7fb45450c229d95dcaccc7c7d0316a450c6ebea8469",
+      "code_sha256": "9d0966317c21d58b3480efabc54af091a68f4688ee45b5e527e32e9bdf31081e",
+      "before_html_sha256": "b929a0ec5a0715d75cd0cc9356d6230b8a04af8edeb53166d286c81c44a3f988",
+      "review_sha256": "9183b1262577693e0afb3c2c9e12937338c0f81bc0d4b03df1bdb0a8880ee730",
+      "after_html_sha256": "c22754b0b591e1d86e5805b58158cf6d9da9da11bd2eb0847ffd77104c2dc250"
+    }
+  },
+  "privacy_findings": [],
+  "limits": [
+    "Chapters5\u201320, cumulative lab, full learning route and book-wide review pending",
+    "Machine transcription is not human wording verification",
+    "No publication performed"
+  ]
+}

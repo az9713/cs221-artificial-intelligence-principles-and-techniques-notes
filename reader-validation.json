@@ -1,10 +1,12 @@
 {
-  "checked_at_utc": "2026-10-03T07:36:26.371370+00:00",
+  "course": "CS221",
+  "checked_at_utc": "2026-10-03T09:29:31.951835+00:00",
+  "scope": "Integrated Chapters1\u20134 and existing reader support pages; twenty-chapter course incomplete",
   "static": {
     "status": "passed",
-    "html_files": 5,
-    "local_links_checked": 49,
-    "timestamps_checked": 6,
+    "html_files": 8,
+    "local_links_checked": 93,
+    "timestamps_checked": 41,
     "chapter_pages_with_dollar_math": 0,
     "failures": [],
     "warnings": []
@@ -46,6 +48,60 @@
         "controls": true,
         "emptyToc": false,
         "file": "lecture-01-foundations-and-tensors.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 318,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-02-objectives-gradients-and-learning.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 318,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-02-objectives-gradients-and-learning.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 328,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-03-classification-probabilities-and-text.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 328,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-03-classification-probabilities-and-text.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 282,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-04-neural-networks-and-training.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 282,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-04-neural-networks-and-training.html",
         "viewport": 390
       },
       {
@@ -108,7 +164,7 @@
     "network": "HTTP and HTTPS requests blocked during browser checks"
   },
   "human_accessibility": "not performed",
-  "renderer": "Explicit disposable headless Chromium, no user session or browser fallback",
-  "course": "CS221",
-  "scope": "Chapter 1 and existing five-page reader only; full course incomplete"
+  "renderer": "Explicit disposable headless Chromium; no user session or browser fallback",
+  "privacy_findings": [],
+  "other_course_files_unchanged": 345
 }
