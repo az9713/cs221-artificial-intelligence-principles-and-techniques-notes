@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
-  "checked_at_utc": "2026-10-03T12:49:24.709815+00:00",
+  "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
   "status": "independently reviewed and locally validated chapter",
   "accepted_scientific_body_sha256": "4c8af58a4758fb5a94319ad4dada45e1d8f8c3c5d23fa1d1f3b5683dda3117ad",
   "accepted_metadata_sha256": "766687b08b2ca1c88169fdaa89a9fe55a821e3e7a5ffa172523752c9fc0acdc4",
@@ -8,7 +8,7 @@
   "integrated_html_sha256": "165b1a5c20b4e24d5a2dc6508b34a44b3cb43206caacb4b8abaaa0b397017cad",
   "worked_solutions": 6,
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-10 reader scope",
+    "status": "passed within accepted Chapters1-11 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   },

@@ -1,12 +1,12 @@
 {
   "course": "CS221",
-  "checked_at_utc": "2026-10-03T12:49:24.709815+00:00",
-  "scope": "Accepted Chapters1-10 and four reader support pages; full20chapter course incomplete",
+  "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
+  "scope": "Accepted Chapters1-11 and four reader support pages; full20chapter course incomplete",
   "static": {
     "status": "passed",
-    "html_files": 15,
-    "local_links_checked": 177,
-    "timestamps_checked": 127,
+    "html_files": 16,
+    "local_links_checked": 190,
+    "timestamps_checked": 139,
     "chapter_pages_with_dollar_math": 0,
     "failures": [],
     "warnings": []
@@ -210,6 +210,24 @@
         "controls": true,
         "emptyToc": false,
         "file": "lecture-10-games-opponent-models-and-search.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 330,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 330,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
         "viewport": 390
       },
       {

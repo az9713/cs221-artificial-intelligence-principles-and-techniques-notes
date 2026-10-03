@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-01-foundations-and-tensors.html",
-  "checked_at_utc": "2026-10-03T12:49:24.709815+00:00",
+  "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
   "status": "independently reviewed and locally validated chapter",
   "independent_review": {
     "rounds": 2,
@@ -37,7 +37,7 @@
   "accepted_program_sha256": null,
   "integrated_html_sha256": "374d562e94868e4fbc89ea116506173b65e12cb0d11c79fd42d2b753b7f255cf",
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-10 reader scope",
+    "status": "passed within accepted Chapters1-11 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   }

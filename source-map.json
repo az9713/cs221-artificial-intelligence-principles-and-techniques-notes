@@ -4207,6 +4207,416 @@
       "chapter": "lecture-10-games-opponent-models-and-search.html",
       "video_id": "SMOD_GiRzb8",
       "duration": 4405
+    },
+    {
+      "section": "case",
+      "start": 5.17,
+      "end": 180.24,
+      "lecture_material": "Minimax/pruning/evaluator review and learning motivation.",
+      "research_extension": null,
+      "teaching_construction": "Dispatcher case, finite fully observed time/turn/chance state, fixed-A reward units and terminal reward-on-entry domain.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Search evaluator and learning motivation",
+          "origin": "Recording"
+        },
+        {
+          "class": "definition",
+          "claim": "Finite state/reward/profile/return assumptions",
+          "origin": "Original explicit teaching model"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "values",
+      "start": 180.24,
+      "end": 869.76,
+      "lecture_material": "V/Q/SARSA relationships, policy improvement, known game rules and vast state spaces.",
+      "research_extension": null,
+      "teaching_construction": "Stochastic-policy averaging, model-dependent value readout counterexample and action-gap error inequality.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Fixed-profile state/action values and sampled/model readouts",
+          "origin": "Recording mechanisms with explicit original domains"
+        },
+        {
+          "class": "theorem",
+          "claim": "Ranking preserved when action gap exceeds twice uniform score error",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Swapped transitions with identical successor values reverse choice",
+          "origin": "Original finite counterexample"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "td",
+      "start": 869.76,
+      "end": 1177.26,
+      "lecture_material": "Parametric state value, squared fitting, temporal difference and detached-target update.",
+      "research_extension": "Sutton1988 PDF7\u20138: successive-prediction TD(0), eligibility recurrence and trace family, not universal convergence.",
+      "teaching_construction": "Half-squared frozen-target derivative versus full sampled residual; conditional variance decomposition; exact scalar comparison.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Recorded detached TD target and prediction gradient",
+          "origin": "Recording and actual official TD diagram"
+        },
+        {
+          "class": "theorem",
+          "claim": "Semi/full derivative formulas and mean-square/variance decomposition under finite differentiable assumptions",
+          "origin": "Original derivations"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Weights21/10 versus39/20",
+          "origin": "Original rational fixture"
+        },
+        {
+          "class": "definition",
+          "claim": "TD trace mechanism",
+          "origin": "Sutton1988 PDF7\u20138"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "terminal",
+      "start": 1182.19,
+      "end": 1452.53,
+      "lecture_material": "Tabular tram demonstration, current-policy interpretation and terminal feedback.",
+      "research_extension": "Pinned td_learning.py lines142\u2013150: is_end accepted but next-state table read unconditionally.",
+      "teaching_construction": "Nonzero terminal-storage failure; alternative boundary convention scoped to discount1; evaluation/control distinction.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Retained end-flag interface and target behavior",
+          "origin": "Actual pinned source"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Terminal target2 versus unguarded11 and double-payoff failure",
+          "origin": "Original fixtures"
+        },
+        {
+          "class": "definition",
+          "claim": "Fixed-policy and changing-control interpretation",
+          "origin": "Recording topic with original qualification"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "selfplay",
+      "start": 1453.55,
+      "end": 1974.24,
+      "lecture_material": "Shared game evaluator, maximizing/minimizing decisions, dice and backgammon features.",
+      "research_extension": null,
+      "teaching_construction": "Fixed-A viewpoint, turn collision, observation-before-choice inequality and2-versus1 chance fixture; evaluation contract.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Shared evaluator, chance and feature mechanisms",
+          "origin": "Recording and inspected official features"
+        },
+        {
+          "class": "theorem",
+          "claim": "Observation-before-choice expectation inequality for always-legal actions",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Turn-dependent2/\u22121 values; observed chance2 versus precommitment1",
+          "origin": "Original examples"
+        },
+        {
+          "class": "definition",
+          "claim": "Finite evaluation suite and changed-opponent limits",
+          "origin": "Original proposal"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "history",
+      "start": 1974.24,
+      "end": 2300.14,
+      "lecture_material": "Samuel, TD-Gammon and AlphaGo Zero self-play history.",
+      "research_extension": "Samuel1959 reprint PDF1\u201312; Tesauro1995 ACM-permitted HTML learning-methodology section; Silver2017 PDF1\u20132/7\u20138 methods and actual pipeline.",
+      "teaching_construction": "Correct checkers identity; distinguish polynomial coefficient adaptation, TD(lambda) and search-policy/outcome fitting; omit unverified quantitative history.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Historical identity and method distinctions",
+          "origin": "Actually inspected primary claim pages/HTML section"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Historical systems motivate evaluator plus experience and search",
+          "origin": "Recorded motivation, not a reproduction or universal theorem"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "simultaneous",
+      "start": 2300.14,
+      "end": 2674.18,
+      "lecture_material": "Simultaneous games, two-finger Morra payoff table, pure and mixed strategies.",
+      "research_extension": null,
+      "teaching_construction": "Fixed-A matrix orientation, independent hidden draw contract, transfer-unit specialization and simplex domains.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Payoff matrix, pure/mixed strategies and announcement versus realization",
+          "origin": "Recording mechanisms with original explicit information contract"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Morra entries2,\u22123,\u22123,4",
+          "origin": "Actual official table; original reproduction as mathematical values"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "expectation",
+      "start": 2674.18,
+      "end": 2978.51,
+      "lecture_material": "Expected payoff under mixtures and classroom repeated play.",
+      "research_extension": null,
+      "teaching_construction": "Product-law derivation, correlated diagonal/offdiagonal counterexamples, repeated-history and recommendation scope.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Bilinear independent expectation and joint-law distinction",
+          "origin": "Original finite derivation of recorded mechanism"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Uniform product0 versus diagonal joint3",
+          "origin": "Original exact calculation"
+        },
+        {
+          "class": "definition",
+          "claim": "Adaptive/repeated play and recommendation information limits",
+          "origin": "Original scope qualification"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "commitment",
+      "start": 2978.51,
+      "end": 3354.4,
+      "lecture_material": "Pure commitment order, responding to announced mixture and minimizing-player correction.",
+      "research_extension": null,
+      "teaching_construction": "Pure bounds\u22123/2, max-min inequality, pure best-response by linearity, uniform opponent response\u22121/2.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Pure max-min\u2264min-max and pure response to a fixed mixture",
+          "origin": "Original proofs of recorded mechanism"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Pure bounds\u22123 and2; minimizing response to uniformA gives\u22121/2",
+          "origin": "Original verified arithmetic, corrected recording sign slip"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "security",
+      "start": 3354.4,
+      "end": 3963.66,
+      "lecture_material": "Continuous mixture envelopes,7/12 probabilities,\u22121/12 value and minimax equality.",
+      "research_extension": "Nash1950 PDF2/printed49 states zero-sum existence/minimax equivalence and common payoff.",
+      "teaching_construction": "Envelope slopes and saddle/tie proof; complete two-action endpoint/intersection rule; finite game LP weak duality and common optimum from an in-place zero-sum response correspondence with explicit Kakutani hypotheses; action-leak counterexample.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Morra envelope optima and saddle bounds",
+          "origin": "Original complete finite proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "p=q7/12,v\u22121/12; leak gives\u22123",
+          "origin": "Original exact fixtures"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite matrix security LP/dual weak bound, saddle existence and common optimum",
+          "origin": "Original in-place zero-sum correspondence reduction using the Nash1950 mechanism; Kakutani theorem explicitly invoked and its hypotheses verified"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite zero-sum minimax/equilibrium equivalence and unique value",
+          "origin": "Nash1950 PDF2, hypotheses stated; no strategy-uniqueness claim"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "nash",
+      "start": 3963.66,
+      "end": 4359.28,
+      "lecture_material": "Separate utility matrices, prisoner/collaborative examples, Nash conditions and finite mixed existence.",
+      "research_extension": "Nash1950 PDF1\u20132/printed48\u201349: finite distributions, response correspondence, closed graph, convex values and Kakutani reduction.",
+      "teaching_construction": "Prisoner strict-dominance proof including mixed uniqueness; all three cooperative equilibria; full finite-game fixed-point reduction and explicit topology hinge; response cycle.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Separate utilities, Nash, best response, dominance and Pareto comparison",
+          "origin": "Recorded topics with original definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite Nash existence under stated compact/convex/continuous hypotheses",
+          "origin": "Original finite reduction of Nash1950 claim; Kakutani theorem explicitly invoked"
+        },
+        {
+          "class": "theorem",
+          "claim": "Prisoner unique mixed/pure equilibrium and cooperative three-profile classification",
+          "origin": "Original proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Prisoner refusal regrets1/1; cooperative mixed payoff\u22121/12; four-step response cycle",
+          "origin": "Original exact checks"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "synthesis",
+      "start": 4359.41,
+      "end": 4422.16,
+      "lecture_material": "Game-model summary and probabilistic/Bayesian-network bridge.",
+      "research_extension": null,
+      "teaching_construction": "Learning/readout/security/equilibrium contract table and modeled chance versus adversarial uncertainty.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Summary of learning and game objectives",
+          "origin": "Recording synthesis; original operational qualification"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Original bounded-rational stdlib program, explicit terminal/derivative/probability/joint/Nash APIs and exact stdout.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Public bounded-rational numeric and effect/failure contracts",
+          "origin": "Original implementation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact loss derivatives, finite saddle certificates and invalid inputs",
+          "origin": "Author check evidence; not independent editorial acceptance"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Six developed derivation, numeric, counterexample, information, equilibrium and evaluation solutions.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Conditional finite proof steps and complete equilibrium classifications",
+          "origin": "Original solutions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Exact arithmetic, leaks, terminal and response-cycle fixtures",
+          "origin": "Original solutions"
+        },
+        {
+          "class": "definition",
+          "claim": "Proposed decision-level evaluation and stated limits",
+          "origin": "Original proposal"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
+    },
+    {
+      "section": "boundaries",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Primary bibliography, computational/source scope and explicit remaining hypotheses.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Guarantee and attribution limits",
+          "origin": "Original synthesis"
+        }
+      ],
+      "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "video_id": "9CKRoKFdS5Y",
+      "duration": 4428
     }
   ]
 }

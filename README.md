@@ -4,7 +4,7 @@ Independent, enhanced textbook based on 20 selected Autumn 2025 recordings.
 
 ## Current local edition
 
-Chapters1-10 are independently reviewed and locally validated. Chapters11-20 are in development. All twenty recordings and local machine transcripts are available; machine transcription is not publisher-authored captioning.
+Chapters1-11 are independently reviewed and locally validated. Chapters12-20 are in development. All twenty recordings and local machine transcripts are available; machine transcription is not publisher-authored captioning.
 
 Open `index.html` for the reader. Run `python numerical_lab.py` for Chapter 1's numerical checks; NumPy checks are optional when NumPy is installed. The HTML reader's laboratory is currently a general companion scaffold; the full course laboratory and learning route remain in development.
 
@@ -21,3 +21,5 @@ RL chapter program: `python programs/chapter08.py`. Their exact finite examples 
 Policy-gradient chapter program: `python programs/chapter09.py`. Their exact finite examples are checked teaching constructions.
 
 Game-search chapter program: `python programs/chapter10.py`. Their exact finite examples are checked teaching constructions.
+
+Additional accepted chapter program: `python programs/chapter11.py`. Their exact finite examples are checked teaching constructions.

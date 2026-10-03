@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="490588343d92b9dd7f16fcbcaeeca7ba0a09c3fe77b5df831eddcdc85ddea1ba"><title>Learning game values and reasoning about simultaneous decisions · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><h1>Learning game values and reasoning about simultaneous decisions</h1>
+<p class="lead">A dispatcher can improve a value predictor from its own journeys. A rival dispatcher can also change which journeys are available and profitable. Learning a prediction, choosing an action against an observed opponent, and securing a payoff against a hidden simultaneous choice are different mathematical problems. We will connect them through one fixed utility viewpoint, then derive where temporal-difference learning and mixed-strategy equilibrium each apply.</p>
+<p class="source-note">Independent textbook treatment of Stanford CS221, Artificial Intelligence: Principles and Techniques, Autumn 2025, Lecture 11. The topic sequence and timestamp links follow the locally generated machine transcript. Proofs, counterexamples, program and exercises are original teaching constructions. Machine transcription is not human-verified captioning.</p>
+
+<section id="case"><h2>1. Search needs an evaluator; experience can train it <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=5">00:05</a></h2>
+<p>Imagine two dispatchers, A and B, choosing access to competing routes. A receives a utility measured in transfer units; in the first model B receives its negative. At a decision state, a dispatcher sees the current route situation and its legal actions. The environment may contain known random events, such as a vehicle becoming available. Deep search is expensive, so a learned evaluator predicts the consequences of positions where the search stops. A small prediction error can change an action ranking and send the dispatcher down a different route. A useful evaluator must therefore be judged through the decisions it supports as well as through its numerical prediction errors.</p>
+<p>Chapter 10's minimax search alternates a maximizing decision for A with a minimizing decision for B. Pruning can avoid exploring branches that cannot change the selected result, but it does not supply the evaluation of an unexplored future. Here we learn an evaluator from transitions. Later we compress a single encounter into two simultaneous route choices. This second task has a different information structure: neither player sees the other's current action before choosing. Solving that one-shot encounter will not solve an arbitrary sequential dispatching game.</p>
+<p>For the sequential derivations, use a finite fully observed state set \(\mathcal S\), a finite deadline \(H\) in decision rounds, and finite nonempty legal-action sets \(\mathcal A(s)\) at nonterminal states. A state includes remaining time, player to move, and any chance result already revealed. The <strong>Markov property</strong> means this state contains the information needed to specify the next response distribution; the current board or route photograph alone need not do so. Rewards take values in a fixed finite bounded set and are expressed from A's fixed viewpoint. B minimizes A's expected utility in this zero-sum model, even when B is the player to move.</p>
+<p>Write \(S_t\in\mathcal S\) for the state before round \(t\in\{0,\ldots,H-1\}\), \(A_t\in\mathcal A(S_t)\) for its chosen action, and \(S_H\) for the state after the final round. A <strong>behavior profile</strong> \(\sigma=(\sigma_A,\sigma_B)\) specifies each player's distribution over its legal choices. Freeze both distributions during policy evaluation. Together with the response law \(K(s',r\mid s,a)\), this determines the distribution of next state \(s'\) and reward \(r\) after action \(a\). A known simulator supplies this law or lets us sample it; it does not enumerate the value of every reachable state. The vast number of states motivates approximation, even when the rules are known.</p>
+<p>Use reward-on-transition semantics. When a terminal state is reached, its final payoff is included in the arriving reward; its remaining value is zero. With discount \(\gamma\in[0,1]\), remaining return at round \(t\) is</p>
+\[G_t=\sum_{j=t}^{H-1}\gamma^{j-t}R_{j+1},\qquad G_H=0.\]
+<p>Here \(R_{j+1}\) is the reward received after round \(j\). Early termination can be padded with zero-reward absorbing rounds. The finite deadline makes the return well-defined even at \(\gamma=1\). It is a stipulated teaching model, not an assertion that every game terminates almost surely.</p></section>
+
+<section id="values"><h2>2. A state value becomes an action choice only through a model <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=180">03:00</a></h2>
+<p>For a fixed profile \(\sigma\), define the <strong>state value</strong> \(V^\sigma(s)\) as the expected remaining return when the process starts in state \(s\) at its encoded time. On a positive-probability visitation event it also equals \(\mathbb E_\sigma[G_t\mid S_t=s]\); initialization defines values even for states the original start distribution never visits. Define the <strong>action value</strong> \(Q^\sigma(s,a)\) by taking legal action \(a\) now, then following the profile. Let \(\sigma(a\mid s)\) denote the distribution of the player whose turn occurs at \(s\). Then</p>
+\[Q^\sigma(s,a)=\sum_{s',r}K(s',r\mid s,a)\,[r+\gamma V^\sigma(s')],\qquad
+V^\sigma(s)=\sum_{a\in\mathcal A(s)}\sigma(a\mid s)Q^\sigma(s,a).\]
+<p>The last expression is an average for a randomized policy. The abbreviation \(V^\sigma(s)=Q^\sigma(s,\sigma(s))\) applies when the policy selects one action deterministically. It should not be read as inserting a probability distribution into an action slot.</p>
+<p>Replacing the continuation value on the right with a supplied predictor, then averaging over the profile's action distribution, computes a <strong>Bellman backup</strong> of that predictor. Its difference from the predictor's current state value is a <strong>Bellman residual</strong>. This expected backup averages possible feedback; a sampled transition supplies a random estimate of it.</p>
+<p>Chapter 9 learned action values directly because the response model was unknown. If game dynamics are known, a state-value predictor can be reused to score every legal action through the first equation. For a deterministic successor map \(f(s,a)\), it reduces to \(r(s,a)+\gamma V^\sigma(f(s,a))\). At an A turn choose an action maximizing that expression; at a B turn choose one minimizing it. This is one-step improvement against the assumed continuation profile, not a theorem that updating both players simultaneously has reached minimax equilibrium.</p>
+<p>State values alone do not determine the readout. Suppose the successor values are \(V(u)=3\) and \(V(v)=0\), immediate rewards are zero and \(\gamma=1\). In model I, action L goes to \(u\) and R to \(v\); A selects L. In model II, the destinations are swapped; A selects R. The supplied value table is identical. Knowing which actions lead to which outcomes is the missing information.</p>
+<p>Even with correct dynamics, approximation can change the ranking. Let the actual action values be \(q_1,q_2\) with gap \(\Delta=q_1-q_2&gt;0\). If each estimated action value differs from its actual value by at most \(\varepsilon\), then</p>
+\[\widehat q_1-\widehat q_2\ge \Delta-2\varepsilon.\]
+<p>A positive gap exceeding \(2\varepsilon\) guarantees the correct ordering. For the deterministic readout with exact rewards, an error bound \(|\widehat V(s')-V(s')|\le e\) supplies \(\varepsilon=\gamma e\). A small average prediction error provides no such worst-case guarantee. Conversely, adding the same offset to both action scores changes their absolute errors but preserves this one decision's ranking. Approximation and decision quality must be related to the actual readout and evaluation distribution.</p>
+<p>Values can be estimated from complete returns or from shorter targets. SARSA updates an action-value estimate using a next action actually selected by the behavior policy. A state-value update can instead average all actions through the model or sample an action from the evaluated profile. The object being estimated must remain explicit: evaluating a frozen profile, evaluating an opponent model, and seeking the minimax value have different continuation laws.</p></section>
+
+<section id="td"><h2>3. Temporal differences train a current prediction against a frozen target <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=869">14:29</a></h2>
+<p>A <strong>feature map</strong> \(\phi:\mathcal S\to\mathbb R^d\) represents the state by a fixed dimensionless column vector of positive integer dimension \(d\). For the linear evaluator \(V_w(s)=w^\top\phi(s)\), weights \(w\in\mathbb R^d\) convert those features to reward units. A differentiable neural evaluator changes the representation family, while preserving the target-versus-prediction distinction below. Features and observed transition are fixed during this one update.</p>
+<p>On feedback \((s,a,r,s')\), define a terminal flag \(b\in\{0,1\}\), equal to one when \(s'\) is terminal. The one-step <strong>temporal-difference target</strong> and error are</p>
+\[y=r+\gamma(1-b)V_w(s'),\qquad \delta=y-V_w(s).\]
+<p>The term “temporal difference” refers to comparing predictions at successive times. “Bootstrapping” means using a prediction of the future before the full future return has been observed. The target uses the weights before the update and is held constant during differentiation. Introduce the local fitting loss \(\ell(w;y)=\tfrac12[V_w(s)-y]^2\). Its frozen-target gradient is \([V_w(s)-y]\nabla_wV_w(s)\), so a step with dimensionless rate \(\alpha\ge0\) gives</p>
+\[w_{\mathrm{new}}=w+\alpha\delta\,\nabla_wV_w(s)
+=w+\alpha\delta\phi(s)\quad\text{for a linear evaluator}.\]
+<p>The factor \(1/2\) absorbs the factor two in differentiating a square. The recording's update differentiates the current prediction and explicitly treats the target as detached. This is called a <strong>semi-gradient</strong> because \(y\) numerically depends on \(w\) but its derivative is omitted. It is gradient descent on the local loss with this fixed target; it is not generally gradient descent on one global squared Bellman-error objective.</p>
+<p>To see the distinction, differentiate the full sampled residual instead:</p>
+\[L(w)=\tfrac12[r+\gamma(1-b)V_w(s')-V_w(s)]^2,\]
+\[w_{\mathrm{new}}=w+\alpha\delta\,[\nabla_wV_w(s)-\gamma(1-b)\nabla_wV_w(s')].\]
+<p>With scalar \(w=2\), current feature \(\phi(s)=1\), next feature \(\phi(s')=3\), reward zero, \(\gamma=1/2\) and \(\alpha=1/10\), the target is 3 and the prediction is 2. Semi-gradient TD gives \(2+(1/10)(1)(1)=21/10\). The full-residual direction is \(1-(1/2)3=-1/2\), giving \(2-(1/20)=39/20\). They move in opposite directions. Automatic differentiation of an attached next-state branch therefore changes the algorithm.</p>
+<p>For random feedback, the expected squared sampled residual also differs from the square of its conditional mean. Let \(R\) be the next reward and \(b(S')\) the terminal indicator of the random next state. For \(D_w=R+\gamma[1-b(S')]V_w(S')-V_w(s)\) at fixed \(s,a\),</p>
+\[\mathbb E[D_w^2\mid s,a]=(\mathbb E[D_w\mid s,a])^2+\operatorname{Var}(D_w\mid s,a).\]
+<p>Thus differentiating a sampled full residual can include a variance term. It cannot silently be advertised as minimizing just the squared expected Bellman residual. Here the program compares the two derivatives on a fixed deterministic transition; it makes no convergence claim. <a href="https://jmvidal.cse.sc.edu/library/sutton88a.pdf">Sutton's 1988 paper</a>, PDF pages 7–8, develops the temporal-difference family and its incremental credit assignment; the TD(0) rule compares successive predictions, while larger trace parameters distribute updates across earlier predictions.</p></section>
+
+<section id="terminal"><h2>4. The terminal convention is part of the learning rule <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=1182">19:42</a></h2>
+<p>A tabular evaluator stores one value per state. Use a one-hot feature vector: \(\phi(s)\) has one coordinate equal to one and all others zero. The semi-gradient update changes only the current state's entry, giving \(V(s)\leftarrow V(s)+\alpha[y-V(s)]\). Observations generated by a fixed profile supply targets for that profile. An exploration policy that changes its actions while updating changes the data-generating behavior; its evaluation and improvement roles must be distinguished.</p>
+<p>The recording demonstrates this idea using a small walking/tram environment. The retained implementation accepts an end flag but forms its target by reading the next-state table entry even at the end. Initially zero terminal entries make that example agree with zero continuation. The dependence is exposed by a nonzero stale entry: terminal reward 2, \(\gamma=9/10\), and stored terminal value 10 produce the unguarded target \(2+(9/10)10=11\). Under our return definition, the correct target is 2. A terminal flag must suppress the bootstrap regardless of storage contents.</p>
+<p>An alternative convention assigns a terminal state \(z\) its final payoff \(U(z)\) as a boundary value \(V(z)=U(z)\), uses zero reward on the final transition, and, for the comparison here, sets \(\gamma=1\). Then the last nonterminal target is \(U(z)\), the same target as reward-on-entry with terminal value zero. Mixing both conventions pays twice: reward \(U\) plus terminal continuation \(U\) gives \(2U\). At \(\gamma&lt;1\), moving a payoff from reward to continuation also changes its discount unless timing is adjusted. Our executable uses reward-on-entry throughout.</p>
+<p>A sampled target can be unbiased for the one-step backup of a fixed predictor under the evaluated profile. That is weaker than saying the predictor itself is correct or the repeated learning process converges. Shared features couple state updates; nonlinear networks add nonconvex optimization; greedy policy changes alter the transition distribution; changing self-play changes the opponent. A finite successful trajectory does not establish a fixed-policy evaluation theorem for all these processes.</p></section>
+
+<section id="selfplay"><h2>5. Shared self-play values need a fixed viewpoint and correct information timing <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=1453">24:13</a></h2>
+<p>In a zero-sum game, both sides can consult one value predictor for A's utility. At A turns select a maximizing action; at B turns select a minimizing one. Transitions experienced by either side can update that shared predictor. There is no automatic sign reversal merely because the turn changes. A predictor defined from the player-to-move viewpoint is possible, but it requires a different sign-adjusted recurrence and target. Combining that convention with the fixed-A update corrupts the meaning of the numbers.</p>
+<p>The turn must also be represented in the state. Consider identical route geometry with two legal successors whose A payoffs are 2 and \(-1\), and no other rewards. If A acts now, optimal readout yields 2. If B acts now, it yields \(-1\). A feature vector that discards the player to move identifies states with different values. Increasing training data cannot make one deterministic prediction simultaneously equal both.</p>
+<p>Backgammon adds chance. A roll is random before it occurs; once observed, it restricts the legal moves the current player can consider. Let \(D\) be a revealed chance outcome with a known distribution on a finite set. At an A decision with a common finite action set, write \(q(d,a)\) for expected A continuation utility after outcome \(d\) and action \(a\). Choosing after observing \(D\) leads to an expectation of a state-dependent maximum. Choosing before it would instead maximize an expectation over the same fixed action. These operators differ:</p>
+\[\mathbb E_D\big[\max_a q(D,a)\big]\ \ge\ \max_a\mathbb E_D[q(D,a)],\]
+<p>when the precommitted actions remain available for every outcome. For each fixed \(a\), its payoff is bounded above pointwise by the maximum; averaging and maximizing proves the inequality. If legal sets depend on \(D\), specify which precommitments are admissible instead of applying this comparison to nonexistent actions.</p>
+<p>In an original dispatching example, L and R are both always legal, a fair signal announces L or R, and matching it pays 2 while a mismatch pays zero. Observation before action gives \((1/2)2+(1/2)2=2\). A fixed action chosen first has expected payoff \((1/2)2+(1/2)0=1\). Treating known probabilities as deterministic outcomes, or moving the observation across the choice, changes the task. At a chance node the fixed-A backup averages; it neither maximizes nor minimizes unless an adversary actually controls that event.</p>
+<p>The lecture's backgammon features include indicators for piece counts at positions, the number of pieces on the bar, the fraction removed, and whose turn it is. An <strong>indicator</strong> is one when its stated predicate holds and zero otherwise. These features let different boards share parameters; they need not distinguish every strategically relevant board and history. Testing should separate representation error, prediction error on held-out states, and action performance against a frozen evaluation suite. The suite needs specified opponents and random-event distributions. Training against oneself does not automatically certify robustness against other opponents.</p></section>
+
+<section id="history"><h2>6. Historical self-play systems use different learning and search targets <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=1974">32:54</a></h2>
+<p><a href="https://www.cs.virginia.edu/~evans/greatworks/samuel1959.pdf">Arthur Samuel's 1959 study</a> concerns <em>checkers</em>. It combines search, stored evaluations and adaptation of a scoring polynomial. Its backup diagram alternates maximizing and minimizing choices; its learning discussion compares remembered scores with backed-up evaluations and adjusts feature coefficients through sign/correlation procedures. These mechanisms anticipate learning an evaluator from play, but they are not identical to the modern TD(0) formula above. The paper also discusses instability and limits on interpreting its experiments (reprint PDF pages 5, 9 and 12).</p>
+<p><a href="https://www.bkgm.com/articles/tesauro/tdl.html">Gerald Tesauro's 1995 account of TD-Gammon</a>, in its learning-methodology section, describes a neural backgammon evaluator trained by self-play with TD(\(\lambda\)). The trace parameter \(\lambda\in[0,1]\) controls how earlier predictions receive temporal credit; it is not the same as the discount \(\gamma\). The account distinguishes an initial raw encoding from later versions with handcrafted features. Consequently “learned by self-play” does not imply that every reported version used the same representation or search procedure.</p>
+<p><a href="https://gwern.net/doc/reinforcement-learning/model/alphago/2017-silver.pdf">Silver and colleagues' AlphaGo Zero paper (2017)</a> describes another combination. Monte Carlo tree search expands simulated continuations using a neural policy and value predictor. The network learns a policy target from search visit counts and a value target from the eventual game result, with regularization; its loss is not the one-step TD(0) loss. The methods specify game rules, legal moves, board-history planes, player-to-move information and symmetries (PDF pages 2, 7–8). AlphaGo Zero is distinct from earlier AlphaGo versions. Learning without human game examples does not mean learning without domain structure.</p>
+<p>These examples motivate the architecture of evaluator plus search plus experience. They do not turn a small linear update into a replica of those systems. Our remaining analysis isolates the information structure of one simultaneous encounter, for which a matrix model makes the opponent's incentives explicit.</p></section>
+
+<section id="simultaneous"><h2>7. Simultaneous choices are distributions over hidden actions <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=2300">38:20</a></h2>
+<p>For one encounter, each dispatcher chooses route 1 or route 2 without seeing the other's current choice. Let \(\mathcal A=\mathcal B=\{1,2\}\). A <strong>payoff matrix</strong> \(M\in\mathbb R^{2\times2}\) lists A's utility, with A's action selecting a row and B's selecting a column. B receives \(-M_{ij}\); there are no continuation rewards in this one-shot specialization. Use the lecture's two-finger Morra matrix as the transfer schedule:</p>
+\[M=\begin{pmatrix}2&amp;-3\\-3&amp;4\end{pmatrix}.\]
+<p>The corresponding Morra rule pays A the sum of the two finger counts when they match, and charges A that sum when they differ. Thus matching one finger pays 2, matching two pays 4, and a mismatch pays \(-3\). In our dispatching interpretation these are stipulated transfer units, not empirical route measurements. Once the matrix is given, its incentives can be analyzed without a simulator.</p>
+<p>A <strong>pure strategy</strong> chooses one action with probability one. A <strong>mixed strategy</strong> is a probability distribution over the actions: \(x=(p,1-p)^\top\) for A and \(y=(q,1-q)^\top\) for B, where \(p,q\in[0,1]\). More generally, the \(m\)-action probability simplex is \(\Delta_m=\{x\in\mathbb R^m:x_i\ge0,\sum_i x_i=1\}\). Pure strategies are its vertices; probabilities zero and one remain legal.</p>
+<p>The strategy may be announced while the realized draw remains hidden. B can know that A chooses route 1 with probability \(7/12\) without knowing A's current choice. Security from randomization depends on that distinction. An action chosen deterministically but concealed is not a known probability model unless one is supplied; a published distribution with a private draw is a precise model.</p></section>
+
+<section id="expectation"><h2>8. Expected payoff requires the joint law, not just the marginals <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=2674">44:34</a></h2>
+<p>Write \(I_A,I_B\in\{1,2\}\) for the players' random action indices. For <strong>independent</strong> draws, the probability of action pair \((i,j)\) is \(x_i y_j\). The expected payoff is a bilinear form, meaning it is linear in either strategy when the other is fixed:</p>
+\[u(x,y)=x^\top My=\sum_{i=1}^2\sum_{j=1}^2x_iM_{ij}y_j.\]
+<p>It is linear in either strategy when the other is fixed, and dimensionless probabilities preserve the payoff's utility units. For Morra,</p>
+\[u(p,q)=2pq-3p(1-q)-3(1-p)q+4(1-p)(1-q).\]
+<p>Independent uniform strategies give each outcome probability \(1/4\), so expected A payoff is \((2-3-3+4)/4=0\). This expectation says neither player necessarily breaks even in one realized encounter. With fresh independent draws and the same distributions, repeated averages can estimate it; adaptive play based on visible history creates a different repeated-game policy model.</p>
+<p>For a general joint law \(J_{ij}=\Pr(I_A=i,I_B=j)\), entries are nonnegative and sum to one. Expected payoff is \(\sum_{ij}J_{ij}M_{ij}\). Its row and column sums are the marginal strategies. Equal marginals need not give equal payoffs. Let \(J_{11}=J_{22}=1/2\) and the other entries zero. Both marginals are uniform, yet the payoff is \((2+4)/2=3\), rather than zero. Here draws are perfectly correlated. Replacing \(J\) by a product silently deletes that dependence.</p>
+<p>Public shared randomness, signals, communication and observation of past actions can change the admissible joint law or each player's available information. A one-shot Nash definition below uses independent mixed choices and unilateral changes to one player's distribution. For a <strong>correlated equilibrium</strong>, each player privately receives an action recommendation drawn from a specified joint law. Conditional on each of its own recommendations having positive probability, following it must be at least as good in expected own utility as any unilateral alternative, while the other player follows its recommendation. Merely constructing a favorable joint law does not prove those obedience incentives.</p></section>
+
+<section id="commitment"><h2>9. Moving second and responding to a known mixture <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=2978">49:38</a></h2>
+<p>First restrict both players to pure commitments and let the second player observe the first choice. If A commits first, B selects the minimum in that row. Each Morra row contains \(-3\), so A's best guaranteed payoff is \(\max_i\min_j M_{ij}=-3\). If B commits first, A selects the maximum in that column. The column maxima are 2 and 4; B selects column 1, giving \(\min_j\max_i M_{ij}=2\). The same payoff table gives different sequential commitment values.</p>
+<p>The general inequality needs no game-theoretic existence theorem. For any fixed column \(j\), \(\min_{j'}M_{ij'}\le M_{ij}\) for every row \(i\). Maximizing over \(i\) and then minimizing the right side over \(j\) proves</p>
+\[\max_i\min_j M_{ij}\le\min_j\max_i M_{ij}.\]
+<p>Observing the other player's choice permits a response contingent on it. This extra information helps the responding maximizer or minimizer weakly, provided action sets and payoffs remain the same. It does not explain every advantage associated with “moving second” in games whose actions themselves alter what is possible.</p>
+<p>Now A commits to a distribution \(p\), but hides the realized action. B's payoffs to A for its two pure columns are</p>
+\[c_1(p)=2p-3(1-p)=5p-3,\qquad
+c_2(p)=-3p+4(1-p)=4-7p.\]
+<p>Any B mixture gives a convex combination of these numbers. Its minimum is attained at a pure column with the smaller number; ties allow either pure column and all their mixtures. Against uniform A, \(c_1(1/2)=-1/2\) and \(c_2(1/2)=1/2\). B minimizes by choosing column 1. The response is selected in A's utility orientation, so the negative value helps B. Announcing a distribution does not give B the opportunity to respond separately to each unseen draw.</p></section>
+
+<section id="security"><h2>10. Maximize the lower envelope; minimize the upper envelope <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=3354">55:54</a></h2>
+<p>A's <strong>security payoff</strong> for mixture \(p\) is its lowest expected payoff over B's independently chosen distributions:</p>
+\[L(p)=\min\{5p-3,4-7p\}.\]
+<p>A maximizes this lower envelope. The two lines cross when \(5p-3=4-7p\), giving \(p^*=7/12\). For \(p\le7/12\), the lower line is \(5p-3\), which increases with \(p\). For \(p\ge7/12\), it is \(4-7p\), which decreases. The crossing is therefore a maximum, not merely a solution of two equalities. At the endpoints the security payoff is \(-3\); at the crossing it is \(35/12-36/12=-1/12\). Thus \(x^*=(7/12,5/12)^\top\).</p>
+<p>Against B mixture \(q\), A's two pure-row payoffs are \(5q-3\) and \(4-7q\). A maximizes them, so B minimizes the <strong>upper envelope</strong></p>
+\[U(q)=\max\{5q-3,4-7q\}.\]
+<p>Before the same crossing the upper line \(4-7q\) decreases; after it the upper line \(5q-3\) increases. Hence \(q^*=7/12\) and the upper value is also \(v=-1/12\). Both distributions have nonzero probability on both actions. Independent equilibrium play has expected A loss \(1/12\) transfer unit per encounter.</p>
+<p>For every \(p,q\in[0,1]\), the pair satisfies the <strong>saddle inequalities</strong></p>
+\[u(p,q^*)\le u(p^*,q^*)=v\le u(p^*,q).\]
+<p>The left inequality says A cannot improve against \(q^*\); the right says B cannot decrease A's payoff against \(p^*\). In this particular matrix, both inequalities are equalities for every deviation: \(u(p,q^*)=v\) and \(u(p^*,q)=v\). Each optimal opponent equalizes the deviator's pure choices. Deviation need not strictly reduce one's payoff. Security means a lower bound on expectation against admissible opponent strategies, not a lower bound on each realized payoff, which can still be \(-3\).</p>
+<p>The equalizing trick needs its feasibility and envelope geometry. For a general matrix \(\begin{pmatrix}a&amp;b\\c&amp;d\end{pmatrix}\), the lower envelope compares \(c+(a-c)p\) with \(d+(b-d)p\). If \(D=a-b-c+d\ne0\), their intersection is \((d-c)/D\); B's intersection is \((d-b)/D\). An intersection outside \([0,1]\) is not a probability. If \(D=0\), the lines are parallel or identical. The maximum or minimum may occur at an endpoint; a constant matrix may make every strategy optimal. In two dimensions, evaluating feasible intersections and endpoints is sufficient because each envelope is affine between its breakpoints. Our program uses this complete finite rule.</p>
+<p>For a finite \(m\times n\) zero-sum matrix, the same security problem is a <strong>linear program</strong>: its objective and constraints are affine in the decision variables. Introduce a proposed guaranteed utility \(v\) for A and a proposed upper utility \(w\) for B:</p>
+\[\begin{aligned}
+&amp;\max_{x,v} v&amp;&amp; x\in\Delta_m,\quad M^\top x\ge v\mathbf1_n,\\
+&amp;\min_{y,w} w&amp;&amp; y\in\Delta_n,\quad My\le w\mathbf1_m.
+\end{aligned}\]
+<p>The vector \(\mathbf1_k\) contains \(k\) ones; inequalities hold coordinatewise. A's constraints cover every pure column, hence every B mixture by linearity. Multiplying them by a feasible \(y\), and B's by a feasible \(x\), gives \(v\le x^\top My\le w\), the weak-duality bound. These are primal and dual linear programs. They are feasible by choosing any mixture and a sufficiently small or large bound; finite entries bound all expected payoffs.</p>
+<p>To prove that these two programs have a common optimum, we first establish a saddle pair for the finite zero-sum matrix. Let \(m,n\) be positive integers and let \(\mathcal Z=\Delta_m\times\Delta_n\). This strategy product is a nonempty compact convex subset of finite-dimensional Euclidean space. Define the set-valued response rule
+\[
+\mathcal T(x,y)=
+\operatorname*{arg\,max}_{x'\in\Delta_m}x'^\top My
+\ \times\
+\operatorname*{arg\,min}_{y'\in\Delta_n}x^\top My'.
+\]
+A set-valued rule, or correspondence, assigns all optimizing responses rather than selecting one at a tie. Each response set is nonempty because the continuous linear payoff attains its extreme on a compact simplex. It is closed and convex: limits of optimizing strategies retain their payoff, and every convex combination of optimizers has that same payoff. The graph is closed as well. If inputs and their optimizing responses converge, every response inequality against a fixed alternative passes to the limit by continuity, so the limiting responses remain optimal.</p>
+<p>Kakutani's fixed-point theorem, in the finite-dimensional form used here, says that a correspondence from a nonempty compact convex set into itself, with nonempty closed convex values and a closed graph, has a fixed point. We invoke this topological theorem; the argument above verifies its hypotheses for \(\mathcal T\). Hence some \((x^*,y^*)\) belongs to \(\mathcal T(x^*,y^*)\). Put \(v^*=x^{*\top}My^*\). The maximizing response gives \(x^\top My^*\le v^*\) for every \(x\in\Delta_m\), and the minimizing response gives \(x^{*\top}My\ge v^*\) for every \(y\in\Delta_n\). These are precisely the saddle inequalities. They establish existence without assuming minimax equality.</p>
+<p>The inequalities hold in particular at every pure row and column. Therefore \((x^*,v^*)\) is feasible for A's maximizing program, and \((y^*,v^*)\) is feasible for B's minimizing program. Their respective optimal values are at least and at most \(v^*\). The already proved weak-duality inequality orders them in the opposite direction, forcing both optima to equal \(v^*\). This proves finite matrix minimax equality and strong duality for this game-specific pair; it does not prove general linear-programming duality or infer a theorem from sampled grid points. The value is unique even when optimizing mixtures are not: for any other saddle pair with value \(v'\), applying each pair's inequalities to the other pair yields \(v'\le v^*\) and \(v^*\le v'\). Existence of these distributions does not guarantee convergence of a particular self-play update.</p>
+<p>Information can destroy the advertised guarantee without changing the announced probabilities. If B sees A's realized Morra action before choosing, it selects the opposite action and pays A \(-3\) every time. This B choice is conditional on A's draw, so its joint law is not \(x^*\otimes y\) for a fixed independently chosen \(y\). Secret independent sampling is a substantive assumption. Predictable seeds or leaked actions turn the interaction into another game.</p></section>
+
+<section id="nash"><h2>11. General games have equilibrium conditions for separate utilities <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=3963">1:06:03</a></h2>
+<p>Now allow each player its own utility matrix, \(U_A,U_B\in\mathbb R^{m\times n}\). Both maximize their own expected utilities \(u_A(x,y)=x^\top U_Ay\) and \(u_B(x,y)=x^\top U_By\). The second utility need not equal the negative of the first. A <strong>Nash equilibrium</strong> is an independent strategy pair \((x^*,y^*)\) at which neither player can improve by changing only its own distribution:</p>
+\[u_A(x^*,y^*)\ge u_A(x,y^*)\quad\forall x\in\Delta_m,\qquad
+u_B(x^*,y^*)\ge u_B(x^*,y)\quad\forall y\in\Delta_n.\]
+<p>A <strong>best response</strong> is a distribution attaining the appropriate maximum against a fixed opponent. Since payoff is linear in one's own distribution, a best pure response exists; a mixture is also optimal when it places mass only on best pure actions. Thus a proposed equilibrium can be checked through finitely many pure deviations. Existence of some best pure response does not imply that the two players have a mutual pure best-response pair.</p>
+<p>The recording's prisoner's dilemma orders each player's actions as testify, refuse. The payoff matrices are</p>
+\[U_A=\begin{pmatrix}-5&amp;0\\-10&amp;-1\end{pmatrix},\qquad
+U_B=\begin{pmatrix}-5&amp;-10\\0&amp;-1\end{pmatrix}.\]
+<p>Testifying gives A \(-5\) rather than \(-10\) when B testifies, and 0 rather than \(-1\) when B refuses. It is therefore <strong>strictly dominant</strong>: it improves A's payoff for every pure opponent action and every opponent mixture. The same comparison holds for B. If B testifies with probability \(q\), A's advantage of testifying over refusing is \(5q+1(1-q)=1+4q&gt;0\). Each must put probability one on testifying in any Nash equilibrium, proving that mutual testimony is the unique equilibrium, including mixed strategies.</p>
+<p>Its payoff vector is \((-5,-5)\). Mutual refusal instead gives \((-1,-1)\), improving both players, but each could improve further to zero by testifying alone. A profile <strong>Pareto dominates</strong> another if nobody receives less and someone receives more. Mutual refusal Pareto dominates mutual testimony, but is not a Nash equilibrium. Nash conditions constrain unilateral incentives; they do not optimize collective welfare or impose fairness.</p>
+<p>For collaborative Morra, both players receive the original matrix: \(U_A=U_B=M\). The diagonal pure profiles are equilibria: at \((1,1)\), a unilateral switch replaces 2 with \(-3\); at \((2,2)\), it replaces 4 with \(-3\). In addition, \(p=q=7/12\) makes each player's two pure responses equal, so it is an interior mixed equilibrium with both expected payoffs \(-1/12\). That profile is strictly Pareto dominated by either diagonal pure equilibrium. A coordinated change to \((2,2)\) is profitable, but a unilateral change against the fixed equalizing mixture is not. “Same interests” does not identify a unique equilibrium.</p>
+<p>Why does allowing mixtures guarantee existence in finite games? Here is the reduction, with its topological hinge stated explicitly. Let \(X=\Delta_m\times\Delta_n\), a nonempty compact convex subset of finite-dimensional Euclidean space. Define the best-response correspondence</p>
+\[\mathcal R(x,y)=\operatorname*{arg\,max}_{x'\in\Delta_m}u_A(x',y)
+\ \times\ \operatorname*{arg\,max}_{y'\in\Delta_n}u_B(x,y').\]
+<p>A correspondence assigns a set of outputs, not necessarily one output. Each response set is nonempty because a continuous payoff attains its maximum on a compact simplex. It is convex because all convex combinations of maximizers remain maximizers of a linear function. It is closed because equality to the maximal payoff is preserved under limits. The graph of \(\mathcal R\) is closed: if \((x_k,y_k)\) and best responses \((x'_k,y'_k)\) converge, every best-response inequality against a fixed alternative passes to the limit by continuity. The limiting response still beats every alternative.</p>
+<p><strong>Kakutani's fixed-point theorem</strong>, in the compact finite-dimensional form used here, states that a correspondence on a nonempty compact convex set, with nonempty closed convex values and a closed graph, has a fixed point. These hypotheses hold for \(\mathcal R\). A fixed point \((x^*,y^*)\in\mathcal R(x^*,y^*)\) is exactly a mutual best response, hence a Nash equilibrium. We have verified the finite-game reduction; the topological theorem itself is being invoked, not proved by a drawing of crossing curves. Nash's original note gives this correspondence argument for any finite number of players.</p>
+<p>Existence is not a training algorithm, uniqueness theorem, or stability theorem for a specified update. Alternating greedy best responses can cycle even in a finite game. In the zero-sum Morra matrix, beginning at column 1, A responds with row 1; B responds with column 2; A responds with row 2; B responds with column 1, returning to the start. Mixed equilibrium exists while this pure response process never settles. To claim convergence of self-play, one must specify a learning dynamic and verify its assumptions separately.</p></section>
+
+<section id="synthesis"><h2>12. Learning, security and equilibrium answer different questions <a class="timestamp" href="https://www.youtube.com/watch?v=9CKRoKFdS5Y&amp;t=4359">1:12:39</a></h2>
+<p>A fixed-policy value predicts consequences under specified behavior. A one-step readout uses known dynamics and those predictions to choose an action. A zero-sum security strategy optimizes a worst-case expected payoff over specified independent opponent choices. A general Nash pair is a mutual response condition for separate utilities. The same word “value” cannot substitute for all four contracts.</p>
+<table><thead><tr><th>Question</th><th>Needed information</th><th>What the result says</th></tr></thead><tbody>
+<tr><td>What does this profile achieve?</td><td>Profile, state, reward law and terminal convention</td><td>Expected remaining return under that profile</td></tr>
+<tr><td>Which action improves this continuation?</td><td>Legal actions, response model and continuation predictor</td><td>Best one-step readout for that predictor</td></tr>
+<tr><td>What can A secure in a matrix game?</td><td>Fixed-A payoff matrix and independent hidden draws</td><td>Worst-case expected payoff, not every realized payoff</td></tr>
+<tr><td>Can either player profitably deviate?</td><td>Both utility matrices and a proposed independent profile</td><td>Nash condition; no welfare or learning-dynamics guarantee</td></tr>
+</tbody></table>
+<p>The next part of the course studies probabilistic reasoning. A known chance distribution, a learned opponent model and an adversarial choice are different sources of uncertainty. Keeping those distinctions explicit helps determine whether to average, infer, maximize, or minimize. In the dispatching case, the contract must identify what the agent observes before acting, how its opponent responds, and whether its score is evaluated under a fixed profile or a worst-case model.</p></section>
+
+<section id="implementation"><h2>13. An exact finite program checks the contracts</h2>
+<p>The original program below uses only Python's standard library. Save it as <code>programs/chapter11.py</code> and run <code>python -I -B programs/chapter11.py</code> from the book directory. It does not fit a neural network or simulate a tournament. It computes exact rational TD steps, response envelopes, joint expectations and unilateral-deviation tests, so numerical approximation cannot hide the distinctions established above.</p>
+<p>Public numeric inputs are built-in integers or <code>Fraction</code> values, excluding booleans and subclasses; the numerator and denominator of each input must use at most 128 bits. Floating-point values, including finite ones, are rejected rather than silently converted to uncertain probabilities. Vectors must be built-in lists or tuples of length 1–16. Payoff and joint matrices are exactly 2 by 2. Probabilities, discount and step lie in the closed interval \([0,1]\); pure strategies and zero steps are supported. Joint probabilities must be nonnegative and sum exactly to one. Unsupported values raise <code>ValueError</code>. The TD terminal and residual flags must be booleans, and all inputs are validated even when a terminal flag makes the next features irrelevant.</p>
+<p>The TD function returns new weights, target and temporal difference without mutating inputs. Its optional residual mode implements the full derivative for comparison; the default freezes the target. The zero-sum solver examines endpoints and feasible line intersections, including degenerate cases; it chooses the smallest optimal probability in a tie. It returns row probability, column probability and the common security value. The general-game checker returns each player's maximum gain from a unilateral deviation; zero gains certify the supplied profile, but do not enumerate every mixed equilibrium. The pure enumerator returns only pure equilibria with zero-based indices. Exact internal rationals may grow beyond the input limit; running cost depends on bit length as well as the fixed dimensions.</p>
+<p>There is no network access, file access, random sampling or hidden mutable training state. The displayed output is the program's actual standard output, including its final newline. The terminal probe intentionally compares a correctly suppressed bootstrap with the separate unguarded arithmetic; it does not ask the TD routine to emulate a broken terminal rule.</p>
+<pre><code class="language-python" id="chapter-program">&quot;&quot;&quot;Exact finite TD and two-action game fixtures; Python standard library only.
+
+Public numbers: built-in int or Fraction, excluding bool and subclasses;
+numerator/denominator at most 128 bits. Inputs never mutated. Internal rational
+arithmetic may grow. There is no training, randomness, network or file access.
+&quot;&quot;&quot;
+from fractions import Fraction
+
+
+def rational(value):
+    if type(value) not in (int, Fraction):
+        raise ValueError(&#x27;expected built-in int or Fraction, excluding bool&#x27;)
+    result = Fraction(value)
+    size = max(abs(result.numerator).bit_length(),
+               result.denominator.bit_length())
+    if size &gt; 128:
+        raise ValueError(
+            &#x27;public rational exceeds 128-bit numerator/denominator&#x27;)
+    return result
+
+
+def probability(value):
+    result = rational(value)
+    if not 0 &lt;= result &lt;= 1:
+        raise ValueError(&#x27;probability or step must lie in [0,1]&#x27;)
+    return result
+
+
+def vector(value):
+    if type(value) not in (list, tuple) or not 1 &lt;= len(value) &lt;= 16:
+        raise ValueError(&#x27;vector must be list/tuple of length 1..16&#x27;)
+    return tuple(rational(x) for x in value)
+
+
+def matrix(value):
+    if type(value) not in (list, tuple) or len(value) != 2:
+        raise ValueError(&#x27;matrix must have exactly two rows&#x27;)
+    rows = tuple(vector(row) for row in value)
+    if any(len(row) != 2 for row in rows):
+        raise ValueError(&#x27;matrix must be 2x2&#x27;)
+    return rows
+
+
+def td_step(weights, features, next_features, reward, discount, step,
+            terminal=False, residual=False):
+    &quot;&quot;&quot;Return(new_weights,target,delta) from one fixed recorded transition.
+
+    terminal=True suppresses bootstrap. residual=True differentiates the
+    whole sampled half-squared residual instead of freezing its target.
+    All arguments, including unused terminal next_features, are validated.
+    &quot;&quot;&quot;
+    w, phi, nxt = vector(weights), vector(features), vector(next_features)
+    if not len(w) == len(phi) == len(nxt):
+        raise ValueError(&#x27;weights and feature vectors must have equal lengths&#x27;)
+    r = rational(reward)
+    gamma = probability(discount)
+    alpha = probability(step)
+    if type(terminal) is not bool or type(residual) is not bool:
+        raise ValueError(&#x27;terminal and residual must be bool&#x27;)
+    current = sum(a*b for a, b in zip(w, phi))
+    target = r if terminal else r + gamma*sum(a*b for a, b in zip(w, nxt))
+    delta = target-current
+    direction = tuple(a-gamma*b if residual and not terminal else a
+                      for a, b in zip(phi, nxt))
+    return tuple(a+alpha*delta*b for a, b in zip(w, direction)), target, delta
+
+
+def _expect(m, p, q):
+    return (p*q*m[0][0] + p*(1-q)*m[0][1]
+            + (1-p)*q*m[1][0] + (1-p)*(1-q)*m[1][1])
+
+
+def expected(payoffs, row_probability, column_probability):
+    &quot;&quot;&quot;A&#x27;s payoff expectation for independent draws; pure endpoints allowed.&quot;&quot;&quot;
+    return _expect(matrix(payoffs), probability(row_probability),
+                   probability(column_probability))
+
+
+def joint_expected(payoffs, joint):
+    &quot;&quot;&quot;Expectation under an explicitly supplied joint law; not product play.&quot;&quot;&quot;
+    m, law = matrix(payoffs), matrix(joint)
+    if any(x &lt; 0 for row in law for x in row) or sum(map(sum, law)) != 1:
+        raise ValueError(
+            &#x27;joint probabilities must be nonnegative and sum to 1&#x27;)
+    return sum(m[i][j]*law[i][j] for i in range(2) for j in range(2))
+
+
+def zero_sum(payoffs):
+    &quot;&quot;&quot;Return(p,q,value) from endpoints/intersections of response envelopes.
+
+    Row player maximizes, column player minimizes the same matrix. Ties use
+    the smallest probability. A two-action solver, not a general Nash solver.
+    &quot;&quot;&quot;
+    m = matrix(payoffs)
+    (a, b), (c, d) = m
+    denominator = a-b-c+d
+    ps, qs = {Fraction(0), Fraction(1)}, {Fraction(0), Fraction(1)}
+    if denominator:
+        p, q = (d-c)/denominator, (d-b)/denominator
+        if 0 &lt;= p &lt;= 1:
+            ps.add(p)
+        if 0 &lt;= q &lt;= 1:
+            qs.add(q)
+
+    def lower(p):
+        return min(c+(a-c)*p, d+(b-d)*p)
+
+    def upper(q):
+        return max(b+(a-b)*q, d+(c-d)*q)
+
+    p = max(sorted(ps), key=lower)
+    q = min(sorted(qs), key=upper)
+    value = lower(p)
+    assert value == upper(q), &#x27;finite rational primal/dual disagreement&#x27;
+    return p, q, value
+
+
+def regrets(row_payoffs, column_payoffs, row_probability, column_probability):
+    &quot;&quot;&quot;Max gain from unilateral deviation for each player; both maximize.&quot;&quot;&quot;
+    a, b = matrix(row_payoffs), matrix(column_payoffs)
+    p, q = probability(row_probability), probability(column_probability)
+    row_value, col_value = _expect(a, p, q), _expect(b, p, q)
+    row_best = max(q*a[i][0]+(1-q)*a[i][1] for i in range(2))
+    col_best = max(p*b[0][j]+(1-p)*b[1][j] for j in range(2))
+    return row_best-row_value, col_best-col_value
+
+
+def pure_equilibria(row_payoffs, column_payoffs):
+    &quot;&quot;&quot;Return only pure Nash profiles as(row_index,column_index);0-based.&quot;&quot;&quot;
+    a, b = matrix(row_payoffs), matrix(column_payoffs)
+    return tuple((i, j) for i in range(2) for j in range(2)
+                 if a[i][j] == max(a[k][j] for k in range(2))
+                 and b[i][j] == max(b[i][k] for k in range(2)))
+
+
+def main():
+    f = Fraction
+    semi = td_step([2], [1], [3], 0, f(1, 2), f(1, 10))
+    full = td_step([2], [1], [3], 0, f(1, 2), f(1, 10), residual=True)
+    terminal = td_step([10], [1], [1], 2, f(9, 10), f(1, 10), terminal=True)
+    print(f&#x27;TD target/delta: {semi[1]} / {semi[2]}&#x27;)
+    print(f&#x27;semi-gradient/full-residual weights: {semi[0][0]} / {full[0][0]}&#x27;)
+    unguarded = 2+f(9, 10)*10
+    print(f&#x27;terminal target / unguarded target: {terminal[1]} / {unguarded}&#x27;)
+    m = [[2, -3], [-3, 4]]
+    p, q, value = zero_sum(m)
+    print(f&#x27;Morra row/column probabilities: {p} / {q}&#x27;)
+    print(f&#x27;Morra security value: {value}&#x27;)
+    uniform = expected(m, f(1, 2), f(1, 2))
+    diagonal = joint_expected(m, [[f(1, 2), 0], [0, f(1, 2)]])
+    print(f&#x27;uniform independent / diagonal joint: {uniform} / {diagonal}&#x27;)
+    revealed = p*min(m[0])+(1-p)*min(m[1])
+    print(f&#x27;revealed-realization payoff: {revealed}&#x27;)
+    # Chance is independent, observed before choice in the first calculation.
+    observed = f(1, 2)*max(2, 0)+f(1, 2)*max(0, 2)
+    committed = max(f(1, 2)*2+f(1, 2)*0, f(1, 2)*0+f(1, 2)*2)
+    print(f&#x27;observed-chance / precommitted action: {observed} / {committed}&#x27;)
+    a, b = [[-5, 0], [-10, -1]], [[-5, -10], [0, -1]]
+    print(f&#x27;prisoner pure Nash profiles: {pure_equilibria(a, b)}&#x27;)
+    ra, rb = regrets(a, b, 0, 0)
+    print(f&#x27;prisoner mutual-refusal regrets: {ra} / {rb}&#x27;)
+    print(f&#x27;cooperative pure Nash profiles: {pure_equilibria(m, m)}&#x27;)
+    ra, rb = regrets(m, m, p, q)
+    cooperative = expected(m, p, q)
+    print(f&#x27;cooperative interior regrets/payoff: {ra} / {rb} / {cooperative}&#x27;)
+
+
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</code></pre>
+<pre><code class="language-text" id="chapter-output">TD target/delta: 3 / 1
+semi-gradient/full-residual weights: 21/10 / 39/20
+terminal target / unguarded target: 2 / 11
+Morra row/column probabilities: 7/12 / 7/12
+Morra security value: -1/12
+uniform independent / diagonal joint: 0 / 3
+revealed-realization payoff: -3
+observed-chance / precommitted action: 2 / 1
+prisoner pure Nash profiles: ((0, 0),)
+prisoner mutual-refusal regrets: 1 / 1
+cooperative pure Nash profiles: ((0, 0), (1, 1))
+cooperative interior regrets/payoff: 0 / 0 / -1/12
+</code></pre>
+<p>The output separates three independent issues. The two TD derivatives disagree on the same transition. The product and correlated laws disagree despite identical uniform marginals. The cooperative mixed profile has zero unilateral gains while giving lower payoffs than coordinated pure choices. A passing finite program establishes these checks for its stated domain; it does not certify arbitrary function approximation or learning dynamics.</p></section>
+
+<section id="exercises"><h2>14. Six exercises with complete solutions</h2>
+<article class="exercise"><h3>Exercise 1 — Detachment, terminal rewards and the objective</h3>
+<p>For \(V_w(s)=w\phi(s)\), take \(w=2\), \(\phi(s)=1\), \(\phi(s')=3\), \(r=0\), \(\gamma=1/2\) and \(\alpha=1/10\). Derive the semi-gradient and full-residual updates from their losses. Then change to a terminal transition with \(r=2\) and the same features and parameters. What targets and updates result? Explain why differentiating a sampled residual is not automatically differentiating the square of an expected Bellman residual.</p>
+<details class="solution"><summary>Solution</summary>
+<p>Before the nonterminal update, \(y=0+(1/2)(2)(3)=3\), current prediction is 2, and \(\delta=1\). Holding \(y\) constant, the half-squared loss derivative is \((2-3)1=-1\), so \(w_{\rm semi}=2-(1/10)(-1)=21/10\). With the next prediction attached, \(D(w)=(1/2)3w-w=w/2\). Thus \(L(w)=w^2/8\), \(L'(2)=1/2\), and \(w_{\rm full}=2-(1/10)(1/2)=39/20\). This also follows from \(\delta[\phi(s)-\gamma\phi(s')]=-1/2\).</p>
+<p>At termination, \(y=r=2\) regardless of next features. The current prediction is also 2, so \(\delta=0\) and both rules leave \(w=2\). If the arriving reward already contains the payoff, including a terminal boundary estimate would count an extra continuation. A separate case with a stale terminal prediction 10 and discount \(9/10\) produces the wrong target 11, demonstrating why initially zero storage is not sufficient validation.</p>
+<p>For a random residual \(D_w\), \(\mathbb E[D_w^2]=(\mathbb E[D_w])^2+\operatorname{Var}(D_w)\). Under the finite differentiable model, differentiation of the left side includes the derivative of the variance as well as the mean-square term. A full sampled residual gradient estimates the former objective's derivative. Detaching the next prediction estimates another update direction. Neither identification alone proves convergence of the learning process.</p></details></article>
+
+<article class="exercise"><h3>Exercise 2 — Values, turns and observations are not interchangeable</h3>
+<p>A predictor gives successor values \(V(u)=3,V(v)=0\). All immediate rewards are zero and \(\gamma=1\). Construct two deterministic models with the same values but opposite preferred A actions. Show that omitting the turn can force a representation collision. Finally prove the observation-before-choice inequality for finite chance outcomes and compute the fair matching-signal example.</p>
+<details class="solution"><summary>Solution</summary>
+<p>In model I, L reaches \(u\) and R reaches \(v\); their readouts are 3 and 0, so L wins. In model II, L reaches \(v\) and R reaches \(u\); R wins. The value table supplies consequences of states, while the response model supplies which state follows an action. No algorithm given just these two numbers can identify the correct action in both models.</p>
+<p>Take one board geometry whose legal successors pay A 2 and \(-1\). In an A-turn state, maximizing gives 2; in the corresponding B-turn state, minimizing gives \(-1\). If both states map to identical \(\phi\), then every deterministic evaluator \(V_w(\phi)\) assigns the same number to both. Its absolute error on at least one is at least \(3/2\): if both errors were smaller, a single value would have to lie simultaneously within two disjoint open intervals centered at 2 and \(-1\). Recording the turn removes this particular collision, but does not prove the remaining representation is sufficient.</p>
+<p>For finite outcome probabilities \(\mu_d\ge0\) summing to one and an always-legal action \(a\), \(\sum_d\mu_d\max_{a'}q(d,a')\ge\sum_d\mu_d q(d,a)\). Taking the maximum of the right side proves \(\mathbb E\max q\ge\max\mathbb E q\). With fair L/R signals and match payoff 2, observing first gives 2; committing first gives 1 for either action or any independent mixture. This is an information advantage, not better function approximation. If availability itself depends on the signal, first define the allowable precommitted policies before comparing the operators.</p></details></article>
+
+<article class="exercise"><h3>Exercise 3 — Security envelopes and an invalid equalizing formula</h3>
+<p>Derive both Morra security strategies and value, proving optimality rather than just equating payoffs. Then solve \(N=\begin{pmatrix}3&amp;2\\1&amp;0\end{pmatrix}\) and the constant matrix with every entry 5. Explain which cases a two-action solver must include.</p>
+<details class="solution"><summary>Solution</summary>
+<p>Morra's A-security envelope is \(L(p)=\min(5p-3,4-7p)\). Their difference is \(12p-7\), so the first line is lower before \(7/12\) and the second after. The first increases and the second decreases, proving a global maximum at \(p^*=7/12\) with value \(-1/12\). B's envelope \(U(q)=\max(5q-3,4-7q)\) decreases before its crossing and increases after, proving the same \(q^*,v\). Pure deviations both have value \(v\), and mixed deviations are convex combinations of them, giving the saddle inequalities for all distributions.</p>
+<p>For \(N\), A's column payoffs are \(1+2p\) and \(2p\), so the lower envelope is \(2p\). Its maximum occurs at \(p=1\) and equals 2. B's row payoffs are \(2+q\) and \(q\), so the upper envelope is \(2+q\); its minimum occurs at \(q=0\), also value 2. Here \(D=3-2-1+0=0\); division by an equalizing denominator is undefined. The optimal pure pair is row 1, column 2, not an interior mix.</p>
+<p>For the all-5 matrix, both envelopes equal 5 everywhere. Every pair of distributions is a saddle pair. An implementation may return \(p=q=0\) by a specified tie rule without asserting uniqueness. For a general matrix, evaluate both endpoints and any actual intersection in \([0,1]\). Each piece between those breakpoints is affine, so its extreme is achieved at a boundary or throughout a flat piece. This covers parallel lines, out-of-range intersections, pure saddle points and nonunique optima.</p></details></article>
+
+<article class="exercise"><h3>Exercise 4 — A leaked draw changes the game</h3>
+<p>A uses the Morra security distribution \((7/12,5/12)\). Compare the expected payoff against an independently chosen B mixture with the payoff when B sees A's realized action and chooses the opposite. Construct uniform marginals with a payoff different from uniform independent play. Is a favorable joint law by itself a correlated equilibrium?</p>
+<details class="solution"><summary>Solution</summary>
+<p>Against any independently selected B distribution, both pure columns give \(-1/12\), so every mixture also gives \(-1/12\). If B sees the realized action, the joint law is \(J_{12}=7/12,J_{21}=5/12\), with diagonal entries zero. Both supported outcomes pay \(-3\), yielding expected payoff \(-3\). B's conditional response cannot be written as one product law using that same A marginal: its column choice depends on A's draw. The security theorem's independence/information premise has failed.</p>
+<p>With uniform marginals, diagonal coupling \(J_{11}=J_{22}=1/2\) gives payoff 3. Independent coupling gives four entries \(1/4\) and payoff zero. Another uniform coupling, \(J_{12}=J_{21}=1/2\), gives \(-3\). Thus identical marginal probabilities can produce 3, 0 or \(-3\); the expectation formula needs the joint law.</p>
+<p>A correlated-equilibrium claim additionally specifies private recommendations and obedience incentives. In zero-sum Morra, the diagonal recommendation law is not such an equilibrium: if B is told column 1, it knows A was recommended row 1 and improves its own payoff by switching to column 2; likewise at the other diagonal. Correlation alone is a distributional property, not an incentive certificate. In a cooperative version, the same diagonal recommendations do pass those particular unilateral tests because a mismatch reduces both utilities. The utility matrices and information therefore both matter.</p></details></article>
+
+<article class="exercise"><h3>Exercise 5 — Nash does not select the collectively best outcome</h3>
+<p>Using the stated prisoner's-dilemma matrices, prove uniqueness of its Nash equilibrium over mixed strategies and calculate the unilateral gains at mutual refusal. For collaborative Morra, find every Nash equilibrium, including mixed profiles. Compare their payoffs and explain why improving both players together does not violate a Nash condition.</p>
+<details class="solution"><summary>Solution</summary>
+<p>If B testifies with probability \(q\), A's expected advantage of testifying is \(5q+1(1-q)=1+4q&gt;0\) for every \(q\in[0,1]\). Any positive probability of refusal can be moved to testimony to increase A's payoff. B has advantage \(1+4p&gt;0\) by the same calculation, so equilibrium forces \(p=q=1\). Its payoffs are \((-5,-5)\). At mutual refusal the payoffs are \((-1,-1)\), but either unilateral testimony gives that player zero: each regret is 1.</p>
+<p>For collaborative Morra, A's first-row payoff minus second-row payoff is \(12q-7\); B's first-column payoff minus second-column payoff is \(12p-7\). A chooses row 1 if \(q&gt;7/12\), row 2 if \(q&lt;7/12\), and may mix only at equality. B has the symmetric rule. The pure mutual responses are \((p,q)=(1,1)\) and \((0,0)\). If either probability is strictly interior, its opponent must be exactly \(7/12\); that interior opponent in turn requires the first probability to be \(7/12\). Hence the only additional profile is \((7/12,7/12)\). A partially mixed boundary profile cannot satisfy both best-response conditions: a pure opponent induces a strict response, forcing the other player pure too.</p>
+<p>The three payoff vectors are \((2,2)\), \((4,4)\) and \((-1/12,-1/12)\). The second Pareto dominates the first and third. At the mixed profile, changing just one distribution leaves that player's payoff \(-1/12\); coordinated movement to \((0,0)\) changes both distributions and yields 4 each. Nash prohibits profitable unilateral deviation with the other strategy fixed; it does not prohibit profitable agreement to change both.</p></details></article>
+
+<article class="exercise"><h3>Exercise 6 — Existence, learning dynamics and a decision-level test</h3>
+<p>Identify the hypotheses in the finite Nash existence reduction and explain why a selected single best-response function may not meet a continuous fixed-point theorem. Trace pure best-response cycling in zero-sum Morra. Design a finite evaluation procedure that distinguishes terminal correctness, value readout error and learning-dynamics behavior; state what it cannot establish.</p>
+<details class="solution"><summary>Solution</summary>
+<p>The finite strategy product is nonempty, compact and convex. Continuous bilinear payoffs attain maxima on each compact simplex. Their maximizer sets are nonempty closed convex faces; response inequalities pass to limits, giving a closed graph. Kakutani then yields a fixed point of the set-valued best-response correspondence. Arbitrarily choosing one maximizer can introduce a jump at a tie: in Morra the pure row response switches when \(q\) crosses \(7/12\). Such a selected function need not be continuous, so a continuous-map fixed-point theorem cannot simply replace the correspondence argument. Infinite action spaces or discontinuous payoffs require their own compactness/continuity assumptions; the finite proof does not transfer automatically.</p>
+<p>Against column 1, A's best row is 1 because \(2&gt;-3\). Against row 1, B's best column is 2 because \(-3&lt;2\). Against column 2, A responds with row 2 because \(4&gt;-3\). Against row 2, B responds with column 1 because \(-3&lt;4\). Alternating these pure responses repeats the four-step cycle. It is a counterexample to inferring convergence of this dynamic from equilibrium existence. It is not a counterexample to the mixed minimax theorem.</p>
+<p>A finite evaluation can first enumerate terminal transitions with deliberately nonzero terminal storage and compare targets to arriving rewards. Next freeze the predictor and a response model, enumerate legal actions, and compare predicted rankings with exact finite-horizon backups; report both absolute errors and decision regret in utility units. Finally freeze the testing opponents, while recording separate training updates, and evaluate repeated checkpoints on the same declared initial-state/chance distribution. In the matrix specialization, compute each profile's unilateral regrets and security envelopes instead of treating a win count as equilibrium evidence. Include turn-swapped states, chance-before/after-choice cases, pure-strategy endpoints and degenerate payoff matrices.</p>
+<p>This procedure can falsify a terminal or information-timing implementation and quantify performance on the stipulated finite suite. It cannot prove convergence of a neural self-play algorithm, robustness against all unmodeled opponents, or optimality in an unrestricted sequential game. Those claims require additional mathematical hypotheses and a broader operational evaluation contract.</p></details></article></section>
+
+<section id="boundaries"><h2>15. Primary references and the remaining assumptions</h2>
+<p>The chapter's guarantees are conditional. TD targets use one reward convention and a fixed utility viewpoint; the elementary derivative compares a fixed transition rather than proving learning convergence. The matrix security theorem assumes finite actions and independent hidden draws. Nash existence uses finite mixed-strategy spaces and continuous expected utilities; it supplies neither a preferred equilibrium nor a training trajectory. Approximation, observation timing and the evaluation distribution must be specified before applying any of these statements to the dispatcher.</p>
+<ul>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/td_learning.py">CS221 temporal-difference learning source, pinned snapshot</a> — evaluator/readout, frozen-target mechanism, retained terminal interface and game features.</li>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/simultaneous_games.py">CS221 simultaneous-games source, pinned snapshot</a> — Morra payoffs, mixture envelopes and general-game examples.</li>
+<li><a href="https://jmvidal.cse.sc.edu/library/sutton88a.pdf">Learning to Predict by the Methods of Temporal Differences, Sutton (1988)</a> — PDF pages 7–8, temporal differences and incremental trace mechanism.</li>
+<li><a href="https://www.cs.virginia.edu/~evans/greatworks/samuel1959.pdf">Some Studies in Machine Learning Using the Game of Checkers, Samuel (1959), anthology reprint</a> — PDF pages 1–12; search backup, stored evaluation, polynomial adaptation and experiment limitations.</li>
+<li><a href="https://www.bkgm.com/articles/tesauro/tdl.html">Temporal Difference Learning and TD-Gammon, Tesauro (1995), ACM-permitted HTML transcription</a> — learning methodology and representation versions; distinct from the original PDF.</li>
+<li><a href="https://gwern.net/doc/reinforcement-learning/model/alphago/2017-silver.pdf">Mastering the Game of Go without Human Knowledge, Silver et al. (2017)</a> — PDF pages 1–2, 7–8; search/training targets and stated domain/input structure.</li>
+<li><a href="https://jmvidal.cse.sc.edu/library/nash50c.pdf">Equilibrium Points in N-Person Games, Nash (1950)</a> — two-page note, printed pages 48–49; best-response correspondence, finite existence and zero-sum distinction.</li>
+</ul></section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-10-games-opponent-models-and-search.html">Previous available chapter</a><a href="index.html">Lecture index</a><span>Further chapters pending</span></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

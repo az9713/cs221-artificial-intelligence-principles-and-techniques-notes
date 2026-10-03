@@ -1,9 +1,9 @@
 {
-  "checked_at_utc": "2026-10-03T12:49:24.709815+00:00",
+  "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
   "course": "CS221",
-  "chapter_count": 10,
+  "chapter_count": 11,
   "selected_recordings": 20,
-  "status": "Ten independently reviewed chapters locally validated; full course in development",
+  "status": "Eleven independently reviewed chapters locally validated; full course in development",
   "course_complete": false,
   "human_accessibility": "not performed",
   "reader_report": "reader-validation.json",
@@ -99,7 +99,7 @@
       "CODE": "1ca9cc21f863de41dfd932ff1b23171aed2e933b7d36938ad7988cde3b04542d",
       "HTML": "048ac79c7c03838eeaae2cf08c0127a9c5bdedf7c1e07bb8001928c3a50a518a",
       "review": "reviews/lecture-09-round1.md",
-      "before_HTML": "23046f4a3ccea8e3a644f0933cb438d6cd6f1c41e9567eff0ecb02e9ce3c3381",
+      "before_HTML": "165b1a5c20b4e24d5a2dc6508b34a44b3cb43206caacb4b8abaaa0b397017cad",
       "review_sha256": "f3e886716e270171df251d02a3a272ff8ec7f786beb8ce42e77b04e890d6aee7",
       "path": "lecture-09-policy-gradients-and-function-approximation.html",
       "after_HTML": "165b1a5c20b4e24d5a2dc6508b34a44b3cb43206caacb4b8abaaa0b397017cad"
@@ -110,14 +110,25 @@
       "CODE": "4d2a6a4e419ffbf2858d3f450988b072012f9ec1963db3ff2dec1ba2a35ce742",
       "HTML": "e0821e393216e5c4a9a88fd8ec84fb0b3874ba9e1bb2d0f88abf9d4b622412a6",
       "review": "reviews/lecture-10-round2.md",
-      "before_HTML": "e0821e393216e5c4a9a88fd8ec84fb0b3874ba9e1bb2d0f88abf9d4b622412a6",
+      "before_HTML": "620841efe18a06751eba6c0697a8d72d42cddf5ba997bb9d98e7021c5edb7a47",
       "review_sha256": "246badaf139e85b8c7c2b33d882e71b01c6102d4a31f00889443380555a2ecd7",
       "path": "lecture-10-games-opponent-models-and-search.html",
-      "after_HTML": "620841efe18a06751eba6c0697a8d72d42cddf5ba997bb9d98e7021c5edb7a47"
+      "after_HTML": "d803a5190a7b9fc389b13ed3947c652dc1bf7e491100bde5e1355d7d9e5c8cbd"
+    },
+    "11": {
+      "BODY": "490588343d92b9dd7f16fcbcaeeca7ba0a09c3fe77b5df831eddcdc85ddea1ba",
+      "META": "98caf53a552efa6c6c50bc4f37a1e6c16f5999f6f8e008ce50793d20ea687f2f",
+      "CODE": "678724cc79aaadb945801bd455f4411dab756858e69a1d19970e018b3c44edf9",
+      "HTML": "20e41a97ed246b67d02c591475ac16741b5d771c38dfeca55ad13d08861d6332",
+      "review": "reviews/lecture-11-round2.md",
+      "before_HTML": "20e41a97ed246b67d02c591475ac16741b5d771c38dfeca55ad13d08861d6332",
+      "review_sha256": "da4e5a0527b1b9310683721e0167238dbc948d1305ce68064de8e095eeb0de97",
+      "path": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+      "after_HTML": "8c27728f3f8b63543f25740cf3b1e21484aeacc4865bfbeda47a3da15f5ef4ce"
     }
   },
   "limits": [
-    "Chapters11-20, cumulative course lab, independent learning-route review and book-wide review pending",
+    "Chapters12-20, cumulative course lab, independent learning-route review and book-wide review pending",
     "No publication performed"
   ]
 }

@@ -1,11 +1,11 @@
 {
-  "chapter": "lecture-07-markov-decision-processes.html",
+  "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
   "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
   "status": "independently reviewed and locally validated chapter",
-  "accepted_scientific_body_sha256": "2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa",
-  "accepted_metadata_sha256": "e2eabcefbc817001beffc1b2ac334f85140ec10915d7adf53e3c6ff63bf74169",
-  "accepted_program_sha256": "d762f9d424dc09583f814907cfb453924720a9a31e0d602f0b8ea4ecd51e3f26",
-  "integrated_html_sha256": "aca6bab290cb8401b21f17861689c899fe46379459b3fa565a95762b431141ca",
+  "accepted_scientific_body_sha256": "490588343d92b9dd7f16fcbcaeeca7ba0a09c3fe77b5df831eddcdc85ddea1ba",
+  "accepted_metadata_sha256": "98caf53a552efa6c6c50bc4f37a1e6c16f5999f6f8e008ce50793d20ea687f2f",
+  "accepted_program_sha256": "678724cc79aaadb945801bd455f4411dab756858e69a1d19970e018b3c44edf9",
+  "integrated_html_sha256": "8c27728f3f8b63543f25740cf3b1e21484aeacc4865bfbeda47a3da15f5ef4ce",
   "worked_solutions": 6,
   "current_reader_gate": {
     "status": "passed within accepted Chapters1-11 reader scope",
@@ -23,7 +23,8 @@
     "gate_6b": "accepted",
     "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "65a1034dcf81fbd0ab339bad114b4547b9051c1de01eeae2876ac9de2b221c25",
-    "independent_numerical_checks": 612
+    "review_report_sha256": "da4e5a0527b1b9310683721e0167238dbc948d1305ce68064de8e095eeb0de97",
+    "independent_numerical_checks": 5200,
+    "independent_bounded_closure_checks": 141
   }
 }

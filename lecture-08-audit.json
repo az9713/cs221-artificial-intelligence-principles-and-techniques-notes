@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-08-reinforcement-learning.html",
-  "checked_at_utc": "2026-10-03T12:49:24.709815+00:00",
+  "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
   "status": "independently reviewed and locally validated chapter",
   "accepted_scientific_body_sha256": "9fd41d0061718308556e055bc9274835173b855916e51e0b192ab5fca918a87c",
   "accepted_metadata_sha256": "d367a27e4257b8969fe0feb4cefcb88ed6c4a663933f91c2fa45fa43beade7c4",
@@ -8,7 +8,7 @@
   "integrated_html_sha256": "ea47cbf84e6f4e47b505590eb6426b404d5dd25aa8e51c15bed23d9c535e663b",
   "worked_solutions": 6,
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-10 reader scope",
+    "status": "passed within accepted Chapters1-11 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   },
