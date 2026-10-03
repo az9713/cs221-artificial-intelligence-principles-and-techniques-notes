@@ -1,0 +1,31 @@
+{
+  "chapter": "lecture-03-classification-probabilities-and-text.html",
+  "checked_at_utc": "2026-10-03T09:29:31.951835+00:00",
+  "status": "independently reviewed and locally validated chapter",
+  "independent_review": {
+    "rounds": 1,
+    "gate_6b": "accepted",
+    "passes_7_8": "accepted",
+    "blocking_defects": 0,
+    "review_report_sha256": "7ae40dd596c6526b750db94e7685db0b676cf2f1ea5ecbff8631141aff68fb47"
+  },
+  "accepted_scientific_body_sha256": "426eeffceeca7168b53a6474a516945b09fad5e8c897b9577c3254be430e7d1a",
+  "accepted_metadata_sha256": "882df672ad25065d669271c76ff87bae62bae5076be24e3d92d9ef702f17530d",
+  "accepted_program_sha256": "a9525bcc62ea3c05296904b6effe4d3a48b2efc3bf143e8e106cd9b9ae9660ab",
+  "integrated_html_sha256": "461c780ce0a7e47cd68f14d5baa64cb9b20098a2fb22839de6d1a8e2cb3e8be2",
+  "worked_solutions": 6,
+  "source_scope": "Full sequential transcript and official module plus recorded claim-specific primary pages; bounded inspection",
+  "pass_9": {
+    "status": "passed within four-chapter integration scope",
+    "reader_report": "reader-validation.json",
+    "independent_numerical_checks": 336,
+    "privacy_scan": "passed",
+    "human_accessibility": "not performed"
+  },
+  "limits": [
+    "The full twenty-chapter course is incomplete",
+    "No full recording-frame or human ASR accuracy certification",
+    "No human keyboard/screen-reader audit",
+    "No empirical deployment-performance certification"
+  ]
+}

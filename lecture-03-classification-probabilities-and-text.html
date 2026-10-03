@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="426eeffceeca7168b53a6474a516945b09fad5e8c897b9577c3254be430e7d1a"><title>Classification, probabilities, and the information retained by text · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START -->
+<header><p class="eyebrow">CS221 · Autumn 2025 · Lecture 3</p><h1>Classification, probabilities, and the information retained by text</h1><p class="lede">A review classifier can choose the right label, assign an unjustified probability, and discard the words' order in the same computation. Each failure belongs to a different part of the model.</p><p>Independent enhanced chapter accompanying <a href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q">Percy Liang's Learning II recording</a>. The topic sequence and timestamp links follow machine transcription. The sentiment fixture, derivations, counterexamples, exercises, and program are original teaching constructions. Research and the pinned official executable lecture are cited beside the claims they support.</p></header>
+
+<section><h2 id="classification">1. A label is a decision with a representation behind it <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=5s">00:05</a></h2>
+<p>A service summarizes film reviews and routes negative feedback for human attention. Mistaking “not good but bad” for praise can send the wrong reviews into that queue. Predicting a sentiment label, estimating how uncertain that label is, and deciding what action to take are related tasks. They require different objects and different evidence.</p>
+<p><strong>Classification</strong> predicts one member of a finite set of labels. <strong>Binary classification</strong> has two labels, here <span class="inline-math">\(y\in\{-1,+1\}\)</span>, meaning negative and positive sentiment. Regression instead predicts a real-valued quantity. The numbers used to encode the two labels do not make sentiment a continuous quantity: a predicted label of 0.37 has no meaning under this binary label contract.</p>
+<p>For now, stipulate a five-component feature vector <span class="inline-math">\(x\in\mathbb R^5\)</span> containing the fractions of lowercased, whitespace-separated pieces equal to <em>good</em>, <em>bad</em>, <em>not</em>, <em>film</em>, and any other piece, in that order. The entries are nonnegative and sum to one for a nonempty review. They are dimensionless frequencies. The <a href="#text">text-representation section</a> will make this conversion executable and identify exactly which information it loses.</p>
+<table><caption>Stipulated training examples; these are teaching labels, not a measured sentiment dataset.</caption><thead><tr><th>Review</th><th>Feature vector, in the declared order</th><th>Target label</th></tr></thead><tbody><tr><td>good film</td><td><span class="inline-math">\((1/2,0,0,1/2,0)\)</span></td><td>+1</td></tr><tr><td>bad film</td><td><span class="inline-math">\((0,1/2,0,1/2,0)\)</span></td><td>−1</td></tr></tbody></table>
+<p>A <strong>predictor</strong> is a function from a feature vector to a predicted label. A <strong>learning algorithm</strong> uses training pairs <span class="inline-math">\(\mathcal D=\{(x_i,y_i)\}_{i=1}^n\)</span> to select a predictor, where <span class="inline-math">\(n\)</span> is the number of training examples and <span class="inline-math">\(i\)</span> indexes them. Our two-row fixture has <span class="inline-math">\(n=2\)</span>. Writing down a predictor by hand is not yet learning; running an optimizer on these pairs is.</p>
+<p>Three choices define that learning problem. The <strong>hypothesis family</strong> determines which predictors are available. A loss evaluates a predictor on labeled examples, and an optimization algorithm attempts to reduce that loss. More compute changes the third choice. It cannot restore information already erased by the representation or justify an unsuitable loss. <a href="lecture-01-foundations-and-tensors.html#agent">Chapter 1's separation of observations, objectives, and actions</a> is a useful refresher; the classification objects are defined locally here.</p>
+</section>
+
+<section><h2 id="affine">2. An affine score supplies a boundary, not calibrated confidence <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=541s">09:01</a></h2>
+<p>Let the feature dimension be <span class="inline-math">\(d\)</span>, with <span class="inline-math">\(d=5\)</span> in our review case. A weight vector <span class="inline-math">\(w\in\mathbb R^d\)</span> and scalar bias <span class="inline-math">\(b\in\mathbb R\)</span> define parameters <span class="inline-math">\(\theta=(w,b)\)</span>. The affine score is</p>
+<div class="math">\[z_\theta(x)=\sum_{j=0}^{d-1}w_jx_j+b,\qquad f_\theta(x)=\begin{cases}+1,&amp;z_\theta(x)\gt0,\\-1,&amp;z_\theta(x)\le0.\end{cases}\]</div>
+<p>Here <span class="inline-math">\(j\)</span> indexes features starting at zero, and <span class="inline-math">\(f_\theta\)</span> is the hard, or single-label, predictor. The scalar score is dimensionless. The name <strong>linear classifier</strong> conventionally refers to this thresholded affine family; the thresholded output itself is not a linear function. Our tie rule assigns the negative label at score zero.</p>
+<p>Take <span class="inline-math">\(w=(1,-1,0,0,0)\)</span> and <span class="inline-math">\(b=0\)</span>. “good film” scores <span class="inline-math">\(1/2\)</span> and predicts positive; “bad film” scores <span class="inline-math">\(-1/2\)</span> and predicts negative. “good bad” scores zero and predicts negative under the declared tie rule. Changing only the bias to <span class="inline-math">\(b=1\)</span> shifts all these scores upward without changing the feature representation.</p>
+<p>For nonzero <span class="inline-math">\(w\)</span>, the <strong>decision boundary</strong> is the hyperplane <span class="inline-math">\(w^\top x+b=0\)</span>, the set of points where the score vanishes. If <span class="inline-math">\(w=0\)</span>, this description degenerates: nonzero bias gives a constant classifier and an empty boundary, while zero bias gives a zero score everywhere. Such predictors still belong to the hypothesis family.</p>
+<h3 id="scale-distance">Positive scaling preserves decisions and geometric distance</h3>
+<p>Replace <span class="inline-math">\((w,b)\)</span> by <span class="inline-math">\((\alpha w,\alpha b)\)</span> for a scalar <span class="inline-math">\(\alpha\gt0\)</span>. Every score is multiplied by <span class="inline-math">\(\alpha\)</span>, so signs, ties, and labels are unchanged. Thus raw score magnitude cannot intrinsically measure confidence in correctness. It can be increased without changing a single classification.</p>
+<p>The Euclidean distance to the nondegenerate boundary does divide out that scale. Write <span class="inline-math">\(\|w\|_2=(\sum_jw_j^2)^{1/2}\)</span>. Moving from <span class="inline-math">\(x\)</span> by <span class="inline-math">\(-z_\theta(x)w/\|w\|_2^2\)</span> lands on the hyperplane because its new score is <span class="inline-math">\(z-z\|w\|_2^2/\|w\|_2^2=0\)</span>. Any displacement reaching the plane must have inner product <span class="inline-math">\(-z\)</span> with <span class="inline-math">\(w\)</span>; the Cauchy–Schwarz inequality bounds its length below by <span class="inline-math">\(|z|/\|w\|_2\)</span>. The displayed displacement attains that bound.</p>
+<p>For the one-word review <em>good</em>, the stipulated weights give score 1, norm <span class="inline-math">\(\sqrt2\)</span>, and distance <span class="inline-math">\(1/\sqrt2\)</span>. Multiplying all parameters by 100 gives score 100 but the same distance. Distance also depends on feature scaling and the chosen input metric. Neither distance nor raw score alone establishes the empirical probability that a review was labeled correctly.</p>
+</section>
+
+<section><h2 id="loss-margin">3. Decision error and margin penalty differ at the tie <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=776s">12:56</a></h2>
+<p>A loss expresses which discrepancies matter. Squared error on the raw score, <span class="inline-math">\((z-y)^2\)</span>, treats the encoded label as a numerical target: with <span class="inline-math">\(y=+1\)</span>, score 1 has loss zero and score 4 has loss 9, although both predict positive. This is a possible surrogate objective, but it penalizes numerical distance from the label as well as wrong decisions. By contrast, squaring the difference of the two hard labels gives exactly four times their zero-one error, because the label difference is either zero or two in magnitude.</p>
+<p>The <strong>zero-one decision loss</strong> is <span class="inline-math">\(\ell_{01}(z,y)=\mathbf1\{f_\theta(x)\ne y\}\)</span>, where <span class="inline-math">\(\mathbf1\)</span> is an indicator equal to one when its stated condition holds and zero otherwise. Its training mean <span class="inline-math">\(n^{-1}\sum_i\ell_{01}(z_i,y_i)\)</span> is the fraction of misclassified training examples, not a population error estimate without sampling assumptions.</p>
+<p>The <strong>signed margin</strong> is <span class="inline-math">\(m=yz\)</span>. Away from zero, positive margin means the score's sign agrees with the target and negative margin means disagreement. At zero, the label convention matters:</p>
+<table><caption>The score-zero counterexample under negative-label tie breaking.</caption><thead><tr><th>Score <span class="inline-math">\(z\)</span></th><th>Target <span class="inline-math">\(y\)</span></th><th>Predicted label</th><th>Decision error</th><th><span class="inline-math">\(\mathbf1\{yz\le0\}\)</span></th></tr></thead><tbody><tr><td>1</td><td>+1</td><td>+1</td><td>0</td><td>0</td></tr><tr><td>−1</td><td>+1</td><td>−1</td><td>1</td><td>1</td></tr><tr><td>0</td><td>+1</td><td>−1</td><td>1</td><td>1</td></tr><tr><td>0</td><td>−1</td><td>−1</td><td>0</td><td>1</td></tr></tbody></table>
+<p>The recording and <a href="https://github.com/stanford-cs221/lectures/tree/f70063773fe9e04ddcbc248059501837053b810a">official executable classification example</a> describe the nonpositive-margin penalty as a rewrite of decision error. The last row disproves equivalence under their stated tie rule. We retain the distinction instead of copying that discrepancy into the program. Exact decision loss can be written</p>
+<div class="math">\[\ell_{01}(z,y)=\mathbf1\{m\lt0\}+\mathbf1\{m=0\ \text{and}\ y=+1\}.\]</div>
+<p>The alternative <span class="inline-math">\(\mathbf1\{m\le0\}\)</span> deliberately penalizes every zero margin. It may be useful as a different convention, but it is not this predictor's exact error rate. Since both labels have the same margin zero but different decision errors there, no function of margin alone can encode the exact tie behavior for both labels.</p>
+<p>Dividing <span class="inline-math">\(m\)</span> by <span class="inline-math">\(\|w\|_2\)</span> gives a signed geometric margin when <span class="inline-math">\(w\ne0\)</span>. The raw margin remains sensitive to positive parameter scaling. Introducing it organizes the loss calculations; it does not convert scale into calibrated confidence.</p>
+</section>
+
+<section><h2 id="zero-gradient">4. A flat local signal does not prove global impossibility <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=1565s">26:05</a></h2>
+<p>Gradient descent updates parameters using the local rate of change of a loss. Let <span class="inline-math">\(\widetilde x=(x,1)\in\mathbb R^{d+1}\)</span> be an augmented feature vector and regard <span class="inline-math">\(\theta\)</span> as its matching <span class="inline-math">\(d+1\)</span> parameters. The score is <span class="inline-math">\(\theta^\top\widetilde x\)</span>. A parameter displacement <span class="inline-math">\(\delta\)</span> changes that score by <span class="inline-math">\(\delta^\top\widetilde x\)</span>, whose magnitude is at most <span class="inline-math">\(\|\delta\|_2\|\widetilde x\|_2\)</span>.</p>
+<p>If a finite training set has no zero score, sufficiently small displacements preserve every sign: choose <span class="inline-math">\(\|\delta\|_2\lt\min_i|z_i|/\|\widetilde x_i\|_2\)</span>. The zero-one training loss is therefore constant in that neighborhood, so its gradient is zero. At a score-crossing boundary it can jump and need not have a derivative. A routine gradient update cannot see the improvement available beyond the current constant region.</p>
+<p>For a positive one-word review, a scalar good-word weight of −1 gives score −1 and error one. Moving it to −0.9 leaves the error unchanged; moving it all the way to +1 fixes the error. The local gradient at −1 is zero, even though a better classifier exists. This proves a failure of ordinary local gradient descent on that objective, not that no algorithm can optimize zero-one loss.</p>
+<p>A <strong>surrogate loss</strong> replaces the target evaluation loss with an objective that supplies a different optimization signal. It introduces another design choice: reductions in the surrogate must be evaluated separately from decision error and deployed consequences. A probabilistic classifier will provide one such objective while retaining the affine score and the same feature vectors.</p>
+</section>
+
+<section><h2 id="logistic">5. A logistic probability model preserves a continuous signal <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=1894s">31:34</a></h2>
+<p>The <strong>logistic function</strong>, also called the sigmoid here, converts a real score into a model probability:</p>
+<div class="math">\[q=\sigma(z)=\frac1{1+e^{-z}},\qquad P_\theta(Y=+1\mid x)=q,\qquad P_\theta(Y=-1\mid x)=1-q.\]</div>
+<p>The capital <span class="inline-math">\(Y\)</span> denotes the random label under this stipulated conditional model; <span class="inline-math">\(y\)</span> is an observed target. For finite real <span class="inline-math">\(z\)</span>, the two probabilities are strictly between zero and one and sum to one. At zero they are both one-half. Applying a distribution model changes what is fitted without changing the underlying feature-to-score calculation.</p>
+<h3 id="odds">The score is the model's log odds</h3>
+<p>For <span class="inline-math">\(0\lt q\lt1\)</span>, the <strong>odds</strong> of the positive class are <span class="inline-math">\(q/(1-q)\)</span>. Solving the logistic equation gives <span class="inline-math">\(q/(1-q)=e^z\)</span>, hence <span class="inline-math">\(z=\log(q/(1-q))\)</span>. Throughout this chapter, <span class="inline-math">\(\log\)</span> is the natural logarithm. A logit is this logarithm of odds under the binary model; before that interpretation, it is an affine score.</p>
+<p>Probability 0.2 has odds <span class="inline-math">\(1/4\)</span> and log odds <span class="inline-math">\(-\log4\)</span>; putting that score through <span class="inline-math">\(\sigma\)</span> returns 0.2. Scores +1 and −1 give approximately 0.731059 and 0.268941. Algebra also gives <span class="inline-math">\(\sigma(-z)=1-\sigma(z)\)</span>, so the probability assigned to a target <span class="inline-math">\(y\in\{-1,+1\}\)</span> is simply <span class="inline-math">\(\sigma(yz)=\sigma(m)\)</span>.</p>
+<h3 id="sigmoid-derivative">Derivative, saturation, and the distinction between model and reality</h3>
+<p>Differentiating the reciprocal shows the local signal:</p>
+<div class="math">\[\sigma'(z)=\frac{e^{-z}}{(1+e^{-z})^2}=q(1-q)=\frac14-(q-\tfrac12)^2.\]</div>
+<p>Its maximum is <span class="inline-math">\(1/4\)</span> at <span class="inline-math">\(z=0\)</span>. As the score tends to either infinity, the probability approaches an endpoint and this derivative tends to zero. That <strong>saturation</strong> is a property of the sigmoid's local response. It does not by itself say that the eventual loss gradient vanishes: the derivative of a log-probability loss will contain a compensating factor.</p>
+<p>The model's output being between zero and one does not establish <strong>calibration</strong>. Positive-class calibration asks whether reviews assigned probability <span class="inline-math">\(q\)</span> have positive labels with conditional frequency <span class="inline-math">\(q\)</span> in the population being evaluated. Four stipulated predictions of 0.8 containing two positive targets have observed positive frequency 0.5. That finite discrepancy illustrates the quantity; four examples cannot establish the exact population relation.</p>
+<p><a href="https://proceedings.mlr.press/v70/guo17a/guo17a.pdf">Guo and colleagues' calibration study</a>, §2, defines a related criterion using confidence in the <em>predicted label</em> and conditional correctness. It is not identical to checking the positive-class probability for every review. Their particular neural-network experiments separate error rate from probability quality; those observations do not certify this toy classifier or every later model. A calibration evaluation needs held-out data representing the intended operating conditions, a declared grouping/estimation method, and uncertainty.</p>
+<p>The final action can also differ from the most probable label. If incorrectly routing a positive review as negative costs one unit and incorrectly declaring a negative review positive costs three, declaring positive has expected cost <span class="inline-math">\(3(1-q)\)</span>, while declaring negative costs <span class="inline-math">\(q\)</span>. Positive is preferred only when <span class="inline-math">\(q\gt3/4\)</span>, with negative at equality. A model probability of 0.7 gives a positive most-probable label but a negative cost-minimizing action under these stipulated penalties. Accurate probability modeling and choosing the penalties remain separate obligations.</p>
+</section>
+
+<section><h2 id="likelihood">6. Likelihood determines the loss and its numerical form <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=2430s">40:30</a></h2>
+<p><strong>Maximum likelihood</strong> selects parameters that assign large conditional probability to the observed training labels. For a fixed parameter value and given feature vectors, assume those labels are conditionally independent under the fitted model. This assumption supplies the product; it does not follow merely from collecting several examples:</p>
+<div class="math">\[P_\theta(y_1,\ldots,y_n\mid x_1,\ldots,x_n)=\prod_{i=1}^n\sigma(y_i z_\theta(x_i)).\]</div>
+<p>Repeated reviews from one author or a common event can violate an independent sampling interpretation. One can still minimize an average per-example loss as an empirical objective, but calling its sum a factorized joint likelihood requires the declared model. Its optimization and its statistical interpretation are distinct claims.</p>
+<p>Taking the natural logarithm preserves ordering for positive probabilities and turns the product into a sum. Negating it converts maximization into minimization. Dividing by the fixed positive sample count does not change the optimizer, but does change gradient scale. We use the mean <strong>logistic loss</strong>, in nats per example:</p>
+<div class="math">\[\ell(z,y)=-\log\sigma(yz)=\log(1+e^{-yz}),\qquad J(\theta)=\frac1n\sum_{i=1}^n\ell(z_\theta(x_i),y_i).\]</div>
+<p>A <strong>nat</strong> is the information unit obtained with natural logarithms; using base-two logarithms would rescale these losses by <span class="inline-math">\(1/\log2\)</span>. The identity follows by substituting the reciprocal sigmoid and taking its negative log. Correct classification does not make this loss zero: finite positive margin still leaves a nonzero probability on the other label.</p>
+<h3 id="product-average">Averaging probabilities asks a different question</h3>
+<p>Two candidate models assign target probabilities <span class="inline-math">\((0.99,0.21)\)</span> and <span class="inline-math">\((0.59,0.59)\)</span> to two examples. Their arithmetic means are 0.60 and 0.59, so average probability favors the first. Their products are 0.2079 and 0.3481, so likelihood favors the second. Their mean negative log probabilities are approximately 0.785349 and 0.527633 nats. A nearly certain correct prediction cannot compensate for a poorly assigned target probability in the same way under these two objectives.</p>
+<p>Probability products can also underflow before taking a logarithm: one thousand factors of 0.1 give <span class="inline-math">\(10^{-1000}\)</span>, below ordinary double precision's positive range. Summing their log probabilities gives the representable number <span class="inline-math">\(-1000\log10\)</span>. This arithmetic advantage does not justify replacing the product objective with a mean of probabilities; the log transform preserves the product's ordering.</p>
+<h3 id="stable-binary">Evaluate the loss without an overflowing exponential</h3>
+<p>Define <strong>softplus</strong> by <span class="inline-math">\(\operatorname{sp}(u)=\log(1+e^u)\)</span> for a real argument <span class="inline-math">\(u\)</span>. Logistic loss is <span class="inline-math">\(\operatorname{sp}(-m)\)</span>. If <span class="inline-math">\(u\ge0\)</span>, factor out <span class="inline-math">\(e^u\)</span>; if <span class="inline-math">\(u\lt0\)</span>, retain the original expression. The combined identity is</p>
+<div class="math">\[\operatorname{sp}(u)=\max(u,0)+\log(1+e^{-|u|}).\]</div>
+<p>The exponential now has a nonpositive argument. The program uses <code>log1p(a)</code>, which evaluates <span class="inline-math">\(\log(1+a)\)</span> without first rounding <span class="inline-math">\(1+a\)</span> to one when <span class="inline-math">\(a\)</span> is tiny. Similarly, the sigmoid can use <span class="inline-math">\(1/(1+e^{-z})\)</span> for nonnegative score and <span class="inline-math">\(e^z/(1+e^z)\)</span> for negative score. Neither branch needs an exponentially large intermediate.</p>
+<p>For margin −1000, the fused loss evaluates to approximately 1000 rather than trying to take the log of a target probability rounded to zero. For margin +1000, the mathematical loss is positive but so small that the returned float may be zero. Stable formulas avoid these unnecessary intermediate failures; they do not give unlimited range or exact real arithmetic. <a href="https://webhomes.maths.ed.ac.uk/~dhigham/Publications/P149.pdf">Blanchard and the Highams' numerical analysis</a>, equations 4.1–4.3 and Algorithm 4.1, develops the corresponding shifted log-sum-exp evaluation. Our binary formula is its two-term specialization.</p>
+</section>
+
+<section><h2 id="gradients">7. Gradients improve the fitted objective under stated conditions <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=2788s">46:28</a></h2>
+<p>The derivative of sigmoid becomes small at an extreme score, but the negative log changes the composite derivative. First differentiate with respect to margin, then with respect to score. Since <span class="inline-math">\(m=yz\)</span>, these are different derivatives:</p>
+<div class="math">\[\frac{d\ell}{dm}=-\frac{e^{-m}}{1+e^{-m}}=-\sigma(-m),\qquad\frac{\partial\ell}{\partial z}=-y\sigma(-yz).\]</div>
+<p>Using <span class="inline-math">\(q=\sigma(z)\)</span> and the binary target indicator <span class="inline-math">\(t=(y+1)/2\in\{0,1\}\)</span>, the score derivative is also <span class="inline-math">\(q-t\)</span>. When the model is confidently wrong, <span class="inline-math">\(yz\)</span> is very negative and its gradient magnitude approaches one, not zero. The reciprocal probability factor from differentiating the log cancels the relevant sigmoid factor. Correct and very confident examples instead have a derivative approaching zero.</p>
+<p>The affine score contributes <span class="inline-math">\(\partial z/\partial w_j=x_j\)</span> and <span class="inline-math">\(\partial z/\partial b=1\)</span>. Applying the chain rule and the declared training mean gives</p>
+<div class="math">\[\nabla_wJ=-\frac1n\sum_i y_i\sigma(-y_i z_i)x_i,\qquad\frac{\partial J}{\partial b}=-\frac1n\sum_i y_i\sigma(-y_i z_i).\]</div>
+<p>The gradient has one component for each parameter. Omitting the factor <span class="inline-math">\(1/n\)</span> would optimize the same minimizer but multiply the update magnitude by the training size at a fixed learning rate. The program uses the margin expression <span class="inline-math">\(-y\sigma(-m)\)</span> directly rather than subtracting nearly equal rounded values. For a confident positive example, this retains a small negative derivative that <span class="inline-math">\(q-1\)</span> could round to zero.</p>
+<h3 id="first-step">A complete step on the sentiment fixture</h3>
+<p>Initialize all six parameters to zero, so both model probabilities are one-half and <span class="inline-math">\(J=\log2\approx0.693147\)</span>. The positive example contributes weight gradient <span class="inline-math">\((-1/4,0,0,-1/4,0)\)</span> and bias gradient <span class="inline-math">\(-1/2\)</span>. The negative example contributes <span class="inline-math">\((0,+1/4,0,+1/4,0)\)</span> and bias gradient <span class="inline-math">\(+1/2\)</span>. Their mean is</p>
+<div class="math">\[\nabla_wJ=(-1/8,+1/8,0,0,0),\qquad\partial_bJ=0.\]</div>
+<p>Gradient descent with learning rate <span class="inline-math">\(\eta=1\)</span> subtracts that gradient. It gives weights <span class="inline-math">\((1/8,-1/8,0,0,0)\)</span> and bias zero. The two scores become <span class="inline-math">\(+1/16\)</span> and <span class="inline-math">\(-1/16\)</span>; both signed margins are <span class="inline-math">\(1/16\)</span>. The new mean loss is <span class="inline-math">\(\log(1+e^{-1/16})\approx0.662385\)</span> nats. Both teaching labels are now predicted correctly, though the probabilities remain near one-half.</p>
+<h3 id="curvature">Curvature supplies a step-size bound, not an arbitrary learning rate</h3>
+<p>The <strong>Hessian</strong> is the matrix of second derivatives with respect to parameters. Write <span class="inline-math">\(q_i=\sigma(z_i)\)</span> for the modeled positive probability on training example <span class="inline-math">\(i\)</span>. With the augmented features already defined, differentiating <span class="inline-math">\(q-t\)</span> gives</p>
+<div class="math">\[\nabla^2J(\theta)=\frac1n\sum_i q_i(1-q_i)\widetilde x_i\widetilde x_i^\top.\]</div>
+<p>For any vector <span class="inline-math">\(v\in\mathbb R^{d+1}\)</span>, its quadratic form is a sum of <span class="inline-math">\(q_i(1-q_i)(v^\top\widetilde x_i)^2/n\)</span>, all nonnegative. Thus the Hessian is positive semidefinite and this objective is convex in the affine parameters. Convexity says its restriction to every line bends upward; it does not imply that a finite minimizer exists or is unique.</p>
+<p>The earlier derivative bound and Cauchy–Schwarz also give <span class="inline-math">\(v^\top\nabla^2Jv\le L\|v\|_2^2\)</span> with the global choice <span class="inline-math">\(L=(4n)^{-1}\sum_i\|\widetilde x_i\|_2^2\)</span>. For nonnegative normalized word frequencies, <span class="inline-math">\(\|x_i\|_2^2\le(\sum_jx_{ij})^2=1\)</span>, so <span class="inline-math">\(L\le1/2\)</span>. This bound depends on the representation and normalization, not a universal constant for all datasets.</p>
+<p>Let <span class="inline-math">\(g=\nabla J(\theta)\)</span>. Taylor's formula along a displacement <span class="inline-math">\(\delta\)</span>, integrating the bounded second derivative, yields <span class="inline-math">\(J(\theta+\delta)\le J(\theta)+g^\top\delta+(L/2)\|\delta\|_2^2\)</span>. Setting <span class="inline-math">\(\delta=-\eta g\)</span> gives</p>
+<div class="math">\[J(\theta-\eta g)\le J(\theta)-\eta(1-L\eta/2)\|g\|_2^2.\]</div>
+<p>For <span class="inline-math">\(0\lt\eta\lt2/L\)</span>, the bound ensures descent when the gradient is nonzero in exact arithmetic. Our unit step meets the conservative normalized-feature bound. Floating-point traces are finite checks of actual values, not exact-arithmetic convergence proofs. A smaller fitted loss also does not establish better held-out decisions or calibration.</p>
+<h3 id="separable">A separable dataset can have an infimum without a finite minimum</h3>
+<p>A training set is <strong>strictly linearly separable</strong> if some parameter vector <span class="inline-math">\(\theta_0\)</span> has positive margins <span class="inline-math">\(m_i=y_i\theta_0^\top\widetilde x_i\gt0\)</span> for every example. Since the set is finite, their minimum is a positive number. Scaling all parameters by <span class="inline-math">\(\alpha\to+\infty\)</span> makes each logistic loss <span class="inline-math">\(\log(1+e^{-\alpha m_i})\)</span> tend to zero. Every finite real margin still has positive loss, so zero is the <strong>infimum</strong>, a greatest lower bound approached by parameters, but is not attained at a finite parameter vector.</p>
+<p>Our two training reviews are separated by <span class="inline-math">\(w=(1,-1,0,0,0),b=0\)</span> with margins one-half. Scaling by 1, 2, 10, and 20 gives mean losses approximately 0.474077, 0.313262, 0.006715, and 0.000045. Decision error is already zero at every one of those scales. Increasing certainty on these training cases does not supply new evaluation evidence.</p>
+<p>One explicit rescue is <strong>regularization</strong>, adding a parameter penalty. For <span class="inline-math">\(\lambda\gt0\)</span>, define <span class="inline-math">\(J_\lambda(\theta)=J(\theta)+\lambda\|\theta\|_2^2/2\)</span>, including the bias in the norm. Since <span class="inline-math">\(J\ge0\)</span>, this objective tends to infinity as the parameter norm grows. Its continuity gives a finite minimizer: sufficiently large norms are worse than its value at zero, so minimization can be restricted to a compact ball. Its Hessian adds <span class="inline-math">\(\lambda I\)</span>, where <span class="inline-math">\(I\)</span> is the identity matrix, making the objective strictly convex and the minimizer unique.</p>
+<p>The penalty changes the fitting objective and introduces a strength to choose; the chapter's unregularized trace does not implement it. Penalizing only weights would require another argument about an unpenalized bias. A finite regularized optimum also does not establish calibrated probabilities or preservation of sentiment information.</p>
+</section>
+
+<section><h2 id="softmax">8. Multiclass probabilities must be coordinated <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=3210s">53:30</a></h2>
+<p>Extend the review task to <span class="inline-math">\(K\ge2\)</span> classes, indexed <span class="inline-math">\(0,\ldots,K-1\)</span>. For three classes we use 0 negative, 1 positive, and 2 neutral. The feature vector remains <span class="inline-math">\(x\in\mathbb R^d\)</span>, but parameters become a matrix <span class="inline-math">\(W\in\mathbb R^{d\times K}\)</span> and class-bias vector <span class="inline-math">\(c\in\mathbb R^K\)</span>. Its columns correspond to classes:</p>
+<div class="math">\[z_k=\sum_{j=0}^{d-1}x_jW_{jk}+c_k,\qquad p_k=\frac{e^{z_k}}{\sum_{r=0}^{K-1}e^{z_r}}.\]</div>
+<p>Here <span class="inline-math">\(k\)</span> and <span class="inline-math">\(r\)</span> index classes; <span class="inline-math">\(p=(p_0,\ldots,p_{K-1})\)</span> is the predicted distribution. This coordinated normalization is <strong>softmax</strong>. Independent sigmoid outputs need not sum to one: three zero scores would produce three probabilities of one-half. A categorical model of one exclusive label must instead distribute one unit of total mass across the classes.</p>
+<p>For finite real logits, exponentials are positive and division by their sum makes <span class="inline-math">\(\sum_kp_k=1\)</span>. If <span class="inline-math">\(z_k\gt z_r\)</span>, then <span class="inline-math">\(p_k\gt p_r\)</span>. Thus the most probable class is a largest-logit class. The program chooses the first class index when logits tie and compares logits directly; rounding the probabilities could erase a tiny ordering difference.</p>
+<p>For one review, suppose its three logits are <span class="inline-math">\((1,-1,0)\)</span>. Their softmax is approximately <span class="inline-math">\((0.665241,0.090031,0.244728)\)</span>. The negative class is most probable, but the model still assigns mass to the other two classes. These stipulated logits illustrate normalization, not measured review performance.</p>
+<h3 id="shift-invariance">Remove the common scale before exponentiation</h3>
+<p>Adding a common real scalar <span class="inline-math">\(a\)</span> to every logit multiplies every numerator and the denominator by <span class="inline-math">\(e^a\)</span>, which cancels. Exact softmax is therefore invariant to a common shift. The logits <span class="inline-math">\((1000,998,999)\)</span> have the same exact probabilities as <span class="inline-math">\((1,-1,0)\)</span>, although directly exponentiating 1000 overflows ordinary double precision.</p>
+<p>Choose <span class="inline-math">\(a=\max_k z_k\)</span> and subtract it instead. Define shifted logits <span class="inline-math">\(u_k=z_k-a\le0\)</span>, so every exponential is at most one and at least one is one. Choose one maximizing index <span class="inline-math">\(r_*\)</span>; then</p>
+<div class="math">\[s=\sum_{k\ne r_*}e^{u_k},\qquad A(z)=\log\sum_ke^{z_k}=a+\log(1+s),\qquad p_k=\frac{e^{u_k}}{1+s}.\]</div>
+<p>The function <span class="inline-math">\(A\)</span> is <strong>log-sum-exp</strong>, the log of the normalizing sum. Keeping a selected maximum term separate permits <code>log1p(s)</code> for its small tail. <a href="https://webhomes.maths.ed.ac.uk/~dhigham/Publications/P149.pdf">Blanchard and the Highams</a>, Algorithm 4.1, analyze this shifted construction. The chapter program derives its own bounded implementation from these equations.</p>
+<p>Shifting avoids an unnecessarily large exponential; it does not make every real-valued result representable. A very negative shifted logit can underflow to a zero exponential, and probabilities can round to zero or one. Even two valid finite logits can have an unrepresentable difference at the extremes of floating-point range. The program explicitly bounds accepted score magnitudes and evaluates losses from shifted logits, rather than taking a log of a rounded probability.</p>
+<p>For two classes with logits <span class="inline-math">\((0,z)\)</span>, the positive-class probability is <span class="inline-math">\(e^z/(1+e^z)=\sigma(z)\)</span>. The binary score is the <em>difference</em> of the two class logits; using <span class="inline-math">\((-z,z)\)</span> would give <span class="inline-math">\(\sigma(2z)\)</span>, a different scale. Common-logit shifts also show that probabilities cannot uniquely identify all multiclass parameters.</p>
+</section>
+
+<section><h2 id="entropy">9. Cross entropy measures a forecast, with a support condition <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=3586s">59:46</a></h2>
+<p>Let <span class="inline-math">\(t=(t_0,\ldots,t_{K-1})\)</span> be a target distribution and <span class="inline-math">\(p\)</span> a forecast on the same classes. Each has nonnegative entries summing to one. The target may encode a single observed class or an explicitly supplied distribution over possible labels. Define its <strong>support</strong> as the classes with positive target mass.</p>
+<div class="math">\[H(t)=-\sum_{k:t_k\gt0}t_k\log t_k,\qquad H(t,p)=-\sum_{k:t_k\gt0}t_k\log p_k.\]</div>
+<p>The first quantity is <strong>entropy</strong>; the second is <strong>cross entropy</strong>, the expected negative log forecast probability when the label follows the target. Both use nats. Zero target mass contributes zero and is omitted instead of numerically multiplying zero by an undefined logarithm. If any supported target class has <span class="inline-math">\(p_k=0\)</span>, cross entropy is positive infinity. No such class can occur under finite exact softmax logits, but it can occur in a direct distribution or a rounded probability array.</p>
+<p><a href="https://sites.stat.washington.edu/people/raftery/Research/PDF/Gneiting2007jasa.pdf">Gneiting and Raftery's treatment of proper scoring rules</a>, categorical Example 3 and the binary logarithmic-score table, uses a <em>maximized</em> log-probability score. Negating that score gives our minimized loss. This sign and the order of target versus forecast matter when relating loss to divergence.</p>
+<h3 id="kl-proof">The entropy floor follows from a log inequality</h3>
+<p>Assume first that the forecast is positive on the target support. The <strong>Kullback–Leibler divergence</strong>, written <span class="inline-math">\(D_{\mathrm{KL}}(t\|p)\)</span>, is</p>
+<div class="math">\[D_{\mathrm{KL}}(t\|p)=\sum_{k:t_k\gt0}t_k\log\frac{t_k}{p_k},\qquad H(t,p)=H(t)+D_{\mathrm{KL}}(t\|p).\]</div>
+<p>The identity follows by expanding the log ratio and collecting the two sums. To prove nonnegativity, use <span class="inline-math">\(\log v\le v-1\)</span> for <span class="inline-math">\(v\gt0\)</span>. The difference <span class="inline-math">\(v-1-\log v\)</span> has derivative <span class="inline-math">\(1-1/v\)</span>, so it decreases to zero at one and increases afterward. Equality holds only at one.</p>
+<p>Apply that inequality to <span class="inline-math">\(v=p_k/t_k\)</span> on the target support:</p>
+<div class="math">\[D_{\mathrm{KL}}(t\|p)\ge\sum_{k:t_k\gt0}(t_k-p_k)=1-\sum_{k:t_k\gt0}p_k\ge0.\]</div>
+<p>Equality requires matching every positive target entry and placing no mass outside its support, hence <span class="inline-math">\(p=t\)</span>. A support mismatch gives infinite divergence and cannot improve the minimum. Thus the minimum cross entropy over the closed probability simplex is <span class="inline-math">\(H(t)\)</span>, uniquely at the target distribution. A <strong>strictly proper</strong> probability loss has this unique expected-loss optimum at the true target distribution. This population statement does not assert that a finite fitted parameter family can realize every distribution or that its finite-sample optimizer is calibrated.</p>
+<p>For <span class="inline-math">\(t=(0.5,0.2,0.3)\)</span> and <span class="inline-math">\(p=(0.1,0.5,0.4)\)</span>, direct sums give <span class="inline-math">\(H(t)=1.029653\)</span>, <span class="inline-math">\(H(t,p)=1.564809\)</span>, and <span class="inline-math">\(D_{\mathrm{KL}}=0.535156\)</span> nats. Their equality is a numerical check of the decomposition. Cross entropy is not a distance: even at <span class="inline-math">\(p=t\)</span> it is the positive target entropy here. KL is not symmetric either: <span class="inline-math">\(D_{\mathrm{KL}}((1,0)\|(1/2,1/2))=\log2\)</span>, while reversing the arguments gives infinity.</p>
+<h3 id="soft-target-gradient">Softmax and cross entropy share a simple gradient</h3>
+<p>A <strong>one-hot target</strong> for class <span class="inline-math">\(r\)</span> has one at index <span class="inline-math">\(r\)</span> and zeros elsewhere. Its entropy is zero and cross entropy reduces to <span class="inline-math">\(-\log p_r\)</span>. Exact finite logits still cannot give probability one when <span class="inline-math">\(K\ge2\)</span>, so the zero floor may only be approached. A soft target with several positive entries has its own entropy floor and is not supposed to achieve zero loss even when matched.</p>
+<p>Since <span class="inline-math">\(\log p_k=z_k-A(z)\)</span> and <span class="inline-math">\(\sum_kt_k=1\)</span>, the loss becomes <span class="inline-math">\(H(t,p(z))=A(z)-\sum_kt_kz_k\)</span>. Differentiating the normalizing log gives <span class="inline-math">\(\partial A/\partial z_k=e^{z_k}/\sum_re^{z_r}=p_k\)</span>. Therefore</p>
+<div class="math">\[\frac{\partial H(t,p(z))}{\partial z_k}=p_k-t_k,\qquad\frac{\partial H}{\partial W_{jk}}=x_j(p_k-t_k),\qquad\frac{\partial H}{\partial c_k}=p_k-t_k.\]</div>
+<p>Here <span class="inline-math">\(j\)</span> remains the feature index and <span class="inline-math">\(k\)</span> the class index. For a training set, average these quantities over its examples indexed by <span class="inline-math">\(i\)</span>. The class-gradient components sum to zero, so a common-logit displacement changes no loss, consistent with shift invariance.</p>
+<p>At logits <span class="inline-math">\((1,-1,0)\)</span> and soft target <span class="inline-math">\((0.5,0.2,0.3)\)</span>, the logits gradient is approximately <span class="inline-math">\((0.165241,-0.109969,-0.055272)\)</span>. The loss here is 1.107606 nats; this forecast differs from the preceding direct-distribution example. A gradient-descent step with positive learning rate directly on this example's logits decreases its excessive first score and increases the other two. A parameter update for a training mean instead combines contributions from all examples, which can change those directions for an individual review.</p>
+<p>For stable computation, use the earlier shifted logits <span class="inline-math">\(u_k\)</span> and tail <span class="inline-math">\(s\)</span> to evaluate <span class="inline-math">\(H=\log(1+s)-\sum_kt_ku_k\)</span>. This avoids subtracting two large nearly equal unshifted quantities or taking a logarithm of an underflowed probability. The derivative is with respect to the original logits; shift invariance permits this evaluation without differentiating a separate maximum-selection model.</p>
+</section>
+
+<section><h2 id="text">10. Indexed text exposes both efficiency and information loss <a class="timestamp" href="https://www.youtube.com/watch?v=Mbe5ICIUw5Q&amp;t=3935s">01:05:35</a></h2>
+<p>A string stores an ordered sequence of characters. <strong>Tokenization</strong> turns it into discrete pieces, and a <strong>vocabulary</strong> maps those pieces to integer indices. The chapter's intentionally simple tokenizer lowercases text and splits on whitespace. It does not interpret punctuation, negation, or language morphology. Its fixed vocabulary is <span class="inline-math">\((\text{good},\text{bad},\text{not},\text{film},\text{unknown})\)</span>, with indices 0 through 4; the last entry is represented by the reserved string <code>&lt;unk&gt;</code> in code.</p>
+<p>“good film good” becomes indices <span class="inline-math">\((0,3,0)\)</span>. An unseen piece maps to 4 without changing the vocabulary. Freezing this map matters: assigning a new index during inference would alter the meaning or required size of already learned weight vectors. The tokenizer rejects an empty token sequence because its later mean representation would divide by zero. Unknown pieces remain counted in the document length.</p>
+<h3 id="one-hot-gather">One-hot rows define the operation; indices can execute it</h3>
+<p>Let <span class="inline-math">\(V\)</span> be vocabulary size, <span class="inline-math">\(N\gt0\)</span> document length, and <span class="inline-math">\(a_r\in\{0,\ldots,V-1\}\)</span> the index at position <span class="inline-math">\(r=0,\ldots,N-1\)</span>. Its one-hot row is a vector <span class="inline-math">\(e_{a_r}\in\mathbb R^V\)</span> with a single one at that index. Stack these rows into <span class="inline-math">\(E\in\{0,1\}^{N\times V}\)</span>.</p>
+<p>For token weights <span class="inline-math">\(w\in\mathbb R^V\)</span>, row multiplication gives <span class="inline-math">\((Ew)_r=\sum_je_{a_r,j}w_j=w_{a_r}\)</span>, because all but one summand vanish. This proves <strong>gathering</strong>, selecting values by their stored indices, is equivalent to this particular one-hot product. With weights <span class="inline-math">\((1,-1,0,0,0)\)</span> and indices <span class="inline-math">\((0,3,0)\)</span>, both methods return <span class="inline-math">\((1,0,1)\)</span>. No dense one-hot matrix is required to execute it.</p>
+<p>A dense matrix needs <span class="inline-math">\(NV\)</span> elements, whereas the index representation needs <span class="inline-math">\(N\)</span> integers. For <span class="inline-math">\(N=100,V=50{,}000\)</span>, four-byte dense entries occupy 20,000,000 bytes and four-byte indices occupy 400 bytes, excluding other storage and temporary arrays. Those are stipulated storage estimates, not Python object-size or speed measurements. Dense multiplication would inspect many zeros; a gather performs one lookup per position under constant-time indexing assumptions.</p>
+<h3 id="bag-order">A bag of words deliberately removes position</h3>
+<p>The <strong>normalized bag-of-words</strong> vector is the mean <span class="inline-math">\(x=N^{-1}\sum_re_{a_r}\)</span>. Its <span class="inline-math">\(j\)</span>th component is the fraction of pieces carrying index <span class="inline-math">\(j\)</span>. This is the feature vector stipulated at the beginning, with <span class="inline-math">\(V=d=5\)</span>. The corresponding score satisfies</p>
+<div class="math">\[w^\top x+b=\frac1N\sum_{r=0}^{N-1}w_{a_r}+b.\]</div>
+<p>“good film good” has vector <span class="inline-math">\((2/3,0,0,1/3,0)\)</span> and score <span class="inline-math">\(2/3\)</span> under the stipulated weights. Computing a frequency vector and dotting it with weights agrees with averaging the gathered weights. The vector size stays fixed as document length changes. Mean frequencies also erase absolute repetition count: duplicating the whole document leaves <span class="inline-math">\(x\)</span> unchanged.</p>
+<p>A permutation of positions leaves the sum unchanged. In particular, “not good but bad” and “not bad but good” both have vector <span class="inline-math">\((1/4,1/4,1/4,0,1/4)\)</span>; <em>but</em> maps to the unknown index. Stipulate negative and positive labels respectively for this pair. Every deterministic predictor that receives only this shared vector returns the same label for both, so it must misclassify at least one. This is a representation limit for this stipulated task, independent of optimizer or model expressiveness after aggregation.</p>
+<p>A probabilistic predictor cannot make both targets certain either. If its shared positive probability is <span class="inline-math">\(q\)</span>, the pair's mean logistic loss is <span class="inline-math">\(-\tfrac12\log(q(1-q))\)</span>. The identity <span class="inline-math">\(q(1-q)=1/4-(q-1/2)^2\le1/4\)</span> gives minimum <span class="inline-math">\(\log2\)</span> at <span class="inline-math">\(q=1/2\)</span>. More optimization cannot remove this floor without changing the inputs or labels.</p>
+<p>Keeping ordered indices, adding declared adjacent-word features, or using a model whose representation retains positions can distinguish the two strings. For example, a feature indicating the adjacent phrase “not good” is one for the first string and zero for the second. That fixes this pair's collision, not every sentiment problem. A richer predictor applied to the already collapsed vector alone cannot recover the lost order.</p>
+<h3 id="subwords">Subwords change token granularity, not this averaging limit</h3>
+<p>Whitespace splitting attaches punctuation to pieces and can make a whole unseen word unknown. <strong>Byte-pair encoding</strong>, or BPE, supplies a different segmentation rule. <a href="https://aclanthology.org/P16-1162.pdf">Sennrich, Haddow, and Birch</a>, §3.2 and Algorithm 1, adapt a prior compression method to neural translation by merging frequent adjacent character or symbol pairs within words. At inference, their learned merge sequence is applied to new character sequences. Their paper cites Gage for compression BPE; it does not justify attributing BPE's invention to GPT.</p>
+<p>As an original miniature trace, take words <em>low</em> with frequency two and <em>lower</em> with frequency one, each initially split into characters plus an end-of-word marker. Pairs <span class="inline-math">\((l,o)\)</span> and <span class="inline-math">\((o,w)\)</span> each occur three weighted times. Choosing <span class="inline-math">\((l,o)\)</span> by a declared tie rule creates the symbol <em>lo</em>; the next pair <span class="inline-math">\((lo,w)\)</span> occurs three times and merges to <em>low</em>. These two learned merges let <em>lowest</em> begin with the known piece <em>low</em> if its remaining characters are in the initial alphabet.</p>
+<p>Unknown characters, boundary conventions, tie rules, and the trained merge inventory still require a contract. This bounded trace neither identifies a particular modern tokenizer nor implements BPE in the chapter program. Replacing whitespace words with subwords can alter vocabulary coverage; averaging the resulting tokens still discards their positions. Segmentation and sequence modeling address different losses of information.</p>
+</section>
+
+<section><h2 id="implementation">11. Execute the declared model, then check what the outputs establish</h2>
+<p>The <a href="programs/chapter03.py">original chapter program</a> implements the binary mean objective, categorical probabilities and losses, fixed-vocabulary text encoding, and the two-example gradient trace. It uses Python's standard library. Its report is a numerical teaching fixture; it does not fit a real review dataset, implement BPE, measure runtime, or establish population calibration.</p>
+<p>Run <code>python cs221-artificial-intelligence-principles-and-techniques-notes/programs/chapter03.py</code> from the repository root. Importing the module performs no computation beyond definitions and constants. Functions return new tuples or scalars, leave their inputs unchanged, and do no file or network I/O. Executing the file prints the JSON report below.</p>
+<table><caption>Input and failure contract for the finite implementation.</caption><thead><tr><th>Object</th><th>Accepted domain and convention</th><th>Failure or limit</th></tr></thead><tbody>
+<tr><td>Numeric scalars</td><td>Python <code>int</code> or <code>float</code>, excluding booleans; converted to finite binary64. Scores, weights, biases, and the learning rate have magnitude at most 1,000,000.</td><td>Invalid type, nonfinite value, bound violation, or unrepresentable integer raises <code>ValueError</code>. Rounding during the declared float conversion is allowed.</td></tr>
+<tr><td>Binary labels and decisions</td><td>Integer −1 or +1. The decision is +1 exactly when the converted score is positive.</td><td>A floating-point label such as <code>1.0</code> is rejected. Decisions use scores, never rounded sigmoid probabilities.</td></tr>
+<tr><td>Probability or feature vectors</td><td>Nonempty lists or tuples with entries in [0,1] and sum within <span class="inline-math">\(10^{-12}\)</span> of one. Accepted vectors are renormalized by that sum.</td><td>Invalid mass is rejected. Numerical results and gradients apply to the accepted, renormalized target/features; this is not a differentiable normalization layer.</td></tr>
+<tr><td>Categorical logits</td><td>At least two bounded scores; class ties choose the first largest score.</td><td>Max shifting bounds score differences by 2,000,000. Exponentials may underflow. Fused logit loss avoids taking a logarithm of a rounded zero probability.</td></tr>
+<tr><td>Direct entropy and divergence</td><td>Equal-dimensional valid target and forecast distributions; zero-target terms are omitted.</td><td>A positive-target/zero-forecast coordinate returns positive infinity for cross entropy and KL. That mathematical support failure is distinct from malformed input.</td></tr>
+<tr><td>Text and indices</td><td>A nonempty string after splitting; a fixed unique lowercase vocabulary containing <code>&lt;unk&gt;</code>; nonempty integer indices in range.</td><td>Empty text, invalid vocabulary, and out-of-range or boolean indices are rejected. Unseen pieces map to the reserved index without modifying the vocabulary.</td></tr>
+<tr><td>Training</td><td>Nonempty matched feature/target rows, dimensions matching weights, positive bounded learning rate, nonnegative integer step count.</td><td>An iterate or derived score outside the stated numeric domain is rejected. A valid learning rate does not itself guarantee descent on every possible dataset.</td></tr>
+</tbody></table>
+<p>These bounds make the numerical interface explicit. They do not change the real-valued derivations, which specify their own hypotheses. In particular, probabilities from finite logits are strictly positive in real arithmetic, whereas <code>softmax((1000, -1000))</code> rounds its second component to zero. The fused loss for target <code>(0, 1)</code> is still 2000. A tiny positive score also need not change the rounded sigmoid: <code>top_class((0, 1e-300))</code> chooses class 1 from the scores even when both printed probabilities look like one half.</p>
+<p>The first step has the exact rational weights derived above; subsequent outputs are binary64 approximations rounded to twelve decimal places in the report. The twenty-step trace reduces this fixture's unregularized training loss from 0.693147 to 0.326876 and gives both stipulated labels correctly. That observation is compatible with the unattained separable infimum: correct decisions do not mean that the fitted parameters minimize logistic loss at a finite point.</p>
+<details><summary>Complete original program</summary><pre><code class="language-python" id="chapter-program">&quot;&quot;&quot;Original bounded numerical model for Chapter 3; Python standard library only.
+
+Inputs are finite Python int/float scalars (not bool), converted to binary64.
+Scores, weights and biases have magnitude at most 1e6. Features are normalized
+nonnegative frequencies. Probabilities must sum to one within 1e-12; accepted
+vectors are renormalized. Functions do not mutate inputs or perform I/O.
+Invalid inputs raise ValueError. Direct cross entropy / KL return inf on a
+target-positive, forecast-zero coordinate. The CLI prints a teaching report.
+&quot;&quot;&quot;
+
+import json
+import math
+
+LIMIT = 1_000_000
+MASS_TOLERANCE = 1e-12
+VOCABULARY = (&quot;good&quot;, &quot;bad&quot;, &quot;not&quot;, &quot;film&quot;, &quot;&lt;unk&gt;&quot;)
+
+
+def _number(value, bound=None):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(&quot;expected a finite int/float, not bool&quot;)
+    # Compare the original integer before conversion: arbitrarily large int
+    # inputs can overflow float(), whereas this domain promises ValueError.
+    if bound is not None and not -bound &lt;= value &lt;= bound:
+        raise ValueError(&quot;number outside the declared magnitude bound&quot;)
+    try:
+        out = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError(&quot;number cannot be represented as finite binary64&quot;) from exc
+    if not math.isfinite(out):
+        raise ValueError(&quot;number must be finite&quot;)
+    return out
+
+
+def _vector(values, bound=None):
+    if not isinstance(values, (tuple, list)) or not values:
+        raise ValueError(&quot;expected a nonempty list or tuple&quot;)
+    return tuple(_number(v, bound) for v in values)
+
+
+def _distribution(values):
+    out = _vector(values)
+    if any(v &lt; 0 or v &gt; 1 for v in out):
+        raise ValueError(&quot;probabilities must lie in [0,1]&quot;)
+    total = math.fsum(out)
+    if abs(total - 1.0) &gt; MASS_TOLERANCE:
+        raise ValueError(&quot;probability mass must sum to one within 1e-12&quot;)
+    return tuple(v / total for v in out)
+
+
+def _label(y):
+    if isinstance(y, bool) or not isinstance(y, int) or y not in (-1, 1):
+        raise ValueError(&quot;binary target must be integer -1 or +1&quot;)
+    return y
+
+
+def hard_label(score):
+    &quot;&quot;&quot;Positive precisely when score &gt; 0; negative at a zero score.&quot;&quot;&quot;
+    return 1 if _number(score, LIMIT) &gt; 0 else -1
+
+
+def sigmoid(score):
+    z = _number(score, LIMIT)
+    if z &gt;= 0:
+        return 1.0 / (1.0 + math.exp(-z))
+    exp_z = math.exp(z)
+    return exp_z / (1.0 + exp_z)
+
+
+def softplus(value):
+    u = _number(value, LIMIT)
+    return max(u, 0.0) + math.log1p(math.exp(-abs(u)))
+
+
+def binary_loss(score, y):
+    z, label = _number(score, LIMIT), _label(y)
+    return softplus(-label * z)
+
+
+def binary_score_gradient(score, y):
+    z, label = _number(score, LIMIT), _label(y)
+    return -label * sigmoid(-label * z)
+
+
+def _shifted_logits(logits):
+    z = _vector(logits, LIMIT)
+    if len(z) &lt; 2:
+        raise ValueError(&quot;categorical model requires at least two classes&quot;)
+    pivot = max(range(len(z)), key=z.__getitem__)  # first maximum on ties
+    shifted = tuple(v - z[pivot] for v in z)
+    tail = math.fsum(math.exp(v) for j, v in enumerate(shifted) if j != pivot)
+    return z, shifted, 1.0 + tail, math.log1p(tail)
+
+
+def softmax(logits):
+    _, u, denominator, _ = _shifted_logits(logits)
+    return tuple(math.exp(v) / denominator for v in u)
+
+
+def top_class(logits):
+    z, _, _, _ = _shifted_logits(logits)
+    return max(range(len(z)), key=z.__getitem__)
+
+
+def categorical_loss(logits, target):
+    &quot;&quot;&quot;Fused soft-target cross entropy; no log of rounded probabilities.&quot;&quot;&quot;
+    _, u, _, correction = _shifted_logits(logits)
+    t = _distribution(target)
+    if len(t) != len(u):
+        raise ValueError(&quot;target and logits dimensions must agree&quot;)
+    return correction - math.fsum(tj * uj for tj, uj in zip(t, u))
+
+
+def categorical_gradient(logits, target):
+    p, t = softmax(logits), _distribution(target)
+    if len(p) != len(t):
+        raise ValueError(&quot;target and logits dimensions must agree&quot;)
+    return tuple(pj - tj for pj, tj in zip(p, t))
+
+
+def entropy(target):
+    t = _distribution(target)
+    return -math.fsum(v * math.log(v) for v in t if v &gt; 0)
+
+
+def cross_entropy(target, forecast):
+    t, p = _distribution(target), _distribution(forecast)
+    if len(t) != len(p):
+        raise ValueError(&quot;probability dimensions must agree&quot;)
+    if any(tj &gt; 0 and pj == 0 for tj, pj in zip(t, p)):
+        return math.inf
+    return -math.fsum(tj * math.log(pj) for tj, pj in zip(t, p) if tj &gt; 0)
+
+
+def relative_entropy(target, forecast):
+    t, p = _distribution(target), _distribution(forecast)
+    if len(t) != len(p):
+        raise ValueError(&quot;probability dimensions must agree&quot;)
+    if any(tj &gt; 0 and pj == 0 for tj, pj in zip(t, p)):
+        return math.inf
+    return math.fsum(tj * (math.log(tj) - math.log(pj))
+                     for tj, pj in zip(t, p) if tj &gt; 0)
+
+
+def encode(text, vocabulary=VOCABULARY):
+    if not isinstance(text, str) or not text.split():
+        raise ValueError(&quot;review must be a nonempty string after whitespace splitting&quot;)
+    if not isinstance(vocabulary, (tuple, list)) or not vocabulary:
+        raise ValueError(&quot;vocabulary must be a nonempty list or tuple&quot;)
+    if any(not isinstance(v, str) or not v or v != v.lower()
+           or len(v.split()) != 1 or v.split()[0] != v for v in vocabulary):
+        raise ValueError(&quot;vocabulary entries must be unique lowercase whitespace-free strings&quot;)
+    if len(set(vocabulary)) != len(vocabulary) or &quot;&lt;unk&gt;&quot; not in vocabulary:
+        raise ValueError(&quot;vocabulary must be unique and contain &lt;unk&gt;&quot;)
+    lookup = {piece: j for j, piece in enumerate(vocabulary)}
+    return tuple(lookup.get(piece, lookup[&quot;&lt;unk&gt;&quot;]) for piece in text.lower().split())
+
+
+def _indices(indices, size):
+    if isinstance(size, bool) or not isinstance(size, int) or size &lt; 1:
+        raise ValueError(&quot;vocabulary size must be a positive integer&quot;)
+    if not isinstance(indices, (tuple, list)) or not indices:
+        raise ValueError(&quot;index sequence must be nonempty&quot;)
+    if any(isinstance(j, bool) or not isinstance(j, int) or not 0 &lt;= j &lt; size
+           for j in indices):
+        raise ValueError(&quot;each index must be an integer in the vocabulary range&quot;)
+    return tuple(indices)
+
+
+def bag_of_words(indices, size):
+    ids = _indices(indices, size)
+    counts = [0] * size
+    for j in ids:
+        counts[j] += 1
+    return tuple(count / len(ids) for count in counts)
+
+
+def gather_mean(indices, weights):
+    w = _vector(weights, LIMIT)
+    ids = _indices(indices, len(w))
+    # Divide before summing to avoid unnecessary accumulation overflow.
+    return math.fsum(w[j] / len(ids) for j in ids)
+
+
+def affine_score(features, weights, bias):
+    x, w, b = _distribution(features), _vector(weights, LIMIT), _number(bias, LIMIT)
+    if len(x) != len(w):
+        raise ValueError(&quot;feature and weight dimensions must agree&quot;)
+    z = math.fsum(xj * wj for xj, wj in zip(x, w)) + b
+    return _number(z, LIMIT)
+
+
+def binary_objective(features, labels, weights, bias):
+    &quot;&quot;&quot;Return unregularized MEAN loss, dJ/dw and dJ/db.&quot;&quot;&quot;
+    w, b = _vector(weights, LIMIT), _number(bias, LIMIT)
+    if not isinstance(features, (tuple, list)) or not features:
+        raise ValueError(&quot;training batch must be nonempty&quot;)
+    if not isinstance(labels, (tuple, list)) or len(features) != len(labels):
+        raise ValueError(&quot;one target is required per training row&quot;)
+    x = tuple(_distribution(row) for row in features)
+    if any(len(row) != len(w) for row in x):
+        raise ValueError(&quot;training feature and weight dimensions must agree&quot;)
+    y = tuple(_label(label) for label in labels)
+    z = tuple(affine_score(row, w, b) for row in x)
+    r = tuple(binary_score_gradient(zi, yi) for zi, yi in zip(z, y))
+    n = len(x)
+    loss = math.fsum(binary_loss(zi, yi) / n for zi, yi in zip(z, y))
+    grad = tuple(math.fsum(ri * row[j] / n for ri, row in zip(r, x))
+                 for j in range(len(w)))
+    return loss, grad, math.fsum(ri / n for ri in r)
+
+
+def train(features, labels, weights, bias, learning_rate=1.0, steps=20):
+    eta = _number(learning_rate, LIMIT)
+    if eta &lt;= 0 or isinstance(steps, bool) or not isinstance(steps, int) or steps &lt; 0:
+        raise ValueError(&quot;learning rate must be positive; steps a nonnegative integer&quot;)
+    w, b = _vector(weights, LIMIT), _number(bias, LIMIT)
+    history = [binary_objective(features, labels, w, b)[0]]
+    for _ in range(steps):
+        _, dw, db = binary_objective(features, labels, w, b)
+        w = tuple(_number(wj - eta * gj, LIMIT) for wj, gj in zip(w, dw))
+        b = _number(b - eta * db, LIMIT)
+        history.append(binary_objective(features, labels, w, b)[0])
+    return w, b, tuple(history)
+
+
+def report():
+    features = tuple(bag_of_words(encode(text), len(VOCABULARY))
+                     for text in (&quot;good film&quot;, &quot;bad film&quot;))
+    labels, zero = (1, -1), (0.0,) * len(VOCABULARY)
+    first_w, first_b, first_history = train(features, labels, zero, 0, steps=1)
+    final_w, final_b, history = train(features, labels, zero, 0, steps=20)
+    t, p = (.5, .2, .3), (.1, .5, .4)
+    left = bag_of_words(encode(&quot;not good but bad&quot;), len(VOCABULARY))
+    right = bag_of_words(encode(&quot;not bad but good&quot;), len(VOCABULARY))
+    return {
+        &quot;zero_score_negative_error&quot;: int(hard_label(0) != -1),
+        &quot;zero_score_nonpositive_margin_penalty&quot;: int((-1 * 0) &lt;= 0),
+        &quot;initial_mean_loss&quot;: round(first_history[0], 12),
+        &quot;first_step_weights&quot;: list(first_w), &quot;first_step_bias&quot;: first_b,
+        &quot;first_step_mean_loss&quot;: round(first_history[1], 12),
+        &quot;twenty_step_mean_loss&quot;: round(history[-1], 12),
+        &quot;twenty_step_losses_decrease&quot;: all(a &gt; b for a, b in zip(history, history[1:])),
+        &quot;twenty_step_training_labels&quot;: [hard_label(affine_score(row, final_w, final_b))
+                                       for row in features],
+        &quot;softmax_1_minus1_0&quot;: [round(v, 12) for v in softmax((1, -1, 0))],
+        &quot;shifted_softmax_matches&quot;: softmax((1, -1, 0)) == softmax((1000, 998, 999)),
+        &quot;soft_target_logit_loss&quot;: round(categorical_loss((1, -1, 0), t), 12),
+        &quot;soft_target_logit_gradient&quot;: [round(v, 12) for v in categorical_gradient((1, -1, 0), t)],
+        &quot;entropy&quot;: round(entropy(t), 12), &quot;cross_entropy&quot;: round(cross_entropy(t, p), 12),
+        &quot;KL&quot;: round(relative_entropy(t, p), 12),
+        &quot;wrong_extreme_binary_loss&quot;: binary_loss(-1000, 1),
+        &quot;rounded_zero_forecast_fused_loss&quot;: categorical_loss((1000, -1000), (0, 1)),
+        &quot;top_class_tiny_positive&quot;: top_class((0, 1e-300)),
+        &quot;order_collision&quot;: left == right,
+        &quot;collision_minimum_mean_loss&quot;: round(binary_loss(0, 1), 12),
+        &quot;encoding_good_film_good&quot;: list(encode(&quot;good film good&quot;)),
+        &quot;gather_and_dot_agree&quot;: gather_mean(encode(&quot;good film good&quot;), (1, -1, 0, 0, 0))
+                                == affine_score(bag_of_words(encode(&quot;good film good&quot;), 5), (1, -1, 0, 0, 0), 0),
+    }
+
+
+if __name__ == &quot;__main__&quot;:
+    print(json.dumps(report(), indent=2, allow_nan=False))
+</code></pre></details>
+<h3 id="actual-stdout">Actual standard output</h3><pre><code id="chapter-stdout">{
+  &quot;zero_score_negative_error&quot;: 0,
+  &quot;zero_score_nonpositive_margin_penalty&quot;: 1,
+  &quot;initial_mean_loss&quot;: 0.69314718056,
+  &quot;first_step_weights&quot;: [
+    0.125,
+    -0.125,
+    0.0,
+    0.0,
+    0.0
+  ],
+  &quot;first_step_bias&quot;: 0.0,
+  &quot;first_step_mean_loss&quot;: 0.662385382358,
+  &quot;twenty_step_mean_loss&quot;: 0.326875891703,
+  &quot;twenty_step_losses_decrease&quot;: true,
+  &quot;twenty_step_training_labels&quot;: [
+    1,
+    -1
+  ],
+  &quot;softmax_1_minus1_0&quot;: [
+    0.665240955775,
+    0.09003057317,
+    0.244728471055
+  ],
+  &quot;shifted_softmax_matches&quot;: true,
+  &quot;soft_target_logit_loss&quot;: 1.107605964444,
+  &quot;soft_target_logit_gradient&quot;: [
+    0.165240955775,
+    -0.10996942683,
+    -0.055271528945
+  ],
+  &quot;entropy&quot;: 1.029653014065,
+  &quot;cross_entropy&quot;: 1.564809202171,
+  &quot;KL&quot;: 0.535156188107,
+  &quot;wrong_extreme_binary_loss&quot;: 1000.0,
+  &quot;rounded_zero_forecast_fused_loss&quot;: 2000.0,
+  &quot;top_class_tiny_positive&quot;: 1,
+  &quot;order_collision&quot;: true,
+  &quot;collision_minimum_mean_loss&quot;: 0.69314718056,
+  &quot;encoding_good_film_good&quot;: [
+    0,
+    3,
+    0
+  ],
+  &quot;gather_and_dot_agree&quot;: true
+}
+</code></pre>
+<p>The report compares gathered weights with the equivalent frequency-vector dot product and exposes the opposite-label order collision. A finite-difference test probes a gradient by perturbing its corresponding input and comparing the resulting loss change with the analytic derivative. Such tests can detect a plausible-looking but incorrectly signed gradient. Neither low training loss nor a successful algebraic equivalence supplies evidence about unseen reviews.</p>
+</section>
+
+<section><h2 id="exercises">12. Six exercises with complete reasoning</h2>
+<div class="exercise"><h3>Exercise 1: distinguish a decision tie from a margin penalty</h3>
+<p>Use the declared binary decision rule at score <span class="inline-math">\(z=0\)</span>. For each label <span class="inline-math">\(y=-1,+1\)</span>, compute decision error and the nonpositive-margin penalty. Can a function of the scalar margin alone equal decision error for both? Then scale a nonzero weight vector and its bias by 100 and determine what changes in labels, boundary distances, and modeled probabilities.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Both zero-score examples are predicted −1. The negative target therefore has decision error 0 and the positive target has error 1. Each has margin <span class="inline-math">\(yz=0\)</span>, so the penalty <span class="inline-math">\(\mathbf1[yz\le0]\)</span> is 1 for each. A margin-only function receives the same input 0 but would have to output both 0 and 1. It cannot encode these two decision errors under the declared tie rule.</p>
+<p>For <span class="inline-math">\(w\ne0\)</span>, scaling parameters by 100 gives <span class="inline-math">\(z'=100z\)</span>, preserving the sign and every hard label, including the zero tie. The boundary <span class="inline-math">\(w^\top x+b=0\)</span> is unchanged. Distance becomes <span class="inline-math">\(|100z|/\|100w\|=|z|/\|w\|\)</span>, also unchanged. Modeled probability changes from <span class="inline-math">\(\sigma(z)\)</span> to <span class="inline-math">\(\sigma(100z)\)</span> unless <span class="inline-math">\(z=0\)</span>. Thus identical decisions and geometry do not determine the probability scale or certify calibration.</p>
+</details></div>
+<div class="exercise"><h3>Exercise 2: recover log odds and the composite derivative</h3>
+<p>A review receives modeled positive probability <span class="inline-math">\(q=0.2\)</span>. Recover its score. Prove the sigmoid's derivative has maximum one quarter. For a positive target at score −10, compare the sigmoid derivative with the score derivative of logistic loss, and explain why probability saturation need not destroy the learning signal for a confidently wrong example.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>The odds are <span class="inline-math">\(q/(1-q)=0.2/0.8=1/4\)</span>. Hence <span class="inline-math">\(z=\log(1/4)=-\log4\approx-1.386294\)</span>. Differentiating <span class="inline-math">\(\sigma(z)=1/(1+e^{-z})\)</span> gives <span class="inline-math">\(\sigma'(z)=q(1-q)=1/4-(q-1/2)^2\le1/4\)</span>, with equality at <span class="inline-math">\(q=1/2\)</span> or <span class="inline-math">\(z=0\)</span>.</p>
+<p>At <span class="inline-math">\(z=-10\)</span>, <span class="inline-math">\(q\approx0.000045398\)</span>, so <span class="inline-math">\(\sigma'(z)\approx0.000045396\)</span> is small. For positive target, the composite loss is <span class="inline-math">\(-\log q\)</span>; its derivative is <span class="inline-math">\(-q^{-1}q(1-q)=q-1\approx-0.999954602\)</span>. The logarithm's derivative compensates for the small sigmoid derivative. A gradient-descent step therefore increases the score substantially rather than treating this wrong prediction as locally irrelevant. This statement concerns the composite mathematical derivative; evaluating <span class="inline-math">\(\log q\)</span> after <span class="inline-math">\(q\)</span> has rounded to zero would still be an implementation error.</p>
+</details></div>
+<div class="exercise"><h3>Exercise 3: carry out the complete first training step</h3>
+<p>Start from all-zero weights and bias on the two review vectors in Section 1. Use their labels, a mean logistic objective, and learning rate one. Compute the two per-example gradients, their mean, the updated parameters, both new margins, and the new mean loss. If a program instead sums example losses with the same learning rate, what happens to this first step?</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Both scores are zero and <span class="inline-math">\(\sigma(0)=1/2\)</span>. For the positive example, <span class="inline-math">\(\partial\ell/\partial z=-1/2\)</span>, producing weight gradient <span class="inline-math">\((-1/4,0,0,-1/4,0)\)</span> and bias gradient −1/2. For the negative example the score derivative is +1/2, producing <span class="inline-math">\((0,1/4,0,1/4,0)\)</span> and bias gradient +1/2.</p>
+<p>Averaging gives <span class="inline-math">\(\nabla_wJ=(-1/8,1/8,0,0,0)\)</span> and <span class="inline-math">\(\partial J/\partial b=0\)</span>. Subtracting this gradient with learning rate one yields <span class="inline-math">\(w=(1/8,-1/8,0,0,0)\)</span> and <span class="inline-math">\(b=0\)</span>. The scores are +1/16 and −1/16 respectively. Multiplying each by its target makes both margins +1/16.</p>
+<p>Both losses are <span class="inline-math">\(\log(1+e^{-1/16})\approx0.662385382358\)</span> nats, so that is also the new mean, below the initial <span class="inline-math">\(\log2\approx0.693147180560\)</span>. With a sum objective, the gradient doubles: the same nominal learning rate yields <span class="inline-math">\(w=(1/4,-1/4,0,0,0)\)</span>, margins 1/8, and a different step. Halving the sum-objective learning rate would reproduce the mean-objective update. Normalization is part of the optimization specification.</p>
+</details></div>
+<div class="exercise"><h3>Exercise 4: prove why an optimizer may have no finite destination</h3>
+<p>For the balanced fixture, take <span class="inline-math">\(w=(1,-1,0,0,0),b=0\)</span>, then scale all parameters by <span class="inline-math">\(\alpha>0\)</span>. Determine the decision error, mean loss, infimum, and whether any finite parameters achieve that infimum. Prove what adding <span class="inline-math">\(\lambda\|\theta\|^2/2\)</span>, with <span class="inline-math">\(\lambda>0\)</span> and bias included in <span class="inline-math">\(\theta\)</span>, changes.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Each original margin is 1/2, so each scaled margin is <span class="inline-math">\(\alpha/2>0\)</span>. Both labels are correct for every positive <span class="inline-math">\(\alpha\)</span>; decision error is zero. The mean logistic loss is <span class="inline-math">\(J(\alpha\theta)=\log(1+e^{-\alpha/2})\)</span>. It decreases to zero as <span class="inline-math">\(\alpha\to\infty\)</span>. Values at <span class="inline-math">\(\alpha=1,2,10,20\)</span> are approximately 0.474077, 0.313262, 0.00671535, and 0.0000453989 nats.</p>
+<p>Every finite score yields positive <span class="inline-math">\(e^{-yz}\)</span>, hence strictly positive loss. The infimum is zero but no finite parameter achieves it. Correct classifications and a continually falling loss therefore do not imply a finite unregularized minimizer. A floating-point loss printed as zero at a very large positive margin does not overturn this real-arithmetic result.</p>
+<p>The regularized objective is continuous and at least <span class="inline-math">\(\lambda\|\theta\|^2/2\)</span>, so it tends to infinity with parameter norm. At <span class="inline-math">\(\theta=0\)</span> its value is <span class="inline-math">\(\log2\)</span>. Outside a sufficiently large ball the quadratic term exceeds that value; inside the closed ball, continuity gives an attained minimum. Its Hessian is the positive-semidefinite logistic Hessian plus <span class="inline-math">\(\lambda I\)</span>, which is positive definite. The objective is strictly convex, making the finite minimizer unique. The argument penalizes the bias too; weights-only regularization requires a separate treatment of unpenalized directions. The chapter program deliberately demonstrates the unregularized case.</p>
+</details></div>
+<div class="exercise"><h3>Exercise 5: derive and compute a soft-target gradient</h3>
+<p>Take categorical logits <span class="inline-math">\(z=(1,-1,0)\)</span> and target <span class="inline-math">\(t=(0.5,0.2,0.3)\)</span>. Show that adding 999 to every logit preserves probabilities and loss. Derive the logit gradient and compute the probabilities, cross entropy, and gradient. Finally compare <span class="inline-math">\(t=(1,0),p=(1,0)\)</span> with <span class="inline-math">\(t=(1,0),p=(0,1)\)</span>, including support conventions.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>For a common shift <span class="inline-math">\(a\)</span>, numerator and denominator of each softmax component both acquire factor <span class="inline-math">\(e^a\)</span>, which cancels. Also <span class="inline-math">\(\log\sum_je^{z_j+a}-\sum_jt_j(z_j+a)=a+\log\sum_je^{z_j}-\sum_jt_jz_j-a\sum_jt_j\)</span>. Since target mass is one, the two shifts cancel in the loss. Thus <span class="inline-math">\((1000,998,999)\)</span> is mathematically equivalent and the shifted implementation avoids huge unshifted exponentials.</p>
+<p>Let <span class="inline-math">\(A(z)=\log\sum_je^{z_j}\)</span>. Differentiating yields <span class="inline-math">\(\partial A/\partial z_j=p_j\)</span>; therefore <span class="inline-math">\(\partial\ell/\partial z_j=p_j-t_j\)</span>. Here probabilities are approximately <span class="inline-math">\((0.665240955775,0.090030573170,0.244728471055)\)</span>. The weighted logit mean is <span class="inline-math">\(0.5(1)+0.2(-1)+0.3(0)=0.3\)</span>. With <span class="inline-math">\(A\approx1.407605964444\)</span>, the loss is <span class="inline-math">\(A-0.3\approx1.107605964444\)</span> nats. The gradient is approximately <span class="inline-math">\((0.165240955775,-0.109969426830,-0.055271528945)\)</span>; its components sum to zero, agreeing with common-shift invariance.</p>
+<p>For <span class="inline-math">\(t=p=(1,0)\)</span>, the zero-target second coordinate contributes zero and cross entropy, target entropy, and KL are all zero. For <span class="inline-math">\(t=(1,0),p=(0,1)\)</span>, the first target-positive coordinate has zero forecast probability, giving infinite cross entropy and KL. Assigning the expression <span class="inline-math">\(0\log0\)</span> the limiting contribution zero never licenses discarding a positive-target term. The first boundary distribution is allowed by the direct-distribution interface, but a finite two-class logit vector cannot realize it exactly in real arithmetic.</p>
+</details></div>
+<div class="exercise"><h3>Exercise 6: separate a representation repair from an evaluation claim</h3>
+<p>Assign negative sentiment to “not good but bad” and positive sentiment to “not bad but good.” Compute their vectors under the fixed vocabulary, prove a lower bound on mean hard-label error and mean logistic loss, and give one feature that separates the pair. Then design an evaluation capable of detecting a model that succeeds by memorizing duplicate reviews or exploiting topic rather than sentiment. State what this evaluation would still not prove.</p>
+<details class="solution"><summary>Full solution</summary>
+<p>Each string contains one <em>good</em>, one <em>bad</em>, one <em>not</em>, and one unknown piece <em>but</em>, with no <em>film</em>. Both vectors are <span class="inline-math">\((1/4,1/4,1/4,0,1/4)\)</span>. A deterministic classifier receives identical inputs and returns one label for both, so at least one of the two opposite targets is wrong. Minimum mean error is 1/2.</p>
+<p>If a probabilistic classifier assigns the common input positive probability <span class="inline-math">\(q\)</span>, its mean loss is <span class="inline-math">\(-\tfrac12[\log q+\log(1-q)]\)</span>. Because <span class="inline-math">\(q(1-q)=1/4-(q-1/2)^2\le1/4\)</span>, the mean loss is at least <span class="inline-math">\(-\tfrac12\log(1/4)=\log2\)</span>. Equality occurs at <span class="inline-math">\(q=1/2\)</span>. Endpoints give infinite loss for one target. The adjacent-phrase feature “not good” is 1 for the first review and 0 for the second, separating this pair. That is a representation repair, not evidence that every negation pattern has been solved.</p>
+<p>Freeze the vocabulary and fitted model using only training data. Form validation and test groups that keep duplicates and near-duplicates of a review in the same split. Hold out topic or product groups when the intended use requires transfer to new subjects, and evaluate ordered minimal pairs as a separately labeled stress set. Report hard-label error, mean log loss, and uncertainty about calibration on held-out groups, with the label and confidence definitions fixed. Use validation to choose features or thresholds and reserve the final test set for the chosen procedure.</p>
+<p>Such evidence can expose duplicate leakage, order blindness, or topic-dependent performance in these groups. It cannot establish performance under every future distribution, human-level language understanding, or exact population calibration. The original two-example computation supplies none of this empirical evidence; its role is to make the failure mechanism and a candidate representation repair explicit.</p>
+</details></div>
+</section>
+
+<section><h2 id="boundaries">13. What this model explains, and what remains to be measured</h2>
+<p>The service's classification problem has three distinct boundaries. A hard-label decision can be correct while the probability scale is unjustified. A differentiable objective can supply useful gradients without attaining a finite unregularized minimum. A representation can make the stipulated labels incompatible before any optimizer runs. The review case makes each boundary explicit; none is repaired merely by observing more iterations of the same two-example training trace.</p>
+<p>The recording's sequence is retained from binary classification through margin losses, logistic likelihood, categorical probabilities, cross entropy, and tokenized text. The machine transcript has recognition errors, and exact wording or uninspected visual details are not treated as verified evidence. The official executable lecture provides source context, including the zero-score discrepancy explained above. The geometry, smoothness bound, separating-ray argument, support proof, miniature BPE counts, review labels, and exercises are original teaching constructions, with their assumptions stated locally.</p>
+<p>The primary sources below support the particular claims identified beside their links. Guo and colleagues' experiments concern their reported datasets and models; they do not certify our sentiment fixture. Sennrich and colleagues support a subword adaptation for translation; their paper does not identify every current tokenizer. Blanchard and colleagues analyze numerical formulas; shifted evaluation does not imply exactness for every input. The logarithmic-score result concerns target distributions and expected loss, and does not by itself prove finite-sample calibration or generalization.</p>
+<h3 id="primary-references">Primary references</h3><ol>
+<li><a href="https://github.com/stanford-cs221/lectures/tree/f70063773fe9e04ddcbc248059501837053b810a">Stanford CS221 executable lectures, pinned revision f700637</a>, <code>linear_classification.py</code>: binary tie rule, margin demo, mean logistic objective, softmax, and text representations. The chapter corrects the demonstrated tie equivalence and uses original numerically bounded code.</li>
+<li><a href="https://sites.stat.washington.edu/people/raftery/Research/PDF/Gneiting2007jasa.pdf">Gneiting and Raftery (2007), Strictly Proper Scoring Rules, Prediction, and Estimation</a>, retained PDF page 5 Example 3 and page 7 binary-score table: logarithmic score, its sign convention, and distributional propriety.</li>
+<li><a href="https://proceedings.mlr.press/v70/guo17a/guo17a.pdf">Guo et al. (2017), On Calibration of Modern Neural Networks</a>, PDF page 2 §2 and page 4 Figure 3: confidence-calibration definition and bounded experimental distinction between classification accuracy and negative log likelihood.</li>
+<li><a href="https://aclanthology.org/P16-1162.pdf">Sennrich, Haddow, and Birch (2016), Neural Machine Translation of Rare Words with Subword Units</a>, PDF pages 3–4 §3.2 and Algorithm 1: learned character-pair merges, word boundaries, and unseen-character qualification.</li>
+<li><a href="https://webhomes.maths.ed.ac.uk/~dhigham/Publications/P149.pdf">Blanchard, D. J. Higham, and N. J. Higham, Accurately Computing the Log-Sum-Exp and Softmax Functions</a>, retained 2020 advance PDF pages 2 and 10–11, equations 4.1–4.3 and Algorithm 4.1: overflow/underflow risks, maximum shifting, and the <code>log1p</code> refinement. Pagination refers to this retained version.</li>
+</ol>
+</section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-02-objectives-gradients-and-learning.html">Previous available chapter</a><a href="index.html">Lecture index</a><a rel="next" href="lecture-04-neural-networks-and-training.html">Next available chapter</a></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

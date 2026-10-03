@@ -1,0 +1,419 @@
+{
+  "title": "Classification, probabilities, and the information retained by text",
+  "number": 3,
+  "video_id": "Mbe5ICIUw5Q",
+  "source_type": "locally generated automatic speech recognition",
+  "chapter_status": "author draft pending different-editor review",
+  "sections": [
+    {
+      "section": "classification",
+      "start": 5.26,
+      "end": 541.58,
+      "lecture_material": "Classification versus regression; predictors, learning, hypothesis/loss/optimization pipeline.",
+      "research_extension": "No separate external result.",
+      "teaching_construction": "Persistent stipulated review-routing problem, normalized five-feature vectors and two labeled examples.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Classification/regression, predictor/learning and hypothesis/loss/optimization definitions."
+        },
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Stipulated review labels, feature order, frequency normalization and consequential routing model; not measured data."
+        }
+      ]
+    },
+    {
+      "section": "affine",
+      "start": 541.58,
+      "end": 776.48,
+      "lecture_material": "Affine family, weights/bias and translated boundaries.",
+      "research_extension": "No empirical result; geometry derived locally.",
+      "teaching_construction": "Explicit zero/degenerate boundary cases; projection and distance proof; confidence-versus-scale counterexample.",
+      "evidence_class": "definition; theorem; engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Affine-score family, parameter dimensions, negative-label zero tie and degenerate w=0 cases."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Positive parameter scaling preserves labels; projection/Cauchy\u2013Schwarz prove boundary distance |z|/norm(w) for nonzero w."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Stipulated good-word weights and numerical distance/scaling example; no calibration estimate."
+        }
+      ]
+    },
+    {
+      "section": "loss-margin",
+      "start": 776.48,
+      "end": 1565.25,
+      "lecture_material": "Squared and zero-one loss; signed margin and mean objective.",
+      "research_extension": "Pinned official binary_classifier and zero_one_loss_inline compared, not silently equated.",
+      "teaching_construction": "Full zero-score table, exact decision-loss formula and margin-only impossibility counterexample.",
+      "evidence_class": "definition; theorem; engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Raw-score squared loss, exact hard-label decision error, signed margin and declared mean reduction."
+        },
+        {
+          "class": "theorem",
+          "origin": "original checked against pinned official source",
+          "claim": "Zero-score negative target disproves equivalence with nonpositive-margin penalty; exact tie-sensitive loss formula and margin-only impossibility."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Four-row score/target table recomputed with the original program's direct-score decision rule."
+        }
+      ]
+    },
+    {
+      "section": "zero-gradient",
+      "start": 1565.25,
+      "end": 1894.74,
+      "lecture_material": "Locally flat zero-one loss and smooth surrogate motivation.",
+      "research_extension": "No separate external result.",
+      "teaching_construction": "Finite sign-cell radius proof and wrong-example score perturbation; local signal versus global optimization distinction.",
+      "evidence_class": "definition; theorem; engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Augmented d+1 feature/parameter axes and surrogate-loss meaning."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Finite nonzero scores yield a sign-preserving open parameter ball and locally zero decision-loss gradient; no global optimization impossibility."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Wrong positive example remains wrong under -1 to -0.9 perturbation and changes label at +1."
+        }
+      ]
+    },
+    {
+      "section": "logistic",
+      "start": 1894.74,
+      "end": 2430.7,
+      "lecture_material": "Logistic map, symmetry, log odds, derivative and probability model.",
+      "research_extension": "Guo et al. \u00a72 confidence calibration and Figure3 bounded experimental distinction, separate from positive-class calibration.",
+      "teaching_construction": "Inverse odds, derivative maximum, illustrative calibration bucket, application-cost threshold.",
+      "evidence_class": "definition; theorem; engineering check; empirical result",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Conditional binary logistic model, odds/logit, positive-class calibration and stipulated application costs."
+        },
+        {
+          "class": "definition",
+          "origin": "primary",
+          "claim": "Guo \u00a72 PDFp2 predicted-class-confidence calibration criterion; explicitly distinct from positive-class calibration."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Log-odds inverse, sigmoid symmetry/derivative maximum and cost-minimizing threshold3/4 under declared penalties."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Sigmoid/odds values and four-example calibration-bucket illustration; not population calibration evidence."
+        },
+        {
+          "class": "empirical result",
+          "origin": "primary",
+          "claim": "Guo Figure3 PDFp4 reported neural-network experiment separates accuracy and negative-log-likelihood behavior; bounded to its models/dataset, no result for this teaching classifier."
+        },
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Proposed held-out calibration grouping/uncertainty requirements; evaluation protocol, not completed validation."
+        }
+      ]
+    },
+    {
+      "section": "likelihood",
+      "start": 2430.7,
+      "end": 2788.88,
+      "lecture_material": "Conditional product likelihood, natural-log mean loss, logistic loss.",
+      "research_extension": "Blanchard et al. shifted/log1p numerical formulas, with floating-point limits.",
+      "teaching_construction": "Average-probability counterexample; independence condition; fused softplus and extreme margins.",
+      "evidence_class": "definition; theorem; engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Declared conditional label independence, joint likelihood interpretation, natural-log mean objective and nats."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Negative-log product becomes mean logistic loss; softplus branch identity and separate average-probability objective."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original checked against primary",
+          "claim": "Stable two-term shift/log1p specialization from Blanchard retainedPDFpp10\u201311, with explicit overflow/rounding/underflow limits."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Probability-pair product ranking,1000-factor underflow example and extreme-margin loss values; finite computations only."
+        }
+      ]
+    },
+    {
+      "section": "gradients",
+      "start": 2788.88,
+      "end": 3210,
+      "lecture_material": "Logistic derivative, mean batch gradient, iterative fitting.",
+      "research_extension": "No separate empirical training result.",
+      "teaching_construction": "Margin versus score derivative; complete first step; Hessian PSD, smoothness/descent bound, separable unattained infimum and all-parameter L2 existence/uniqueness proof.",
+      "evidence_class": "definition; theorem; engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Mean training gradient, margin versus score differentiation, target indicator, Hessian and learning-rate conventions."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Correct derivatives, Hessian PSD, normalized-feature smoothness bound and conditional exact-arithmetic descent inequality."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Strictly separable finite training set has zero logistic infimum without finite minimizer; all-parameter positive L2 yields an attained unique finite optimum."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Exact rational first-step fixture, finite ray values and numerical gradient/trace checks; no convergence/generalization certificate."
+        }
+      ]
+    },
+    {
+      "section": "softmax",
+      "start": 3210,
+      "end": 3586.11,
+      "lecture_material": "Multiclass logits, normalization, common-shift invariance and numerical range motivation.",
+      "research_extension": "Blanchard et al. equations4.1\u20134.3 and Algorithm4.1, retained advance PDF pp10\u201311.",
+      "teaching_construction": "Feature-row/class-column dimensions, shifted three-class example, direct-score tie contract, binary logit-difference equivalence.",
+      "evidence_class": "definition; theorem; engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Exclusive categorical distribution and d-by-K feature-row/class-column score axes; direct-score first-index ties."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Normalization/order, common-logit-shift invariance and binary probability from the two-logit difference."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original checked against primary",
+          "claim": "Maximum-pivot/log1p-tail evaluation specializes Blanchard Algorithm4.1 retainedPDFp11; bounded finite implementation, not arbitrary-input exactness."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Three-class logits/probabilities, large common-shift fixture and tiny-logit ordering counterexample."
+        }
+      ]
+    },
+    {
+      "section": "entropy",
+      "start": 3586.11,
+      "end": 3935.52,
+      "lecture_material": "Target distributions, cross entropy, entropy/KL, one-hot targets.",
+      "research_extension": "Gneiting/Raftery categorical logarithmic scoring Example3 and binary table; reward sign and target/forecast order explicit.",
+      "teaching_construction": "Support conventions and full KL inequality/equality proof; direct-distribution versus finite-softmax boundary; logits and W/c gradients; two separate numerical forecasts.",
+      "evidence_class": "definition; theorem; engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Target/forecast/support, entropy/cross entropy/KL, omitted zero-target terms and positive-target support infinity."
+        },
+        {
+          "class": "definition",
+          "origin": "primary",
+          "claim": "Gneiting/Raftery categorical log score Example3 PDFp5 and binary tablep7 use a maximized reward; chapter explicitly negates it for minimized loss."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "KL decomposition/nonnegativity/equality proof on closed simplex; strict propriety domain versus finite-logit realization; logits and W_jk/c_k gradients."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Two distinct numerical forecasts, fused categorical loss, support boundaries and d-by-K central-difference comparisons."
+        }
+      ]
+    },
+    {
+      "section": "text",
+      "start": 3935.52,
+      "end": 4362.61,
+      "lecture_material": "Tokenization, vocabulary indices, one-hot matrices, gathering, mean bag of words and order loss.",
+      "research_extension": "Sennrich et al. \u00a73.2/Algorithm1 BPE adaptation and unseen-character qualification; no modern-tokenizer attribution.",
+      "teaching_construction": "Frozen vocabulary/unknown/empty contract; index-gather proof and storage estimate; exact order collision and log2 floor; two original weighted BPE merges.",
+      "evidence_class": "definition; theorem; engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Fixed-vocabulary whitespace tokenizer, unknown/empty contracts, token indices, one-hot rows, gather and normalized bag of words."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "One-hot/gather equivalence, permutation/repetition invariance and opposite-label representation collision with error1/2 and log2 loss floor."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Stipulated dense/index byte-storage counts and finite gathering/encoding examples; not Python-memory or runtime measurements."
+        },
+        {
+          "class": "definition",
+          "origin": "primary",
+          "claim": "Sennrich \u00a73.2/Algorithm1 PDFpp3\u20134 learned within-word pair-merge adaptation and unknown-character qualification; not invention/current-tokenizer attribution."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Two declared BPE weighted-pair merges in an original miniature trace; no BPE implementation or coverage claim."
+        }
+      ]
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original program supporting lecture concepts.",
+      "research_extension": "No empirical model, speed or calibration evaluation.",
+      "teaching_construction": "Original standard-library chapter03.py, bounded contracts, actual embedded code and stdout.",
+      "evidence_class": "definition; engineering check",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Original program's accepted types/domains/axes, binary64 conversion, magnitude/mass bounds, renormalization, effects and failures."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Actual standard-library execution and exact embedded code/stdout; finite high-precision/gradient/boundary/invalid-input checks and20-step teaching trace only."
+        }
+      ]
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "Original supporting exercises, not a separate lecture claim.",
+      "research_extension": "No separate empirical result.",
+      "teaching_construction": "Six full mixed solutions: ties/scaling, inverse logistic, complete update, separable infimum/L2, categorical gradient/support, representation/evaluation.",
+      "evidence_class": "definition; theorem; engineering check",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Exercise1 zero-score/scaling proof; Exercise2 inverse/derivative proof; Exercise3 exact mean-gradient update and sum-scale relation."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Exercise4 separating-ray/L2 existence and uniqueness; Exercise5 shift/gradient/support proof; Exercise6 representation-error/log2 lower bounds and separating feature."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Finite arithmetic and numerical cases in Exercises2\u20135 independently recomputed by the author checker; not empirical outcomes."
+        },
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Exercise6 proposed train/validation/test grouping, duplicate/near-duplicate isolation, topic holdout and stress-set protocol; not an executed evaluation or proved empirical guarantee."
+        }
+      ]
+    },
+    {
+      "section": "boundaries",
+      "start": null,
+      "end": null,
+      "lecture_material": "Source and mathematical-model boundaries.",
+      "research_extension": "Exact claim-specific primary bibliography.",
+      "teaching_construction": "Interpretation, representation, optimization and evaluation limits.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Evidence limits, exact mathematical versus finite program domains, source boundaries and claim-scoped primary bibliography; no measured model performance or independent acceptance."
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "Official CS221 executable lectures, pinned revision f70063773fe9e04ddcbc248059501837053b810a",
+      "url": "https://github.com/stanford-cs221/lectures/tree/f70063773fe9e04ddcbc248059501837053b810a",
+      "supports": "Retained linear_classification.py, source sequence and zero-score counterexample. Locally verified pinned file; no claim of live GitHub page retrieval."
+    },
+    {
+      "title": "Gneiting and Raftery (2007), Strictly Proper Scoring Rules, Prediction, and Estimation",
+      "url": "https://sites.stat.washington.edu/people/raftery/Research/PDF/Gneiting2007jasa.pdf",
+      "supports": "PDFp5 Example3/p7 binary table: logarithmic score, reward sign, distributional propriety."
+    },
+    {
+      "title": "Guo et al. (2017), On Calibration of Modern Neural Networks",
+      "url": "https://proceedings.mlr.press/v70/guo17a/guo17a.pdf",
+      "supports": "PDFp2 \u00a72 confidence-calibration definition; PDFp4 Figure3 bounded accuracy/NLL experimental distinction."
+    },
+    {
+      "title": "Sennrich, Haddow, and Birch (2016), Neural Machine Translation of Rare Words with Subword Units",
+      "url": "https://aclanthology.org/P16-1162.pdf",
+      "supports": "PDFpp3\u20134 \u00a73.2/Algorithm1 learned merges; within-word and unknown-character qualifications, no GPT invention claim."
+    },
+    {
+      "title": "Blanchard, D. J. Higham, and N. J. Higham, Accurately Computing the Log-Sum-Exp and Softmax Functions",
+      "url": "https://webhomes.maths.ed.ac.uk/~dhigham/Publications/P149.pdf",
+      "supports": "Retained2020 advance PDFp2/pp10\u201311, eq4.1\u20134.3 and Algorithm4.1: overflow/underflow risks, shift and log1p."
+    }
+  ],
+  "limitations": [
+    "Automatic machine transcript; no human listening certification.",
+    "No claim of inspecting official lecture plots or survey illustrations.",
+    "Review data/labels and arithmetic are original stipulated teaching fixtures, not empirical evaluation.",
+    "No BPE implementation or identification of a current tokenizer.",
+    "Numerical functions use bounded binary64 inputs and can round or underflow.",
+    "No different-editor acceptance or complete-course validation implied by author checks."
+  ],
+  "program": "programs/chapter03.py",
+  "body_sha256": "426eeffceeca7168b53a6474a516945b09fad5e8c897b9577c3254be430e7d1a",
+  "implementation": {
+    "program_sha256": "a9525bcc62ea3c05296904b6effe4d3a48b2efc3bf143e8e106cd9b9ae9660ab",
+    "stdout_sha256": "352979907d4880b9647b3b2c11a44f64e8e1f7a992083ed99eead9a82a9c6d4d",
+    "runtime": "Python standard library; diagnostic report only"
+  }
+}
