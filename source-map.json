@@ -3346,6 +3346,458 @@
       "chapter": "lecture-08-reinforcement-learning.html",
       "video_id": "34Hk2v2kwg4",
       "duration": 4696
+    },
+    {
+      "section": "interaction",
+      "start": 5.17,
+      "end": 338.85,
+      "lecture_material": "Agent interaction, experience, policy versus RL algorithm, policy evaluation and changing behavior.",
+      "research_extension": null,
+      "teaching_construction": "Finite time-augmented deadline, joint response/reward law, legal mask and absorbing padding; consequential delivery case.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Interaction, policy and finite model domains",
+          "origin": "Recording topic; explicit original domains"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Recorded walk1\u21922\u21923/tram6 utility\u22124, distinct from expectation",
+          "origin": "Recorded instance and original arithmetic"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "targets",
+      "start": 338.85,
+      "end": 844.51,
+      "lecture_material": "Model/value methods, state/action values, policy versus optimal values, Monte Carlo/SARSA/Q targets and terminal handling.",
+      "research_extension": null,
+      "teaching_construction": "Unified target table, units, behavior/target definitions and bootstrap interpretation.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Values and alternative sampled targets",
+          "origin": "Recording mechanisms with original explicit domains"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "target-choice",
+      "start": 844.51,
+      "end": 1024.18,
+      "lecture_material": "Epsilon-greedy exploration and different SARSA/Q targets; consequences of exploratory behavior.",
+      "research_extension": null,
+      "teaching_construction": "Same-observation targets\u22122 versus1; support and objective qualifications.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Exploration rule and target distinction",
+          "origin": "Recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Target\u22122 versus1 at discount1/2",
+          "origin": "Original fixture"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "approximation",
+      "start": 1024.27,
+      "end": 1321.84,
+      "lecture_material": "Parameterizing large state/action spaces, linear/MLP prediction, representation/loss/optimization and feature sharing.",
+      "research_extension": null,
+      "teaching_construction": "Deadline-feature failure, critic/actor parameter distinction and hypothesis-versus-update separation.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Function approximation and parameter sharing",
+          "origin": "Recording; original first-use domains"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Representation and data-distribution concerns motivate caution",
+          "origin": "Recording discussion, not a measured benchmark"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "q-implementation",
+      "start": 1324.14,
+      "end": 1774.4,
+      "lecture_material": "One-hot state/action encoding, linear/neural Q feedback interface, squared fitting and demonstrated prediction updates.",
+      "research_extension": "Pinned policy_gradient.py lines168\u2013244 and PyTorch2.11 Linear default: shared bias and attached next-state branch.",
+      "teaching_construction": "Half-squared one-hot derivative; full-versus-detached scalar gradient; sampled squared error versus squared expected residual identity.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Retained API default bias and attached-target computation",
+          "origin": "Actual pinned source; official Linear2.11 definition"
+        },
+        {
+          "class": "theorem",
+          "claim": "Shared-bias update and variance decomposition under explicit differentiation assumptions",
+          "origin": "Original derivations"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Predictions1/5 and1/10; full gradient(\u22122,1) versus detached(\u22122,0)",
+          "origin": "Original rational fixtures"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "q-limits",
+      "start": 1774.4,
+      "end": 2069.89,
+      "lecture_material": "Observed approximation-policy limitations, successful route versus comparison behavior, learning longer and interaction uncertainty.",
+      "research_extension": "Watkins\u2013Dayan PDF1\u20134: discrete finite discounted tabular convergence and per-pair step/coverage assumptions.",
+      "teaching_construction": "Almost-sure versus finite-run distinction; constant/shared/nonlinear/undiscounted experiment does not inherit the cited theorem.",
+      "evidence_class": "speaker judgment",
+      "claim_provenance": [
+        {
+          "class": "speaker judgment",
+          "claim": "Demonstration behavior and learning-longer suggestion",
+          "origin": "Attributed recording, no reproduction claim"
+        },
+        {
+          "class": "theorem",
+          "claim": "Tabular convergence only under the cited hypotheses",
+          "origin": "Watkins\u2013Dayan PDF2\u20134, not a neural convergence theorem"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "direct-policy",
+      "start": 2069.89,
+      "end": 2431.38,
+      "lecture_material": "Model/value/policy taxonomy, classifier analogy, expert imitation versus experience and stochastic decisions.",
+      "research_extension": null,
+      "teaching_construction": "Fixed legal softmax support, argmax derivative boundary, one-step depot calibration with rewards1/3.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Policy logits, softmax and imitation distinction",
+          "origin": "Recording topic; original explicit definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Self-sampled unweighted score has zero conditional mean",
+          "origin": "Original normalization proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "DepotJ=3/2 atp=1/4",
+          "origin": "Original specialization"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "trajectory",
+      "start": 2431.38,
+      "end": 2690.21,
+      "lecture_material": "Trajectory utility, policy-dependent trajectory probabilities, start/transition factors and episode objective.",
+      "research_extension": "Williams PDF8\u20139 and Sutton et al. PDF3/7 clarify fixed episodes and start objective.",
+      "teaching_construction": "Full joint reward/transition path law, finite fixed support and zero-based indexing.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite trajectory law and start-return objective",
+          "origin": "Recording mechanism with original reward-law completion"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "reinforce",
+      "start": 2690.21,
+      "end": 3253.14,
+      "lecture_material": "Log-derivative trajectory gradient, environment factors, REINFORCE, successful self-imitation and negative returns.",
+      "research_extension": "Williams PDF4\u20139,16\u201317,20\u201322: score rule, episode/baseline conditions and limited convergence discussion.",
+      "teaching_construction": "Complete finite proof, signed local actor loss, success-normalization boundary, exact logit derivative and negative-return update.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Finite score identity and unbiased fresh-trajectory gradient",
+          "origin": "Original proof of recorded mechanism under stated assumptions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Depotgradient3/8 and negative-return increment\u221215\u03b7/2",
+          "origin": "Original fixtures"
+        },
+        {
+          "class": "definition",
+          "claim": "Unbiasedness versus convergence and local-loss scope",
+          "origin": "Original interpretation of cited/recorded mechanism"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "actor-implementation",
+      "start": 3253.17,
+      "end": 3685.26,
+      "lecture_material": "Episode feedback, softmax/cross-entropy update, acknowledged missing utility, initialization, online versus offline and batch sampling.",
+      "research_extension": "Pinned module lines360/433: artificialterminal4 example versus six-location environment, retained utility multiplier versus recording version.",
+      "teaching_construction": "Softmax Jacobian, frozen policy/batch, finite importance identity, ratio-detach distinction and stale gradient13/8 versus3/8.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Recorded and retained update versions and feedback scope",
+          "origin": "Recording plus actual pinned source"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite importance-corrected gradient under support inclusion",
+          "origin": "Original extension"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Stale13/8 versus corrected3/8",
+          "origin": "Original exact fixture"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "estimators",
+      "start": 3685.65,
+      "end": 4078.98,
+      "lecture_material": "Bias/variance/cost, four-point mean correction, repeated sampling, averaging and control variate offsets.",
+      "research_extension": "Pinned module lines494\u2013528: raw unnormalized weights and two-index sampling without replacement.",
+      "teaching_construction": "Exact population variance37; IIDpair37/2 versus distinctpair37/3; zero-mean offset variance1 and covariance condition.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Population bias/variance and sampling convention",
+          "origin": "Recording topic with pinned source clarification"
+        },
+        {
+          "class": "theorem",
+          "claim": "MSE decomposition, independent-average variance and covariance identity",
+          "origin": "Original derivations"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Four-point exact moments and normalized/raw distinction",
+          "origin": "Original enumeration of recorded values"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "baselines",
+      "start": 4078.98,
+      "end": 4266.74,
+      "lecture_material": "Baseline intuition, unchanged expected score, variance reduction and auxiliary-value analogy.",
+      "research_extension": "Williams PDF6/8/16\u201317 and Sutton et al. PDF5: baseline independence and action normalization.",
+      "teaching_construction": "Conditional-state proof, actor detach and same-batch dependence; optimal scalar baseline with score weighting and zero-score case.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Conditional baseline cancellation and weighted variance-minimizing baseline",
+          "origin": "Original proofs; primary-source mechanism corroborated"
+        },
+        {
+          "class": "theorem",
+          "claim": "Own-batch mean shrink(B\u22121)/B for independent one-step episodes",
+          "origin": "Original complete batch argument"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Baselines0/5/2/100 variances75/64,0,114075/64; action-dependent zero gradient",
+          "origin": "Original exact fixture"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "return-to-go",
+      "start": 4266.74,
+      "end": 4294.42,
+      "lecture_material": "Dropping rewards before an action and locally discounted utility enhancement.",
+      "research_extension": "Sutton et al. PDF3/7: discounted occupancy/start-state expansion; pinned module enhancement omits outer discount.",
+      "teaching_construction": "Conditional causality proof retaining \u03b3^t; four-history fixture9/16 versus wrong3/4; no universal variance ordering.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Discounted return-to-go equals start-objective gradient under finite assumptions",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Two-roundJ5/4; full/propergradient9/16 versus omitted-factor3/4",
+          "origin": "Original enumeration"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "critic",
+      "start": 4294.86,
+      "end": 4381.04,
+      "lecture_material": "Critic-based value replacement, actor/value connection, approximate bias/variance discussion.",
+      "research_extension": "Sutton et al. PDF3\u20137: compatible features, weighted stationarity, state baseline and actual gradient-to-zero conclusion.",
+      "teaching_construction": "Conditional value substitution, critic error term, TD-residual scope, finite orthogonality proof and reversed/compatible depot critics.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Actor\u2013critic, advantage and TD residual",
+          "origin": "Recording topic; original explicit domains"
+        },
+        {
+          "class": "theorem",
+          "claim": "Compatible substitution requires weighted residual stationarity; paper convergence conclusion is stationary-gradient, not global optimum",
+          "origin": "Original finite proof; Sutton et al. Theorems2/3 PDF4\u20136"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Reversed critic\u22123/8 versus compatible3/8",
+          "origin": "Original exact fixture"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "synthesis",
+      "start": 4381.1,
+      "end": 4436.24,
+      "lecture_material": "Model/value/policy summary and preview of strategic opponents.",
+      "research_extension": null,
+      "teaching_construction": "Operational-contract table and modeled opponent versus worst-case/game objective distinction.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Scope of three learning families and strategic preview",
+          "origin": "Recording synthesis; original boundary explanation"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Original exact standard-library finite program, full public contract, counterexamples and displayed stdout.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Bounded rational public inputs and exact internal arithmetic",
+          "origin": "Original executable"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Closed forms, finite differences, exact batch enumeration and invalid inputs",
+          "origin": "Author validation, not independent acceptance"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Six mixed fully developed proof, numeric, failure-mode and evaluation solutions.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Conditional finite proof steps and estimator equivalences",
+          "origin": "Original solutions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Worked rational arithmetic, negative return, stale data and critic reversals",
+          "origin": "Original solutions"
+        },
+        {
+          "class": "definition",
+          "claim": "Proposed frozen-policy operational evaluation",
+          "origin": "Original proposal, not measured result"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
+    },
+    {
+      "section": "boundaries",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "Precisely scoped primary references in conventional public format.",
+      "teaching_construction": "Original synthesis of assumption/representation/estimator/evaluation limits.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Guarantee and attribution boundaries",
+          "origin": "Original synthesis"
+        }
+      ],
+      "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
+      "video_id": "lOMNskWVeD8",
+      "duration": 4442
     }
   ]
 }

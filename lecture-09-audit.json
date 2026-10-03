@@ -1,11 +1,11 @@
 {
-  "chapter": "lecture-07-markov-decision-processes.html",
+  "chapter": "lecture-09-policy-gradients-and-function-approximation.html",
   "checked_at_utc": "2026-10-03T12:15:32.881025+00:00",
   "status": "independently reviewed and locally validated chapter",
-  "accepted_scientific_body_sha256": "2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa",
-  "accepted_metadata_sha256": "e2eabcefbc817001beffc1b2ac334f85140ec10915d7adf53e3c6ff63bf74169",
-  "accepted_program_sha256": "d762f9d424dc09583f814907cfb453924720a9a31e0d602f0b8ea4ecd51e3f26",
-  "integrated_html_sha256": "aca6bab290cb8401b21f17861689c899fe46379459b3fa565a95762b431141ca",
+  "accepted_scientific_body_sha256": "4c8af58a4758fb5a94319ad4dada45e1d8f8c3c5d23fa1d1f3b5683dda3117ad",
+  "accepted_metadata_sha256": "766687b08b2ca1c88169fdaa89a9fe55a821e3e7a5ffa172523752c9fc0acdc4",
+  "accepted_program_sha256": "1ca9cc21f863de41dfd932ff1b23171aed2e933b7d36938ad7988cde3b04542d",
+  "integrated_html_sha256": "23046f4a3ccea8e3a644f0933cb438d6cd6f1c41e9567eff0ecb02e9ce3c3381",
   "worked_solutions": 6,
   "current_reader_gate": {
     "status": "passed within accepted Chapters1-9 reader scope",
@@ -19,11 +19,11 @@
     "No publication performed"
   ],
   "independent_review": {
-    "rounds": 2,
+    "rounds": 1,
     "gate_6b": "accepted",
     "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "65a1034dcf81fbd0ab339bad114b4547b9051c1de01eeae2876ac9de2b221c25",
-    "independent_numerical_checks": 612
+    "review_report_sha256": "f3e886716e270171df251d02a3a272ff8ec7f786beb8ce42e77b04e890d6aee7",
+    "independent_numerical_checks": 1500
   }
 }

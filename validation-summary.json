@@ -1,9 +1,9 @@
 {
-  "checked_at_utc": "2026-10-03T11:44:57.158119+00:00",
+  "checked_at_utc": "2026-10-03T12:15:32.881025+00:00",
   "course": "CS221",
-  "chapter_count": 8,
+  "chapter_count": 9,
   "selected_recordings": 20,
-  "status": "Eight independently reviewed chapters locally validated; full course in development",
+  "status": "Nine independently reviewed chapters locally validated; full course in development",
   "course_complete": false,
   "human_accessibility": "not performed",
   "reader_report": "reader-validation.json",
@@ -77,7 +77,7 @@
       "CODE": "d762f9d424dc09583f814907cfb453924720a9a31e0d602f0b8ea4ecd51e3f26",
       "HTML": "93bb870972c69ac5697b8573ab41b7203456da9e31ce8cfeee80575cf6792361",
       "review": "reviews/lecture-07-round2.md",
-      "before_HTML": "0fa3ba791fa8d6525cc21e71ebec39d8c9c0c5499cad1c5b93a9ad6d1b6b9ee5",
+      "before_HTML": "aca6bab290cb8401b21f17861689c899fe46379459b3fa565a95762b431141ca",
       "review_sha256": "65a1034dcf81fbd0ab339bad114b4547b9051c1de01eeae2876ac9de2b221c25",
       "path": "lecture-07-markov-decision-processes.html",
       "after_HTML": "aca6bab290cb8401b21f17861689c899fe46379459b3fa565a95762b431141ca"
@@ -88,14 +88,25 @@
       "CODE": "873e3db06116bad3f834cfd108de29fec4105dee30cc117c406c733e1fc4bfb2",
       "HTML": "9a03ecb6b6b48d43a3d6d310cd9a82d342a7fde4e2dfcd1e54f7dd3cda0b0988",
       "review": "reviews/lecture-08-round2.md",
-      "before_HTML": "9a03ecb6b6b48d43a3d6d310cd9a82d342a7fde4e2dfcd1e54f7dd3cda0b0988",
+      "before_HTML": "7a67f7648b28128c072234e9a57c3c3bee5e96b755f11c267a612b826487874e",
       "review_sha256": "14f09638bfa24950a5152d6d0b98a56892c0f0a460d072b1d5f9a6c6115d0bcb",
       "path": "lecture-08-reinforcement-learning.html",
-      "after_HTML": "7a67f7648b28128c072234e9a57c3c3bee5e96b755f11c267a612b826487874e"
+      "after_HTML": "ea47cbf84e6f4e47b505590eb6426b404d5dd25aa8e51c15bed23d9c535e663b"
+    },
+    "9": {
+      "BODY": "4c8af58a4758fb5a94319ad4dada45e1d8f8c3c5d23fa1d1f3b5683dda3117ad",
+      "META": "766687b08b2ca1c88169fdaa89a9fe55a821e3e7a5ffa172523752c9fc0acdc4",
+      "CODE": "1ca9cc21f863de41dfd932ff1b23171aed2e933b7d36938ad7988cde3b04542d",
+      "HTML": "048ac79c7c03838eeaae2cf08c0127a9c5bdedf7c1e07bb8001928c3a50a518a",
+      "review": "reviews/lecture-09-round1.md",
+      "before_HTML": "048ac79c7c03838eeaae2cf08c0127a9c5bdedf7c1e07bb8001928c3a50a518a",
+      "review_sha256": "f3e886716e270171df251d02a3a272ff8ec7f786beb8ce42e77b04e890d6aee7",
+      "path": "lecture-09-policy-gradients-and-function-approximation.html",
+      "after_HTML": "23046f4a3ccea8e3a644f0933cb438d6cd6f1c41e9567eff0ecb02e9ce3c3381"
     }
   },
   "limits": [
-    "Chapters9-20, cumulative course lab, full learning route and book-wide review pending",
+    "Chapters10-20, cumulative course lab, independent learning-route review and book-wide review pending",
     "No publication performed"
   ]
 }

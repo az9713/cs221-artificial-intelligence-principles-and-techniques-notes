@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="4c8af58a4758fb5a94319ad4dada45e1d8f8c3c5d23fa1d1f3b5683dda3117ad"><title>Policy gradients: learning the decision rule from reward · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><h1>Policy gradients: learning the decision rule from reward</h1>
+<p class="lead">A delivery dispatcher can learn a map of travel outcomes, learn the value of each decision, or change its decision probabilities directly. The third route looks deceptively like training a classifier. Its labels come from the dispatcher's own actions, and its weights come from their consequences. We will derive exactly when that update follows expected reward, why a correct gradient can still be noisy, and where an approximate critic changes the result.</p>
+<p class="source-note">Independent textbook treatment of Stanford CS221, Artificial Intelligence: Principles and Techniques, Autumn 2025, Lecture 9. Topic order and timestamp links follow the locally generated machine transcript; mathematical proofs, calibration examples, executable and exercises are original teaching constructions. Machine transcription is not human-verified captioning.</p>
+
+<section id="interaction"><h2>1. A learner interacts; a policy specifies decisions <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=5">00:05</a></h2>
+<p>Suppose a dispatcher must reach a destination while paying for time spent walking and boarding unreliable transport. It sees its current location, chooses an action, then receives the next location and a reward. A failed tram attempt consumes time even when the location does not change. An action that looks efficient on one successful journey may have poor expected utility. The problem is to improve decisions using these observed consequences, without supplying the learner with a transition table.</p>
+<p>The recording's small example starts at location 1 and ends at location 6. Walking advances from integer location \(i\) to \(i+1\) and returns reward \(-1\); a valid tram attempt moves toward \(2i\), returns \(-2\), and fails with probability \(0.1\). A successful recorded route walks to 2, walks to 3, then takes the tram to 6. Its undiscounted observed utility is \(-1-1-2=-4\). This one outcome is a sample, not its policy's expected utility. Legal actions and terminal handling must be part of the environment specification; a tram that would overshoot is not an available action in our mathematical model.</p>
+<p>For the main derivations, impose a known finite deadline \(H\), measured in action rounds. Let \(S_t\in\mathcal S\) be a finite, fully observed state before round \(t\), where \(t\in\{0,\ldots,H-1\}\). Include time in the state when decisions depend on remaining deadline. Each nonterminal state has a fixed finite nonempty legal-action set \(\mathcal A(s)\). The action is \(A_t\); feedback consists of reward \(R_{t+1}\) and next state \(S_{t+1}\). Rewards have finite bounded support and use one common utility unit. After early termination, append absorbing zero-reward rounds with a single dummy action. This convention gives every trajectory the same length without changing its reward.</p>
+<p>A <strong>Markov decision process</strong> specifies a response law \(K(s',r\mid s,a)\), the conditional probability of next state and reward given current state and action. “Markov” means this current state contains the information needed for that response law; a photograph is not automatically such a state. The start distribution is \(\rho_0(s)\). Both are unknown to the interaction-based learner and independent of its policy parameters. A <strong>policy</strong> \(\pi(a\mid s)\) specifies a distribution over legal actions. An RL algorithm is the procedure that collects feedback and updates that policy or an associated model. During evaluation of a particular policy, freeze its parameters: averaging returns while the algorithm is changing instead measures a learning process with changing decision rules.</p>
+<p>Let the dimensionless discount be \(\gamma\in[0,1]\). Define the local <strong>return</strong></p>
+\[G_t=\sum_{j=t}^{H-1}\gamma^{j-t}R_{j+1}.\]
+<p>Thus \(G_0\) is the episode utility from its start, and \(G_H=0\). At \(\gamma=1\), all rounds receive equal weight; at \(\gamma=0\), only the immediate reward contributes to each local return. The finite deadline makes all sums finite. The recording's unbounded-until-arrival tram example motivates the setting; a deadline truncation is a different task and must be included when reporting results.</p></section>
+
+<section id="targets"><h2>2. Four values, several targets <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=338">05:38</a></h2>
+<p>The <strong>state value</strong> \(V^\pi(s)\) is expected remaining return starting in state \(s\) and following policy \(\pi\). The <strong>action value</strong> \(Q^\pi(s,a)\) is expected remaining return after first taking action \(a\), then following \(\pi\). Time is included in \(s\), so these definitions apply to the finite deadline. The superscript star, as in \(V^*(s)\) and \(Q^*(s,a)\), means the best attainable expected return over the admissible policies. Reward maximization chooses a largest value; the negative travel rewards are not positive travel costs.</p>
+<p>A model-based learner estimates the response law and uses planning to derive a policy. A value-based learner estimates action values and chooses actions using those estimates. In a tabular representation, each legal pair \((s,a)\) has a separate stored number. A generic update is</p>
+\[Q(s,a)\leftarrow Q(s,a)+\alpha\,[Y-Q(s,a)],\]
+<p>where \(Y\) is a sampled target in reward units and \(\alpha\in(0,1]\) is a dimensionless step size. The target expresses what is being estimated. The same interaction interface can support very different targets.</p>
+<table><thead><tr><th>Method</th><th>Target for a nonterminal transition</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Monte Carlo policy evaluation</td><td>Observed \(G_t\)</td><td>Follow the evaluated policy through the remaining episode.</td></tr>
+<tr><td>SARSA</td><td>\(R_{t+1}+\gamma Q(S_{t+1},A_{t+1})\)</td><td>Use the next action actually selected by the behavior policy.</td></tr>
+<tr><td>Q-learning</td><td>\(R_{t+1}+\gamma\max_{a'\in\mathcal A(S_{t+1})}Q(S_{t+1},a')\)</td><td>Back up an estimated best continuation, whatever action the behavior takes.</td></tr>
+</tbody></table>
+<p><strong>Bootstrapping</strong> substitutes a current value prediction for the still-unobserved future. It permits an update before the episode ends, at the cost of dependence on an imperfect predictor. At a terminal successor, the continuation is zero and each bootstrapped target is just the received reward. A Monte Carlo return avoids that bootstrap but may include many random later outcomes.</p>
+<p>Call the data-generating rule the <strong>behavior policy</strong> and the policy whose return is being estimated the <strong>target policy</strong>. Evaluation is <strong>on-policy</strong> when they coincide and <strong>off-policy</strong> when they differ. Q-learning's maximum target addresses optimal continuation even when behavior explores. This is a statement about the backup's objective; it does not say arbitrary data from arbitrary states suffice to learn the optimum.</p></section>
+
+<section id="target-choice"><h2>3. Exploration choice does not identify the target <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=844">14:04</a></h2>
+<p>An <strong>epsilon-greedy</strong> behavior rule explores according to a specified distribution with probability \(\varepsilon\in[0,1]\) and otherwise selects a largest current action value. SARSA and Q-learning may use the same such behavior rule. Their difference then lies in feedback processing: SARSA carries the chosen next action into both its target and subsequent execution; Q-learning uses a maximizing next action for its target, even if another action is executed.</p>
+<p>For a numerical distinction, suppose next-state estimates for two legal actions are \(4\) and \(-2\), the observed reward is \(-1\), and \(\gamma=1/2\). If behavior selected the second action, SARSA's target is \(-1+(1/2)(-2)=-2\), while Q-learning's target is \(-1+(1/2)4=1\). The same observation moves estimates toward different continuations. Neither target is a ground-truth label supplied by the environment.</p>
+<p>SARSA can account for the consequences of an exploratory policy that sometimes makes costly decisions. Q-learning instead aims at optimal values under its applicable assumptions. Choosing between them therefore includes the intended behavior during learning, support of the collected data, and representation. A favorable target definition alone cannot guarantee that the dispatcher ever observes a rarely visited crossing or fits its value accurately.</p></section>
+
+<section id="approximation"><h2>4. Sharing parameters across large state spaces <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=1024">17:04</a></h2>
+<p>A separate entry for every image, language prefix, or continuous measurement is not a practical learning representation. <strong>Function approximation</strong> replaces those entries with a parameterized predictor \(Q_w(s,a)\). Here \(w\in\mathbb R^m\) is a vector of learned critic or value parameters. A feature map \(\phi(s,a)\in\mathbb R^m\) gives a linear model \(Q_w(s,a)=w^\top\phi(s,a)\); a multilayer perceptron instead applies successive affine maps and nonlinearities to an explicitly defined input representation. The output still has reward units.</p>
+<p>The design questions from supervised learning return: which functions can the representation express, which loss compares a prediction with a target, and which optimizer changes parameters? Chapters 2–4 supply the regression and differentiation background. In RL the data distribution and bootstrap targets also depend on the changing decision rule and value predictions. Reducing a sampled regression loss is consequently a narrower statement than improving the actual policy's expected return.</p>
+<p>Sharing parameters lets observations at one location affect predictions at another. That can make experience useful across a large space, but it also creates interference. Distinct histories requiring distinct decisions must not be merged simply because their feature vectors happen to be equal. A larger neural network cannot restore information omitted from the observation or state definition. For the dispatcher, a feature vector that ignores remaining deadline may be inadequate even if it fits previously observed journeys.</p></section>
+
+<section id="q-implementation"><h2>5. A one-hot example exposes update geometry <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=1324">22:04</a></h2>
+<p>A <strong>one-hot vector</strong> has one coordinate equal to one and all other coordinates zero. For the six-location example, order the actions as walk, tram with indices 0, 1. The pair index is \(j=(s-1)2+a_{\mathrm{index}}\), so state 2/tram has index 3 in a vector of length 12. This is an encoding, not a learned feature extraction. The mathematical action mask still excludes illegal actions; a large penalty for a listed illegal action defines a different environment.</p>
+<p>Consider \(Q_{w,b}(s,a)=w_j+b\), where \(b\in\mathbb R\) is a shared bias. With a frozen target \(Y\), use loss \(\ell=\tfrac12(w_j+b-Y)^2\). Its derivatives with respect to \(w_j\) and \(b\) are both the residual \(e=w_j+b-Y\). A descent step of size \(\alpha\) changes the selected prediction by \(-2\alpha e\), while every other prediction changes by \(-\alpha e\) through the bias. Thus the function class can represent every table, but its update is not an independent tabular update. Starting at all zeros, \(Y=1\) and \(\alpha=1/10\) give selected prediction \(1/5\) and other predictions \(1/10\). Removing the bias gives the independent-coordinate analogy.</p>
+<p>A second choice concerns the target's derivative. A <strong>semi-gradient</strong> treats the bootstrap target as a fixed number during this update:</p>
+\[\Delta w=\alpha\,[Y-Q_w(s,a)]\nabla_wQ_w(s,a).\]
+<p>This is the negative derivative of a half-squared loss with a detached target. The retained <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/policy_gradient.py#L171-L243">official parameterized-Q source</a> has a shared linear bias and constructs the next-state target from the same differentiable model without detaching it. The <a href="https://docs.pytorch.org/docs/2.11/generated/torch.nn.Linear.html">version 2.11 official Linear definition</a> specifies an affine map with a bias enabled by default, which explains the shared-bias qualification. The retained Q implementation's backward pass also includes the bootstrap branch. For two independent scalar outputs \(x,y\), reward 1 and discount \(1/2\), loss \((x-1-y/2)^2\) has gradient \((-2,1)\) at \(x=y=0\); freezing \(1+y/2\) instead gives \((-2,0)\). These are distinct algorithms even when the forward target numbers agree.</p>
+<p>There is another expectation boundary. Let a random bootstrap target \(Y_w\) depend on parameters. Minimizing \(\mathbb E[(Q_w-Y_w)^2]\) is not the same objective as minimizing \((Q_w-\mathbb E[Y_w])^2\): their difference is \(\operatorname{Var}(Y_w)\), which can itself change with \(w\). Differentiating a sampled residual can estimate the gradient of the former under suitable interchange assumptions; it does not automatically estimate the latter. For that latter derivative, products involving independent target expectations generally need additional sampling or modeling. This distinction explains why merely retaining more branches in automatic differentiation does not establish the desired Bellman-error objective.</p>
+<p>The terminal mask, legal next-action mask, target-freeze choice, and loss normalization all belong to the algorithm specification. Squared-loss fitting remains a useful way to move a prediction toward a fixed noisy label. Once the label and other predictions move with the same parameters, that supervised interpretation requires these additional qualifications.</p></section>
+
+<section id="q-limits"><h2>6. A fitted value is not a convergence certificate <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=1774">29:34</a></h2>
+<p>The function-approximation demonstration does not consistently recover the comparison policy. The six-location successful route is walk 1→2→3, then tram 3→6; it should not be replaced by a route for a different destination. A displayed near-optimal set of estimates is evidence about that run only. A single unlucky journey and an incorrect fitted policy are also different events: a good stochastic policy can receive a poor outcome, while a bad policy may occasionally succeed.</p>
+<p>The classical <a href="https://www.gatsby.ucl.ac.uk/~dayan/papers/cjch.pdf">Watkins–Dayan Q-learning theorem</a> has explicit tabular assumptions (PDF pp. 2–4): a finite controlled Markov problem, bounded rewards, \(0&lt;\gamma&lt;1\), repeated coverage of every pair, and per-pair learning rates satisfying \(\sum_i\alpha_i(s,a)=\infty\) and \(\sum_i\alpha_i(s,a)^2&lt;\infty\), with \(0\le\alpha_i&lt;1\). Under those conditions, the tabular estimates converge almost surely to optimal action values. “Almost surely” means with probability one under that model's sampling assumptions, not after a specified finite number of trials.</p>
+<p>A constant rate \(0.1\), nonlinear or shared-bias representation, incomplete visitation, and an undiscounted episodic experiment do not inherit that discounted tabular theorem merely by using a maximum target. Additional results may address some alternative assumptions, but they must be supplied separately. Running longer is an experiment one can perform, not a proof of convergence. Track policy return on fresh frozen-policy episodes, state/action coverage, target convention, and estimation error separately.</p></section>
+
+<section id="direct-policy"><h2>7. Learning a probability of acting <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=2069">34:29</a></h2>
+<p>Model-based learning estimates dynamics, value-based learning estimates expected consequences, and <strong>policy-based learning</strong> parameterizes the decision distribution directly. Let \(\theta\in\mathbb R^d\) be actor parameters, distinct from value parameters \(w\). At legal action \(a\), a dimensionless <strong>logit</strong> \(z_\theta(s,a)\) is an unnormalized score. A softmax policy is</p>
+\[\pi_\theta(a\mid s)=\frac{\exp z_\theta(s,a)}{\sum_{b\in\mathcal A(s)}\exp z_\theta(s,b)}.\]
+<p>The denominator normalizes over the declared legal support. Finite real logits give positive probabilities on that support, and differentiable logits give a differentiable policy. A real-valued output alone does not ensure differentiability. An argmax rule, by comparison, can change its chosen action discontinuously when two values cross; away from such boundaries, its selected-action indicator has zero local derivative.</p>
+<p>A stochastic policy makes score differentiation possible and supplies some exploration, but positive mathematical probability does not imply useful finite coverage. An event with probability \(10^{-9}\) is unlikely to be observed in a modest batch, and floating arithmetic may round a probability to zero or one. The formal derivation below assumes positive support rather than asserting that a particular softmax implementation preserves it at arbitrary logits. A policy class can also exclude the optimal decision rule entirely.</p>
+<p>With expert demonstrations \(\{(s_i,a_i)\}_{i=1}^n\), <strong>imitation learning</strong> can maximize \(n^{-1}\sum_i\log\pi_\theta(a_i\mid s_i)\). The labels specify which actions the expert chose. Without demonstrations, the dispatcher has its own selected actions and their rewards. Cloning all its own choices without reward does not preferentially retain good journeys: at a fixed state, its own mean log-probability gradient is zero at the sampling parameters. Reward is what correlates a sampled choice with a useful update.</p>
+<p>For a tractable specialization of this same decision model, let the dispatcher make one depot choice \(A\in\{0,1\}\), then terminate. Stipulate utilities \(r(0)=1\), \(r(1)=3\). These are original calibration values, not measured transport rewards. Write \(p=\pi_\theta(1)=\sigma(\theta)=1/(1+e^{-\theta})\), so \(\theta\) is a scalar logit and \(0&lt;p&lt;1\). At \(p=1/4\), expected utility is \(J=1+2p=3/2\). This small specialization will let us check policy-gradient and variance claims exactly before applying them to many-state journeys.</p></section>
+
+<section id="trajectory"><h2>8. The probability of an entire journey <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=2431">40:31</a></h2>
+<p>A trajectory or episode is \(\tau=(s_0,a_0,r_1,s_1,\ldots,a_{H-1},r_H,s_H)\). Lower-case symbols denote one realization of the random variables. Its probability under a policy held fixed for the episode is</p>
+\[p_\theta(\tau)=\rho_0(s_0)\prod_{t=0}^{H-1}\pi_\theta(a_t\mid s_t)K(s_{t+1},r_{t+1}\mid s_t,a_t).\]
+<p>This is the chain rule plus the Markov response assumption. The joint response law includes random rewards; reward need not be recoverable solely from a sequence of visited states. If rewards are deterministic functions of transitions, the appropriate response factors reduce to that special case. The objective is</p>
+\[J(\theta)=\mathbb E_{\tau\sim p_\theta}[G_0(\tau)]
+=\sum_{\tau\in\mathcal T}p_\theta(\tau)G_0(\tau),\]
+<p>where \(\mathcal T\) is the fixed finite set of feasible trajectories. Its feasibility is independent of actor parameters. We seek to maximize expected start utility, not log likelihood of every trajectory, nor an average reward per continuing time step. The symbol \(J\) avoids confusing this parameter objective with a state value \(V^\pi\). The recording indexes its first action as \(a_1\) given \(s_0\); here the same first action is \(A_0\), so the subsequent discount factors must follow the zero-based convention.</p>
+<p>The response law remains unknown to the learner. It is nevertheless useful in a proof of the estimator's expectation. We can show that its logarithmic derivative contributes zero, and therefore obtain an update from the learner's policy probabilities and observed returns without differentiating or fitting that response law.</p></section>
+
+<section id="reinforce"><h2>9. The score identity and signed REINFORCE <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=2690">44:50</a></h2>
+<p>A <strong>score</strong> here means the vector derivative \(\nabla_\theta\log\pi_\theta(a\mid s)\), not a reward or a logit. Assume the policy is differentiable and positive on each fixed legal support, the start/response/reward laws do not depend on \(\theta\), and the finite horizon and bounded rewards introduced earlier apply. Environmental zero-probability paths can be omitted from \(\mathcal T\); they do not acquire probability as \(\theta\) changes. For every supported path, logarithmic differentiation gives \(\nabla p_\theta=p_\theta\nabla\log p_\theta\). Because the sum is finite, differentiate term by term:</p>
+\[\begin{aligned}
+\nabla_\theta J
+&amp;=\sum_\tau G_0(\tau)\nabla_\theta p_\theta(\tau)\\
+&amp;=\sum_\tau p_\theta(\tau)G_0(\tau)\nabla_\theta\log p_\theta(\tau)\\
+&amp;=\mathbb E\!\left[G_0\sum_{t=0}^{H-1}\nabla_\theta\log\pi_\theta(A_t\mid S_t)\right].
+\end{aligned}\]
+<p>The last equality expands the logarithm of the product. Derivatives of \(\rho_0\) and \(K\) disappear because those factors are actor-independent. No derivative through the sampled integer action or the environment is needed. If the reward directly depends on \(\theta\), an extra reward derivative appears; if support depends on \(\theta\), the fixed-sum argument needs repair. Infinite horizons or continuous spaces require separate integrability and interchange conditions. The finite theorem avoids assuming those conclusions automatically.</p>
+<p>Sampling a fresh trajectory at parameters \(\theta_0\) gives the estimator \(\widehat g=G_0\sum_t\nabla_\theta\log\pi_\theta(A_t\mid S_t)|_{\theta_0}\). Its expectation equals \(\nabla J(\theta_0)\): it is <strong>unbiased</strong>. A negative actor loss whose local gradient yields this estimator is \(L(\theta;\tau)=-G_0\sum_t\log\pi_\theta(a_t\mid s_t)\), with the sampled return and trajectory held fixed during differentiation. Descending this loss ascends reward in expectation at the sampling parameters. This is the episodic REINFORCE mechanism developed by <a href="https://gwern.net/doc/reinforcement-learning/model-free/1992-williams.pdf">Williams (1992)</a>, whose PDF pp. 6–9 state baseline-independence and episode-parameter conditions; our finite trajectory derivation makes its applicable hypotheses explicit.</p>
+<p>For the two-action specialization, \(dp/d\theta=p(1-p)\). Differentiating \(\log p\) for action 1 gives \(1-p\), and differentiating \(\log(1-p)\) for action 0 gives \(-p\). Thus the scalar score is \(u(A)=A-p\). At \(p=1/4\), REINFORCE returns \(-1/4\) for action 0 and \(9/4\) for action 1. Averaging with probabilities \(3/4,1/4\) gives \(-3/16+9/16=3/8\), which equals \(d(1+2p)/d\theta=2p(1-p)\). The derivative is with respect to the logit, not probability: \(dJ/dp=2\) is a different number.</p>
+<p>Positive return encourages a sampled action; negative return discourages it. For a sampled action 1 with return \(-10\), the logit-ascent update at \(p=1/4\) is \(\Delta\theta=\eta(-10)(3/4)=-15\eta/2\), where \(\eta&gt;0\) is a step size with the appropriate parameter-per-gradient units. The corresponding sample loss can be negative and unbounded below as that sampled action's probability tends to zero. It is a local gradient surrogate, not an ordinary nonnegative classification risk whose global minimum solves RL.</p>
+<p>When returns are exactly zero or one, failures contribute zero and successes contribute their score sums. Averaging over all \(B\) generated episodes gives the unbiased batch estimator \(B^{-1}\sum_iG_0^{(i)}\sum_tu_t^{(i)}\), where \(u_t\) denotes the score vector. Dividing instead by the random number of successes changes the finite-sample estimator and is undefined for an all-failure batch. Successful-self-imitation is useful intuition, but its normalization is part of the algorithm.</p>
+<p>Unbiasedness is an expectation statement at one parameter vector. It does not bound the realized update, guarantee monotonically increasing reward, or prove global convergence. Williams' PDF pp. 16–17 and 20 explicitly discuss limiting-behavior and baseline qualifications. Learning rates, policy representation, rare outcomes, and changing data distributions remain consequential.</p></section>
+
+<section id="actor-implementation"><h2>10. Keep the sampling policy and derivative aligned <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=3253">54:13</a></h2>
+<p>For independent logits, differentiating the softmax log probability yields \(\partial\log\pi(a\mid s)/\partial z(s,b)=\mathbf1[a=b]-\pi(b\mid s)\), where the indicator is one exactly when the two actions coincide. The selected logit receives positive score and the others receive negative scores. To obtain the parameter gradient, multiply these logit derivatives through the logit network's Jacobian, the matrix of first derivatives of its logits with respect to its parameters. Legal-action masking must be consistent in sampling and loss evaluation: evaluating a different normalized distribution changes the score estimator.</p>
+<p>An episodic implementation stores each pre-action state, sampled action, reward, and terminal flag. It holds parameters fixed during the episode or fresh batch, computes returns backwards, forms the return-weighted log-probability loss, differentiates with returns treated as constants, then applies the update. Reusing old episodes for many updates no longer supplies fresh on-policy data at the new parameters. The episode's observations do not become expert demonstrations merely because they remain in a buffer.</p>
+<p>The recording explicitly acknowledges that utility weighting was missing from the demonstrated cross-entropy update. The retained <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/policy_gradient.py#L413-L438">official source, line 433</a>, does multiply cross-entropy by the accumulated utility. These are different versions of the update. Its manually supplied feedback example also marks arrival at location 4 as terminal despite constructing a six-location task; that call sequence illustrates the interface rather than establishing a valid full episode of that environment. Neither the display nor that artificial feedback sequence is evidence that unweighted self-imitation correctly optimized expected reward.</p>
+<p>A batch of fresh interaction remains <strong>online</strong> RL even if updates happen after several episodes. <strong>Offline</strong> RL learns from a fixed pre-existing dataset and must address support and distribution mismatch. Initialization affects collected data: similar logits can yield broad initial action support, while highly unequal logits can concentrate experience. Broad support alone gives no guarantee that dangerous exploration is acceptable or that a small batch visits every decision context.</p>
+<p>A precise off-policy extension exposes the mismatch. Let a fixed behavior law \(\mu(\tau)\) generate trajectories and be positive wherever \(p_\theta(\tau)&gt;0\). Then multiplying by the likelihood ratio \(w_\theta(\tau)=p_\theta(\tau)/\mu(\tau)\) gives</p>
+\[\mathbb E_{\tau\sim\mu}\!\left[w_\theta(\tau)G_0\sum_t\nabla\log\pi_\theta(A_t\mid S_t)\right]=\nabla J(\theta).\]
+<p>The equality follows by cancellation of \(\mu\) in the finite sum. Under the same actor-independent environment, the trajectory ratio reduces to the product of policy-action ratios. It does not recover actions that behavior never generated, and long products can create large variance. In a score-loss implementation the numerical weights must be held fixed for that local differentiation; differentiating both a ratio and its accompanying log probability adds a spurious term. Alternatively differentiate the importance-weighted objective \(\mathbb E_\mu[w_\theta G_0]\) directly, without an extra log-probability factor.</p>
+<p>At current \(p=1/4\) but behavior probability \(\mu(1)=3/4\), the uncorrected mean reward-score is \(13/8\), not the true \(3/8\). Importance ratios are 3 for action 0 and \(1/3\) for action 1; their corrected mean is \(3/8\). A claim that a stored rollout gradient is still unbiased must therefore identify the sampling law, current policy, support, and correction. This finite extension explains a boundary; it is not a claim that importance sampling always makes reuse efficient.</p></section>
+
+<section id="estimators"><h2>11. Bias, variance, cost, and a sampling convention <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=3685">61:25</a></h2>
+<p>An <strong>estimator</strong> is a random variable intended to approximate a target number. For scalar target \(\mu_X\), its bias is \(\mathbb E[\widehat X]-\mu_X\), and its variance is \(\mathbb E[(\widehat X-\mathbb E\widehat X)^2]\). Squared-error expectation decomposes into variance plus squared bias, by expanding around the estimator's own mean. Computation cost is separate: a lower-variance estimate may require more trajectories or a trained predictor. Gradient estimators are vectors, but the scalar example isolates these distinctions.</p>
+<p>Use the recording's values \((-4,-6,6,8)\) with a normalized uniform probability of \(1/4\) each. Their mean is \(\mu_X=1\), and the exact population variance is</p>
+\[\tfrac14[(-4-1)^2+(-6-1)^2+(6-1)^2+(8-1)^2]=37.\]
+<p>The retained source's written weights \((0.1,0.1,0.1,0.1)\) sum to \(0.4\), although its categorical sampling normalizes them. Their raw dot product is \(0.4\), not the mean 1 of the normalized law. The recording verbally corrects the probabilities. A finite sample variance near 36 is an observed noisy statistic; it is not the population value 37. Keep the probability law and statistic being reported explicit.</p>
+<p>For two independent draws with replacement, \(\widehat X=(X_1+X_2)/2\) has mean 1 and variance \(37/2\): independence sets the covariance term to zero. Two distinct uniformly drawn indices have the same mean but variance \(37/3\), obtained by enumerating the six unordered pairs or applying their negative covariance. The official two-index multinomial call does not request replacement. Those two sampling modes are different experiments; calling both “two samples” hides the reason for their different variance.</p>
+<p>A <strong>control variate</strong> is a correlated zero-mean quantity used to adjust an estimator. With uniformly selected index \(I\), subtract offsets \((-6,-6,6,6)\). They have mean zero; adjusted values are \((2,0,0,2)\), retaining mean 1 and reducing variance to 1. Generally, for zero-mean offset \(C\),</p>
+\[\operatorname{Var}(X-C)=\operatorname{Var}(X)+\operatorname{Var}(C)-2\operatorname{Cov}(X,C).\]
+<p>The covariance is \(\mathbb E[(X-\mathbb EX)(C-\mathbb EC)]\). Its magnitude and sign determine whether subtraction helps. Adding independent zero-mean noise preserves the mean while increasing variance by the noise variance. Zero mean supplies unbiasedness, not variance reduction. The policy baseline will exploit a particular zero-mean score term rather than an unsupported “magic” offset.</p></section>
+
+<section id="baselines"><h2>12. A baseline removes a conditional zero-mean term <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=4078">67:58</a></h2>
+<p>At a fixed state \(s\), let a baseline \(b(s)\) have reward units and be independent of the currently sampled action. Then</p>
+\[\begin{aligned}
+\mathbb E_{A\sim\pi_\theta(\cdot\mid s)}[b(s)\nabla\log\pi_\theta(A\mid s)]
+&amp;=b(s)\sum_a\nabla\pi_\theta(a\mid s)\\
+&amp;=b(s)\nabla\sum_a\pi_\theta(a\mid s)=0.
+\end{aligned}\]
+<p>The hinge is conditional normalization at a fixed state. The state's visitation distribution can depend on \(\theta\); the proof does not claim \(\mathbb E[b(S_t)]\) is actor-independent. Conditioning on the complete pre-action history gives the same result for a history-based baseline that is chosen before the action. Williams' PDF pp. 6 and 8 and <a href="https://papers.neurips.cc/paper_files/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf">Sutton et al. (1999), PDF p. 5</a>, state the corresponding independence/normalization mechanism.</p>
+<p>Replacing \(G_0\) by \(G_0-b(S_t)\) in each full-return score contribution therefore preserves its mean. A learned baseline can depend on actor parameters as a numerical function and still be a valid conditional control variate, provided its action-loss contribution is held fixed during actor differentiation. Differentiating \(-[G_0-b_\theta(s)]\log\pi_\theta(a\mid s)\) through \(b_\theta\) adds \(\nabla b_\theta(s)\log\pi_\theta(a\mid s)\), which is not the score estimator just proved unbiased. Shared actor/critic features do not erase this distinction.</p>
+<p>Independence also concerns how a baseline is fitted. Setting it equal to the current sampled return makes the adjusted estimate zero, even when the true gradient is nonzero. For independent episodes at a fixed policy, a baseline trained before the batch or with the current episode left out avoids that particular action dependence. In the one-step case, subtracting the same batch's mean reward and averaging scores shrinks the expected gradient by \((B-1)/B\), because each sample's own reward appears with weight \(1/B\). “State-only” is insufficient if the estimator used to produce the number depends on the very action/return being scored.</p>
+<p>A baseline is analogous to a search heuristic only in its use of auxiliary knowledge to improve computation. The A* admissibility inequality and this conditional zero-mean identity are different guarantees. A large baseline can preserve the expected gradient while making its sample variance worse.</p>
+<p>For a fixed state, write the score vector as \(u\), and suppose \(\mathbb E\|u\|^2&gt;0\). A constant scalar baseline minimizing the conditional second moment \(\mathbb E[(G-b)^2\|u\|^2]\) satisfies</p>
+\[b^*=\frac{\mathbb E[G\|u\|^2]}{\mathbb E\|u\|^2}.\]
+<p>Expand the quadratic in \(b\), differentiate to get \(-2\mathbb E[G\|u\|^2]+2b\mathbb E\|u\|^2=0\), and note its positive quadratic coefficient. The mean of the estimator is baseline-independent, so minimizing this second moment also minimizes the trace of its covariance. If the score is identically zero, the estimator is zero for every baseline and this quotient is undefined rather than needed. In general, \(b^*\) is not simply the expected return.</p>
+<p>In the depot fixture at \(p=1/4\), baseline 0 gives gradient samples \(-1/4,9/4\), mean \(3/8\), variance \(75/64\). Here \(b^*=5/2\), giving sample \(3/8\) for either action and zero variance. Baseline 100 retains mean \(3/8\) but increases variance to \(114075/64\). Setting an action-dependent baseline equal to its reward gives mean zero instead. These exact values separate useful variance reduction, harmful variance inflation, and bias.</p></section>
+
+<section id="return-to-go"><h2>13. Causality removes past rewards; discounting remains <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=4266">71:06</a></h2>
+<p>For action round \(t\), every earlier reward is known in the pre-action history. Conditional on that history, the action score has mean zero by normalization. Consequently \(\mathbb E[u_tR_{j+1}]=0\) for \(j&lt;t\). This is the causality argument; it does not say the past has no effect on future states or choices. Split full start return into past and remaining rewards:</p>
+\[G_0=\sum_{j&lt;t}\gamma^jR_{j+1}+\gamma^tG_t.\]
+<p>Dropping the first part only inside the expectation gives the correct start-objective estimator</p>
+\[\widehat g_{\mathrm{rtg}}=\sum_{t=0}^{H-1}\gamma^t u_t\,[G_t-b(S_t)].\]
+<p>The baseline for this form measures local-return units. Each baseline contribution has zero conditional mean, and the outer \(\gamma^t\) is deterministic. An individual full-return sample and return-to-go sample can differ; their expectations coincide. Removing irrelevant past-reward terms is often useful, but covariance among time contributions means one should not infer an unconditional whole-vector variance ordering from this identity alone.</p>
+<p>The outer discount is essential when ordinary episodes estimate \(J=\mathbb E G_0\). A locally discounted \(G_t\) alone does not account for when action \(t\) occurs relative to the start. The source enhancement writes the local return but omits that outer factor. It agrees with this derivation at the demonstration's \(\gamma=1\); a general discounted objective needs the factor or a separately specified sampling convention. Sutton et al.'s PDF pp. 3 and 7 place the same weighting in discounted state occupancy rather than silently discarding it.</p>
+<p>Check a two-round specialization of the dispatcher. Independently sample \(A_0,A_1\sim\operatorname{Bernoulli}(p)\) with the same logit parameter. Let \(R_1=2A_0\), \(R_2=1+2A_1\), and \(\gamma=1/2\). Then \(J=2p+(1/2)(1+2p)=1/2+3p\), so at \(p=1/4\), \(J=5/4\) and \(dJ/d\theta=9/16\). Full-trajectory REINFORCE and correctly weighted return-to-go both average to \(9/16\) over the four possible action pairs. Omitting the outer discount makes the second decision contribute twice its correct weight and gives \(3/4\). The original executable checks this equality and its deliberate failure exactly.</p></section>
+
+<section id="critic"><h2>14. A critic can reduce noise and introduce error <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=4294">71:34</a></h2>
+<p>An <strong>actor–critic</strong> method combines a parameterized policy with a learned predictor of its return. The actor changes decisions; the critic supplies estimates such as \(Q_w(s,a)\) or \(V_w(s)\). With time included in state, \(Q^{\pi_\theta}(S_t,A_t)=\mathbb E[G_t\mid S_t,A_t]\). Replacing \(G_t\) by the exact conditional mean preserves the actor expectation by conditional averaging. The quantity \(A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s)\) is the <strong>advantage</strong>, an action's relative return at that state. A state-only value subtraction changes no mean score gradient.</p>
+<p>An approximate critic has error \(e_w(s,a)=Q_w(s,a)-Q^{\pi_\theta}(s,a)\). Its substitution changes the expected gradient by \(\mathbb E[\sum_t\gamma^tu_te_w(S_t,A_t)]\). An error common to every action in a state cancels; error correlated with the action score does not. For the depot fixture, reversing the two exact rewards in the critic gives mean actor gradient \(-3/8\), the opposite of the true \(3/8\). Small predictor loss on a different state/action distribution cannot by itself exclude such a reversal.</p>
+<p>One bootstrapped local alternative is the temporal-difference residual \(\delta_t=R_{t+1}+\gamma V_w(S_{t+1})-V_w(S_t)\), with terminal next value zero. Its utility is that it can be formed immediately rather than waiting for all future rewards. When \(V_w\) is the exact value under the current policy, its action-conditional mean is the advantage. An approximate bootstrap changes that relation; the resulting bias and variance depend on the critic and sampling. There is no universal “a little bias, less variance” theorem for every neural critic or shared-parameter implementation.</p>
+<p>A specific exception has an exact algebraic hypothesis. For our finite start objective define the discounted occupancy \(d_\theta(s)=\sum_{t=0}^{H-1}\gamma^t\Pr(S_t=s)\), a nonnegative visitation weight rather than necessarily a normalized probability. Write \(u_\theta(s,a)=\nabla_\theta\log\pi_\theta(a\mid s)\). The return-to-go identity can be grouped as</p>
+\[\nabla J=\sum_sd_\theta(s)\sum_a\pi_\theta(a\mid s)u_\theta(s,a)Q^{\pi_\theta}(s,a).\]
+<p>At fixed actor parameters, choose a compatible critic \(f_w(s,a)=w^\top u_\theta(s,a)\), with \(w\in\mathbb R^d\). If it satisfies the weighted residual stationarity condition</p>
+\[\sum_sd_\theta(s)\sum_a\pi_\theta(a\mid s)u_\theta(s,a)[Q^{\pi_\theta}(s,a)-f_w(s,a)]=0,\]
+<p>then subtracting this zero vector from the preceding gradient expression proves that replacing \(Q^{\pi_\theta}\) by \(f_w\) preserves the actor gradient exactly. The condition follows, for example, from exact stationarity of the weighted squared fit with score features held fixed. Compatibility alone does not guarantee the fitting condition, and approximate stationarity is not exact orthogonality. This is the mechanism of Sutton et al.'s Theorem 2 (PDF pp. 4–5), not a certificate for any arbitrary critic network.</p>
+<p>For the depot, \(u=A-p\) and \(V^\pi=3/2\). With \(w=2\), the critic predicts \((-1/2,3/2)\), exactly the two advantages. Residual reward minus critic is the action-independent \(3/2\), hence its score correlation is zero. Expected actor gradient is still \(3/8\). The critic need not reproduce absolute reward levels to reproduce the actor gradient, but it must get the relevant action-relative component right.</p>
+<p>The same paper's Theorem 3 states compatibility, exact residual stationarity at each iteration, bounded derivatives and diminishing step-size conditions; its displayed conclusion is that the performance gradient tends to zero (PDF pp. 5–6). That is not global optimality, a finite training budget, or safe exploration. For dispatch operations, objective validity, constraints, distribution shift and evaluation uncertainty remain separate from this finite-policy-gradient mathematics.</p></section>
+
+<section id="synthesis"><h2>15. The three learning routes share a task, not a guarantee <a class="timestamp" href="https://www.youtube.com/watch?v=lOMNskWVeD8&amp;t=4381">73:01</a></h2>
+<p>All three families interact, form a training signal, and update some parameters. They differ in what is represented and what must be inferred. Model-based methods turn an estimated response law into planned decisions; value-based methods turn estimated action values into decisions; policy-based methods estimate a gradient that changes the decision distribution. Actor–critic reconnects the last two through a conditional value predictor.</p>
+<table><thead><tr><th>Question</th><th>What must be specified</th><th>What a local check cannot establish</th></tr></thead><tbody>
+<tr><td>What is being improved?</td><td>Start return, horizon, discount and legal actions.</td><td>That a reward proxy matches operational safety or usefulness.</td></tr>
+<tr><td>Where do data come from?</td><td>Frozen sampling policy, behavior support, environment/version.</td><td>That replay is on-policy after parameters change.</td></tr>
+<tr><td>Which derivative is taken?</td><td>Detached targets, returns, baseline and ratio conventions.</td><td>That an attached bootstrap equals a semi-gradient.</td></tr>
+<tr><td>Why use a critic or baseline?</td><td>Conditional independence, variance or orthogonality hypotheses.</td><td>That every approximate predictor lowers variance without bias.</td></tr>
+</tbody></table>
+<p>The next lectures introduce strategic opponents. Expected utility remains a meaningful quantity when an opponent's behavior is modeled probabilistically, but that model may be inappropriate or change in response to the learner. Worst-case and game-theoretic objectives require their own information and payoff assumptions. The score identity cannot supply those assumptions merely because an interaction produces a reward.</p></section>
+
+<section id="implementation"><h2>16. An exact finite laboratory</h2>
+<p>The original standard-library program enumerates the depot and two-round specializations. Its policy input is a rational probability \(p\), but its score \(a-p\) is the derivative with respect to the implicit logit \(\theta=\log[p/(1-p)]\). This representation permits exact checks without a floating softmax, a neural framework, or a stochastic training trace. It implements the expectation and variance objects already derived; it does not fit a deployed dispatcher.</p>
+<p>Inputs are built-in integers or <code>Fraction</code> values with numerator and denominator bit lengths at most 128. Booleans, floats, malformed distributions, support-zero policy probabilities, invalid actions and unequal vector lengths raise <code>ValueError</code>. The main Bernoulli policy requires \(0&lt;p&lt;1\); exact zero/one policies are outside its log-score contract. Distribution checks require exact normalization. Numerical functions return exact <code>Fraction</code> values or tuples/dictionaries of them; the report prints rational strings. No files, network, global random state or caller inputs are modified. Work is finite: the two-round fixture enumerates four histories, and generic moment inputs support at most 64 outcomes. Intermediate and returned rational values may exceed the public input bit bound; internal arithmetic is not rounded or rejected merely because multiplication creates larger integers. Arbitrary-precision arithmetic still has a cost depending on integer bit lengths.</p>
+<p>Besides the correct gradients, the report deliberately prints the wrong undiscounted return-to-go and stale-behavior estimators, an action-dependent baseline, and a reversed critic. Those are named counterexamples rather than alternative implementations advertised as correct. The source's four-point population is normalized, and sampling with or without replacement is distinguished explicitly. A small executable can certify its arithmetic on these declared cases; it cannot prove that a neural training process converges.</p>
+<div class="codewrap"><pre><code class="language-python" id="chapter-program">&quot;&quot;&quot;Original exact policy-gradient laboratory; standard library only.
+
+Inputs are built-in int/Fraction, excluding bool, with &lt;=128-bit numerator
+and denominator. Bernoulli policies have strict positive two-action support.
+All scores differentiate an implicit logit, not its probability parameter.
+No random training, files, network, global state or caller mutation occurs.
+&quot;&quot;&quot;
+from fractions import Fraction
+from itertools import combinations, product
+import json
+
+
+def rational(value, label):
+    if type(value) not in (int, Fraction):
+        raise ValueError(label + &#x27; must be an int or Fraction, excluding bool&#x27;)
+    value = Fraction(value)
+    if (abs(value.numerator).bit_length() &gt; 128
+            or value.denominator.bit_length() &gt; 128):
+        raise ValueError(label + &#x27; numerator/denominator exceed 128 bits&#x27;)
+    return value
+
+
+def vector(values, label):
+    if type(values) not in (list, tuple) or not 1 &lt;= len(values) &lt;= 64:
+        raise ValueError(label + &#x27; must be a list/tuple of 1..64 outcomes&#x27;)
+    return tuple(rational(x, label) for x in values)
+
+
+def probability(p):
+    p = rational(p, &#x27;policy probability&#x27;)
+    if not 0 &lt; p &lt; 1:
+        raise ValueError(&#x27;policy probability must have strict support: 0&lt;p&lt;1&#x27;)
+    return p
+
+
+def _moments(weights, values):
+    &quot;&quot;&quot;Internal exact arithmetic may grow beyond public-input bit bounds.&quot;&quot;&quot;
+    mean = sum((w*x for w, x in zip(weights, values)), Fraction(0))
+    variance = sum((w*(x-mean)**2 for w, x in zip(weights, values)),
+                   Fraction(0))
+    return mean, variance
+
+
+def moments(weights, values):
+    &quot;&quot;&quot;Exact normalized population mean and variance, not sample variance.&quot;&quot;&quot;
+    weights, values = vector(weights, &#x27;weights&#x27;), vector(values, &#x27;values&#x27;)
+    if len(weights) != len(values) or any(w &lt; 0 for w in weights):
+        raise ValueError(&#x27;nonnegative weights need matching values&#x27;)
+    if sum(weights) != 1:
+        raise ValueError(&#x27;weights must sum exactly to one&#x27;)
+    return _moments(weights, values)
+
+
+def score(p, action):
+    &quot;&quot;&quot;d log Bernoulli(A;p(theta))/d theta for p(theta)=sigmoid(theta).&quot;&quot;&quot;
+    p = probability(p)
+    if type(action) is not int or action not in (0, 1):
+        raise ValueError(&#x27;action must be built-in integer 0 or 1&#x27;)
+    return action-p
+
+
+def bandit(p, rewards=(1, 3), baseline=0):
+    p = probability(p)
+    rewards = vector(rewards, &#x27;rewards&#x27;)
+    baseline = rational(baseline, &#x27;baseline&#x27;)
+    if len(rewards) != 2:
+        raise ValueError(&#x27;bandit requires two rewards&#x27;)
+    weights = (1-p, p)
+    samples = tuple((rewards[a]-baseline)*score(p, a) for a in (0, 1))
+    mean, variance = _moments(weights, samples)
+    value, _ = _moments(weights, rewards)
+    optimum_baseline = p*rewards[0]+(1-p)*rewards[1]
+    return {&#x27;value&#x27;: value, &#x27;gradient&#x27;: mean, &#x27;variance&#x27;: variance,
+            &#x27;samples&#x27;: samples, &#x27;optimal_baseline&#x27;: optimum_baseline}
+
+
+def off_policy(p, behavior_p, rewards=(1, 3)):
+    p, behavior_p = probability(p), probability(behavior_p)
+    rewards = vector(rewards, &#x27;rewards&#x27;)
+    if len(rewards) != 2:
+        raise ValueError(&#x27;two rewards required&#x27;)
+    target = (1-p, p)
+    behavior = (1-behavior_p, behavior_p)
+    scores = tuple((rewards[a]*score(p, a)) for a in (0, 1))
+    # Products/ratios are internal exact arithmetic, not fresh public inputs.
+    naive = sum(behavior[a]*scores[a] for a in (0, 1))
+    corrected = sum(behavior[a]*(target[a]/behavior[a])*scores[a]
+                    for a in (0, 1))
+    return naive, corrected
+
+
+def two_round(p, gamma=Fraction(1, 2)):
+    &quot;&quot;&quot;R1=2*A0, R2=1+2*A1, shared policy, independent decisions.&quot;&quot;&quot;
+    p, gamma = probability(p), rational(gamma, &#x27;discount&#x27;)
+    if not 0 &lt;= gamma &lt;= 1:
+        raise ValueError(&#x27;discount must be in [0,1]&#x27;)
+    value = full = correct = missing = Fraction(0)
+    for a0, a1 in product((0, 1), repeat=2):
+        weight = (p if a0 else 1-p)*(p if a1 else 1-p)
+        r1, r2 = 2*a0, 1+2*a1
+        g0 = r1+gamma*r2
+        u0, u1 = score(p, a0), score(p, a1)
+        value += weight*g0
+        full += weight*g0*(u0+u1)
+        correct += weight*(u0*g0+gamma*u1*r2)
+        missing += weight*(u0*g0+u1*r2)
+    return {&#x27;value&#x27;: value, &#x27;full&#x27;: full, &#x27;return_to_go&#x27;: correct,
+            &#x27;missing_outer_discount&#x27;: missing}
+
+
+def four_point():
+    weights = (Fraction(1, 4),)*4
+    values = (-4, -6, 6, 8)
+    single = moments(weights, values)
+    iid_means = tuple(Fraction(x+y, 2) for x, y in product(values, repeat=2))
+    distinct_means = tuple(Fraction(x+y, 2) for x, y in combinations(values, 2))
+    adjusted = tuple(x-c for x, c in zip(values, (-6, -6, 6, 6)))
+    return {&#x27;single&#x27;: single,
+            &#x27;iid_pair&#x27;: moments((Fraction(1, 16),)*16, iid_means),
+            &#x27;distinct_pair&#x27;: moments((Fraction(1, 6),)*6, distinct_means),
+            &#x27;control_variate&#x27;: moments(weights, adjusted)}
+
+
+def residual_gradients(x, y, reward=1, gamma=Fraction(1, 2)):
+    &quot;&quot;&quot;Full squared residual versus fixed-target semi-gradient in x,y.&quot;&quot;&quot;
+    x, y = rational(x, &#x27;x&#x27;), rational(y, &#x27;y&#x27;)
+    reward, gamma = rational(reward, &#x27;reward&#x27;), rational(gamma, &#x27;discount&#x27;)
+    if not 0 &lt;= gamma &lt;= 1:
+        raise ValueError(&#x27;discount must be in [0,1]&#x27;)
+    residual = x-reward-gamma*y
+    return (2*residual, -2*gamma*residual), (2*residual, Fraction(0))
+
+
+def stringify(value):
+    if isinstance(value, dict):
+        return {k: stringify(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [stringify(v) for v in value]
+    if type(value) is Fraction:
+        return str(value)
+    return value
+
+
+def report():
+    p = Fraction(1, 4)
+    rows = {str(b): bandit(p, baseline=b)
+            for b in (0, Fraction(5, 2), 100)}
+    # Explicitly wrong action-dependent baseline and reversed critic cases.
+    action_dependent = sum(w*(r-r)*score(p, a)
+                           for a, w, r in ((0, 1-p, 1), (1, p, 3)))
+    reversed_critic = sum(w*q*score(p, a)
+                          for a, w, q in ((0, 1-p, 3), (1, p, 1)))
+    compatible = sum(w*(2*score(p, a))*score(p, a)
+                     for a, w in ((0, 1-p), (1, p)))
+    return stringify({&#x27;bandit_baselines&#x27;: rows,
+                      &#x27;action_dependent_baseline_gradient&#x27;: action_dependent,
+                      &#x27;off_policy_naive_corrected&#x27;: off_policy(p, 1-p),
+                      &#x27;two_round&#x27;: two_round(p),
+                      &#x27;critic_reversed_compatible&#x27;: (reversed_critic, compatible),
+                      &#x27;four_point_mean_variance&#x27;: four_point(),
+                      &#x27;one_hot_selected_other&#x27;: (2*Fraction(1, 10), Fraction(1, 10)),
+                      &#x27;squared_full_detached_gradient&#x27;: residual_gradients(0, 0)})
+
+
+if __name__ == &#x27;__main__&#x27;:
+    print(json.dumps(report(), indent=2))
+</code></pre></div>
+<p>Running <code>python -I -B programs/chapter09.py</code> from the book folder produces:</p>
+<div class="codewrap"><pre><code class="language-text" id="chapter-output">{
+  &quot;bandit_baselines&quot;: {
+    &quot;0&quot;: {
+      &quot;value&quot;: &quot;3/2&quot;,
+      &quot;gradient&quot;: &quot;3/8&quot;,
+      &quot;variance&quot;: &quot;75/64&quot;,
+      &quot;samples&quot;: [
+        &quot;-1/4&quot;,
+        &quot;9/4&quot;
+      ],
+      &quot;optimal_baseline&quot;: &quot;5/2&quot;
+    },
+    &quot;5/2&quot;: {
+      &quot;value&quot;: &quot;3/2&quot;,
+      &quot;gradient&quot;: &quot;3/8&quot;,
+      &quot;variance&quot;: &quot;0&quot;,
+      &quot;samples&quot;: [
+        &quot;3/8&quot;,
+        &quot;3/8&quot;
+      ],
+      &quot;optimal_baseline&quot;: &quot;5/2&quot;
+    },
+    &quot;100&quot;: {
+      &quot;value&quot;: &quot;3/2&quot;,
+      &quot;gradient&quot;: &quot;3/8&quot;,
+      &quot;variance&quot;: &quot;114075/64&quot;,
+      &quot;samples&quot;: [
+        &quot;99/4&quot;,
+        &quot;-291/4&quot;
+      ],
+      &quot;optimal_baseline&quot;: &quot;5/2&quot;
+    }
+  },
+  &quot;action_dependent_baseline_gradient&quot;: &quot;0&quot;,
+  &quot;off_policy_naive_corrected&quot;: [
+    &quot;13/8&quot;,
+    &quot;3/8&quot;
+  ],
+  &quot;two_round&quot;: {
+    &quot;value&quot;: &quot;5/4&quot;,
+    &quot;full&quot;: &quot;9/16&quot;,
+    &quot;return_to_go&quot;: &quot;9/16&quot;,
+    &quot;missing_outer_discount&quot;: &quot;3/4&quot;
+  },
+  &quot;critic_reversed_compatible&quot;: [
+    &quot;-3/8&quot;,
+    &quot;3/8&quot;
+  ],
+  &quot;four_point_mean_variance&quot;: {
+    &quot;single&quot;: [
+      &quot;1&quot;,
+      &quot;37&quot;
+    ],
+    &quot;iid_pair&quot;: [
+      &quot;1&quot;,
+      &quot;37/2&quot;
+    ],
+    &quot;distinct_pair&quot;: [
+      &quot;1&quot;,
+      &quot;37/3&quot;
+    ],
+    &quot;control_variate&quot;: [
+      &quot;1&quot;,
+      &quot;1&quot;
+    ]
+  },
+  &quot;one_hot_selected_other&quot;: [
+    &quot;1/5&quot;,
+    &quot;1/10&quot;
+  ],
+  &quot;squared_full_detached_gradient&quot;: [
+    [
+      &quot;-2&quot;,
+      &quot;1&quot;
+    ],
+    [
+      &quot;-2&quot;,
+      &quot;0&quot;
+    ]
+  ]
+}
+</code></pre></div></section>
+
+<section id="exercises"><h2>17. Exercises with complete solutions</h2>
+<h3>1. Independent table entries or a shared regression model?</h3>
+<p>For one-hot pair features, start with \(w=0,b=0\) and update one coordinate using target \(Y=1\), half-squared loss and step \(1/10\). Compute the selected and unselected predictions, with and without bias. Separately differentiate the full squared residual \((x-1-y/2)^2\) at zero and explain the frozen-target version.</p>
+<details class="solution"><summary>Solution</summary><p>The initial residual is \(-1\). Both selected weight and shared bias have derivative \(-1\), so descent changes each to \(1/10\). Selected prediction is \(1/5\); every unselected coordinate still has weight zero but prediction \(1/10\) from the bias. Without bias only the selected weight changes, giving selected \(1/10\) and all others zero. Expressing any table is a property of the hypothesis class; independently updating table entries is a property of the parameterization and loss derivative.</p><p>Let \(e=x-1-y/2\). Full differentiation gives \((\partial_x\ell,\partial_y\ell)=(2e,-e)\), hence \((-2,1)\) at zero. Detaching the target gives \((-2,0)\). A descent step from the full derivative lowers \(y\) as well as raising \(x\), moving the target itself; the semi-gradient holds that label fixed. The half-squared example and full-squared example have deliberately different factors of two, which must not be mixed when comparing step sizes.</p></details>
+<h3>2. Derive a journey gradient and handle a bad reward</h3>
+<p>Under the finite fixed-support model, derive the trajectory score estimator, naming every actor-independent factor. For the depot at \(p=1/4\), compute its exact expected gradient. What is the ascent increment on a sampled action 1 with return \(-10\)? Would cloning all self-sampled actions without return have the same mean gradient?</p>
+<details class="solution"><summary>Solution</summary><p>Write the path law as start probability times alternating policy and joint response probabilities. Finite sums permit termwise differentiation; \(\nabla p=p\nabla\log p\) converts the differentiated objective into an expectation. The start and response factors have zero parameter derivative by assumption; the remaining log derivatives sum over actor decisions. The estimator is \(G_0\sum_t\nabla\log\pi\), evaluated at the sampling parameters with observations fixed.</p><p>For the depot the scores are \(-1/4\) and \(3/4\); after multiplying by rewards 1 and 3, samples are \(-1/4\) and \(9/4\). Their mean is \((3/4)(-1/4)+(1/4)(9/4)=3/8\), matching \(2p(1-p)\). A negative-return action 1 produces increment \(-15\eta/2\); the sample discourages that action. Unweighted cloning has mean score \((3/4)(-1/4)+(1/4)(3/4)=0\). It has random updates but no mean preference for the higher-reward action at these parameters. None of these expectation statements supplies a monotone finite update guarantee.</p></details>
+<h3>3. An old episode is not automatically on-policy</h3>
+<p>The depot's current probability is \(p=1/4\), while stored episodes used action-1 probability \(3/4\). Compute the naive and importance-corrected expected reward-score. Explain what fails if behavior never chose action 1. Why should a score-loss implementation detach its importance weight?</p>
+<details class="solution"><summary>Solution</summary><p>Current scores remain \(-1/4,3/4\), but sampling probabilities are now \(1/4,3/4\). The naive expectation is \((1/4)(1)(-1/4)+(3/4)(3)(3/4)=-1/16+27/16=13/8\). Current-policy probabilities divided by behavior probabilities are \(3\) for action 0 and \(1/3\) for action 1. Applying them gives \(-3/16+9/16=3/8\), the true current gradient.</p><p>If behavior assigns zero to action 1, the required ratio there is undefined and no sample contains the missing contribution. Additional knowledge or new interaction is needed; a finite weight cannot manufacture missing support. In a local score loss \(-wG\log\pi\), differentiating through both \(w\) and \(\log\pi\) gives the desired \(-wG\nabla\log\pi\) plus \(-G\log\pi\nabla w\). Detaching the numerical ratio removes the extra term. Direct differentiation of \(-wG\) is a separate correct construction and should not have an extra log factor attached.</p></details>
+<h3>4. Find a baseline and diagnose its failure modes</h3>
+<p>For the depot, derive the variance-minimizing scalar baseline and compute the variances at baseline 0, \(5/2\) and 100. Why is using the observed reward as baseline invalid? For \(B\) independent one-step episodes, derive the effect of subtracting their own batch mean reward from each score contribution.</p>
+<details class="solution"><summary>Solution</summary><p>The mean gradient is \(3/8\) for every fixed action-independent baseline. Scores have squared values \(1/16,9/16\), so \(\mathbb E u^2=(3/4)(1/16)+(1/4)(9/16)=3/16\). Also \(\mathbb E[ru^2]=(3/4)(1/16)+(1/4)(27/16)=15/32\), hence \(b^*=(15/32)/(3/16)=5/2\). Equivalently the general two-reward baseline is \(pr(0)+(1-p)r(1)\). For two scalar outcomes, variance equals \(p(1-p)\) times the squared difference. The adjusted sample difference is \(5/2-b\), giving \((3/16)(5/2-b)^2\). This yields \(75/64,0,114075/64\) at the requested baselines.</p><p>Baseline equal to sampled reward removes both samples and yields zero mean, violating the action-independence premise. For a same-batch mean \(\bar R=B^{-1}\sum_jR_j\), independence across episodes gives \(\mathbb E[\bar R u_i]=B^{-1}\mathbb E[R_i u_i]\): the cross terms vanish because \(\mathbb E u_i=0\). Thus the expected adjusted batch gradient is \((1-1/B)g\); at \(B=1\) it is identically zero. A leave-one-episode-out mean is independent of that episode's action and has zero score correlation, provided episodes were independently generated at the same fixed policy. Lower variance is a further question.</p></details>
+<h3>5. The missing outer discount</h3>
+<p>Enumerate the two-round fixture at \(p=1/4,\gamma=1/2\), rewards \(2A_0\) and \(1+2A_1\). Find the expected full-return score gradient and correctly discounted return-to-go gradient. Explain the value from omitting \(\gamma^t\), and prove why earlier rewards can be dropped despite influencing future state histories.</p>
+<details class="solution"><summary>Solution</summary><p>Action pairs \((0,0),(0,1),(1,0),(1,1)\) have probabilities \(9/16,3/16,3/16,1/16\) and start returns \(1/2,3/2,5/2,7/2\). Their score sums are \(-1/2,1/2,1/2,3/2\). Weighted full-return products sum to \((-9+9+15+21)/64=9/16\). This agrees with \(J=1/2+3p\) and its logit derivative \(3p(1-p)\).</p><p>For return-to-go the first decision contributes \(\mathbb E[u_0G_0]=2p(1-p)=3/8\), since its score has zero mean against the independent second reward. The second contributes \(\gamma\mathbb E[u_1R_2]=(1/2)2p(1-p)=3/16\). Total is \(9/16\). Missing the outer factor gives \(3/8+3/8=3/4\), changing the relative weight of the two rounds. In a general Markov journey, condition on the history just before action \(t\). All earlier rewards are constants under that conditioning, and the normalized policy score has conditional mean zero. Their product therefore has zero expectation after conditioning and averaging. Past rewards may affect the history and future choices; that does not invalidate the conditional normalization argument.</p></details>
+<h3>6. A compatible critic or a misleading approximation?</h3>
+<p>At the depot's current policy, show that \(f_w(a)=w(a-p)\) with \(w=2\) reproduces the exact advantage. Prove the weighted-orthogonality criterion that lets this critic replace true action values in a finite actor gradient. Contrast a reversed-reward critic, and propose an evaluation that would distinguish actor-gradient correctness from a deployed performance claim.</p>
+<details class="solution"><summary>Solution</summary><p>Mean reward is \(3/2\); true advantages are \(1-3/2=-1/2\) and \(3-3/2=3/2\). Multiplying scores \(-1/4,3/4\) by \(w=2\) gives exactly these. Reward minus critic is the common baseline \(3/2\), which has zero action-score correlation. More generally, start from \(g=\sum_sd(s)\sum_a\pi(a\mid s)u(s,a)Q(s,a)\). If the same weighted sum with \(Q-f_w\) is zero, subtract it to obtain \(g=\sum_sd(s)\sum_a\pi u f_w\). A compatible linear score-feature fit at exact weighted stationarity satisfies that condition. A small regression error without those weights/features or exact stationarity does not prove it.</p><p>A critic assigning values 3 to action 0 and 1 to action 1 gives expected score product \((3/4)(-1/4)3+(1/4)(3/4)1=-3/8\), reversing the correct gradient. For the finite laboratory, enumerate trajectories to compare actor estimators with an exact independently derived gradient. For dispatch evaluation, freeze the resulting policy, evaluate on fresh episodes with stated deadline/reward law, retain failures and uncertainty, and separately measure constraint violations and coverage. Record predictor error under the actor's visitation weights. Such a protocol is a proposal, not a measured result; unbiased estimator arithmetic does not certify global convergence or operational safety.</p></details></section>
+
+<section id="boundaries"><h2>18. What these identities establish</h2>
+<p>The finite model establishes expected policy-gradient identities, conditional baseline cancellation, and a compatible-critic criterion under explicit support and derivative assumptions. The exact program establishes arithmetic for its bounded rational specializations. The recorded interactions motivate the route and identify historical demonstration behavior. These are different kinds of evidence.</p>
+<p>A photograph or language prefix may omit relevant state; a reward may fail to represent the intended objective; old data may lack support; a critic may distort action-relative value; an unbiased gradient may have unusable variance. Each requires a different repair. Adding network layers or episodes does not logically repair all five. Infinite-horizon, continuous-action, partially observed and adversarial problems require additional results rather than automatic extrapolation of the finite proof.</p>
+<h3>Primary references used</h3><ol>
+<li><a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/policy_gradient.py">Official CS221 policy_gradient.py, pinned retained Autumn 2025 source</a>: interaction/value taxonomy, one-hot shared-bias/attached-target semantics, recorded versus retained REINFORCE update, sampling and estimator examples. The book executable is original.</li>
+<li><a href="https://www.gatsby.ucl.ac.uk/~dayan/papers/cjch.pdf">Watkins and Dayan, Q-learning (1992)</a>, PDF pp. 1–4: tabular discounted convergence conditions and their limits.</li>
+<li><a href="https://gwern.net/doc/reinforcement-learning/model-free/1992-williams.pdf">Williams, Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning (1992)</a>, PDF pp. 4–9, 16–17, 20–22: logistic score, conditional baselines, episodic updates and bounded convergence claims.</li>
+<li><a href="https://papers.neurips.cc/paper_files/paper/1999/file/464d828b85b0bed98e80ade0a5c43b0f-Paper.pdf">Sutton, McAllester, Singh and Mansour, Policy Gradient Methods for Reinforcement Learning with Function Approximation (1999)</a>, PDF pp. 2–7: discounted occupancy, compatibility, residual orthogonality, baselines and the actual stationarity conclusion.</li>
+<li><a href="https://docs.pytorch.org/docs/2.11/generated/torch.nn.Linear.html">PyTorch 2.11, Linear</a>: affine definition, bias-enabled default and parameter shapes; used to interpret the retained source, not as a dependency of this chapter's executable.</li>
+</ol></section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-08-reinforcement-learning.html">Previous available chapter</a><a href="index.html">Lecture index</a><span>Further chapters pending</span></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>
