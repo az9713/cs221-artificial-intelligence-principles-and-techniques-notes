@@ -1,12 +1,12 @@
 {
   "course": "CS221",
-  "checked_at_utc": "2026-10-03T09:29:31.951835+00:00",
-  "scope": "Integrated Chapters1\u20134 and existing reader support pages; twenty-chapter course incomplete",
+  "checked_at_utc": "2026-10-03T10:37:08.966562+00:00",
+  "scope": "Accepted Chapters1-6 and four reader support pages; full20chapter course incomplete",
   "static": {
     "status": "passed",
-    "html_files": 8,
-    "local_links_checked": 93,
-    "timestamps_checked": 41,
+    "html_files": 10,
+    "local_links_checked": 122,
+    "timestamps_checked": 73,
     "chapter_pages_with_dollar_math": 0,
     "failures": [],
     "warnings": []
@@ -106,6 +106,42 @@
       },
       {
         "mathErrors": 0,
+        "mathNodes": 199,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-05-search-problems-and-approximate-planning.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 199,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-05-search-problems-and-approximate-planning.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 334,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-06-uniform-cost-and-a-star-search.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 334,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-06-uniform-cost-and-a-star-search.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
         "mathNodes": 0,
         "horizontalOverflow": false,
         "controls": true,
@@ -163,8 +199,8 @@
     "clipboard": "Fallback branch checked with captured text; manual OS clipboard verification not performed",
     "network": "HTTP and HTTPS requests blocked during browser checks"
   },
+  "renderer": "Explicit disposable headless Chromium; no user session",
   "human_accessibility": "not performed",
-  "renderer": "Explicit disposable headless Chromium; no user session or browser fallback",
-  "privacy_findings": [],
-  "other_course_files_unchanged": 345
+  "other_course_files_unchanged": 345,
+  "privacy_findings": []
 }

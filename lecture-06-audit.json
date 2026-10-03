@@ -1,0 +1,30 @@
+{
+  "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+  "checked_at_utc": "2026-10-03T10:37:08.966562+00:00",
+  "status": "independently reviewed and locally validated chapter",
+  "accepted_scientific_body_sha256": "fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4",
+  "accepted_metadata_sha256": "ecafcb9b0e2a7df34748cc7a6498aac771323e4d6616ce3c9af18b1dcfcd0e60",
+  "accepted_program_sha256": "a6d99d5484b432d2b29b79efe6e5ffa4178d8a5267e63a2f8b867e4b3e9d86dd",
+  "integrated_html_sha256": "adb980f0fa891928d243d02cf5c2f5477637227f983f5f939eddd82ed9458c2c",
+  "worked_solutions": 6,
+  "current_reader_gate": {
+    "status": "passed within accepted Chapters1-6 reader scope",
+    "reader_report": "reader-validation.json",
+    "human_accessibility": "not performed"
+  },
+  "limits": [
+    "Full20chapter course incomplete",
+    "Machine transcription is not human ASR certification",
+    "Human keyboard/screen-reader audit unperformed",
+    "No publication performed"
+  ],
+  "independent_review": {
+    "rounds": 2,
+    "gate_6b": "accepted",
+    "passes_7_8": "accepted",
+    "blocking_defects": 0,
+    "review_report_sha256": "edd159004065d5536c2734d64fe26f8afb2d8054d185b9e45162d69c8341b24f",
+    "independent_numerical_checks": 7488,
+    "extra_nan_boundary_checks": 4
+  }
+}

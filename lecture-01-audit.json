@@ -1,7 +1,7 @@
 {
   "chapter": "lecture-01-foundations-and-tensors.html",
-  "checked_at_utc": "2026-10-03T07:36:20.859515+00:00",
-  "status": "independently reviewed and locally validated pilot",
+  "checked_at_utc": "2026-10-03T10:37:08.966562+00:00",
+  "status": "independently reviewed and locally validated chapter",
   "independent_review": {
     "rounds": 2,
     "gate_6b": "accepted",
@@ -16,11 +16,10 @@
   "historical_audit": "Earlier author audit superseded by independent two-round review; earlier evidence retained privately",
   "worked_solutions": 6,
   "limits": [
-    "Only Chapter 1 is covered",
-    "Human keyboard/screen-reader audit not performed",
-    "No full slide review or human ASR accuracy claim",
-    "No speed or deployment-performance benchmark",
-    "The complete twenty-chapter course is not finished"
+    "Full20chapter course incomplete",
+    "Machine transcription is not human ASR certification",
+    "Human keyboard/screen-reader audit unperformed",
+    "No publication performed"
   ],
   "pass_9": {
     "status": "passed within pilot scope",
@@ -33,6 +32,13 @@
     "independent_invalid_checks": 40,
     "visual_inspection": "Actual revised desktop title/control view and mobile masked-normalization/named-axes views inspected",
     "privacy_scan": "No local user paths, private source paths, task errors or local account name found in public documents and code",
+    "human_accessibility": "not performed"
+  },
+  "accepted_program_sha256": null,
+  "integrated_html_sha256": "374d562e94868e4fbc89ea116506173b65e12cb0d11c79fd42d2b753b7f255cf",
+  "current_reader_gate": {
+    "status": "passed within accepted Chapters1-6 reader scope",
+    "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   }
 }

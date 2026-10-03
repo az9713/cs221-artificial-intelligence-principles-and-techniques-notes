@@ -1,0 +1,532 @@
+{
+  "title": "Uniform-cost and A* search: when a promising route is provably best",
+  "number": 6,
+  "video_id": "4Iu4KPVbnAY",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "Draft: author checks complete; independent science-editor gate pending",
+  "sections": [
+    {
+      "section": "case",
+      "start": 5.26,
+      "end": 151.76,
+      "lecture_material": "Search recap, exact versus approximate methods, cycles, UCS/A* agenda.",
+      "research_extension": "No imported primary theorem.",
+      "teaching_construction": "Consequential delivery robot; fixed known costs versus prediction and stochastic execution.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Deterministic planning objective and chapter scope",
+          "origin": "Recording topic plus original running case"
+        }
+      ]
+    },
+    {
+      "section": "model",
+      "start": 151.76,
+      "end": 441.34,
+      "lecture_material": "Past/future costs, cyclic recursion ordering problem, Dijkstra and negative-cost alternative mention.",
+      "research_extension": "1959 publication identity checked separately in Dijkstra PDF1.",
+      "teaching_construction": "Finite state/action/cost domains; cycle removal and attainment; self-loop fixed-point ambiguity.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "State, path and best past/future costs",
+          "origin": "Recording definitions with explicit original domains"
+        },
+        {
+          "class": "theorem",
+          "claim": "Nonnegative cycle removal gives a finite simple-path optimum when reachable",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Zero self-loop recurrence admits multiple algebraic fixed points",
+          "origin": "Original counterexample"
+        }
+      ]
+    },
+    {
+      "section": "ucs",
+      "start": 441.34,
+      "end": 719.54,
+      "lecture_material": "Explored/frontier/unseen, priority queue, relaxation, backpointers, start initialization and minimum removal.",
+      "research_extension": "Dijkstra Problem2 PDF2–3: original three-set branch/predecessor construction.",
+      "teaching_construction": "Goal-on-removal counterexample and label upper-bound interpretation.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "UCS procedure and historical predecessor mechanism",
+          "origin": "Recording plus original Dijkstra pp2–3"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Generated goal10 versus settled goal2",
+          "origin": "Original finite case"
+        }
+      ]
+    },
+    {
+      "section": "trace",
+      "start": 719.54,
+      "end": 1087.46,
+      "lecture_material": "A/B/C/D complete decreased-priority trace and cost3 route.",
+      "research_extension": "Official pinned ucs_astar.py supplies exact edge definitions.",
+      "teaching_construction": "Explicit table, changed predecessors, stale-heap distinction.",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "class": "engineering check",
+          "claim": "Diamond labels0/1/2/3 and reconstructed route",
+          "origin": "Recorded fixture, reimplemented and executed originally"
+        },
+        {
+          "class": "definition",
+          "claim": "Lazy heap stale-record convention",
+          "origin": "Original implementation"
+        }
+      ]
+    },
+    {
+      "section": "grid",
+      "start": 1087.46,
+      "end": 1328.1,
+      "lecture_material": "Grid cost14 example, larger visualization and uniform expansion motivation.",
+      "research_extension": "Official pinned ucs_astar.py exact five-row map and legal moves; no video-frame claim.",
+      "teaching_construction": "Coordinates, complete compressed route and forced corridors.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Exact recorded-code map reconstructed in ASCII",
+          "origin": "Official module"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Route14 and six-move lower-bound gap",
+          "origin": "Original program and arithmetic"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Larger animation motivates directional guidance",
+          "origin": "Attributed recording illustration, not remeasured"
+        }
+      ]
+    },
+    {
+      "section": "settlement",
+      "start": 1328.1,
+      "end": 1794.72,
+      "lecture_material": "Nonnegative-cost condition, induction, first frontier crossing and inequality chain.",
+      "research_extension": "Dijkstra source procedure provides historical context, not modern heap bound.",
+      "teaching_construction": "Full finite-graph proof; goal-set argument; negative-edge DAG counterexample; finite/infinite zero-cycle distinction.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "UCS settlement and goal optimality under finite/nonnegative assumptions",
+          "origin": "Recording proof expanded with original hinges"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Negative-edge failure despite acyclicity; finite zero cycle succeeds",
+          "origin": "Original cases"
+        },
+        {
+          "class": "theorem",
+          "claim": "Infinite zero chain defeats finite-cost goal; positive lower bound/finite branching suffices for UCS",
+          "origin": "Original assumption analysis"
+        }
+      ]
+    },
+    {
+      "section": "astar",
+      "start": 1794.72,
+      "end": 2065.02,
+      "lecture_material": "Ideal past+future priority, computable heuristic motivation.",
+      "research_extension": "No separate external result.",
+      "teaching_construction": "Finite signed potential domain, equal units, provisional-versus-optimal labels.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "f=g+h and heuristic domain",
+          "origin": "Recording mechanism plus explicit original scope"
+        }
+      ]
+    },
+    {
+      "section": "reweight",
+      "start": 2065.02,
+      "end": 2300.78,
+      "lecture_material": "Reduced edge cost, line0→2 and h=2−s directional example.",
+      "research_extension": "Official pinned line state range verifies state3 exception to exact future-cost interpretation.",
+      "teaching_construction": "Right0/left2 arithmetic; signed admissible estimate at state3.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Potential/reduced-cost mechanism",
+          "origin": "Recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Line reduced costs and h(3)=−1 versus F(3)=1",
+          "origin": "Original arithmetic against official state range"
+        }
+      ]
+    },
+    {
+      "section": "bookkeeping",
+      "start": 2300.78,
+      "end": 2691.95,
+      "lecture_material": "Modified wrapper, original-cost recovery and negative-cost/heuristic Q&A.",
+      "research_extension": "Official wrapper used for conceptual context only, not copied implementation.",
+      "teaching_construction": "Prefix telescoping and constant queue offset; reduced versus actual travel time.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "g'=g+h−h(start), equivalent priority ordering",
+          "origin": "Original derivation of recorded mechanism"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Reduced0 recovers original2",
+          "origin": "Original line arithmetic"
+        }
+      ]
+    },
+    {
+      "section": "consistency",
+      "start": 2692.78,
+      "end": 2917.36,
+      "lecture_material": "Bad heuristic, nonnegative reduced edges, zero terminal estimate and correctness setup.",
+      "research_extension": "Hart PDF3 reopening variant; PDF5 Figure2/consistency and PDF5–6 closed-label lemma.",
+      "teaching_construction": "Finite consistent A* inheritance; edge-local Manhattan check; variant separation.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Consistency and historical reopen procedure",
+          "origin": "Recording definition plus Hart pp3/5"
+        },
+        {
+          "class": "theorem",
+          "claim": "Consistency makes reduced edges nonnegative and permanent settlement valid",
+          "origin": "Original finite proof; Hart pp5–6 corroboration"
+        }
+      ]
+    },
+    {
+      "section": "telescoping",
+      "start": 2917.36,
+      "end": 3190.86,
+      "lecture_material": "Telescoping complete route sums, terminal values and original-cost bookkeeping.",
+      "research_extension": "No separate imported result.",
+      "teaching_construction": "Full sum cancellation; separate objective preservation and valid UCS; unequal-goal and negative-reduced-edge counterexamples.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Equal terminal potentials preserve minimizing complete routes",
+          "origin": "Original expansion of recording proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Costs(1,2,4)/potentials(6,5,5,0) and multiple-goal failure",
+          "origin": "Original finite cases"
+        }
+      ]
+    },
+    {
+      "section": "admissibility",
+      "start": 3190.93,
+      "end": 3409.12,
+      "lecture_material": "Perfect/zero estimates, efficiency, admissibility versus consistency, graph/tree discussion.",
+      "research_extension": "Hart PDF2/4 theorem hypotheses, PDF6–7 information/tie-qualified comparisons.",
+      "teaching_construction": "Consistency⇒admissibility; explicit6-versus5 reopening failure; optimal-prefix witness/finite termination; strict priority threshold and perfect tie plateau.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Admissibility and algorithm variant scope",
+          "origin": "Recording plus Hart"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite reopening optimality/termination; consistency⇒admissibility; strict expansion thresholds",
+          "origin": "Original bounded proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Admissible inconsistent fixture and perfect-heuristic tie plateau",
+          "origin": "Original counterexamples"
+        },
+        {
+          "class": "theorem",
+          "claim": "Historical optimal-efficiency comparisons are conditional on consistency/information/tie hypotheses",
+          "origin": "Hart pp6–7, not universal runtime"
+        }
+      ]
+    },
+    {
+      "section": "manhattan",
+      "start": 3409.12,
+      "end": 3745.74,
+      "lecture_material": "Remove walls, Manhattan8, imperfect ranking and small-demo limited speedup.",
+      "research_extension": "Exact grid rows/moves grounded in pinned official module; no animation measurement.",
+      "teaching_construction": "Constructive relaxed-distance proof; true10/h2 versus true5/h5; FIFO17/17 counterexample to guaranteed saving.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Wall-free relaxation",
+          "origin": "Recording mechanism"
+        },
+        {
+          "class": "theorem",
+          "claim": "Manhattan optimum and consistency",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Grid cost14/heuristic8, ranking failure and17/17 removals",
+          "origin": "Original executed fixture"
+        }
+      ]
+    },
+    {
+      "section": "projection",
+      "start": 3745.74,
+      "end": 4020.05,
+      "lecture_material": "Ticket removal, projected location state, relaxed table at4=3 and reported23/8/10 counts.",
+      "research_extension": "Pinned search.py exact walk/tram fares and ticket state; pinned ucs_astar.py example.",
+      "teaching_construction": "Projection/fare distinction; routes3/4/6 and zero-ticket future6; honest instance accounting.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Resource-state projection and unchanged tram fare",
+          "origin": "Recording plus official source"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Relaxed F(4)=3 and original feasible route6",
+          "origin": "Original arithmetic"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Recording reports23 original,8 guided,10 preprocessing states",
+          "origin": "Attributed demonstrated instance, not a general benchmark"
+        }
+      ]
+    },
+    {
+      "section": "reverse",
+      "start": 4020.05,
+      "end": 4361.12,
+      "lecture_material": "Geometry versus abstraction Q&A, reverse UCS in cycles, preprocessing/query tradeoff.",
+      "research_extension": "Hart PDF8 computational cost discussion.",
+      "teaching_construction": "Multi-goal reverse-path proof, unreachable omitted entries, lazy-heap arithmetic/storage scope, amortization inequality.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Full multi-source reverse procedure and accounting convention",
+          "origin": "Recording topic expanded explicitly"
+        },
+        {
+          "class": "theorem",
+          "claim": "Reverse costs equal future costs; heap operation bound and amortization condition",
+          "origin": "Original derivations"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Heuristic calculation can outweigh saved expansions",
+          "origin": "Hart p8 analytical discussion, not measured benchmark"
+        }
+      ]
+    },
+    {
+      "section": "tiles",
+      "start": 4361.12,
+      "end": 4451.31,
+      "lecture_material": "Independent tile-motion relaxation and summed displacement.",
+      "research_extension": "Official module supplies mechanism; recording board not inspected or used numerically.",
+      "teaching_construction": "Explicit new board, exclude blank, per-move one-tile proof.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Eight-puzzle state/actions and independent motion",
+          "origin": "Recording mechanism"
+        },
+        {
+          "class": "theorem",
+          "claim": "Numbered-tile Manhattan sum consistent under unit swap cost",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Fully specified original two-move board",
+          "origin": "Original case"
+        }
+      ]
+    },
+    {
+      "section": "relaxation-proof",
+      "start": 4453.1,
+      "end": 4697.28,
+      "lecture_material": "Removing constraints/lowering costs, relaxed optimum triangle inequality and structural ease.",
+      "research_extension": "No separate imported theorem.",
+      "teaching_construction": "Explicit projection/edge simulation/goal assumptions; finite future values; extra goals; ease and deletion counter-boundaries.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Finite exact abstract future cost gives consistency under edge simulation and goal mapping",
+          "origin": "Recording theorem with original stated hypotheses"
+        },
+        {
+          "class": "definition",
+          "claim": "Constraint removal is edge/cost preservation; computational ease separate",
+          "origin": "Original interpretation"
+        }
+      ]
+    },
+    {
+      "section": "combination",
+      "start": 4697.28,
+      "end": 4785.94,
+      "lecture_material": "Max combination theorem, chapter summary, stochastic-outcomes preview.",
+      "research_extension": "No separate imported theorem.",
+      "teaching_construction": "Full max proof, duplicate-edge sum failure and cost-partition proof; strict-threshold versus runtime distinction.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Max consistency and sufficient cost-partition sum condition",
+          "origin": "Original proofs; max theorem proposed in recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Two exact unit-edge estimates sum to invalid2",
+          "origin": "Original counterexample"
+        },
+        {
+          "class": "definition",
+          "claim": "Deterministic route versus stochastic-policy scope",
+          "origin": "Recording transition preview"
+        }
+      ]
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate recording span: supporting original material.",
+      "research_extension": "No framework/API dependency.",
+      "teaching_construction": "Complete exact-integer graph program, contracts, safe rejection, reverse admissibility audit, exact stdout.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Supported integer/stable-state/ValueError/no-side-effect contract",
+          "origin": "Original implementation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Program execution and exhaustive finite/invalid-input checks",
+          "origin": "Original author validation, not independent acceptance"
+        }
+      ]
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate recording span: supporting original material.",
+      "research_extension": "Source mechanisms referenced in exposition.",
+      "teaching_construction": "Six fully reasoned mixed derivation/counterexample/numerical/implementation solutions.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Exercise conditional proof steps",
+          "origin": "Original solutions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Finite trace, telescoping, grid, reopening and amortization arithmetic",
+          "origin": "Original solutions"
+        }
+      ]
+    },
+    {
+      "section": "boundaries",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate recording span: original synthesis of covered topics.",
+      "research_extension": "Retained original-paper limits and official source context.",
+      "teaching_construction": "Model, computation and source scope separated.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Guarantee and attribution boundaries",
+          "origin": "Original synthesis"
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "title": "A Note on Two Problems in Connexion with Graphs (1959)",
+      "url": "https://ir.cwi.nl/pub/9256/9256D.pdf",
+      "supports": "PDF1 publication identity; PDF2–3/printed270–271 Problem2 increasing shortest-path construction, three sets and predecessor/cost records; no modern heap complexity attribution."
+    },
+    {
+      "title": "A Formal Basis for the Heuristic Determination of Minimum Cost Paths (1968)",
+      "url": "https://ai.stanford.edu/~nilsson/OnlinePubs-Nils/PublishedPapers/astar.pdf",
+      "supports": "PDF2 historical graph assumptions; PDF3 original reopen/tie procedure and Figure1; PDF4 lower-bound theorem; PDF5 Figure2/consistency; PDF5–6 closed-label lemma; PDF6–7 information/tie-qualified efficiency; PDF8 heuristic computation tradeoff."
+    },
+    {
+      "title": "Official CS221 ucs_astar.py, retained Autumn2025 snapshot",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/ucs_astar.py",
+      "supports": "Recorded UCS/A* topic order, exact diamond/grid/line fixtures and resource-relaxation example; implementation not copied."
+    },
+    {
+      "title": "Official CS221 search.py, retained Autumn2025 snapshot",
+      "url": "https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/search.py",
+      "supports": "LimitedTravelSearchProblem state/terminal/action definitions: walk fare1, tram fare2 and one-ticket consumption."
+    }
+  ],
+  "transcript_sha256": "4e1b956019af939fc6bf3d1be990be44d2a2a31b77b1588b6d37cef35bf081ef",
+  "transcript_segment_count": 153,
+  "transcript_text_sha256": "0a303165a707c8f50ffabbe6c96d00a0871579ba9383fbbda7227a3f2eafea99",
+  "transcript_first_start_seconds": 5.26,
+  "transcript_last_end_seconds": 4785.94,
+  "audio_sha256": "de2ae3458e58aefc4d7ac23bcfed7cad864daaddb2e008330cc04753af88bda5",
+  "audio_duration_seconds": 4791.381,
+  "authored_body_sha256": "fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4",
+  "program": "programs/chapter06.py",
+  "program_sha256": "a6d99d5484b432d2b29b79efe6e5ffa4178d8a5267e63a2f8b867e4b3e9d86dd",
+  "implementation": {
+    "dependencies": "Python standard library",
+    "input_contract": "Finite built-in graph dictionary; stable hash/equality states; built-in integer costs>=0 and signed integer heuristic values; bool/float excluded; exact state coverage; goal values0; consistency required or expensive reverse admissibility audit with reopening; ValueError rejection; None unreachable; no caller mutation or external side effects",
+    "arithmetic": "Exact arbitrary-size integers; work depends on bit lengths; finite graph only",
+    "counter_convention": "Valid forward queue removals including goal; stale records and reverse audit excluded"
+  },
+  "limitations": [
+    "Machine ASR, not publisher captions.",
+    "No recording animation or pictured puzzle-board visual attestation.",
+    "Historical efficiency hypotheses retained; no universal runtime claim.",
+    "Recording resource-demo counts are instance reports, not elapsed-time measurements.",
+    "Reopening audit includes an exact reverse solve and is not an efficient heuristic construction.",
+    "No deployed robot or uncertain-execution safety certificate.",
+    "Independent editorial acceptance and root reader validation pending."
+  ]
+}

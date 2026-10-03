@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="fadb2b43ae2aa9b7a64a6c5522be3946731d900edfd8d29fcd8a6861a35d11c4"><title>Uniform-cost and A* search: when a promising route is provably best · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START --><h1>Uniform-cost and A* search: when a promising route is provably best</h1>
+<p class="lede">A delivery robot sees a destination four rows down and four columns across. Eight moves would suffice on an empty floor; the barriers require fourteen. A planner must know when a route is optimal, when a frontier estimate can guide it safely, and whether computing that estimate saves any work. Those are three different questions.</p>
+
+<section id="case"><h2>1. From prediction to a route <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=5s">0:05</a></h2>
+<p>The preceding chapters developed predictors and the representation of search problems. Here the robot already has a deterministic map: an action has one specified successor, and its cost is known. We stipulate one minute per orthogonal move for the running example. This is a mathematical travel model; it does not estimate collision probabilities or certify a physical robot.</p>
+<p>The planner must minimize the sum of these costs over a route to a goal. Backtracking can repeatedly encounter the same state. Acyclic dynamic programming exploits a dependency order that a cyclic map lacks. Uniform-cost search (UCS) instead establishes a state’s best past cost in an order justified by nonnegative edges. A* retains that exact search principle while using a lower-bound estimate of the remaining cost. The reason this works is a change of edge costs whose path sum telescopes.</p>
+<p>We will first establish the UCS invariant, then derive A*, then construct its heuristic by relaxing the problem. The same map will expose the limits: a valid heuristic can badly rank two locations, and a stronger estimate can cost more to compute than the search work it saves.</p></section>
+
+<section id="model"><h2>2. Past cost, future cost, and cycles <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=151s">2:31</a></h2>
+<p>Let \(S\) be a finite set of states, \(s_0\in S\) the start, and \(G\subseteq S\) a nonempty set of goal states. At \(s\), choose an action \(a\) from a finite set \(A(s)\). It produces \(t=\operatorname{Succ}(s,a)\) with cost \(c(s,a)\in[0,\infty)\). Parallel actions may reach the same successor with different costs. All costs use the same unit. The graph and action sets are fixed throughout a query.</p>
+<p>A path \(P=(s_0,a_0,s_1,\ldots,a_{k-1},s_k)\) has cost \(C(P)=\sum_{i=0}^{k-1}c(s_i,a_i)\). The empty path costs zero. Define the optimal past cost \(g^*(s)\) as the minimum cost from \(s_0\) to \(s\), and the optimal future cost \(F(s)\) as the minimum cost from \(s\) to any goal. Set either value to \(+\infty\) when the corresponding route does not exist. Because costs are nonnegative, removing a cycle cannot increase a path’s cost. On a finite graph, a reachable optimum therefore has a simple-path representative and is attained.</p>
+<p>The planner does not initially know \(g^*\). Its provisional label \(g(s)\) is the cost of a route it has actually discovered. Consequently \(g(s)\ge g^*(s)\). A finite label is an upper bound on best past cost; a heuristic introduced later will be a lower bound on best future cost. Confusing these directions breaks the proof.</p>
+<p>On a directed acyclic graph, future costs can be evaluated in reverse dependency order. Cycles invalidate that evaluation order, rather than making shortest paths intrinsically undefined. For example, a state with a zero-cost self-loop and a cost-one edge to a goal has true future cost one. The equation \(F(s)=\min\{F(s),1\}\), viewed alone, admits every value between zero and one; recursive self-reference does not select the path-defined answer. UCS supplies an ordering and an invariant instead. Negative edges require a different argument; merely having a cycle is not the offending condition.</p>
+<p>The lecture briefly mentions Bellman–Ford as an alternative for negative edges. We will not import that algorithm’s theorem here. Our claims concern the stated nonnegative model and a finite state set.</p></section>
+
+<section id="ucs"><h2>3. Three sets and one operation <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=441s">7:21</a></h2>
+<p>Partition the states into <em>unseen</em> states with no discovered route, a <em>frontier</em> with provisional labels, and <em>settled</em> states whose labels have been certified optimal. “Explored” in the recording refers to this settled set. Initially only \(s_0\) is in the frontier, with \(g(s_0)=0\). A priority queue removes the smallest frontier label.</p>
+<p>After removing \(s\), inspect every outgoing edge \(s\to t\) of cost \(c\). If \(t\) is not settled, compare its current label with the route through \(s\):</p>
+\[g_{\mathrm{new}}(t)=\min\{g_{\mathrm{old}}(t),\ g(s)+c\}.\]
+<p>This operation is <em>relaxation</em>. On a strict improvement, store a predecessor identifying the improved route. An unseen target becomes frontier. The minimum removal is the point at which a label becomes settled; discovering a goal is not enough to finish.</p>
+<p>To see why, consider edges \(s_0\to q\) of cost 10, \(s_0\to a\) of cost 1, and \(a\to q\) of cost 1, where \(q\) is the goal. Generating \(q\) first finds a route of cost 10. Removing the minimum frontier instead settles \(a\) at 1, improves \(q\) to 2, and only then settles the goal. A path’s existence and its optimality are different certificates.</p>
+<p>Dijkstra’s original procedure also separates reached vertices by their status, chooses the smallest provisional route, and updates branch and predecessor records. The relevant shortest-path construction is Problem 2, on printed pages 270–271; Problem 1 is a different graph problem. The publication is from 1959. <a href="https://ir.cwi.nl/pub/9256/9256D.pdf">Dijkstra, <cite>A Note on Two Problems in Connexion with Graphs</cite>, PDF pp. 2–3</a>.</p></section>
+
+<section id="trace"><h2>4. A full relaxation trace <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=719s">11:59</a></h2>
+<p>The recorded diamond has undirected edges \(A\!-\!B=1\), \(A\!-\!C=100\), \(B\!-\!C=1\), \(B\!-\!D=100\), and \(C\!-\!D=1\). Start at \(A\) and seek \(D\). Each undirected edge supplies an action in each direction.</p>
+<div class="table-wrap"><table><thead><tr><th>Valid removal</th><th>Relaxation results</th><th>Frontier afterward</th></tr></thead><tbody>
+<tr><td>\(A:0\)</td><td>\(B\leftarrow A:1, C\leftarrow A:100\)</td><td>\(B:1, C:100\)</td></tr>
+<tr><td>\(B:1\)</td><td>\(C\leftarrow B:2, D\leftarrow B:101\)</td><td>\(C:2, D:101\)</td></tr>
+<tr><td>\(C:2\)</td><td>\(D\leftarrow C:3\)</td><td>\(D:3\)</td></tr>
+<tr><td>\(D:3\)</td><td>Goal settled; stop.</td><td>Irrelevant to the returned route.</td></tr>
+</tbody></table></div>
+<p>The predecessor chain is \(D\leftarrow C\leftarrow B\leftarrow A\); reversing it yields \(A\to B\to C\to D\), with total cost \(1+1+1=3\). A predecessor is overwritten when a better route is found. Preserving the first predecessor would leave a valid but expensive route.</p>
+<p>A heap implementation need not physically delete the old \(C:100\) record. It can insert \(C:2\), then ignore the stale record if it is ever removed. A valid removal must match the current best label and must not already be settled. Stale records are bookkeeping, not new state expansions.</p></section>
+
+<section id="grid"><h2>5. The robot’s map <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=1087s">18:07</a></h2>
+<p>The following map is reconstructed from the official executable example. Rows and columns are numbered 0 through 4. A dot is an accessible cell; <code>#</code> is a wall. Here <code>S</code> is \((0,0)\), and <code>G</code> is \((4,4)\). An action moves one cell up, down, left, or right, at cost one; it cannot enter a wall or leave the map.</p>
+<pre><code>S....
+###.#
+.....
+.####
+....G</code></pre>
+<p>An optimal route passes through</p>
+\[(0,0)\to(0,3)\to(2,3)\to(2,0)\to(4,0)\to(4,4),\]
+<p>where each displayed straight segment includes its intermediate cells. Its cost is \(3+2+3+2+4=14\). The vertical corridor in column 3 and the later corridor in column 0 are forced by the wall rows, so the detour is necessary. UCS certifies the same answer without requiring us to inspect the corridors by eye.</p>
+<p>The recording uses a larger animation to motivate directional search. We need no particular animation frame to establish the algorithm: the concrete map, legal moves, and checked route above supply a complete problem. A heuristic will soon estimate eight remaining moves at the start, leaving a six-move gap between its lower bound and the actual optimum.</p></section>
+
+<section id="settlement"><h2>6. Why the smallest label is final <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=1328s">22:08</a></h2>
+<p><strong>Settlement theorem.</strong> On a finite graph with nonnegative costs, every valid UCS removal \(s\) satisfies \(g(s)=g^*(s)\). Thus the first settled goal has minimum cost among all routes to all goals; if the frontier empties, no goal is reachable.</p>
+<p>Prove the assertion by induction on valid removals. The start’s zero-cost route is optimal because no path costs less than zero. Assume all previously settled labels are optimal, and suppose the next state \(s\) has \(g(s)&gt;g^*(s)\). Take an optimal path to \(s\). Just before this removal, that path has a first not-yet-settled state \(y\), whose predecessor \(x\) is settled. The start cannot be that first unsettled state after initialization and its removal.</p>
+<p>When \(x\) was settled, relaxing \(x\to y\) placed or improved \(y\) in the frontier. Its label satisfies the following chain:</p>
+\[g(y)\ \le\ g(x)+c(x,y)
+ =g^*(x)+c(x,y)
+ \le C(P_{s_0\to y})
+ \le C(P_{s_0\to s})=g^*(s).\]
+<p>The first inequality is relaxation. The equality uses the induction hypothesis. The next inequality holds because the chosen path prefix to \(x\) is a candidate route, whereas \(g^*(x)\) is its minimum. The final inequality discards the suffix from \(y\) to \(s\); <em>this is precisely where nonnegative costs are needed</em>. Since \(s\) is the minimum frontier removal, \(g(s)\le g(y)\le g^*(s)\). But a discovered route always has \(g(s)\ge g^*(s)\). Both inequalities force equality, contradicting the supposition.</p>
+<p>For a goal \(q\), its settled label is the best route to \(q\). If a different goal had a cheaper reachable route, the same first-crossing argument would leave a frontier label below \(g(q)\), preventing \(q\)’s removal. The proof is therefore about the entire goal set, not only the chosen goal.</p>
+<p>Nonnegativity cannot be replaced by “no negative cycles.” Consider \(s_0\to a:1\), \(s_0\to b:2\), \(a\to q:1\), and \(b\to a:-2\), with \(q\) terminal. A permanent-settlement procedure removes \(a\) at 1; it may then settle \(q\) at 2 before using the better route through \(b\). The true route \(s_0\to b\to a\to q\) costs 1. The graph is acyclic, but the suffix inequality used above fails.</p>
+<p>Finite zero-cost cycles are harmless when updates require strict improvement: traversing a zero cycle cannot improve a label. Finiteness still matters. An infinite chain \(s_0\to s_1\to\cdots\) of zero-cost edges, together with \(s_0\to q\) of cost one, can keep every minimum removal below the goal forever. For infinite UCS, finite branching and a strictly positive lower bound on edge costs are sufficient for only finitely many paths below any finite goal cost. We do not carry that condition automatically into a reweighted graph, where positive original edges may become zero.</p></section>
+
+<section id="astar"><h2>7. Add a future estimate <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=1794s">29:54</a></h2>
+<p>UCS orders the frontier by discovered past cost \(g(s)\). An ideal priority would also know the optimal remaining cost \(F(s)\). Let a <em>heuristic</em> be a finite real-valued function \(h:S\to\mathbb R\), computed from the state and intended to estimate that future cost. A* uses</p>
+\[f(s)=g(s)+h(s).\]
+<p>The two terms have the same cost unit. We will require \(h(q)=0\) for <em>every</em> \(q\in G\). Lower-bound and edge-compatibility conditions will be stated separately. A learned estimate, a geometric distance, and an exact relaxed optimum are possible constructions; the name “heuristic” by itself supplies no correctness guarantee.</p>
+<p>If \(g(s)=g^*(s)\), then \(g^*(s)+F(s)\) is the cost of the best complete route constrained to pass through \(s\). Before settlement, \(g(s)\) need not equal \(g^*(s)\), so \(g+h\) is a priority attached to the current route record. The correctness argument must deal with those provisional records; it cannot assume the planner already knows every optimal prefix.</p></section>
+
+<section id="reweight"><h2>8. A* is UCS under a potential <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=2065s">34:25</a></h2>
+<p>Use \(h\) as a <em>potential</em>: a state-dependent quantity added to the destination of an edge and subtracted from its source. Define the reduced edge cost</p>
+\[c'(s,a)=c(s,a)+h(\operatorname{Succ}(s,a))-h(s).\]
+<p>Moving toward a smaller heuristic is rewarded with a smaller reduced cost. Moving toward a larger heuristic costs more. This is an algebraic transformation of the planning problem, not a change in the robot’s physical travel time.</p>
+<p>For a line of integer states with unit-cost left and right moves, start 0 and goal 2, use the recorded \(h(s)=2-s\). A right move has reduced cost \(1+(2-(s+1))-(2-s)=0\); a left move has reduced cost \(1+(2-(s-1))-(2-s)=2\). The route \(0\to1\to2\) has original cost 2 and reduced cost 0. On states \(s\le2\), this heuristic equals the true distance to 2. If the state set also permits 3, then \(h(3)=-1\) while the true distance is 1. That negative estimate is still an under-estimate, and the edge inequalities remain valid. A heuristic need not be nonnegative for our finite-graph theorem.</p></section>
+
+<section id="bookkeeping"><h2>9. Keep the original objective <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=2300s">38:20</a></h2>
+<p>Apply the edge transformation to a path ending at \(s\). Every internal potential appears once positively and once negatively, leaving</p>
+\[g'(s)=g(s)+h(s)-h(s_0).\]
+<p>Thus ordering reduced labels \(g'(s)\) is identical to ordering \(f(s)=g(s)+h(s)\): they differ by the constant \(-h(s_0)\). The queue can store original \(g\) labels and simply use \(g+h\) as its key. The predecessor route and reported travel cost stay in original units.</p>
+<p>For the line example, reduced route cost 0 becomes original cost \(0+h(0)-h(2)=2\). Returning the reduced cost as the robot’s travel cost would falsely announce zero travel time. This explains the bookkeeping in the recording’s modified-problem wrapper without requiring a second copy of the graph.</p>
+<p>An arbitrarily large heuristic can make the queue favor the wrong route. The condition needed by UCS on the transformed graph is nonnegative <em>reduced</em> costs. Preserving the original objective is a separate condition on the terminal potentials. We next establish both conditions explicitly.</p></section>
+
+<section id="consistency"><h2>10. Consistency is an edge condition <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=2692s">44:52</a></h2>
+<p>Call \(h\) <em>consistent</em> when it is zero at every goal and, for every legal edge \(s\to t\) of cost \(c\),</p>
+\[h(s)\le c+h(t).\]
+<p>This is exactly \(c'=c+h(t)-h(s)\ge0\). It says the estimated remaining cost cannot fall by more than the cost of the step taken. Because every reduced edge is nonnegative, UCS’s settlement proof applies to the reduced finite graph. Therefore consistent A* can permanently settle states without reopening them.</p>
+<p>This condition is checkable one edge at a time. On the robot grid, a single orthogonal step changes Manhattan distance by either \(+1\) or \(-1\), so a unit edge always has nonnegative reduced cost, either 2 or 0. A potential spike of 1000 at a neighbor can violate the inequality on an outgoing unit edge; assigning a “distance-looking” number is not sufficient.</p>
+<p>Hart, Nilsson, and Raphael’s original A* procedure permits reopening an improved closed node. Their consistency lemma makes such reopening unnecessary. These are distinct algorithm variants, which matters when comparing a textbook implementation with a historical theorem. Their Figure 2 exhibits estimates that violate the edge condition. <a href="https://ai.stanford.edu/~nilsson/OnlinePubs-Nils/PublishedPapers/astar.pdf">Hart, Nilsson, and Raphael (1968), PDF pp. 3, 5–6, printed pp. 102, 104–105</a>.</p></section>
+
+<section id="telescoping"><h2>11. Why the minimizing route survives <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=2917s">48:37</a></h2>
+<p>For any complete path \(P\) from \(s_0\) to a goal \(q\), summing its reduced costs gives</p>
+\[\begin{aligned}
+C'(P)&=\sum_{i=0}^{k-1}\bigl[c(s_i,a_i)+h(s_{i+1})-h(s_i)\bigr]\\
+&=C(P)+h(q)-h(s_0)=C(P)-h(s_0).
+\end{aligned}\]
+<p>All complete routes lose the same constant. Consequently their order, ties, and minimizing routes are unchanged. We minimize both objectives; there is no maximization hidden in the change of variables.</p>
+<p>There are two logical hinges. <em>Telescoping</em> preserves route ordering when all goals have the same potential. <em>Consistency</em> validates permanent-settlement UCS on the reduced graph. Telescoping alone says nothing about nonnegative reduced edges. For example, on a three-edge cost-\((1,2,4)\) route with potentials \((6,5,5,0)\), reduced costs are \((0,2,-1)\). They sum to 1, exactly original cost \(7-6\), while the last reduced edge is negative.</p>
+<p>Zero at every goal is a convenient normalization of the equal-goal condition. Unequal terminal potentials can change which goal is best. If \(s_0\to q_1\) costs 2 and \(s_0\to q_2\) costs 1, but \(h(q_1)=0\) and \(h(q_2)=100\), transformed optimization prefers \(q_1\). It is then solving a different objective. This is why one goal’s zero estimate is insufficient for a multiple-goal problem.</p></section>
+
+<section id="admissibility"><h2>12. Admissibility, reopening, and ties <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=3190s">53:10</a></h2>
+<p>A heuristic is <em>admissible</em> if \(h(s)\le F(s)\) for every state, with our separate zero-goal requirement. Consistency implies admissibility: apply the edge inequality along any path to a goal, sum it, and cancel intermediate estimates to obtain \(h(s)\le C(P)\). Taking the minimum over complete paths yields the lower bound. At a state with no goal route, a finite \(h\) is trivially below \(+\infty\).</p>
+<p>The converse fails. Consider directed edges \(s_0\to a:3\), \(s_0\to b:1\), \(a\to q:3\), \(b\to a:1\), and \(b\to q:100\). Let \(h(s_0)=0, h(a)=0, h(b)=4, h(q)=0\). True future costs are \(F(a)=3, F(b)=4, F(s_0)=5\), so every estimate is admissible. But \(h(b)=4&gt;1+h(a)=1\), making \(b\to a\) a reduced edge of cost \(-3\).</p>
+<p>A permanent-settlement queue removes \(a\) at \(g=3,f=3\), then \(b\) at \(g=1,f=5\). The latter discovers \(a\) at cost 2. If the improved closed state is ignored, the planner returns \(q\) at 6. Reopening \(a\) updates its route, expands it again at \(g=2,f=2\), and improves \(q\) to the true optimum 5.</p>
+<p><strong>Why reopening repairs this case generally.</strong> Retain every strict improvement, including improved closed states. Fix an optimal path to a goal that has not yet been removed. Before the start is removed, its record is the witness. Afterwards choose the furthest state along this path that is currently closed with its optimal prefix cost. The start guarantees that such a state exists. Its next state cannot already be closed with the optimal prefix cost, by the choice of the furthest state. When the chosen state was removed, relaxing this next edge supplied that optimal prefix cost: the prefix is optimal, and no discovered route can be cheaper. If the next state was closed at a worse cost, the strict improvement reopened it. If it was subsequently removed at the optimal cost, it would be a later closed optimal state, contradicting our choice. Thus the next state has a current frontier record with optimal prefix cost. Its priority satisfies \(f=g^*+h\le g^*+F=C^*\), where \(C^*\) is optimal complete cost. A more expensive goal has \(f=g&gt;C^*\) and cannot be the minimum removal while this witness exists.</p>
+<p>On a finite graph with nonnegative costs, termination follows as well. Before a reachable optimal goal is removed, each valid removal has \(f\le C^*\), hence \(g\le C^*-\min_s h(s)\). There are finitely many positive edge-cost values, with a positive minimum if any are present. A bounded-cost walk uses only a bounded number of positive edges; zero-cost portions cannot create infinitely many distinct lower cost labels. Strict improvements therefore occur only finitely many times. For an unreachable goal, admissibility gives no finite goal bound, but all discovered labels are bounded by their first discovered finite labels; the same finite-cost argument applies. This argument uses the finite model, not an unrestricted infinite-state completeness claim.</p>
+<p>For consistent A*, write \(f^*(s)=g^*(s)+h(s)\). Among start-reachable states, those with \(f^*(s)&lt;C^*\) are settled before the goal; those with \(f^*(s)&gt;C^*\) are not. The boundary \(f^*=C^*\) depends on ties. With two cost-one branches from the start to a goal and the perfect heuristic, both branch states can share the same priority as the goal and both be removed under FIFO ties. “Perfect” does not mean “only one selected path is touched.”</p>
+<p>The original paper’s efficiency comparisons impose consistency and information assumptions, and distinguish equal-priority ties. They do not establish universal fastest runtime. Its historical setting also uses a positive lower edge-cost bound; our main proof explicitly uses a finite graph. <a href="https://ai.stanford.edu/~nilsson/OnlinePubs-Nils/PublishedPapers/astar.pdf">Hart et al., PDF pp. 2, 4, 6–7</a>.</p></section>
+
+<section id="manhattan"><h2>13. Remove walls to obtain a bound <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=3409s">56:49</a></h2>
+<p>A <em>relaxation</em> makes the original problem less restrictive or less expensive. Remove the robot’s walls while keeping unit orthogonal moves. For position \((r,c)\) and goal \((r_g,c_g)\), the relaxed optimum is</p>
+\[h(r,c)=|r-r_g|+|c-c_g|.\]
+<p>Every orthogonal move changes one coordinate by one, so at least that many moves are necessary. Moving along one coordinate and then the other constructs a wall-free route of exactly that length. This proves the formula, rather than merely naming it Manhattan distance. Every original legal route is also relaxed-legal with the same cost, so \(h\le F\). Its one-step distance inequality proves consistency.</p>
+<p>On our map, \(h(0,0)=8\), whereas \(F(0,0)=14\). The estimate is exact for the relaxed problem and approximate for the original one. It can even reverse the ranking of remaining travel costs. At \((2,4)\), \(h=2\), but the only escape first goes left around the wall, and \(F=10\). At \((3,0)\), \(h=5\) and \(F=5\). A lower bound need not preserve state rankings.</p>
+<p>The checked program’s FIFO ties remove 17 accessible states for both UCS and A*, including the goal, while returning cost 14 in each case. Here the early forced corridor and the large equal-priority plateau leave no expansion saving. This finite check neither invalidates the heuristic nor predicts all maps. The recording’s larger directional animation illustrates a possible benefit; it is not a benchmark applicable to this map.</p></section>
+
+<section id="projection"><h2>14. Relax a resource, not just geometry <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=3745s">1:02:25</a></h2>
+<p>Suppose the state is \((\ell,k)\): location \(\ell\in\{1,\ldots,10\}\) and remaining tickets \(k\in\{0,\ldots,3\}\). Walking to \(\ell+1\) costs one minute and uses no ticket. A tram to \(2\ell\), when within the location bound, costs two minutes and consumes one ticket. The goal is location 10 with any remaining ticket count. This model keeps resource availability in the state because it changes future legal actions.</p>
+<p>Remove the ticket requirement and project the state through \(\phi(\ell,k)=\ell\). The relaxed location graph has both walking and tram edges whenever their destination is at most 10. The tram is now unrestricted; it is <em>not</em> zero-fare. Let \(\bar F(\ell)\) be the relaxed optimal future cost and use \(h(\ell,k)=\bar F(\ell)\).</p>
+<p>At location 4, the relaxed route \(4\to5\to10\) costs \(1+2=3\); the competing \(4\to8\to9\to10\) costs \(2+1+1=4\). Thus \(\bar F(4)=3\). With no tickets, the original future cost at \((4,0)\) is six walks, so the relaxation remains useful as a lower bound while forgetting relevant constraints. Starting from \((1,3)\), the route walk to 2, tram to 4, walk to 5, tram to 10 costs 6 and uses two tickets.</p>
+<p>The lecture reports 23 states for its original search, 8 for the heuristic-guided search, and 10 for computing the relaxed table: 18 total rather than 23. These are counts for that demonstrated instance and implementation. They are not a runtime ratio, and they can vary with tie rules. The important accounting lesson is that the ten precomputation states must not disappear when comparing methods.</p></section>
+
+<section id="reverse"><h2>15. Compute future costs by reversing edges <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=4020s">1:07:00</a></h2>
+<p>The relaxed graph need not be acyclic or geometric. Reverse every edge \(s\to t\) into \(t\to s\) at the same cost. Initialize UCS with all original goals, each at zero, and run until the frontier is empty. A reversed path from a goal to \(s\) corresponds edge for edge to an original path from \(s\) to that goal, with the same summed cost. Taking the minimum over the initialized goals therefore computes \(F(s)\).</p>
+<p>Do not stop this computation at the first goal or first query state if the purpose is a reusable table. The table needs all reachable reversed states. If a state cannot reach any goal in the original graph, it has no finite entry. One must handle that dead end explicitly rather than subtracting two infinities in a reduced-cost formula.</p>
+<p>On a finite graph with \(V\) states and \(E\) directed edges, a lazy binary heap for permanent-settlement UCS inserts at most one improving record per scanned edge, plus initialization. Its usual arithmetic-operation bound is \(O((V+E)\log(1+V+E))\), with \(O(V+E)\) storage for graph and queued records. This bound treats comparisons and additions as fixed-cost operations; exact large-integer arithmetic adds a dependence on operand bit lengths. Preprocessing, graph construction, heuristic lookup, and path reconstruction are additional components of elapsed work.</p>
+<p>Let a relaxed precomputation cost \(T_{\mathrm{pre}}\) time units, each unassisted query \(T_U\), and each subsequent A* query \(T_A\), all measured under one accounting convention. For \(Q\) queries on an unchanged goal/map model, preprocessing pays off when</p>
+\[T_{\mathrm{pre}}+QT_A&lt;QT_U.
+\qquad Q&gt;\frac{T_{\mathrm{pre}}}{T_U-T_A}\quad\text{if }T_U&gt;T_A.\]
+<p>If \(T_A\ge T_U\), no positive number of repeated queries amortizes this fixed cost under the assumed model. If the goal or map changes, the cached table may no longer apply. The original A* paper likewise observes that computing a more informed estimate can outweigh saved expansions. <a href="https://ai.stanford.edu/~nilsson/OnlinePubs-Nils/PublishedPapers/astar.pdf">Hart et al., PDF p. 8, printed p. 107</a>.</p></section>
+
+<section id="tiles"><h2>16. Independent tile motion <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=4361s">1:12:41</a></h2>
+<p>In the eight-puzzle, a state is a 3-by-3 arrangement of numbered tiles 1 through 8 and one blank. A legal unit-cost action swaps the blank with an orthogonally adjacent tile. Fix a goal arrangement. The lecture relaxes collisions between numbered tiles, allowing each numbered tile to move independently toward its goal location.</p>
+<p>For tile \(i\), let its current and goal positions be \((r_i,c_i)\) and \((r_i^G,c_i^G)\). Exclude the blank and sum the independently required movements:</p>
+\[h(s)=\sum_{i=1}^{8}\bigl(|r_i-r_i^G|+|c_i-c_i^G|\bigr).\]
+<p>A legal move moves exactly one numbered tile by one unit. The sum changes by \(+1\) or \(-1\), proving the edge consistency inequality with unit cost. Every tile must undergo at least its Manhattan displacement before reaching the goal, and every real action contributes movement to exactly one tile. Hence the sum lower-bounds the real number of actions. The absence of double counting is the crucial reason this particular sum is valid.</p>
+<p>For an original fully specified example, take goal rows <code>1 2 3 / 4 5 6 / 7 8 0</code>, with 0 the blank, and start rows <code>1 2 3 / 4 5 6 / 0 7 8</code>. Tiles 7 and 8 are each one column away, so \(h=2\). Two swaps, moving 7 left and then 8 left, reach the goal. The bound is attained here. It is not a claim about the recording’s pictured board or about every solvable puzzle state.</p></section>
+
+<section id="relaxation-proof"><h2>17. The general relaxation theorem <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=4453s">1:14:13</a></h2>
+<p>The geometric and ticket constructions share one proof. Let \(\phi:S\to\bar S\) map original states into an abstract graph. Assume every original edge \(s\to t\) of cost \(c\) has an abstract edge \(\phi(s)\to\phi(t)\) of cost \(\bar c\le c\), and every original goal maps into an abstract goal. The abstract graph may contain additional edges and additional goals. Assume its exact future cost \(\bar F\) is finite on all projected states used here, with nonnegative abstract costs. Define \(h(s)=\bar F(\phi(s))\).</p>
+<p>An abstract route may take the simulated original edge and then an optimal abstract suffix. Therefore</p>
+\[h(s)=\bar F(\phi(s))
+\le\bar c+\bar F(\phi(t))
+\le c+h(t).\]
+<p>The first inequality is the optimality of \(\bar F\), not an assumption that the abstract route must imitate an original optimum. At an original goal the projected state is abstract-terminal, so \(h=0\). This establishes consistency and hence admissibility. Applying the edge simulation along an entire original route also gives the lower-bound proof directly.</p>
+<p>“Remove a constraint” must be operationalized as preserving all original routes at no larger cost. Arbitrarily deleting inconvenient edges does the opposite and can overestimate the optimum. Conversely, adding shortcuts may make a problem less informative without making its exact optimum cheap to compute. Ease of solving the relaxed problem is an additional design requirement, not part of the lower-bound theorem. If an abstract future cost is infinite, the finite-potential proof above does not justify using an undefined infinity difference; dead-end reachability needs separate treatment.</p></section>
+
+<section id="combination"><h2>18. Maxima preserve consistency; sums need a budget <a class="timestamp" href="https://www.youtube.com/watch?v=4Iu4KPVbnAY&amp;t=4697s">1:18:17</a></h2>
+<p>Suppose \(h_1,\ldots,h_m\) are finite consistent heuristics for the same costs and goals, with \(m\ge1\). Define \(h_{\max}(s)=\max_i h_i(s)\). Choose an index \(j\) attaining the maximum at the source \(s\). For any edge \(s\to t\),</p>
+\[h_{\max}(s)=h_j(s)\le c+h_j(t)\le c+\max_i h_i(t)=c+h_{\max}(t).\]
+<p>Every component is zero at a goal, so the maximum is zero there as well. The maximum is at least as informative pointwise as each component, but evaluating all components may increase computational cost. With nonnegative consistent heuristics, it cannot enlarge the strictly-below-optimal-priority set \(\{s:g^*(s)+h(s)&lt;C^*\}\); equality ties and elapsed runtime remain separate questions.</p>
+<p>A sum has no such general guarantee. On the single unit-cost edge \(s\to q\), two heuristics each assigning \(h_i(s)=1,h_i(q)=0\) are exact and consistent. Their sum assigns 2 at \(s\), overestimates the remaining cost, and violates consistency. Each has counted the same edge’s entire budget.</p>
+<p>A sufficient repair is <em>cost partitioning</em>. For each real edge, allocate nonnegative component costs \(c_i\) with \(\sum_i c_i\le c\). If each component is zero at goals and satisfies \(h_i(s)\le c_i+h_i(t)\), summing those inequalities proves \(\sum_i h_i(s)\le c+\sum_i h_i(t)\). The eight-puzzle construction allocates a move’s unit cost to the one numbered tile moved. That is why its sum works where the duplicated unit-edge example fails.</p>
+<p>These planners optimize a deterministic cost model. When an action has stochastic outcomes, a single successor path is insufficient; the next chapter moves to a transition distribution and policies. The present optimality theorem remains a theorem about routes in the specified graph, not about uncertain execution outcomes.</p></section>
+
+<section id="implementation"><h2>19. An executable model with explicit failure boundaries</h2>
+<p>The original Python program below implements the mathematical distinctions directly. Its public <code>shortest_path</code> accepts a nonempty built-in dictionary of states and finite adjacency lists of <code>\(target, cost\)</code> pairs; every target must have a dictionary entry. States have stable hashing and equality, but need not be orderable. It accepts built-in nonnegative integer costs and signed built-in integer heuristic values, excluding booleans and all floats. This is a narrower exact-arithmetic model than the real-valued proof; arbitrarily large integers are supported, with arithmetic work depending on their bit lengths.</p>
+<p>The start and a nonempty finite collection of goals must be declared states. A supplied heuristic must specify exactly all states and be zero at every goal. The default permanent-settlement mode verifies consistency on every edge. Violated supported input contracts raise <code>ValueError</code>. A returned immutable <code>Result</code> contains original cost, state path, and valid queue removals including the goal; an unreachable query returns <code>None</code>. The program copies adjacency information and changes no caller data, files, network state, or random state.</p>
+<p>For <code>reopen=True</code>, it first computes exact reverse future costs and checks admissibility, then allows improved closed states to return to the frontier. This intentionally expensive mode is a correctness audit of the reopening example. Its printed removal count excludes the reverse audit; it cannot be used as a fair end-to-end speed comparison. The internal <code>_run</code> function bypasses those guarantees only for the explicitly labeled unchecked counterexample in the demonstration. Calling the public function without reopening rejects that inconsistent heuristic.</p>
+<p>Heap entries contain a monotonically increasing serial number, so equal priorities use FIFO insertion order and never compare the state objects themselves. Stale labels are discarded. A goal is tested only on a valid removal. Strict improvements avoid repeatedly traversing finite zero-cost cycles. Reverse distances omit states with no goal route instead of exposing infinity arithmetic.</p>
+<p>From the repository root, run <code>python -B programs/chapter06.py</code>. The complete standard-library implementation is:</p>
+<pre><code class="language-python" id="chapter-program">&quot;&quot;&quot;Exact finite-graph UCS/A* teaching fixtures; standard library only.
+
+Public costs and potentials are built-in integers (booleans excluded). States
+must have stable hash/equality; adjacency order defines FIFO priority ties.
+Reopening mode deliberately audits admissibility with an exact reverse solve.
+It is a correctness demonstration, not a competitive heuristic implementation.
+No files, network, random state, or input objects are modified.
+&quot;&quot;&quot;
+from dataclasses import dataclass
+from heapq import heappop, heappush
+from itertools import count
+
+
+@dataclass(frozen=True)
+class Result:
+    cost: int
+    path: tuple
+    removals: int  # valid removals, including the returned goal
+
+
+def _integer(value, label, nonnegative=False):
+    if type(value) is not int or (nonnegative and value &lt; 0):
+        raise ValueError(label + &quot; must be a built-in &quot; +
+                         (&quot;nonnegative &quot; if nonnegative else &quot;&quot;) + &quot;integer&quot;)
+    return value
+
+
+def _graph(graph):
+    if type(graph) is not dict or not graph:
+        raise ValueError(&quot;graph must be a nonempty dict&quot;)
+    copied = {}
+    for state, edges in graph.items():
+        if not isinstance(edges, (list, tuple)):
+            raise ValueError(&quot;adjacency must be a list or tuple&quot;)
+        outgoing = []
+        for edge in edges:
+            if not isinstance(edge, (list, tuple)) or len(edge) != 2:
+                raise ValueError(&quot;each edge must be (target, cost)&quot;)
+            target, cost = edge
+            try:
+                declared = target in graph
+            except TypeError as exc:
+                raise ValueError(&quot;targets must be hashable&quot;) from exc
+            if not declared:
+                raise ValueError(&quot;every target needs an adjacency entry&quot;)
+            outgoing.append((target, _integer(cost, &quot;cost&quot;, True)))
+        copied[state] = tuple(outgoing)
+    return copied
+
+
+def _terminals(graph, goals):
+    if not isinstance(goals, (list, tuple, set, frozenset)) or not goals:
+        raise ValueError(&quot;goals must be a nonempty finite collection&quot;)
+    try:
+        terminals = frozenset(goals)
+        if not terminals &lt;= graph.keys():
+            raise ValueError(&quot;goals must be declared states&quot;)
+    except TypeError as exc:
+        raise ValueError(&quot;goals must be hashable&quot;) from exc
+    return terminals
+
+
+def _run(graph, start, goals, potential, reopen):
+    &quot;&quot;&quot;Internal engine. Call shortest_path for validated correctness guarantees.&quot;&quot;&quot;
+    serial = count()
+    queue = [(potential[start], next(serial), 0, start)]
+    best, parent, closed = {start: 0}, {}, set()
+    removals = 0
+    while queue:
+        _, _, distance, state = heappop(queue)
+        if distance != best[state] or state in closed:
+            continue
+        closed.add(state)
+        removals += 1
+        if state in goals:
+            route = [state]
+            while state is not start and state != start:
+                state = parent[state]
+                route.append(state)
+            return Result(distance, tuple(reversed(route)), removals)
+        for target, cost in graph[state]:
+            candidate = distance + cost
+            if target in closed and not reopen:
+                continue
+            if target not in best or candidate &lt; best[target]:
+                best[target] = candidate
+                parent[target] = state
+                closed.discard(target)
+                heappush(queue, (candidate + potential[target], next(serial),
+                                 candidate, target))
+    return None
+
+
+def _future(graph, goals):
+    reverse = {state: [] for state in graph}
+    for state, edges in graph.items():
+        for target, cost in edges:
+            reverse[target].append((state, cost))
+    serial = count()
+    # Iterate graph order, not set order, so ties are deterministic.
+    queue = [(0, next(serial), state) for state in graph if state in goals]
+    best = {state: 0 for state in graph if state in goals}
+    final = {}
+    while queue:
+        distance, _, state = heappop(queue)
+        if state in final or distance != best[state]:
+            continue
+        final[state] = distance
+        for target, cost in reverse[state]:
+            candidate = distance + cost
+            if target not in best or candidate &lt; best[target]:
+                best[target] = candidate
+                heappush(queue, (candidate, next(serial), target))
+    return final
+
+
+def future_costs(graph, goals):
+    &quot;&quot;&quot;Exact distance to ANY goal; omit states unable to reach a goal.&quot;&quot;&quot;
+    copied = _graph(graph)
+    return _future(copied, _terminals(copied, goals))
+
+
+def shortest_path(graph, start, goals, heuristic=None, *, reopen=False):
+    &quot;&quot;&quot;Return Result or None. Reject violated supported input hypotheses.
+
+    Default: check consistency, use permanent settlement. Reopening mode:
+    check admissibility using a full reverse solve, then allow repeat removals.
+    Reported removals exclude that audit and stale heap records. Integer costs
+    avoid floating-point comparisons; their arithmetic cost grows with bits.
+    &quot;&quot;&quot;
+    copied = _graph(graph)
+    try:
+        present = start in copied
+    except TypeError as exc:
+        raise ValueError(&quot;start must be hashable&quot;) from exc
+    if not present:
+        raise ValueError(&quot;start must be a declared state&quot;)
+    terminals = _terminals(copied, goals)
+    if type(reopen) is not bool:
+        raise ValueError(&quot;reopen must be boolean&quot;)
+    if heuristic is None:
+        potential = {state: 0 for state in copied}
+    else:
+        if type(heuristic) is not dict or heuristic.keys() != copied.keys():
+            raise ValueError(&quot;heuristic must specify exactly all states&quot;)
+        potential = {state: _integer(value, &quot;heuristic&quot;)
+                     for state, value in heuristic.items()}
+    if any(potential[goal] != 0 for goal in terminals):
+        raise ValueError(&quot;every goal heuristic must be zero&quot;)
+    if reopen:
+        exact = _future(copied, terminals)
+        if any(potential[state] &gt; distance for state, distance in exact.items()):
+            raise ValueError(&quot;reopening audit requires admissibility&quot;)
+    elif any(potential[state] &gt; cost + potential[target]
+             for state, edges in copied.items() for target, cost in edges):
+        raise ValueError(&quot;permanent settlement requires consistency&quot;)
+    return _run(copied, start, terminals, potential, reopen)
+
+
+def grid_problem(rows):
+    &quot;&quot;&quot;Rectangular ASCII grid: # wall, . free, exactly one S and one G.&quot;&quot;&quot;
+    if (not isinstance(rows, (list, tuple)) or not rows or
+            any(type(row) is not str for row in rows) or not rows[0] or
+            any(len(row) != len(rows[0]) for row in rows) or
+            any(ch not in &quot;.#SG&quot; for row in rows for ch in row)):
+        raise ValueError(&quot;invalid rectangular grid&quot;)
+    starts = [(r, c) for r, row in enumerate(rows) for c, ch in enumerate(row)
+              if ch == &quot;S&quot;]
+    goals = [(r, c) for r, row in enumerate(rows) for c, ch in enumerate(row)
+             if ch == &quot;G&quot;]
+    if len(starts) != 1 or len(goals) != 1:
+        raise ValueError(&quot;grid needs exactly one S and one G&quot;)
+    graph = {(r, c): [] for r, row in enumerate(rows)
+             for c, ch in enumerate(row) if ch != &quot;#&quot;}
+    for r, c in graph:
+        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            target = r + dr, c + dc
+            if target in graph:
+                graph[r, c].append((target, 1))
+    gr, gc = goals[0]
+    h = {(r, c): abs(r - gr) + abs(c - gc) for r, c in graph}
+    return graph, starts[0], goals, h
+
+
+def demo():
+    diamond = {&quot;A&quot;: [(&quot;B&quot;, 1), (&quot;C&quot;, 100)],
+               &quot;B&quot;: [(&quot;A&quot;, 1), (&quot;C&quot;, 1), (&quot;D&quot;, 100)],
+               &quot;C&quot;: [(&quot;A&quot;, 100), (&quot;B&quot;, 1), (&quot;D&quot;, 1)],
+               &quot;D&quot;: [(&quot;B&quot;, 100), (&quot;C&quot;, 1)]}
+    answer = shortest_path(diamond, &quot;A&quot;, [&quot;D&quot;])
+    print(&quot;diamond:&quot;, answer.cost, &quot;-&gt;&quot;.join(answer.path))
+    graph, start, goals, h = grid_problem((&quot;S....&quot;, &quot;###.#&quot;, &quot;.....&quot;,
+                                          &quot;.####&quot;, &quot;....G&quot;))
+    ucs = shortest_path(graph, start, goals)
+    astar = shortest_path(graph, start, goals, h)
+    exact = future_costs(graph, goals)
+    print(f&quot;grid: cost={astar.cost}, Manhattan={h[start]}, &quot;
+          f&quot;UCS removals={ucs.removals}, A* removals={astar.removals}&quot;)
+    print(f&quot;grid ranking: (2,4) h={h[2,4]} true={exact[2,4]}; &quot;
+          f&quot;(3,0) h={h[3,0]} true={exact[3,0]}&quot;)
+    inconsistent = {&quot;s&quot;: [(&quot;a&quot;, 3), (&quot;b&quot;, 1)], &quot;a&quot;: [(&quot;g&quot;, 3)],
+                    &quot;b&quot;: [(&quot;a&quot;, 1), (&quot;g&quot;, 100)], &quot;g&quot;: []}
+    ih = {&quot;s&quot;: 0, &quot;a&quot;: 0, &quot;b&quot;: 4, &quot;g&quot;: 0}
+    unsafe = _run(inconsistent, &quot;s&quot;, {&quot;g&quot;}, ih, False)
+    repaired = shortest_path(inconsistent, &quot;s&quot;, [&quot;g&quot;], ih, reopen=True)
+    print(f&quot;inconsistent audit: unchecked closed={unsafe.cost}, &quot;
+          f&quot;validated reopening={repaired.cost}&quot;)
+    zero = {&quot;s&quot;: [(&quot;a&quot;, 0)], &quot;a&quot;: [(&quot;s&quot;, 0), (&quot;g&quot;, 1)], &quot;g&quot;: []}
+    print(&quot;finite zero cycle:&quot;, shortest_path(zero, &quot;s&quot;, [&quot;g&quot;]).cost)
+    print(&quot;unreachable:&quot;, shortest_path({&quot;s&quot;: [], &quot;g&quot;: []}, &quot;s&quot;, [&quot;g&quot;]))
+
+
+if __name__ == &quot;__main__&quot;:
+    demo()
+</code></pre>
+<p>Actual output under the declared adjacency order and FIFO ties:</p>
+<pre><code class="language-text" id="chapter-output">diamond: 3 A-&gt;B-&gt;C-&gt;D
+grid: cost=14, Manhattan=8, UCS removals=17, A* removals=17
+grid ranking: (2,4) h=2 true=10; (3,0) h=5 true=5
+inconsistent audit: unchecked closed=6, validated reopening=5
+finite zero cycle: 1
+unreachable: None
+</code></pre>
+<p>The grid’s 17-versus-17 result includes the goal and excludes stale heap records. The internal unchecked result 6 is intentionally wrong; the validated reopening result 5 is correct. The last two lines test a finite zero cycle and unreachable goals. These are engineering checks of finite fixtures. They do not replace the invariants or establish a benchmark on other maps.</p></section>
+
+<section id="exercises"><h2>20. Exercises with complete solutions</h2>
+<h3>Exercise 1 — Diagnose premature finality</h3>
+<p>Use edges \(s\to q:10, s\to a:1, a\to q:1\), with \(q\) the goal. Trace UCS, explain why goal generation is not a stopping certificate, and identify the precise failed inequality if the last edge instead has cost \(-2\).</p>
+<details class="solution"><summary>Solution</summary><p>After removing \(s:0\), the frontier contains \(a:1\) and \(q:10\), regardless of which outgoing edge was generated first. Removing \(a\) improves \(q\) to \(1+1=2\); removing \(q:2\) then certifies the optimum. A generator-first return would output 10, confusing a discovered route with a settled label.</p><p>With \(a\to q=-2\), the optimal goal cost is \(-1\). This particular trace still happens to return it, because \(a\) is removed before \(q\); that does not validate the theorem for negative edges. The proof’s claim that a prefix cost does not exceed the completed path cost fails: the prefix to \(a\) costs 1, while the whole route costs \(-1\). Nonnegativity is a hypothesis of the guarantee, not a claim that every negative-edge instance must produce a wrong answer. The acyclic negative-edge counterexample in §6 supplies an actual failure.</p></details>
+
+<h3>Exercise 2 — Separate telescoping from correctness</h3>
+<p>A path has original edge costs \((1,2,4)\) and successive potentials \((6,5,5,0)\). Compute each reduced edge and recover the original total. Does the calculation justify UCS on the reduced graph? What changes if a second goal has potential 3 instead of 0?</p>
+<details class="solution"><summary>Solution</summary><p>The reduced edges are \(1+5-6=0\), \(2+5-5=2\), and \(4+0-5=-1\). Their total is 1; telescoping predicts \(7+0-6=1\), and recovery gives \(1+6-0=7\). The negative last edge violates consistency \(5\le4+0\), so permanent-settlement UCS on the reduced graph has no guarantee. The route-sum identity remains correct despite that failure.</p><p>A route to the second goal loses only \(6-3=3\), whereas a route to the zero-potential goal loses 6. Their reduced objectives differ by endpoint-dependent shifts. For example, an original cost-6 route to the second goal reduces to 3, while the cost-7 route above reduces to 1; transformed optimization now prefers the originally more expensive route. Equal goal potentials preserve route ordering; zero is a normalization, not the essential algebraic requirement.</p></details>
+
+<h3>Exercise 3 — An admissible heuristic that needs reopening</h3>
+<p>For the directed graph in §12, compute all future costs, show admissibility and the failed consistency edge, and trace the permanent-settlement and reopening outcomes. Explain why tree search and graph search differ here.</p>
+<details class="solution"><summary>Solution</summary><p>At \(q\), \(F=0\). At \(a\), the only continuation costs 3. At \(b\), the route through \(a\) costs \(1+3=4\), better than direct cost 100. At \(s_0\), the alternatives cost \(3+3=6\) and \(1+4=5\), so \(F=5\). The estimates \((0,0,4,0)\) are each no larger than those values. But on \(b\to a\), \(4\nleq1+0\); its reduced cost is \(-3\).</p><p>After \(s_0\), the queue has \(a:(g,f)=(3,3)\) and \(b:(1,5)\). Removing \(a\) generates \(q:(6,6)\). Removing \(b\) proposes \(a:(2,2)\) and \(q:101\). A no-reopen graph algorithm discards the improved closed \(a\) and returns 6. Reopening installs \(a:2\), removes it before the goal, and updates \(q:5\). The optimal path is \(s_0\to b\to a\to q\) with \(1+1+3=5\).</p><p>A path-record tree search can retain both routes ending at \(a\) as different nodes instead of permanently merging their state. Admissibility gives the optimal-path frontier-witness argument in either a suitable tree search or reopening graph search, subject to termination hypotheses. It does not validate a graph algorithm that permanently discards every later route to the same state. On infinite trees, repeated states and zero-cost chains introduce an additional completeness issue.</p></details>
+
+<h3>Exercise 4 — Prove and audit a relaxed heuristic</h3>
+<p>Derive the Manhattan heuristic for the robot map. Compute its value and the true remaining cost at \((2,4)\) and \((3,0)\). Then prove the ticket-projection heuristic consistent without assuming geometry.</p>
+<details class="solution"><summary>Solution</summary><p>In the wall-free grid, reaching the goal requires changing the row by \(|r-4|\) and the column by \(|c-4|\). Each move changes only one coordinate by one, so the sum is necessary. Performing those changes sequentially attains it; thus \(h=|r-4|+|c-4|\). An original route is relaxed-legal, giving admissibility, while the absolute-value triangle inequality gives \(h(s)\le1+h(t)\) on every real edge.</p><p>At \((2,4)\), \(h=2\). Its real route goes left four columns to \((2,0)\), down two to \((4,0)\), then right four to the goal, costing 10. At \((3,0)\), the row difference is 1 and column difference 4, so \(h=5\); moving down then right attains 5. The lower heuristic therefore ranks the first state as closer even though its true remaining cost is larger.</p><p>For tickets, project \((\ell,k)\) to \(\ell\). Every legal original walk or tram appears in the relaxed graph at the same fare. If an original edge costs \(c\) and maps from \(\ell\) to \(\ell'\), the relaxed optimum can take that edge and its optimal suffix: \(\bar F(\ell)\le c+\bar F(\ell')\). At location 10 the relaxed value is zero. Thus \(h(\ell,k)=\bar F(\ell)\) is consistent. The proof uses edge simulation and goal mapping; no coordinates or metric embedding are required.</p></details>
+
+<h3>Exercise 5 — Combine estimates without double counting</h3>
+<p>Prove that the maximum of finitely many consistent heuristics is consistent. Disprove the corresponding unrestricted sum claim. Give sufficient hypotheses that make a sum valid, and apply them to the eight-puzzle.</p>
+<details class="solution"><summary>Solution</summary><p>For an edge \(s\to t\), choose \(j\) with \(h_j(s)=\max_i h_i(s)\). Then \(\max_i h_i(s)=h_j(s)\le c+h_j(t)\le c+\max_i h_i(t)\). All components are zero at a goal, so the maximum is zero there. The maximizing index may differ at the destination; the final inequality explicitly handles that.</p><p>For a unit edge to a goal, two exact heuristics each give 1 at the source and 0 at the goal. Their sum gives 2, violating both admissibility and the unit edge inequality. To validate a sum, allocate each edge nonnegative component costs \(c_i\) with \(\sum_i c_i\le c\), require \(h_i(s)\le c_i+h_i(t)\), and require zero component goal values. Summing gives the desired inequality for total cost \(c\).</p><p>In the puzzle, allocate cost one to the numbered tile moved by a swap, and zero to the other numbered tiles. The moved tile’s Manhattan distance can decrease by at most one; unchanged tiles have zero change. Every real action’s allocated costs sum to one, and all numbered tile distances vanish at the goal. Thus the summed heuristic is consistent. Including the blank’s distance would allocate the same physical swap twice and invalidate this argument; no such term is included.</p></details>
+
+<h3>Exercise 6 — Design a fair implementation comparison</h3>
+<p>A relaxed-table construction costs 30 work units. A UCS query costs 12 units and an A* query using that table costs 8. Find the smallest positive integer query count giving a strict saving. Explain four reasons why “A* removed fewer states” is insufficient evidence of a better implementation, and specify tests for a graph program with zero cycles and unorderable states.</p>
+<details class="solution"><summary>Solution</summary><p>Compare \(30+8Q\) with \(12Q\). Strict saving requires \(30&lt;4Q\), hence \(Q&gt;7.5\); the smallest integer is 8. At 8, total A* work is 94 versus UCS work 96. At 7, it is 86 versus 84, so there is no saving. This assumes the table remains valid across all queries and the work units include the same categories for both methods.</p><p>First, preprocessing can dominate saved search work. Second, evaluating a heuristic or validating its contract can cost more per state than a zero estimate. Third, different equality ties can change removal counts even with the same heuristic. Fourth, a stale heap record is not a new state expansion; inconsistent definitions of the counter create a false advantage. Different graph construction, arithmetic widths, and changed goal/map queries add further accounting differences. The reopening audit in the supplied program performs an exact reverse solve before searching; comparing only its printed removals would hide that work.</p><p>For a finite zero cycle, test \(s\to a:0, a\to s:0, a\to q:1\). Require result cost 1, a finite path \(s,a,q\), and no equal-label reinsertions. For unorderable states, use three distinct plain objects, place two targets at equal priorities, and require the heap to succeed without comparing objects; a serial tie key should resolve them. Also test goal-on-removal with the 10-versus-2 fixture, unreachable goals returning <code>None</code>, negative or floating costs raising <code>ValueError</code>, inconsistent heuristics rejected in permanent-settlement mode, and unchanged input dictionaries after execution. These tests target independent failure modes, not only the demonstration’s ordinary result.</p></details></section>
+
+<section id="boundaries"><h2>21. What the guarantee covers</h2>
+<p>UCS certifies optimal past costs by nonnegative settlement. Consistent A* inherits that certificate through nonnegative reduced edges, while equal terminal potentials preserve the original minimizing routes. Admissibility alone requires an algorithm that retains the optimal-path frontier witness, such as graph search with reopening. A relaxation produces consistency only when its edge-cost and goal mappings satisfy the stated inequalities.</p>
+<p>The lecture supplies the sequence and its diamond, grid, line, and ticket examples. Their exact definitions are available in the pinned official <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/ucs_astar.py">UCS/A* module</a> and <a href="https://github.com/stanford-cs221/lectures/blob/f70063773fe9e04ddcbc248059501837053b810a/search.py">search-problem module</a>. The exact program, failure cases, finite-graph derivations, cost-partition proof, and six exercises are teaching constructions. The checked original papers establish historical procedure and theorem scope; no uninspected lecture animation or puzzle board is used as numerical evidence. More informative estimates may reduce forced expansions, but ties, evaluation cost, preprocessing, and model validity determine the practical outcome.</p></section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-05-search-problems-and-approximate-planning.html">Previous available chapter</a><a href="index.html">Lecture index</a><span>Further chapters pending</span></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

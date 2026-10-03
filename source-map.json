@@ -1344,6 +1344,1013 @@
       "chapter": "lecture-04-neural-networks-and-training.html",
       "video_id": "89NND-Ca0yY",
       "duration": 4306
+    },
+    {
+      "section": "motivation",
+      "start": 5.26,
+      "end": 316.88,
+      "lecture_material": "Prediction versus planning; learning and search as complementary computation.",
+      "research_extension": "No empirical claim or unverified essay content.",
+      "teaching_construction": "Deadline-sensitive constrained traveler; observations/objectives and representation backward refreshers.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Planning/search distinction, model-relative consequence of a computed optimum, persistent task."
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "problem",
+      "start": 316.88,
+      "end": 658.96,
+      "lecture_material": "Search interface, start/goal/successors/cost; walking and tram case.",
+      "research_extension": "Pinned official search.py problem interface read.",
+      "teaching_construction": "Complete versus partial paths, additive minutes, start-goal/dead-end contracts; explicit route validation and all-walk nine-minute correction.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Finite deterministic model, goals absorbing, complete path and additive objective."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original checked against official",
+          "claim": "Legal/illegal routes, nine-minute all-walk count and six-minute complete path."
+        }
+      ],
+      "evidence_class": "definition; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "state",
+      "start": 658.96,
+      "end": 1233.2,
+      "lecture_material": "State sufficiency, resource/history restrictions, ticket and last-action examples.",
+      "research_extension": "No independent empirical result.",
+      "teaching_construction": "Composite state transitions/terminal set, sufficient history equivalence proof, clock counterexample and suffix costs5/2/5.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "State versus path record and composite resource/last-action state."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Matching terminal status/legal actions/costs/compressed successors implies equal finite-horizon futures by induction."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Exact5/2/5 constrained suffix fixture; not a measured travel result."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "recurrence",
+      "start": 1233.2,
+      "end": 1629.26,
+      "lecture_material": "Future-cost first-edge recurrence and worked backward street example.",
+      "research_extension": "Official recurrence checked; no historical original-content attribution.",
+      "teaching_construction": "Finite-DAG order and full lower-bound/attainment induction; infinity conventions, negative edge, witness/tie distinction.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "DAG, future value, unreachable infinity, goal stopping, topological ordering."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Finite-DAG first-edge optimality and attainment, including finite negative edges; backpointer reconstruction."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Destination4 values0/1/2/3 and negative-DAG cost\u22122."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "exhaustive",
+      "start": 1629.26,
+      "end": 1999.22,
+      "lecture_material": "Recursive exhaustive traversal, repeated states, n4/n10/n17 examples and complexity discussion.",
+      "research_extension": "Actual pinned exhaustive source inspected; recorded asymptotic intuition bounded.",
+      "teaching_construction": "Exact prefix visits9/59/237; explicit branching/depth bound, layered-DAG exponential unfolding and implementation-specific storage limits.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Exhaustive entered-prefix traversal versus distinct problem states."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Branching/depth geometric bound and layered DAG path/visit formulas; streaming recursion workspace under explicit storage assumptions."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Finite travel costs3/6/8 and visits9/59/237; own immutable-prefix implementation is not claimed depth-only storage."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "cycles",
+      "start": 1999.22,
+      "end": 2240.58,
+      "lecture_material": "Cyclic recursive evaluation and action-count augmentation/truncation.",
+      "research_extension": "Original algorithm audit; historical Bellman work unavailable and not cited as mathematical proof.",
+      "teaching_construction": "Zero-cycle nonunique fixed point, bounded-horizon recurrence, simple-path sufficient horizon and relevant negative-cycle infimum.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Zero-loop equation does not uniquely select path value; finite-horizon recurrence terminates; nonnegative cycle deletion yields optimal simple path; relevant negative cycle gives \u2212infinity."
+        },
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Action horizon changes feasible completions; cycle evaluation distinguished from problem definition."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Travel10 fails under horizon3; finite cyclic beam/sampling failures and DAG-cycle rejection."
+        }
+      ],
+      "evidence_class": "theorem; definition; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "cache",
+      "start": 2240.58,
+      "end": 2602.18,
+      "lecture_material": "Caching solved futures, memoization mechanics and Bellman name mentioned by speaker.",
+      "research_extension": "Pinned official dynamic_programming read; no certification of historical naming.",
+      "teaching_construction": "Scalar values plus one backpointer, exact ties and alternative six-minute routes, two-ticket/no-consecutive optimum9.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Memoization and sufficient-state future cache versus prefix cost."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Acyclic cached recurrence and reverse topological evaluation compute same optimal values; consistent backpointers recover a complete witness."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Exact destination10/17 routes and constrained17 value9; no secondary path-length objective inferred."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "memory",
+      "start": 2602.18,
+      "end": 3004.51,
+      "lecture_material": "Larger examples, memory limits and benefit from histories merging into states.",
+      "research_extension": "Official whole-suffix solution cache and list-copy behavior inspected at exact source lines364\u2013410.",
+      "teaching_construction": "Scalar O(V+E) work/O(V) auxiliary entries under unit-cost assumptions, full-suffix chain quadratic slots, state-grid bound and rational/representation qualifications.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Abstract scalar-DAG work/storage and sumV(V\u22121)/2 full-suffix references; reachable resource-state grid bounded by2n(K+1)."
+        },
+        {
+          "class": "engineering check",
+          "origin": "verified official source and original",
+          "claim": "Official full solution suffix representation incurs chain quadratic copying; no claim of measured bytes or timings."
+        },
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Input versus auxiliary storage, states/records/references/bytes and constant-time abstraction separated."
+        }
+      ],
+      "evidence_class": "theorem; engineering check; definition",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "sampling",
+      "start": 3004.51,
+      "end": 3485.02,
+      "lecture_material": "Policies/uniform action rollout, best-of-n, cap, asymptotic support, parallelism and different lengths.",
+      "research_extension": "Actual official completion boundary inspected; no stochastic performance study claimed.",
+      "teaching_construction": "Explicit complete-only acceptance, fixed IID event and miss probability, rare probability budget, perfect-correlation and horizon counterexamples, pseudorandom scope.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Conditional policy normalization, supported complete rollouts, best observed answer and failure."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "IID miss power and logarithmic integer budget for0<q<1; q0/support/correlation boundaries; minimum complete cost order independence with tie caveat."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "70-digit rare-event miss and neighboring budget boundary; deterministic seeded trace is not an independence certificate."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "beam",
+      "start": 3485.02,
+      "end": 4036.32,
+      "lecture_material": "Beam expansion/pruning, greedy-width intuition, finished records, stable ties and horizon implementation.",
+      "research_extension": "Pinned beam_search inspected at505\u2013532.",
+      "teaching_construction": "Precisely scoped depth-synchronous beam, greedy failure101versus2, pool/ranking/path-copy operation bounds.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Finite width/horizon, full path records, stable cost ranking and completed-slot convention."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Prefix-cost greediness does not imply global optimality; candidate-pool/ranking bound under stated assumptions."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Finite101versus2 counterexample and completion/failure/start-goal program behavior."
+        }
+      ],
+      "evidence_class": "definition; theorem; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "beam-limits",
+      "start": 4036.32,
+      "end": 4279.36,
+      "lecture_material": "Finished-slot budget, cost pruning, infinite-width intuition and informal particle-filter analogy.",
+      "research_extension": "No imported particle-filter guarantee.",
+      "teaching_construction": "Explicit nonmonotonic B1cost5/B2cost102 graph, finite-horizon completeness without pruning, negative-cost prefix-pruning failure and variant distinctions.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Nonnegative finite-width nonmonotonicity counterexample; finite-horizon unpruned completeness; nonnegative future lower bound needed for incumbent pruning."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Exact width1/2 traces5/102 and negative suffix example10\u221220."
+        },
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Archived incumbents, finished beam slots and probabilistic particle schemes are different contracts."
+        }
+      ],
+      "evidence_class": "theorem; engineering check; definition",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "tokens",
+      "start": 4279.36,
+      "end": 4513.04,
+      "lecture_material": "Prompt/prefix/next-token search, negative-log cost, verifier and cited Large Language Monkeys.",
+      "research_extension": "Actually checked Monkeys v1 pages2\u20134/9\u201312 and visuals2/10: generation/selection, bounded reported MATH comparison, pool estimator and verification scope.",
+      "teaching_construction": "Fixed token-ID/EOS model, chain-rule derivation and units, hard validity versus likelihood, conditional pool counting and rare-correct majority counterexample.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Ordered token-prefix/prompt conditioning/EOS, positive-support surprisal nats and hard feasible verifier."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Product-to-log sum, fixed-pool without-replacement coverage formula; IID majority versus oracle coverage counterexample."
+        },
+        {
+          "class": "empirical result",
+          "origin": "verified primary",
+          "claim": "Monkeys v1 page3 Llama-3-8B-Instruct/MATH reported coverage79.8\u219295.3 at100\u219210000 versus selection38.7\u219239.8; Figure7's bounded generation/selection gap."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Exact pool5/2 values and independently computed q0.01 oracle examples; not new model results."
+        }
+      ],
+      "evidence_class": "definition; theorem; empirical result; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "demo-audit",
+      "start": 4513.04,
+      "end": 4778.78,
+      "lecture_material": "Illustrative Qwen arithmetic completion, top5 support, terminal reward, policy and duplicate candidates.",
+      "research_extension": "Actual official source535\u2013610 checked for string re-tokenization, top5, closing parenthesis/eval, reward and shaped-policy code; no model execution.",
+      "teaching_construction": "Hard-versus-soft objective, bonus counterexample, local policy reweighting derivation, safe strict JSON answer schema and binary64 limit.",
+      "claim_provenance": [
+        {
+          "class": "engineering check",
+          "origin": "verified official source",
+          "claim": "Pinned source implementation audited; no source model or eval executed, no current model-quality claim."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Finite bonus lacks universal hard-acceptance guarantee; shaped softmax policy equals restrictedp timesexpRv normalized."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Valid200\u2212100loses to invalid1;2/3bonus-reweighting high-precision value and binary64 rounding; actual safe JSON finite boundaries."
+        },
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Hard exact answer24 schema and limited verifier scope; policy/transition/support/objective distinguished."
+        }
+      ],
+      "evidence_class": "engineering check; theorem; definition",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "synthesis",
+      "start": 4778.78,
+      "end": 4898.06,
+      "lecture_material": "Four-method synthesis, learned costs with search, preview of cyclic algorithms.",
+      "research_extension": "No new measured result.",
+      "teaching_construction": "Model/support/objective/algorithm guarantee table and scoped proposed evaluation quantities.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "lecture and original",
+          "claim": "Model correctness, exact optimum, observed sample/beam result and future chapter conditions separated."
+        },
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Increasing trials/width cannot recover excluded support or missing state information under an unchanged model."
+        }
+      ],
+      "evidence_class": "definition; theorem",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "No source performance experiment.",
+      "teaching_construction": "Complete original stdlib exact finite graph implementation, declared immutable snapshots/domain/resource failures, actual embedded code/stdout.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Exact program input/output/effect/failure contracts and operational bounds."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Actual deterministic program/stdout, independent author-oracle comparisons and invalid/support/verifier cases; not independent editorial acceptance."
+        }
+      ],
+      "evidence_class": "definition; engineering check",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "No new research experiment.",
+      "teaching_construction": "Six complete mixed state-equivalence/proof/resource/sampling/beam/verifier problems and solutions.",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "origin": "original",
+          "claim": "Solutions1/2/3/4/5/6 mathematical inductions, counting, probability assumptions and counterexamples."
+        },
+        {
+          "class": "engineering check",
+          "origin": "original",
+          "claim": "Finite suffix/route/cost/visit/neighboring-budget/subset/beam/verifier arithmetic independently author checked."
+        },
+        {
+          "class": "definition",
+          "origin": "original",
+          "claim": "Exercise6 proposed frozen-budget evaluation protocol, with no empirical result claimed."
+        }
+      ],
+      "evidence_class": "theorem; engineering check; definition",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "boundaries",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": "Checked pinned official and Monkeys v1 attribution/limits.",
+      "teaching_construction": "Evidence scope, machine-transcription/finite-model/hardware/verification limits and conventional primary references.",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "origin": "original and verified primary",
+          "claim": "Original/recorded/primary evidence boundaries; no human/audio/model/hardware or universal verifier certificate."
+        }
+      ],
+      "evidence_class": "definition",
+      "chapter": "lecture-05-search-problems-and-approximate-planning.html",
+      "video_id": "fPESauMaJYA",
+      "duration": 4904
+    },
+    {
+      "section": "case",
+      "start": 5.26,
+      "end": 151.76,
+      "lecture_material": "Search recap, exact versus approximate methods, cycles, UCS/A* agenda.",
+      "research_extension": "No imported primary theorem.",
+      "teaching_construction": "Consequential delivery robot; fixed known costs versus prediction and stochastic execution.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Deterministic planning objective and chapter scope",
+          "origin": "Recording topic plus original running case"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "model",
+      "start": 151.76,
+      "end": 441.34,
+      "lecture_material": "Past/future costs, cyclic recursion ordering problem, Dijkstra and negative-cost alternative mention.",
+      "research_extension": "1959 publication identity checked separately in Dijkstra PDF1.",
+      "teaching_construction": "Finite state/action/cost domains; cycle removal and attainment; self-loop fixed-point ambiguity.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "State, path and best past/future costs",
+          "origin": "Recording definitions with explicit original domains"
+        },
+        {
+          "class": "theorem",
+          "claim": "Nonnegative cycle removal gives a finite simple-path optimum when reachable",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Zero self-loop recurrence admits multiple algebraic fixed points",
+          "origin": "Original counterexample"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "ucs",
+      "start": 441.34,
+      "end": 719.54,
+      "lecture_material": "Explored/frontier/unseen, priority queue, relaxation, backpointers, start initialization and minimum removal.",
+      "research_extension": "Dijkstra Problem2 PDF2\u20133: original three-set branch/predecessor construction.",
+      "teaching_construction": "Goal-on-removal counterexample and label upper-bound interpretation.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "UCS procedure and historical predecessor mechanism",
+          "origin": "Recording plus original Dijkstra pp2\u20133"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Generated goal10 versus settled goal2",
+          "origin": "Original finite case"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "trace",
+      "start": 719.54,
+      "end": 1087.46,
+      "lecture_material": "A/B/C/D complete decreased-priority trace and cost3 route.",
+      "research_extension": "Official pinned ucs_astar.py supplies exact edge definitions.",
+      "teaching_construction": "Explicit table, changed predecessors, stale-heap distinction.",
+      "evidence_class": "engineering check",
+      "claim_provenance": [
+        {
+          "class": "engineering check",
+          "claim": "Diamond labels0/1/2/3 and reconstructed route",
+          "origin": "Recorded fixture, reimplemented and executed originally"
+        },
+        {
+          "class": "definition",
+          "claim": "Lazy heap stale-record convention",
+          "origin": "Original implementation"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "grid",
+      "start": 1087.46,
+      "end": 1328.1,
+      "lecture_material": "Grid cost14 example, larger visualization and uniform expansion motivation.",
+      "research_extension": "Official pinned ucs_astar.py exact five-row map and legal moves; no video-frame claim.",
+      "teaching_construction": "Coordinates, complete compressed route and forced corridors.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Exact recorded-code map reconstructed in ASCII",
+          "origin": "Official module"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Route14 and six-move lower-bound gap",
+          "origin": "Original program and arithmetic"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Larger animation motivates directional guidance",
+          "origin": "Attributed recording illustration, not remeasured"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "settlement",
+      "start": 1328.1,
+      "end": 1794.72,
+      "lecture_material": "Nonnegative-cost condition, induction, first frontier crossing and inequality chain.",
+      "research_extension": "Dijkstra source procedure provides historical context, not modern heap bound.",
+      "teaching_construction": "Full finite-graph proof; goal-set argument; negative-edge DAG counterexample; finite/infinite zero-cycle distinction.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "UCS settlement and goal optimality under finite/nonnegative assumptions",
+          "origin": "Recording proof expanded with original hinges"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Negative-edge failure despite acyclicity; finite zero cycle succeeds",
+          "origin": "Original cases"
+        },
+        {
+          "class": "theorem",
+          "claim": "Infinite zero chain defeats finite-cost goal; positive lower bound/finite branching suffices for UCS",
+          "origin": "Original assumption analysis"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "astar",
+      "start": 1794.72,
+      "end": 2065.02,
+      "lecture_material": "Ideal past+future priority, computable heuristic motivation.",
+      "research_extension": "No separate external result.",
+      "teaching_construction": "Finite signed potential domain, equal units, provisional-versus-optimal labels.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "f=g+h and heuristic domain",
+          "origin": "Recording mechanism plus explicit original scope"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "reweight",
+      "start": 2065.02,
+      "end": 2300.78,
+      "lecture_material": "Reduced edge cost, line0\u21922 and h=2\u2212s directional example.",
+      "research_extension": "Official pinned line state range verifies state3 exception to exact future-cost interpretation.",
+      "teaching_construction": "Right0/left2 arithmetic; signed admissible estimate at state3.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Potential/reduced-cost mechanism",
+          "origin": "Recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Line reduced costs and h(3)=\u22121 versus F(3)=1",
+          "origin": "Original arithmetic against official state range"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "bookkeeping",
+      "start": 2300.78,
+      "end": 2691.95,
+      "lecture_material": "Modified wrapper, original-cost recovery and negative-cost/heuristic Q&A.",
+      "research_extension": "Official wrapper used for conceptual context only, not copied implementation.",
+      "teaching_construction": "Prefix telescoping and constant queue offset; reduced versus actual travel time.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "g'=g+h\u2212h(start), equivalent priority ordering",
+          "origin": "Original derivation of recorded mechanism"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Reduced0 recovers original2",
+          "origin": "Original line arithmetic"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "consistency",
+      "start": 2692.78,
+      "end": 2917.36,
+      "lecture_material": "Bad heuristic, nonnegative reduced edges, zero terminal estimate and correctness setup.",
+      "research_extension": "Hart PDF3 reopening variant; PDF5 Figure2/consistency and PDF5\u20136 closed-label lemma.",
+      "teaching_construction": "Finite consistent A* inheritance; edge-local Manhattan check; variant separation.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Consistency and historical reopen procedure",
+          "origin": "Recording definition plus Hart pp3/5"
+        },
+        {
+          "class": "theorem",
+          "claim": "Consistency makes reduced edges nonnegative and permanent settlement valid",
+          "origin": "Original finite proof; Hart pp5\u20136 corroboration"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "telescoping",
+      "start": 2917.36,
+      "end": 3190.86,
+      "lecture_material": "Telescoping complete route sums, terminal values and original-cost bookkeeping.",
+      "research_extension": "No separate imported result.",
+      "teaching_construction": "Full sum cancellation; separate objective preservation and valid UCS; unequal-goal and negative-reduced-edge counterexamples.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Equal terminal potentials preserve minimizing complete routes",
+          "origin": "Original expansion of recording proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Costs(1,2,4)/potentials(6,5,5,0) and multiple-goal failure",
+          "origin": "Original finite cases"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "admissibility",
+      "start": 3190.93,
+      "end": 3409.12,
+      "lecture_material": "Perfect/zero estimates, efficiency, admissibility versus consistency, graph/tree discussion.",
+      "research_extension": "Hart PDF2/4 theorem hypotheses, PDF6\u20137 information/tie-qualified comparisons.",
+      "teaching_construction": "Consistency\u21d2admissibility; explicit6-versus5 reopening failure; optimal-prefix witness/finite termination; strict priority threshold and perfect tie plateau.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Admissibility and algorithm variant scope",
+          "origin": "Recording plus Hart"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite reopening optimality/termination; consistency\u21d2admissibility; strict expansion thresholds",
+          "origin": "Original bounded proofs"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Admissible inconsistent fixture and perfect-heuristic tie plateau",
+          "origin": "Original counterexamples"
+        },
+        {
+          "class": "theorem",
+          "claim": "Historical optimal-efficiency comparisons are conditional on consistency/information/tie hypotheses",
+          "origin": "Hart pp6\u20137, not universal runtime"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "manhattan",
+      "start": 3409.12,
+      "end": 3745.74,
+      "lecture_material": "Remove walls, Manhattan8, imperfect ranking and small-demo limited speedup.",
+      "research_extension": "Exact grid rows/moves grounded in pinned official module; no animation measurement.",
+      "teaching_construction": "Constructive relaxed-distance proof; true10/h2 versus true5/h5; FIFO17/17 counterexample to guaranteed saving.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Wall-free relaxation",
+          "origin": "Recording mechanism"
+        },
+        {
+          "class": "theorem",
+          "claim": "Manhattan optimum and consistency",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Grid cost14/heuristic8, ranking failure and17/17 removals",
+          "origin": "Original executed fixture"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "projection",
+      "start": 3745.74,
+      "end": 4020.05,
+      "lecture_material": "Ticket removal, projected location state, relaxed table at4=3 and reported23/8/10 counts.",
+      "research_extension": "Pinned search.py exact walk/tram fares and ticket state; pinned ucs_astar.py example.",
+      "teaching_construction": "Projection/fare distinction; routes3/4/6 and zero-ticket future6; honest instance accounting.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Resource-state projection and unchanged tram fare",
+          "origin": "Recording plus official source"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Relaxed F(4)=3 and original feasible route6",
+          "origin": "Original arithmetic"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Recording reports23 original,8 guided,10 preprocessing states",
+          "origin": "Attributed demonstrated instance, not a general benchmark"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "reverse",
+      "start": 4020.05,
+      "end": 4361.12,
+      "lecture_material": "Geometry versus abstraction Q&A, reverse UCS in cycles, preprocessing/query tradeoff.",
+      "research_extension": "Hart PDF8 computational cost discussion.",
+      "teaching_construction": "Multi-goal reverse-path proof, unreachable omitted entries, lazy-heap arithmetic/storage scope, amortization inequality.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Full multi-source reverse procedure and accounting convention",
+          "origin": "Recording topic expanded explicitly"
+        },
+        {
+          "class": "theorem",
+          "claim": "Reverse costs equal future costs; heap operation bound and amortization condition",
+          "origin": "Original derivations"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Heuristic calculation can outweigh saved expansions",
+          "origin": "Hart p8 analytical discussion, not measured benchmark"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "tiles",
+      "start": 4361.12,
+      "end": 4451.31,
+      "lecture_material": "Independent tile-motion relaxation and summed displacement.",
+      "research_extension": "Official module supplies mechanism; recording board not inspected or used numerically.",
+      "teaching_construction": "Explicit new board, exclude blank, per-move one-tile proof.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Eight-puzzle state/actions and independent motion",
+          "origin": "Recording mechanism"
+        },
+        {
+          "class": "theorem",
+          "claim": "Numbered-tile Manhattan sum consistent under unit swap cost",
+          "origin": "Original proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Fully specified original two-move board",
+          "origin": "Original case"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "relaxation-proof",
+      "start": 4453.1,
+      "end": 4697.28,
+      "lecture_material": "Removing constraints/lowering costs, relaxed optimum triangle inequality and structural ease.",
+      "research_extension": "No separate imported theorem.",
+      "teaching_construction": "Explicit projection/edge simulation/goal assumptions; finite future values; extra goals; ease and deletion counter-boundaries.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Finite exact abstract future cost gives consistency under edge simulation and goal mapping",
+          "origin": "Recording theorem with original stated hypotheses"
+        },
+        {
+          "class": "definition",
+          "claim": "Constraint removal is edge/cost preservation; computational ease separate",
+          "origin": "Original interpretation"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "combination",
+      "start": 4697.28,
+      "end": 4785.94,
+      "lecture_material": "Max combination theorem, chapter summary, stochastic-outcomes preview.",
+      "research_extension": "No separate imported theorem.",
+      "teaching_construction": "Full max proof, duplicate-edge sum failure and cost-partition proof; strict-threshold versus runtime distinction.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Max consistency and sufficient cost-partition sum condition",
+          "origin": "Original proofs; max theorem proposed in recording"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Two exact unit-edge estimates sum to invalid2",
+          "origin": "Original counterexample"
+        },
+        {
+          "class": "definition",
+          "claim": "Deterministic route versus stochastic-policy scope",
+          "origin": "Recording transition preview"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate recording span: supporting original material.",
+      "research_extension": "No framework/API dependency.",
+      "teaching_construction": "Complete exact-integer graph program, contracts, safe rejection, reverse admissibility audit, exact stdout.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Supported integer/stable-state/ValueError/no-side-effect contract",
+          "origin": "Original implementation"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Program execution and exhaustive finite/invalid-input checks",
+          "origin": "Original author validation, not independent acceptance"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate recording span: supporting original material.",
+      "research_extension": "Source mechanisms referenced in exposition.",
+      "teaching_construction": "Six fully reasoned mixed derivation/counterexample/numerical/implementation solutions.",
+      "evidence_class": "theorem",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Exercise conditional proof steps",
+          "origin": "Original solutions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Finite trace, telescoping, grid, reopening and amortization arithmetic",
+          "origin": "Original solutions"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
+    },
+    {
+      "section": "boundaries",
+      "start": null,
+      "end": null,
+      "lecture_material": "No separate recording span: original synthesis of covered topics.",
+      "research_extension": "Retained original-paper limits and official source context.",
+      "teaching_construction": "Model, computation and source scope separated.",
+      "evidence_class": "definition",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Guarantee and attribution boundaries",
+          "origin": "Original synthesis"
+        }
+      ],
+      "chapter": "lecture-06-uniform-cost-and-a-star-search.html",
+      "video_id": "4Iu4KPVbnAY",
+      "duration": 4792
     }
   ]
 }

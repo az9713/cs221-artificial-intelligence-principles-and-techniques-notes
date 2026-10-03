@@ -4,10 +4,12 @@ Independent, enhanced textbook based on 20 selected Autumn 2025 recordings.
 
 ## Current local edition
 
-Chapters 1–4 are independently reviewed and locally validated. Chapters 5–20 are in development. All twenty recordings and local machine transcripts are available; machine transcription is not publisher-authored captioning.
+Chapters1-6 are independently reviewed and locally validated. Chapters7-20 are in development. All twenty recordings and local machine transcripts are available; machine transcription is not publisher-authored captioning.
 
 Open `index.html` for the reader. Run `python numerical_lab.py` for Chapter 1's numerical checks; NumPy checks are optional when NumPy is installed. The HTML reader's laboratory is currently a general companion scaffold; the full course laboratory and learning route remain in development.
 
 This is a local working edition. The full book is not complete, and CS221 publication is not authorized. Automated reader checks do not constitute a human keyboard or screen-reader audit. No hardware speed or empirical robot-performance benchmark is claimed.
 
 Original chapter programs: `python programs/chapter02.py`, `python programs/chapter03.py`, and `python programs/chapter04.py`. These standard-library examples are checked teaching constructions, not deployment benchmarks.
+
+Search chapter programs: `python programs/chapter05.py` and `python programs/chapter06.py`. Their exact finite examples are checked teaching constructions.
