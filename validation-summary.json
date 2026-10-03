@@ -1,9 +1,9 @@
 {
-  "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
+  "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
   "course": "CS221",
-  "chapter_count": 11,
+  "chapter_count": 12,
   "selected_recordings": 20,
-  "status": "Eleven independently reviewed chapters locally validated; full course in development",
+  "status": "Twelve independently reviewed chapters locally validated; full course in development",
   "course_complete": false,
   "human_accessibility": "not performed",
   "reader_report": "reader-validation.json",
@@ -110,7 +110,7 @@
       "CODE": "4d2a6a4e419ffbf2858d3f450988b072012f9ec1963db3ff2dec1ba2a35ce742",
       "HTML": "e0821e393216e5c4a9a88fd8ec84fb0b3874ba9e1bb2d0f88abf9d4b622412a6",
       "review": "reviews/lecture-10-round2.md",
-      "before_HTML": "620841efe18a06751eba6c0697a8d72d42cddf5ba997bb9d98e7021c5edb7a47",
+      "before_HTML": "d803a5190a7b9fc389b13ed3947c652dc1bf7e491100bde5e1355d7d9e5c8cbd",
       "review_sha256": "246badaf139e85b8c7c2b33d882e71b01c6102d4a31f00889443380555a2ecd7",
       "path": "lecture-10-games-opponent-models-and-search.html",
       "after_HTML": "d803a5190a7b9fc389b13ed3947c652dc1bf7e491100bde5e1355d7d9e5c8cbd"
@@ -121,14 +121,25 @@
       "CODE": "678724cc79aaadb945801bd455f4411dab756858e69a1d19970e018b3c44edf9",
       "HTML": "20e41a97ed246b67d02c591475ac16741b5d771c38dfeca55ad13d08861d6332",
       "review": "reviews/lecture-11-round2.md",
-      "before_HTML": "20e41a97ed246b67d02c591475ac16741b5d771c38dfeca55ad13d08861d6332",
+      "before_HTML": "8c27728f3f8b63543f25740cf3b1e21484aeacc4865bfbeda47a3da15f5ef4ce",
       "review_sha256": "da4e5a0527b1b9310683721e0167238dbc948d1305ce68064de8e095eeb0de97",
       "path": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
-      "after_HTML": "8c27728f3f8b63543f25740cf3b1e21484aeacc4865bfbeda47a3da15f5ef4ce"
+      "after_HTML": "ddd99cd1b1900ad216f253739616625ee53662eb85d56eb39e63d6b1571e264e"
+    },
+    "12": {
+      "BODY": "82130fa1990fad90aed47dfd71540f66046876acbc3fa4c1789e464be60ee9ad",
+      "META": "cf6f442084bfe41557882906841bcad57a8c0fadbeef20ee2bb120242b6e5e22",
+      "CODE": "e15e74642f7b2231e9652eac3bf4d24f6de1aaa3304c3d17558e22b981bdfb3a",
+      "HTML": "0327786a7d3aa54d47b48d4db62291e55b596bd7e7faadf331fdf15098262757",
+      "review": "reviews/lecture-12-round2.md",
+      "before_HTML": "0327786a7d3aa54d47b48d4db62291e55b596bd7e7faadf331fdf15098262757",
+      "review_sha256": "c295c6e6c404ec1287ba533927cb348f9f719f285cc6e71c12a8b2e02d6afabf",
+      "path": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "after_HTML": "e05c9347f514952636c0a3e413796e24a41f3ac5147d849f8de43ee56bf918ae"
     }
   },
   "limits": [
-    "Chapters12-20, cumulative course lab, independent learning-route review and book-wide review pending",
+    "Chapters13-20, cumulative course lab, independent learning-route review and book-wide review pending",
     "No publication performed"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-07-markov-decision-processes.html",
-  "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
+  "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
   "status": "independently reviewed and locally validated chapter",
   "accepted_scientific_body_sha256": "2c45fed358afacdf99595dd58995d41f8147bdb8d370b07be745c78025b4f3aa",
   "accepted_metadata_sha256": "e2eabcefbc817001beffc1b2ac334f85140ec10915d7adf53e3c6ff63bf74169",
@@ -8,7 +8,7 @@
   "integrated_html_sha256": "aca6bab290cb8401b21f17861689c899fe46379459b3fa565a95762b431141ca",
   "worked_solutions": 6,
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-11 reader scope",
+    "status": "passed within accepted Chapters1-12 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   },

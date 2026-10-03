@@ -1,12 +1,12 @@
 {
   "course": "CS221",
-  "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
-  "scope": "Accepted Chapters1-11 and four reader support pages; full20chapter course incomplete",
+  "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
+  "scope": "Accepted Chapters1-12 and four reader support pages; full20chapter course incomplete",
   "static": {
     "status": "passed",
-    "html_files": 16,
-    "local_links_checked": 190,
-    "timestamps_checked": 139,
+    "html_files": 17,
+    "local_links_checked": 204,
+    "timestamps_checked": 153,
     "chapter_pages_with_dollar_math": 0,
     "failures": [],
     "warnings": []
@@ -228,6 +228,24 @@
         "controls": true,
         "emptyToc": false,
         "file": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
+        "viewport": 390
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 351,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+        "viewport": 1280
+      },
+      {
+        "mathErrors": 0,
+        "mathNodes": 351,
+        "horizontalOverflow": false,
+        "controls": true,
+        "emptyToc": false,
+        "file": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
         "viewport": 390
       },
       {

@@ -1,11 +1,11 @@
 {
-  "chapter": "lecture-10-games-opponent-models-and-search.html",
+  "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
   "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
   "status": "independently reviewed and locally validated chapter",
-  "accepted_scientific_body_sha256": "dacecac97ded7a9a05b6c7a584c86f2fd71134ec432e90656d2bf9ab6fe8093a",
-  "accepted_metadata_sha256": "f81f795b23400104f0640dacc7e1746bf1dee6eee63f648d5e20fec0661454a0",
-  "accepted_program_sha256": "4d2a6a4e419ffbf2858d3f450988b072012f9ec1963db3ff2dec1ba2a35ce742",
-  "integrated_html_sha256": "d803a5190a7b9fc389b13ed3947c652dc1bf7e491100bde5e1355d7d9e5c8cbd",
+  "accepted_scientific_body_sha256": "82130fa1990fad90aed47dfd71540f66046876acbc3fa4c1789e464be60ee9ad",
+  "accepted_metadata_sha256": "cf6f442084bfe41557882906841bcad57a8c0fadbeef20ee2bb120242b6e5e22",
+  "accepted_program_sha256": "e15e74642f7b2231e9652eac3bf4d24f6de1aaa3304c3d17558e22b981bdfb3a",
+  "integrated_html_sha256": "e05c9347f514952636c0a3e413796e24a41f3ac5147d849f8de43ee56bf918ae",
   "worked_solutions": 6,
   "current_reader_gate": {
     "status": "passed within accepted Chapters1-12 reader scope",
@@ -23,7 +23,8 @@
     "gate_6b": "accepted",
     "passes_7_8": "accepted",
     "blocking_defects": 0,
-    "review_report_sha256": "246badaf139e85b8c7c2b33d882e71b01c6102d4a31f00889443380555a2ecd7",
-    "independent_numerical_checks": 11815
+    "review_report_sha256": "c295c6e6c404ec1287ba533927cb348f9f719f285cc6e71c12a8b2e02d6afabf",
+    "independent_numerical_checks": 7305,
+    "independent_bounded_closure_checks": 108
   }
 }

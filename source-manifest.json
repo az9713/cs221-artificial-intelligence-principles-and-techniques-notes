@@ -5,7 +5,7 @@
   "playlist": "PLoROMvodv4rMeDqwS1yFl3j3sR_-MQNEN",
   "format": "HTML",
   "publication": "local only; publication not authorized for CS221",
-  "status": "20 recordings and machine transcripts available; Chapters1-11 independently reviewed and locally validated; remaining9chapters in development",
+  "status": "20 recordings and machine transcripts available; Chapters1-12 independently reviewed and locally validated; remaining8chapters in development",
   "lectures": [
     {
       "id": "yaLEGZuIIgE",
@@ -316,7 +316,7 @@
       "duration": 4656,
       "url": "https://www.youtube.com/watch?v=ec2rCf4iIqU",
       "chapter_order": 12,
-      "chapter_status": "not drafted",
+      "chapter_status": "reviewed and locally validated",
       "transcript_status": "local machine transcription complete; not publisher captions",
       "audio_status": "downloaded",
       "audio_filename": "audio.webm",

@@ -4617,6 +4617,465 @@
       "chapter": "lecture-11-learning-game-values-and-simultaneous-decisions.html",
       "video_id": "9CKRoKFdS5Y",
       "duration": 4428
+    },
+    {
+      "section": "model-information",
+      "start": 5.26,
+      "end": 290.49,
+      "lecture_material": "model-free and model-based bridge",
+      "research_extension": null,
+      "teaching_construction": "Persistent stipulated alarm task and conditional model/value distinctions",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Policy/value/model distinctions and stipulated binary alarm variables",
+          "origin": "Recording bridge with original teaching definitions"
+        },
+        {
+          "class": "speaker judgment",
+          "claim": "Model-based representations can support reward changes when the transition law is unchanged; model estimation and planning have costs",
+          "origin": "Recording motivation, explicitly scoped in the prose"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "joint-table",
+      "start": 290.49,
+      "end": 572.91,
+      "lecture_material": "finite random variables and joint table",
+      "research_extension": null,
+      "teaching_construction": "Exact mass/domain/assignment/axis contracts and full-table storage count",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite domains, assignments, nonnegative normalized joint mass and semantic axes",
+          "origin": "Recording definitions with explicit original contracts"
+        },
+        {
+          "class": "theorem",
+          "claim": "An unrestricted table over d binary variables contains 2^d assignments",
+          "origin": "Original finite counting argument"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Weather masses 1/5,2/25,7/10,1/50 sum to one",
+          "origin": "Recording example recomputed exactly"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "marginalization",
+      "start": 572.91,
+      "end": 807.34,
+      "lecture_material": "marginalization and tensor contraction",
+      "research_extension": null,
+      "teaching_construction": "Finite sums, labeled axes and lost-joint-information boundary",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Marginalization sums assignments over omitted axes",
+          "origin": "Recording mechanism"
+        },
+        {
+          "class": "theorem",
+          "claim": "Finite marginal sums can be rearranged; a single marginal does not determine the general joint",
+          "origin": "Original finite-sum and information argument"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Weather sunshine marginal is (7/25,18/25)",
+          "origin": "Recording example recomputed exactly"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "conditioning",
+      "start": 807.34,
+      "end": 1257.86,
+      "lecture_material": "conditioning and evidence",
+      "research_extension": null,
+      "teaching_construction": "Exact weather normalization, indicator contraction and zero-event failure",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Positive-event conditioning selects evidence and divides by its total mass; impossible finite evidence has no ratio conditional",
+          "origin": "Recording mechanism with explicit domain restriction"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Weather evidence probability 1/10 and sunshine conditional (4/5,1/5)",
+          "origin": "Recording example recomputed exactly"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "query-contract",
+      "start": 1257.86,
+      "end": 1450.55,
+      "lecture_material": "query and latent partition",
+      "research_extension": null,
+      "teaching_construction": "Ordered disjoint query/evidence/latent contract and empty-query conventions",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Ordered disjoint query, observed and latent variables; empty evidence/query conventions",
+          "origin": "Recording partition with original API conventions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Summing latent assignments and normalizing positive selected mass yields the requested finite conditional",
+          "origin": "Original finite derivation"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "alarm-construction",
+      "start": 1450.55,
+      "end": 2110.1,
+      "lecture_material": "alarm DAG and kernel construction",
+      "research_extension": null,
+      "teaching_construction": "Exact eight-assignment joint and one-node/all-parent-factor correction",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Independent 1/20 roots, deterministic OR child and one normalized all-parent factor per node",
+          "origin": "Recording stipulated model"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Four positive alarm masses 361/400,19/400,19/400,1/400 normalize",
+          "origin": "Recording example recomputed exactly"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "alarm-inference",
+      "start": 2110.1,
+      "end": 2851.75,
+      "lecture_material": "alarm inference and explaining-away boundaries",
+      "research_extension": null,
+      "teaching_construction": "Exact alarm posteriors, selected dependence and unreachable-row qualification",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Explaining away and conditional independence are properties of the selected joint",
+          "origin": "Recording mechanism with original precise distinction"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Alarm evidence 39/400; burglary posteriors 20/39 and1/20; conditional joint1/39 differs from(20/39)^2; E1/A0 impossible",
+          "origin": "Recording model recomputed exactly"
+        },
+        {
+          "class": "theorem",
+          "claim": "A supplied node kernel equals the derived conditional on its parents only at positive-probability parent assignments",
+          "origin": "Original finite-DAG argument, proved in Section10"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "collider-sign",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Odds-ratio derivation and monotone positive-interaction counterexample",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Collider shape, positive binary likelihoods and conditional odds ratio",
+          "origin": "Original teaching definitions"
+        },
+        {
+          "class": "theorem",
+          "claim": "Independent positive root factors cancel from the conditional odds ratio; its sign comparison gives the direction of the additional root observation",
+          "origin": "Original derivation under stated positivity assumptions"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Monotone likelihoods(1/10,1/5,1/5,99/100) yield odds ratio99/40 and increasing posteriors119/149,99/119",
+          "origin": "Original exact counterexample"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "symptom-model",
+      "start": 2851.75,
+      "end": 3485.21,
+      "lecture_material": "toy symptom network",
+      "research_extension": null,
+      "teaching_construction": "Stipulated nonclinical exact cough/itchy posteriors; local allergy variable D",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Stipulated nonclinical independent cold/allergy roots and cough/itchy kernels",
+          "origin": "Recording toy model; local allergy labelD is original"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Cough evidence81/250 and posterior5/18; cough/itchy evidence441/2500 and posterior13/98",
+          "origin": "Recording model recomputed exactly"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "dag-normalization",
+      "start": 3485.21,
+      "end": 3644.92,
+      "lecture_material": "general DAG factorization",
+      "research_extension": "Heckerman MSR report revised1996 PDF12-17, visually checked12/13: DAG kernels, chain rule, parent reduction and inference definition",
+      "teaching_construction": "Reverse-topological normalization/conditional proof, cyclic mass-two example and parameter count",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "DAG, topological order, node kernels and chain-rule parent reduction under conditional independence",
+          "origin": "Recording definitions; Heckerman revised1996 PDF12\u201317"
+        },
+        {
+          "class": "theorem",
+          "claim": "Reverse-topological elimination normalizes finite DAG products and recovers local conditionals at positive parent mass",
+          "origin": "Original proof"
+        },
+        {
+          "class": "theorem",
+          "claim": "Binary networks with at most k parents per node require at most d2^k local free probabilities, versus2^d\u22121 in an unrestricted joint",
+          "origin": "Original representation count; no inference-cost claim"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Cyclic deterministic equality kernels have normalized rows but product mass two",
+          "origin": "Original exact finite counterexample"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "language-inversion",
+      "start": 3644.92,
+      "end": 3855.04,
+      "lecture_material": "autoregressive and inverse inference",
+      "research_extension": "Li et al.2025 arXivv1 PDF1-4, visually checked3: Section2.1 likelihood/entropy/prior objective, finite posterior interpretation only",
+      "teaching_construction": "Harmless two-prompt prior/likelihood posterior, finite KL proof and maximize-direction correction",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Fixed-horizon autoregressive token joint; finite inverse-prompt prior, likelihood and posterior; entropy and KL divergence",
+          "origin": "Recording model with original finite formalization"
+        },
+        {
+          "class": "definition",
+          "claim": "Investigator string-elicitation objective combines likelihood, entropy and prompt-prior terms with tunable coefficients",
+          "origin": "Li et al.2025v1 PDF2\u20133, Section2.1; actual source formula inspected"
+        },
+        {
+          "class": "theorem",
+          "claim": "At coefficients one and posterior-supported q, the finite objective equals log evidence minus KL and is maximized by the posterior",
+          "origin": "Original proof; no claim that the trained investigator is an exact sampler"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Two-prompt evidence13/50 and posterior(9/13,4/13); direct objective audit detects the source sentence\u2019s minimized/maximized conflict",
+          "origin": "Original exact example and claim-specific primary equation audit"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "ancestral",
+      "start": 3855.04,
+      "end": 3995.18,
+      "lecture_material": "ancestral probabilistic program",
+      "research_extension": null,
+      "teaching_construction": "Finite sampler probability proof and shared-randomness counterexample",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Finite topological sampler with fresh independent conditional draws",
+          "origin": "Recording probabilistic-program mechanism with explicit original contract"
+        },
+        {
+          "class": "theorem",
+          "claim": "Its sequential assignment probability equals the constructed node-factor product",
+          "origin": "Original finite proof"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Reusing the root Bernoulli bit gives both-root and alarm probability1/20, rather than1/400 and39/400",
+          "origin": "Original exact shared-randomness counterexample"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "rejection",
+      "start": 3995.18,
+      "end": 4254.65,
+      "lecture_material": "rejection sampling",
+      "research_extension": null,
+      "teaching_construction": "Accepted/proposed distinction, positive-evidence ratio law, binomial and conditional variance bounds",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Proposal countN, accepted countK and positive-count empirical conditional; no estimate atK0",
+          "origin": "Recording mechanism with explicit original diagnostic contract"
+        },
+        {
+          "class": "theorem",
+          "claim": "Under IID proposals and positive evidence, the conditional ratio converges almost surely; K is binomial and conditional binary variance is p(1-p)/k with the stated error bound",
+          "origin": "Original finite derivation using the stated strong-law assumption"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Alarm expected accepts97.5 atN1000; rare evidence gives expected1, zero-accept probability about.3677; k100/epsilon.1 bound1/4",
+          "origin": "Original exact arithmetic and numerical checks"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "tracking",
+      "start": 4254.65,
+      "end": 4457.42,
+      "lecture_material": "medical sampling and hidden Markov model",
+      "research_extension": null,
+      "teaching_construction": "Six-bit combinatorial smoothing calculation checked against ten-bit program paths",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Five-step hidden-position/sensor model, ten independent fair bits, smoothing versus filtering and zero-based indices",
+          "origin": "Recording model with explicit original names and timing"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Six-bit reduction and independent1024-path enumeration give evidence15/64 and posterior(1/5,3/5,1/5); priorH3=(1,3,3,1)/8",
+          "origin": "Original exact combinatorial calculation and independent path oracle"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "model-limits",
+      "start": 4457.42,
+      "end": 4651.36,
+      "lecture_material": "missing information and model limits",
+      "research_extension": null,
+      "teaching_construction": "Missing observation versus missingness mechanism; observational versus intervention scope",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Marginalizing unobserved variables differs from modeling informative recording; observational conditioning differs from intervention",
+          "origin": "Recording closing topics with original scope clarification"
+        },
+        {
+          "class": "engineering check",
+          "claim": "This exact enumeration visits all complete assignments; it makes no general complexity or calibration certification",
+          "origin": "Original implementation design audit"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "implementation-design",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Original exact standard-library typed/bounded immutable network, complete queries and explicit unavailable estimates",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Exact typed bounded immutable Node/Network API, query conventions, local seeded rejection diagnostics and None for zero accepts",
+          "origin": "Original teaching implementation contract"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Actual standalone and runnable snippet stdout; independent joint/query/sampler/boundary/ownership/path checks within declared finite limits",
+          "origin": "Original program and executed finite checks; no seed-accuracy claim"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Six original fully reasoned derivation/computation/counterexample/implementation exercises",
+      "claim_provenance": [
+        {
+          "class": "theorem",
+          "claim": "Solution3 positive odds-ratio equality condition, Solution4 finite DAG/unreachable distinction and Solution5 positive-count variance bound",
+          "origin": "Original proofs with explicit hypotheses"
+        },
+        {
+          "class": "engineering check",
+          "claim": "Solutions1\u20136 weather/alarm/collider/unreachable/cyclic/rare-event/tracking calculations and zero-based index checks",
+          "origin": "Original complete solutions recomputed independently"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
+    },
+    {
+      "section": "sources",
+      "start": null,
+      "end": null,
+      "lecture_material": null,
+      "research_extension": null,
+      "teaching_construction": "Bounded claim-level primary source support and model/computation limitations",
+      "claim_provenance": [
+        {
+          "class": "definition",
+          "claim": "Claim-specific recording/official-module/primary-page support and excluded calibration, causality, benchmarks and complexity scope",
+          "origin": "Original provenance and evidence-scope note"
+        }
+      ],
+      "chapter": "lecture-12-bayesian-networks-and-probabilistic-inference.html",
+      "video_id": "ec2rCf4iIqU",
+      "duration": 4656
     }
   ]
 }

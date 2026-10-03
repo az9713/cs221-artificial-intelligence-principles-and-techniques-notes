@@ -1,6 +1,6 @@
 {
   "chapter": "lecture-05-search-problems-and-approximate-planning.html",
-  "checked_at_utc": "2026-10-03T13:45:08.280416+00:00",
+  "checked_at_utc": "2026-10-03T13:52:07.245052+00:00",
   "status": "independently reviewed and locally validated chapter",
   "accepted_scientific_body_sha256": "2cf63c537ad2c7fa0aa5350f648864ce93e2a95d62c207255a2ccdc1009b106c",
   "accepted_metadata_sha256": "61d5ac5788398157f5e8bf852f590c1e4a57631ad06d0ea9d0bf07c2aa5e0425",
@@ -8,7 +8,7 @@
   "integrated_html_sha256": "ef19dbc6745b1861425f8f305344577f68b503c568d87faaa8d3a23de192e128",
   "worked_solutions": 6,
   "current_reader_gate": {
-    "status": "passed within accepted Chapters1-11 reader scope",
+    "status": "passed within accepted Chapters1-12 reader scope",
     "reader_report": "reader-validation.json",
     "human_accessibility": "not performed"
   },
