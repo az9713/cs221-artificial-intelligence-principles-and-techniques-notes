@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light"><meta name="book-content-sha256" content="6c98e9aa2aeb6fa735b31d38fe1b7d1edd62c5d686e87451ba0c538fbea5c832"><title>Objectives, gradients, and learning · CS221: Artificial Intelligence: Principles and Techniques</title>
+<link rel="stylesheet" href="assets/book.css"><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},svg:{fontCache:'local'},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script>
+<script defer src="assets/mathjax-tex-svg.js"></script><script defer src="assets/book.js"></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><a class="brand" href="index.html">CS221: Artificial Intelligence: Principles and Techniques · Autumn 2025</a><nav class="course-nav" aria-label="Book"><a href="index.html">Lectures</a><a href="source-map.html">Source map</a><a href="references.html">References</a><a href="numerical-lab.html">Numerical lab</a></nav></header>
+<div class="layout"><aside class="toc" id="chapter-toc" aria-label="On this page"><h2>On this page</h2></aside><main id="main">
+<div class="reading-tools" aria-label="Reading controls"><button id="theme-toggle" aria-pressed="false">Light theme</button><button id="text-toggle" aria-pressed="false">Larger text</button><button id="solutions-toggle" aria-pressed="false">Expand solutions</button><button id="print-page">Print with solutions</button></div>
+<article id="chapter-content"><!-- BOOK-CONTENT-START -->
+<header><p class="eyebrow">CS221 · Autumn 2025 · Lecture 2</p><h1>Objectives, gradients, and learning</h1><p class="lede">A loss measures a proposed predictor. A gradient measures its local sensitivity. A learning algorithm uses those sensitivities to change the predictor. Each transition needs its own assumptions.</p><p>Independent enhanced chapter accompanying <a href="https://www.youtube.com/watch?v=ypZJaTqrNdk">Percy Liang's Learning I recording</a>. The sequence follows locally generated automatic speech recognition, checked against the retained official executable lecture. The robot case, proofs, counterexamples, program and six exercises are original teaching constructions. Checked external material is attributed beside its claims.</p></header>
+
+<section><h2 id="case">A delivery prediction that has to improve</h2>
+<p>Chapter 1's delivery robot chooses between go and wait using stipulated losses. Now a dispatcher asks a different question: how long will a delivery take? Underestimating duration can cause a missed appointment; overestimating it can leave a robot idle. A handwritten predictor is easy to deploy, but experience should change it in a controlled way. We will follow one fitting problem from data representation through a scalar objective, its computation graph, a gradient and an update.</p>
+<p>For this teaching case, let \(x\in\mathbb R\) be a cargo-load coordinate and \(y\in\mathbb R\) a duration coordinate. Both have been expressed in fixed reference units so their numerical values are dimensionless; one duration unit may be read as one minute. Negative load coordinates can occur after centering, but our three observations have positive coordinates. Define \(f_\theta(x)=wx+b\), where \(\theta=(w,b)\in\mathbb R^2\) contains a weight and a bias in that order. The weight multiplies the input, and the bias adds a constant; this is an <strong>affine</strong> predictor. Its output \(\hat y\) is a prediction, while \(y\) is an observed label. These are stipulated data and an intentionally small model, not measured robotics performance.</p>
+<p>The three observations will be \((1,4),(2,6),(4,7)\), exactly the scalar fixture in the official lecture. An affine family cannot fit these three points perfectly. That limitation is useful: a nonzero final loss will force us to distinguish an incomplete model from an unsuccessful optimizer. Fixing an objective also does not justify its use in a scheduling policy. Squared prediction error treats an underestimate and an equally large overestimate symmetrically; appointment penalties may not.</p>
+<p>Keep three questions visible. Which predictors may the learner choose? What numerical criterion ranks those predictors? How will it find a good one? The tensor and differentiation machinery comes first because it makes the last two questions executable. Learning will then give that machinery a purpose.</p></section>
+
+<section><h2 id="axes">1. Named axes make the computation explicit <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=5s">00:05</a></h2>
+<p>A tensor's <strong>order</strong> is its number of axes. A scalar has order zero, a vector one, a matrix two. Matrix rank instead counts independent rows or columns and is a different object. Chapter 1's semantic-axis discipline still applies: an axis called example indexes observations; an axis called feature indexes input coordinates. Naming an axis does not change its storage, but it exposes which entries are allowed to interact.</p>
+<p>Consider \(v=(0,1,10)\in\mathbb R^3\). The contraction pattern <code>i -&gt; i</code> leaves the coordinate index in the output, so the result is the same vector. The pattern <code>i -&gt;</code> removes that index and returns the scalar \(0+1+10=11\). Empty output axes mean a scalar, not an empty array. In <a href="https://einops.rocks/api/einsum/">einops's official einsum API</a>, an input axis absent from the output is summed; tensors precede the pattern argument. This verifies operation semantics, not which package version ran during the recording.</p>
+<p>One useful mental implementation allocates a zero output, enumerates every assignment of input indices, multiplies the selected input entries, and adds the product to the indexed output entry. The word <em>adds</em> is essential. For <code>i -&gt;</code>, all three assignments address the same scalar. Overwriting it would leave only 10. For <code>i -&gt; i</code>, each assignment addresses a different location, so assignment happens to give the same answer. An example with no reduction can therefore hide an incorrect general implementation.</p>
+<p>Before evaluating a contraction, state the sizes and meanings of all axes, check that a shared index has compatible sizes, and determine which indices survive. This is a specification of a mathematical computation. Whether a library uses a loop, a fused kernel or a different summation order is a separate implementation question, and finite arithmetic can distinguish those orders.</p></section>
+
+<section><h2 id="products">2. The output indices distinguish products <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=345s">05:45</a></h2>
+<p>The same inputs can define several different products. With two copies of \(v\), <code>i, i -&gt; i</code> is the elementwise square \((0,1,100)\). The shared input index ties the operands to the same coordinate, and the retained output index keeps the results separate. Removing it gives <code>i, i -&gt;</code>, the dot product \(\sum_i v_i^2=101\). Merely saying “multiply two vectors” does not select either operation.</p>
+<p>For the outer product, <code>i, j -&gt; i j</code>, the two index assignments are independent and both survive. Its entry is \(v_i v_j\), and the output shape is \((3,3)\):</p>
+<div class="math">\[vv^\top=\begin{pmatrix}0&amp;0&amp;0\\0&amp;1&amp;10\\0&amp;10&amp;100\end{pmatrix}.\]</div>
+<p>The row coordinate comes from the first operand; the column coordinate comes from the second. Because we happened to use the same vector, this matrix is symmetric. With two different vectors that symmetry generally disappears. A transpose can thus be invisible on this fixture, which is why tests should include operands with different roles.</p>
+<p>Three copies extend the same rule. <code>i, i, i -&gt; i</code> gives \((0,1,1000)\). The pattern <code>i, j, k -&gt; i j k</code> has shape \((3,3,3)\) and entry \(v_i v_j v_k\). No special “triple-product” theory is needed: sharing an index constrains coordinates, retaining an index preserves coordinates, and omitting it reduces coordinates. Later the reverse pass will rely on equally explicit bookkeeping, but there it will add derivative contributions instead of forward products.</p></section>
+
+<section><h2 id="contractions">3. Matrix contractions preserve different information <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=674s">11:14</a></h2>
+<p>The lecture uses \(M=\begin{pmatrix}0&amp;1&amp;2\\1&amp;10&amp;0\end{pmatrix}\) with two row coordinates and three column coordinates. Its total sum is 14, its row sums are \((3,11)\), its column sums are \((1,11,2)\), and its transpose has shape \((3,2)\). These correspond to <code>i j -&gt;</code>, <code>i j -&gt; i</code>, <code>i j -&gt; j</code>, and <code>i j -&gt; j i</code>. Each output answers a different question about the same entries.</p>
+<p>Multiplying by \(v\) gives <code>i j, j -&gt; i</code>, hence \(Mv=(21,10)\). The inner index is reduced; the row index survives. Two matrix operands can instead form row or column comparisons:</p>
+<div class="math">\[(MM^\top)_{ij}=\sum_k M_{ik}M_{jk},\quad MM^\top=\begin{pmatrix}5&amp;10\\10&amp;101\end{pmatrix};\qquad (M^\top M)_{ij}=\sum_k M_{ki}M_{kj},\quad M^\top M=\begin{pmatrix}1&amp;10&amp;0\\10&amp;101&amp;2\\0&amp;2&amp;4\end{pmatrix}.\]</div>
+<p>The first compares rows using columns as the shared coordinates. The second compares columns using rows as the shared coordinates. Both are called <strong>Gram matrices</strong>, matrices of pairwise inner products, but their dimensions and meanings differ. If rows are examples and columns are features, they live in example space and feature space respectively. Later the regression Hessian will involve a feature Gram matrix; using the example Gram instead would change the parameter dimension.</p>
+<p>These are engineering checks on fixed numbers. The general indexing identities do not imply that one contraction is always cheaper or more accurate. They do establish what must be computed and which dimension is the output. That is enough to derive the corresponding backward contractions without memorizing a shape-free formula.</p></section>
+
+<section><h2 id="objective">4. Compose an objective before differentiating it <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=1053s">17:33</a></h2>
+<p>The lecture first uses a multifeature example before returning to scalar affine regression. Let \(X\in\mathbb R^{n\times d}\) have example rows and feature columns, \(y\in\mathbb R^n\) be labels, and \(\beta\in\mathbb R^d\) be weights. This temporary weight vector is distinct from the running case's scalar \(w\). Define predictions \(\hat y=X\beta\), residuals \(e=\hat y-y\), and the <strong>sum objective</strong> \(J_{\rm sum}(\beta)=\sum_i e_i^2\). An objective is a scalar-valued criterion that we want to minimize or maximize; here smaller is preferred.</p>
+<div class="math">\[X=\begin{pmatrix}1&amp;2&amp;0\\0&amp;-1&amp;1\end{pmatrix},\quad y=\begin{pmatrix}0\\3\end{pmatrix},\quad \beta=\begin{pmatrix}1\\0\\1\end{pmatrix}\quad\Longrightarrow\quad \hat y=\begin{pmatrix}1\\1\end{pmatrix},\ e=\begin{pmatrix}1\\-2\end{pmatrix},\ e\odot e=\begin{pmatrix}1\\4\end{pmatrix},\ J_{\rm sum}=5.\]</div>
+<p>Here \(\odot\) means elementwise multiplication. With \(\beta=(1,0,-1)^\top\), the predictions become \((1,-1)\), residuals \((1,-4)\), and sum loss 17. We can compare two weight vectors without yet knowing how to find a better one. The labels and data are held fixed; parameters are the adjustable inputs to the objective.</p>
+<p>Squaring prevents positive and negative residuals from cancelling. A signed residual sum of zero would not imply correct predictions: residuals \((1,-1)\) sum to zero while both predictions are wrong. Squared loss gives larger errors disproportionate influence, and it discards whether an error was an underestimate or overestimate. These are design choices, not facts established by the differentiation algorithm.</p>
+<p>The eventual scalar regression uses a <em>mean</em> objective. A sum and a mean have the same minimizers for a fixed nonempty dataset, but their gradient magnitudes differ by the sample size. We will retain both names rather than silently replace 5 by 2.5 or claim that a learning rate has a normalization-independent meaning.</p></section>
+
+<section><h2 id="derivative">5. A derivative is a limiting sensitivity <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=1440s">24:00</a></h2>
+<p>For a scalar function \(q:\mathbb R\to\mathbb R\), the derivative at \(x\), when it exists, is \(q'(x)=\lim_{\varepsilon\to0}[q(x+\varepsilon)-q(x)]/\varepsilon\). It measures output change per unit of sufficiently small input change. For \(q(x)=x^2\), expand the numerator rather than appeal only to a remembered rule:</p>
+<div class="math">\[\frac{(x+\varepsilon)^2-x^2}{\varepsilon}=2x+\varepsilon\quad(\varepsilon\ne0),\qquad q'(x)=2x.\]</div>
+<p>At \(x=1\) with \(\varepsilon=10^{-4}\), the forward quotient is 2.0001 in real arithmetic. The extra \(\varepsilon\) is the approximation error. Shrinking it improves that mathematical approximation but eventually makes a computer subtract nearly equal rounded quantities. If \(1+\varepsilon\) rounds back to 1, the computed numerator is zero and the quotient tells us nothing about the actual derivative.</p>
+<p>A symmetric check uses \([q(x+\varepsilon)-q(x-\varepsilon)]/(2\varepsilon)\). For the quadratic, the \(\varepsilon^2\) terms cancel exactly in real arithmetic and the quotient equals \(2x\). For a three-times differentiable general function it usually has error of order \(\varepsilon^2\), locally with a bounded third derivative. Neither statement removes floating-point cancellation. A central difference is a useful independent check on code, not a definition of automatic differentiation or a certificate for every input.</p>
+<p><a href="https://jmlr.org/papers/volume18/17-468/17-468.pdf">Baydin, Pearlmutter, Radul and Siskind's survey</a> distinguishes finite-difference approximation from automatic differentiation (PDF p.4). We will use central differences only where perturbations are numerically resolved and the function is smooth. The chapter program explicitly rejects an increment that rounds away at the chosen parameter.</p></section>
+
+<section><h2 id="geometry">6. A gradient needs a geometry and a step size <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=1584s">26:24</a></h2>
+<p>For \(q:\mathbb R^d\to\mathbb R\), the partial derivative \(\partial q/\partial z_j\) changes coordinate \(j\) while holding the others fixed. The <strong>gradient</strong> \(\nabla q\) stacks those partial derivatives into a vector. If the input is a tensor and the output a scalar, the gradient has one entry per input entry and the same shape. This is a dimension check, not proof that the entries are correct.</p>
+<p>For the lecture's \(q(z_1,z_2)=(z_1+z_2)^2\), both partial derivatives are \(2(z_1+z_2)\). At \((1,2)\) the value is 9 and the gradient is \((6,6)\). More generally, \(q(z)=(\sum_j z_j)^2\) has gradient \(2(\sum_j z_j)\mathbf1\), where \(\mathbf1\) is the all-ones vector with the input's length. The four-coordinate input \((1,3,0,-1)\) also sums to 3 and has gradient \((6,6,6,6)\). The zero-sum hyperplane contains all its global minima; a stationary point need not be unique.</p>
+<h3>The sign and the missing norm</h3>
+<p>At a differentiable point, for a displacement \(\delta\), \(q(z+\delta)=q(z)+\nabla q(z)^\top\delta+o(\|\delta\|_2)\). The Euclidean norm \(\|\delta\|_2=(\sum_j\delta_j^2)^{1/2}\) measures displacement in the chosen coordinates. The last term divided by that norm tends to zero as the displacement vanishes. Among Euclidean unit directions \(v\), Cauchy–Schwarz gives \(\nabla q^\top v\ge-\|\nabla q\|_2\). When the gradient is nonzero, equality is attained at \(v=-\nabla q/\|\nabla q\|_2\). Thus the negative gradient is the direction of greatest <em>first-order decrease per Euclidean unit distance</em>; the positive gradient gives greatest increase.</p>
+<p>The early spoken/source-code phrase that the gradient itself decreases the function has the sign reversed. The recording's later two-dimensional example and descent update use the correct negative sign. If the gradient is zero, every direction has zero first-order change, and higher-order behavior matters. For example \(q(z)=z^3\) at zero has zero derivative but is neither a minimum nor a maximum.</p>
+<p>A direction is not a safe finite step. On \(q(z)=(z_1+z_2)^2\) at \((1,2)\), stepping by \(-\eta(6,6)\) changes the sum to \(3-12\eta\). At \(\eta=0.1\) the value is 3.24; at \(\eta=1\) it is 81, above the initial 9. Both move along the negative gradient. Further, rescaling a coordinate changes what “Euclidean unit distance” means. Our fixed reference units are part of the optimization specification, not a physical law about steepest improvement.</p>
+<p>The differentiated argument also determines the question being asked. A parameter gradient changes the predictor; an input gradient changes the observation supplied to a fixed predictor. The latter can diagnose sensitivity or construct an adversarial perturbation, but a change to a recorded cargo coordinate is not automatically a physically valid intervention. A gradient over data-mixture weights changes the objective itself. For fixed losses \(\ell_i\), let \(J_{\rm mix}(\alpha)=\sum_i\alpha_i\ell_i\), with weights \(\alpha_i\ge0\) and \(\sum_i\alpha_i=1\). Then \(\partial J_{\rm mix}/\partial\alpha_i=\ell_i\). From weights \((1/2,1/2)\) and losses \((1,4)\), an unconstrained step of size 0.1 gives \((0.4,0.1)\), whose sum is only 0.5. The derivative is correct, yet the update violates the intended weight domain. Constraints and the meaning of the adjustable variable belong to the optimization problem; differentiating it does not enforce them.</p></section>
+
+<section><h2 id="graph">7. A computation graph exposes local dependencies <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=1978s">32:58</a></h2>
+<p>A <strong>directed acyclic graph</strong> is a directed graph with no directed cycle. Here each node stores an input or the result of an elementary operation; its operand edges identify the values consumed by that operation. We draw arrows from operands to consumers. A leaf has no operands, while the chosen root is the output we want to differentiate. A graph can have many potential outputs; “root” names the one selected for this backward computation.</p>
+<p>The lecture builds \(u=z_1+z_2\), then \(q=u^2\), at \((z_1,z_2)=(2,3)\). A valid forward order is \(z_1,z_2,u,q\): obtain the inputs, compute 5, then compute 25. Evaluating the square before the sum would use an unavailable or stale operand. A <strong>topological order</strong> is any order in which every operand precedes its consumer. More than one order may work; the dependency condition matters, not a particular node name.</p>
+<p>Our original implementation realizes the square as multiplication with two operand slots, \(u\times u\). That graph has four unique nodes but two incoming operand edges to the multiplication. This distinction will matter during differentiation. The official lecture instead provides a separate square operation; both express the same smooth real function. We implement addition and multiplication rather than reproduce the lecture's classes or trace machinery.</p>
+<p>Forward values alone already specify a useful executable predictor. A computation graph adds the bookkeeping needed to reuse each elementary operation's derivative. It does not turn an arbitrary program into a differentiable real function: branching, integer indices and nondifferentiable primitives need additional interpretation. This chapter stays with finite smooth algebraic graphs and explicitly fixed datasets.</p></section>
+
+<section><h2 id="chain">8. Reverse differentiation accumulates sensitivity to one root <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=2506s">41:46</a></h2>
+<p>For a scalar node value \(v\), define its <strong>adjoint</strong> \(\bar v=\partial q/\partial v\): the sensitivity of the selected scalar root \(q\) to a change at that node. Every bar refers to the same root, including when a method is called on an intermediate node. The word “gradient” in a node's data field does not mean its derivative with respect to its own input alone.</p>
+<p>For a single chain \(a\to b=a^2\to c=b^2\), the chain rule gives \(\partial c/\partial a=(\partial c/\partial b)(\partial b/\partial a)=2b\cdot2a=4a^3\). Reverse differentiation is that rule organized over the entire graph. If \(v\) supplies several consumer operand slots, each route contributes:</p>
+<div class="math">\[\bar v=\sum_{\text{consumer slots }(k,j)\text{ using }v}\bar v_k\,\frac{\partial v_k}{\partial\text{operand }j}.\]</div>
+<p>The partial derivative in this formula treats the consumer's operand slots as independent local arguments, then evaluates them at their actual values. It is not necessarily the derivative with respect to a distinct upstream node: a node may occupy two slots in one operation. This is the hinge that makes repeated uses correct.</p>
+<table><caption>Elementary scalar rules; add each contribution to an existing input adjoint</caption><thead><tr><th>Forward operation</th><th>Contribution to first operand</th><th>Contribution to second operand</th></tr></thead><tbody><tr><td>\(v_k=a+b\)</td><td>\(\bar a\mathrel{+}=\bar v_k\)</td><td>\(\bar b\mathrel{+}=\bar v_k\)</td></tr><tr><td>\(v_k=a-b\)</td><td>\(\bar a\mathrel{+}=\bar v_k\)</td><td>\(\bar b\mathrel{+}=-\bar v_k\)</td></tr><tr><td>\(v_k=ab\)</td><td>\(\bar a\mathrel{+}=b\bar v_k\)</td><td>\(\bar b\mathrel{+}=a\bar v_k\)</td></tr><tr><td>\(v_k=a^2\), as one square primitive</td><td>\(\bar a\mathrel{+}=2a\bar v_k\)</td><td>No second operand</td></tr></tbody></table>
+<p>The notation \(\mathrel{+}=\) means accumulation, not overwriting. Initialize all adjoints to zero and the root adjoint to one, because \(\partial q/\partial q=1\). For \(q=(2+3)^2\), the completed trace is:</p>
+<table><caption>Complete forward and reverse trace of the lecture's scalar example</caption><thead><tr><th>Node</th><th>Forward value</th><th>Final root adjoint</th><th>Reason</th></tr></thead><tbody><tr><td>\(z_1\)</td><td>2</td><td>10</td><td>Sum passes \(\bar u\) unchanged</td></tr><tr><td>\(z_2\)</td><td>3</td><td>10</td><td>Sum passes \(\bar u\) unchanged</td></tr><tr><td>\(u=z_1+z_2\)</td><td>5</td><td>10</td><td>Square gives \(2u\bar q\)</td></tr><tr><td>\(q=u^2\)</td><td>25</td><td>1</td><td>Root seed</td></tr></tbody></table>
+<p>The backward order is \(q,u,z_2,z_1\), or the final leaves can be swapped. When processing \(u\), its adjoint is 10, not one. If \(z_1\) increases by \(\varepsilon\), then \(u\) increases by \(\varepsilon\), and \(q\) increases by \(10\varepsilon+\varepsilon^2\). That expansion independently confirms both the local derivative and its interpretation. Baydin et al. (PDF pp.12–13, Table 3) explicitly trace the same root-seed and consumer-accumulation mechanism; their table uses a different function, not these teaching numbers.</p></section>
+
+<section><h2 id="ordering">9. Dependency order makes the reverse pass correct <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=2992s">49:52</a></h2>
+<p>A backward operation assumes both that forward values are available and that its own adjoint already includes every downstream contribution. Reverse topological order ensures the latter: all consumers of a node have been processed before the node propagates to its operands. Reversing an arbitrary visitation order is insufficient. If an upstream node sends its adjoint too early, later consumers can add contributions that never reach the inputs.</p>
+<p>The correctness argument is a descending induction over a topological order. At the output, the seed is correct. Suppose all nodes later in the order have propagated their correct adjoints. For the next node, each route to the root begins through one of its consumer slots. The multivariable chain rule sums exactly the contributions now stored there. Its local rule therefore propagates the correct contributions to earlier operands. Repeating this argument reaches every input. It assumes a finite acyclic graph and differentiable local operations at the forward values.</p>
+<p>For the lecture's two-example multifeature objective, the same mechanism works on whole arrays. Let \(\bar e\in\mathbb R^n\) be residual sensitivity and \(\bar\beta\in\mathbb R^d\) parameter sensitivity. Reversing scalar summation seeds every squared residual with one, elementwise squaring gives \(\bar e=2e\), and reversing \(\hat y=X\beta\) gives \(\bar\beta=X^\top\bar e\). With \(e=(1,-2)\), this produces \((2,8,-4)\).</p>
+<div class="math">\[\delta J_{\rm sum}=2e^\top\delta e=2e^\top X\,\delta\beta=(2X^\top e)^\top\delta\beta,\qquad \nabla_\beta J_{\rm sum}=2X^\top e.\]</div>
+<p>This differential calculation independently derives the transpose rather than inferring it from shape alone. In semantic axes, predictions use <code>example feature, feature -&gt; example</code>, and weight sensitivity uses <code>example feature, example -&gt; feature</code>. If we also differentiated the data, the entry \(X_{ij}\) would receive \(2e_i\beta_j\), with shape \((n,d)\). Holding data fixed during fitting is a modeling choice, not a restriction of the chain rule.</p>
+<p>For a general map \(F:\mathbb R^d\to\mathbb R^m\), a reverse output seed \(r\in\mathbb R^m\) computes \(D F(\beta)^\top r\), where \(D F\) is the Jacobian matrix of all output partial derivatives. It does not automatically return that entire matrix. The scalar objective selects \(m=1\), so one seed yields the full parameter gradient. The recorded official graph example has a one-entry matrix root; its all-ones seed differentiates the sum of root entries, which agrees with a scalar gradient only because there is one entry.</p></section>
+
+<section><h2 id="sharing">10. Deduplicate nodes, preserve every operand use <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=3310s">55:10</a></h2>
+<p>The recording emphasizes why the structure is a graph rather than necessarily a tree: one input can appear in several places. A topological traversal should visit a shared node once. Derivative accumulation must still count every use. These instructions are compatible because a <em>node</em> stores one computed value, while an <em>operand edge</em> represents a separate contribution to its downstream effect.</p>
+<p>Take \(q=u\times u+u\) at \(u=2\). The product node has value 4 and the root value 6. The root passes adjoint one to the product and one directly to \(u\). The product then contributes 2 from its first slot and 2 from its second. The final adjoint is \(1+2+2=5\), agreeing with \(d(u^2+u)/du=2u+1\). Representing the product's operands as a set would collapse its two edges and produce 3 instead of 5. Overwriting \(\bar u\) at each arrival would also discard legitimate paths.</p>
+<p>Another error is to keep the preceding backward pass's adjoints. Calling backward twice on the same immutable graph should return 5 twice if the API promises fresh differentiation. Our program returns a new adjoint mapping each time; it never stores accumulated gradients in nodes. Some training frameworks deliberately accumulate gradients across calls, so a different API can be valid, but its reset policy must be explicit.</p>
+<p>The original neural-network paper by <a href="https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf">Rumelhart, Hinton and Williams (1986)</a> sums error-derivative contributions over a unit's outgoing connections (PDF p.3, equation 7). It then specifies a separate negative-gradient weight update (equation 8). Its distinction between backward sensitivity and parameter adjustment is the same one used here. This supports the mechanism; it is not a claim of earliest discovery or a guarantee of a global minimum for neural networks.</p>
+<p>Reverse differentiation avoids expanding every path into a separate symbolic expression. With elementary operations of bounded local work, the original forward and backward traversals perform work proportional to the number of executed operand edges. Stored intermediate values also consume space; Baydin et al. discuss this operation/storage tradeoff on PDF p.13. This is not a universal timing benchmark, and dense tensor operations have their own costs. Our finite scalar graph stores values and local derivatives; it does not implement checkpointing, accelerator kernels, branching derivatives or a production tensor library.</p></section>
+
+<section><h2 id="learning">11. Learning selects a predictor from a family <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=3401s">56:41</a></h2>
+<p>A <strong>predictor</strong> maps an input to an output. A <strong>learning algorithm</strong> maps training data to a predictor. These functions have different domains: the dispatcher calls a fitted predictor on a new cargo coordinate, while training consumes many labeled observations to choose its parameters. A function that happens to run on data is not thereby a learning algorithm.</p>
+<p>The recording illustrates a predictor with exam scores and study hours, while our running case retains delivery duration. Its scalar family is the same:</p>
+<div class="math">\[\mathcal H=\{f_\theta:\mathbb R\to\mathbb R\mid f_\theta(x)=wx+b,\ \theta=(w,b)\in\mathbb R^2\}.\]</div>
+<p>The <strong>hypothesis class</strong> \(\mathcal H\) is the set of all predictors available to the learner. The bias makes these functions affine; “linear regression” conventionally includes an intercept. Formally, a map with nonzero intercept is not linear because it does not take zero to zero. Fixing \(\theta=(3,1)\) gives prediction 4 at input 1; fixing \((2,0.2)\) gives 2.2 there. Choosing a class allows infinitely many predictors but excludes arbitrary curves.</p>
+<p>In neural networks, an architecture and its parameter domains describe an analogous family of functions. This is a useful conceptual connection, not an assertion that every parameter vector identifies a distinct function. Redundant units and symmetries can produce the same predictor from different parameters. Even here, with all observed \(x_i=2\), training can identify only \(2w+b\). The parameterization and the observable predictor are separate objects.</p>
+<p>Restricting the class is unavoidable when data are finite. Three observations cannot specify a unique function on all of \(\mathbb R\) without additional structure. The affine restriction makes fitting possible and extrapolation fragile. We will later construct a different function that agrees at every training point and differs arbitrarily elsewhere. For now, selecting \(\mathcal H\) answers only the first of the three learning questions.</p></section>
+
+<section><h2 id="loss">12. Per-example loss becomes an empirical objective <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=3761s">62:41</a></h2>
+<p>For training pairs \((x_i,y_i)\), \(i=1,\ldots,n\), define the signed residual \(e_i=f_\theta(x_i)-y_i\) and the per-example squared loss \(\ell_i(\theta)=e_i^2\). The <strong>empirical objective</strong> averages over these particular observed examples:</p>
+<div class="math">\[J(\theta)=\frac1n\sum_{i=1}^n\ell_i(\theta)=\frac1n\sum_{i=1}^n(wx_i+b-y_i)^2,\qquad n\ge1.\]</div>
+<p>In the original physical units, residuals have duration units and squared losses have squared duration units. Averaging does not restore duration units. A root-mean-square error would take a square root, but would be a different objective with a differently scaled gradient away from zero. Our numerical coordinates are dimensionless, which avoids silently adding quantities with different units.</p>
+<p>At \(\theta=(2,1)\), predictions on inputs \((1,2,4)\) are \((3,5,9)\). Residuals against \((4,6,7)\) are \((-1,-1,2)\), losses \((1,1,4)\), and mean loss 2. At \((1,1)\), the residuals are \((-2,-3,-2)\), giving \(17/3\). The recording's approximate “5.6” is not an exact identity. Squared empirical loss prefers the first predictor, but this comparison alone says nothing about a new route or a changed cargo distribution.</p>
+<p>Averaging also selects a weighting scheme: each observation receives weight \(1/n\), regardless of how frequently its condition occurs in deployment or how costly its error is. Duplicate one example many times and the empirical criterion changes. Duplicate <em>every</em> example the same number of times and the mean objective stays unchanged, while the sum objective grows by that factor. Normalization and sampling are part of what the learner optimizes.</p>
+<p>A population risk would instead be \(\mathbb E[\ell(f_\theta(X),Y)]\) under a specified distribution of a random input-label pair \((X,Y)\). Such a distribution has not been established by our three observations. We will analyze empirical optimization exactly without promoting it to a generalization or causal guarantee.</p></section>
+
+<section><h2 id="update">13. Derive the gradient and the first update <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=3981s">66:21</a></h2>
+<p>The recording supplies the regression gradient without working through it. Expand its chain rule: \(\partial e_i/\partial w=x_i\), \(\partial e_i/\partial b=1\), and \(\partial e_i^2/\partial e_i=2e_i\). Linearity of differentiation through a finite average gives</p>
+<div class="math">\[\nabla J(\theta)=\frac2n\sum_{i=1}^n e_i\begin{pmatrix}x_i\\1\end{pmatrix}.\]</div>
+<p>The weight gradient scales each residual by its input; the bias gradient sums residuals without that factor. A large-input observation can therefore dominate the weight update even when its residual is similar to the others. Gradient magnitude reflects both error and feature scaling.</p>
+<p>At the official initial parameters \(\theta_0=(0,1)\), predictions are all 1, residuals \((-3,-5,-6)\), and the complete calculation is</p>
+<div class="math">\[J(\theta_0)=\frac{9+25+36}{3}=\frac{70}{3},\quad \nabla J(\theta_0)=\frac23\left[\begin{pmatrix}-3\\-3\end{pmatrix}+\begin{pmatrix}-10\\-5\end{pmatrix}+\begin{pmatrix}-24\\-6\end{pmatrix}\right]=\begin{pmatrix}-74/3\\-28/3\end{pmatrix}.\]</div>
+<p>A <strong>gradient-descent update</strong> with learning rate \(\eta\gt0\) is \(\theta_{k+1}=\theta_k-\eta\nabla J(\theta_k)\), with \(k\) the update index. At \(\eta=0.01\),</p>
+<div class="math">\[\theta_1=\begin{pmatrix}0\\1\end{pmatrix}-\frac1{100}\begin{pmatrix}-74/3\\-28/3\end{pmatrix}=\begin{pmatrix}37/150\\82/75\end{pmatrix},\qquad J(\theta_1)=\frac{5710445}{337500}\approx16.919837037.\]</div>
+<p>This is an engineering check, not an observed training result. The recording's spoken loss “23” and update “0.24, 1.09” are coarse displays; the unrounded quantities above follow from its actual data, mean-loss convention and learning rate. Both coordinates increase because both gradient entries are negative. We subtract the gradient, not the residual or the loss scalar.</p>
+<p>Reverse differentiation builds exactly this objective from operations and obtains the same gradient. The analytical formula, graph traversal and central differences will provide three checks with different failure modes. Their agreement at this fixture is strong debugging evidence; it is not proof that an implementation handles every possible input.</p></section>
+
+<section><h2 id="curvature">14. Curvature determines which fixed steps converge <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=4157s">69:17</a></h2>
+<p>Ten iterations are a demonstration budget, not a convergence criterion. To analyze this particular objective, define the design matrix \(A\in\mathbb R^{n\times2}\) with row \((x_i,1)\). Unlike Chapter 1's action set, this local matrix \(A\) acts on parameter coordinates, not actions. With labels \(y\in\mathbb R^n\),</p>
+<div class="math">\[J(\theta)=\frac1n\|A\theta-y\|_2^2,\quad \nabla J=\frac2n A^\top(A\theta-y),\quad H=\nabla^2J=\frac2n A^\top A.\]</div>
+<p>The <strong>Hessian</strong> \(H\) is the matrix of second partial derivatives. For any vector \(v\), \(v^\top Hv=(2/n)\|Av\|_2^2\ge0\); the quadratic is therefore convex. A convex function's value on a line segment is no greater than the corresponding weighted average of its endpoint values. For a quadratic, a symmetric Hessian with nonnegative directional curvature establishes that property. If \(A\) has full column rank, meaning its columns are independent, the curvature is strictly positive for nonzero \(v\). Its Hessian is then <strong>positive definite</strong>, and the objective has a unique minimizer. Convexity says something about the landscape. It does not choose a valid step size.</p>
+<h3>Solve the fitted predictor before analyzing convergence</h3>
+<p>Setting the gradient to zero gives the normal equations \(A^\top A\theta_* = A^\top y\). For our observations,</p>
+<div class="math">\[A^\top A=\begin{pmatrix}21&amp;7\\7&amp;3\end{pmatrix},\quad A^\top y=\begin{pmatrix}44\\17\end{pmatrix},\quad \det(A^\top A)=14,\quad \theta_* =\begin{pmatrix}13/14\\7/2\end{pmatrix}.\]</div>
+<p>The final residuals are \((3/7,-9/14,3/14)\), whose sum and input-weighted sum both vanish. They need not vanish individually. The minimum is \(J(\theta_*)=3/14\), positive because the three data points are not collinear. Continuing optimization cannot remove this model mismatch. Explicit normal equations are useful for this tiny derivation; forming an inverse is not a general numerical recommendation for ill-conditioned least-squares systems.</p>
+<h3>Prove the learning-rate interval</h3>
+<p>Let \(\varepsilon_k=\theta_k-\theta_*\) be parameter error, distinct from the data residuals \(e_i\). Since \(\nabla J(\theta_*)=0\), the quadratic satisfies \(\nabla J(\theta_k)=H\varepsilon_k\), hence \(\varepsilon_{k+1}=(I-\eta H)\varepsilon_k\), where \(I\) is the two-dimensional identity matrix. An eigenvector is a nonzero direction \(v\) satisfying \(Hv=\lambda v\); \(\lambda\) is its eigenvalue. A real symmetric Hessian has an orthonormal eigenbasis: mutually perpendicular unit eigenvectors spanning parameter space. In a direction with eigenvalue \(\lambda\gt0\), the error is multiplied at each step by \(1-\eta\lambda\).</p>
+<p>All components converge to zero exactly when \(|1-\eta\lambda|\lt1\) for every positive eigenvalue, if we require convergence from every initial parameter. For a positive-definite Hessian this is \(0\lt\eta\lt2/\lambda_{\max}\). The proof is the scalar geometric-sequence criterion applied in each orthogonal direction. An out-of-range rate can still converge from a specially chosen initial point with no unstable component; that exception does not establish a guarantee for arbitrary initialization.</p>
+<div class="math">\[H=\begin{pmatrix}14&amp;14/3\\14/3&amp;2\end{pmatrix},\qquad \lambda_\pm=8\pm\frac{2\sqrt{130}}3,\qquad 0\lt\eta\lt\frac{2}{8+2\sqrt{130}/3}\approx0.128195518.\]</div>
+<p>The official rate 0.01 lies within this interval. At 0.2, the largest-direction factor is about \(-2.12023\): the sign flips and the magnitude grows. From the official initial point, the program's mean loss after ten steps is approximately 75,058,023, versus 1.74699 at rate 0.01. This concrete convex counterexample rules out the unqualified statement that a fixed-step descent method converges merely because its objective is convex.</p>
+<p>At the upper endpoint, the largest-direction factor is \(-1\); that component oscillates without shrinking. At zero rate, parameters do not move. If the Hessian has a zero eigenvalue, the corresponding parameter component also never changes. A valid rate contracts all positive-curvature components but cannot identify parameters absent from the data. Smoothness, curvature, initial state and numerical arithmetic all matter. Deep-network objectives generally do not have this fixed positive-definite Hessian, so this proof is not a global convergence theorem for them.</p></section>
+
+<section><h2 id="synthesis">15. The learning template and its boundaries <a class="timestamp" href="https://www.youtube.com/watch?v=ypZJaTqrNdk&amp;t=4277s">71:17</a></h2>
+<p>The recording ends by separating a hypothesis class, a loss and an optimization algorithm. In the running case, they are an affine family, mean squared residuals and full-batch gradient descent. Each can change independently. A richer family may reduce minimum training loss; a new penalty may reflect appointment costs; a new optimizer may reach the same objective's minimum faster. Those interventions should not all be described as “a better model” without naming what changed.</p>
+<p><strong>Full-batch</strong> means that each update uses every training example. Stochastic gradient descent instead forms updates from sampled examples or batches, introducing a sampling procedure and typically a noisy gradient estimate. Adam is another optimizer named in the recording. The recording mentions these alternatives without developing their rules; no universal superiority or convergence guarantee is established for either. Later learning chapters can supply the missing assumptions and algorithms.</p>
+<p>For the dispatcher, optimization error is the gap between the current objective and the lowest objective within the chosen family. Approximation error concerns what the family cannot represent. Generalization concerns performance away from the particular training examples under a specified deployment distribution. A perfect derivative addresses none of the latter two by itself. Nor does a predictive relationship show what an intervention on cargo load would cause; unobserved route length could change both load and delivery duration.</p>
+<p>The practical audit therefore proceeds in stages: define what is predicted, check tensor roles and objective normalization, validate the derivative, verify the update's arithmetic and stability, and evaluate the fitted predictor on an appropriate separate dataset. The last step needs evidence we do not have here. A small executable mathematics example is valuable because its guarantees can be stated precisely, without substituting it for deployment validation.</p></section>
+
+<section><h2 id="implementation">Original numerical program</h2>
+<p>Download <a href="programs/chapter02.py">chapter02.py</a>, an original standard-library implementation. From the repository root, run <code>python programs/chapter02.py</code>. It performs no file writes or network access. The scalar graph contains only smooth addition and multiplication, stores immutable forward values and ordered operand edges, and returns a fresh node-to-adjoint mapping. The regression API accepts a nonempty list or tuple of input-label pairs and parameters in weight/bias order. It implements the mathematical model above, not the official lecture's trace framework.</p>
+<p>Its public scalars must be finite built-in integers or floats, excluding booleans, convertible to binary64. Invalid shapes/types, unresolved finite-difference perturbations, nonfinite conversions and nonfinite computed intermediates raise <code>ValueError</code>. A descent rate must be positive; its step count must be a nonnegative integer. The program deliberately permits unstable positive rates so the divergence example remains testable. Ordinary finite rounding, including underflow to zero, is allowed; it does not promise exact arithmetic or support every algebraically cancellable extreme intermediate. The low-level graph edge constructor also checks dependency and local-derivative types.</p>
+<p>The default run verifies analytical/graph/central gradients, repeated operands, repeated backward calls, the first update, stable versus unstable rates and the positive minimum loss. The central difference uses a resolved increment of \(10^{-5}\); its agreement is a numerical diagnostic. The exact source and actual stdout follow.</p>
+<div class="codewrap"><pre><code class="language-python" id="chapter02-code">&quot;&quot;&quot;Original CS221 learning fixture. Standard library; no file/network effects.
+
+Public scalars accept finite built-in int/float, excluding bool, converted to
+binary64. Nonfinite conversions/intermediates raise ValueError. Ordinary finite
+rounding, including subnormal underflow, is allowed. Arithmetic is not exact.
+Graphs are immutable; backward returns a fresh mapping, accumulating every
+operand edge. Data are nonempty sequences of (input,target) pairs; theta=(w,b).
+&quot;&quot;&quot;
+from dataclasses import dataclass
+import math
+
+
+def finite(value):
+    if isinstance(value, bool) or type(value) not in (int, float):
+        raise ValueError(&quot;expected a built-in real scalar, excluding bool&quot;)
+    try:
+        result = float(value)
+    except OverflowError as exc:
+        raise ValueError(&quot;scalar is outside binary64 range&quot;) from exc
+    if not math.isfinite(result):
+        raise ValueError(&quot;scalar or computed intermediate is nonfinite&quot;)
+    return result
+
+
+def total(values):
+    try:
+        return finite(math.fsum(values))
+    except OverflowError as exc:
+        raise ValueError(&quot;sum is outside binary64 range&quot;) from exc
+
+
+@dataclass(frozen=True, eq=False)
+class Scalar:
+    value: float
+    edges: tuple = ()
+
+    def __post_init__(self):
+        object.__setattr__(self, &quot;value&quot;, finite(self.value))
+        if type(self.edges) is not tuple:
+            raise ValueError(&quot;operand edges must be a tuple&quot;)
+        for edge in self.edges:
+            if type(edge) is not tuple or len(edge) != 2:
+                raise ValueError(&quot;each edge is (Scalar, local derivative)&quot;)
+            parent, derivative = edge
+            if not isinstance(parent, Scalar):
+                raise ValueError(&quot;edge dependency must be a Scalar&quot;)
+            finite(derivative)
+
+    def __add__(self, other):
+        other = as_scalar(other)
+        return Scalar(finite(self.value + other.value),
+                      ((self, 1.0), (other, 1.0)))
+
+    __radd__ = __add__
+
+    def __mul__(self, other):
+        other = as_scalar(other)
+        return Scalar(finite(self.value * other.value),
+                      ((self, other.value), (other, self.value)))
+
+    __rmul__ = __mul__
+
+    def __neg__(self):
+        return self * -1.0
+
+    def __sub__(self, other):
+        return self + -as_scalar(other)
+
+    def __rsub__(self, other):
+        return as_scalar(other) + -self
+
+
+def as_scalar(value):
+    return value if isinstance(value, Scalar) else Scalar(value)
+
+
+def backward(root, seed=1.0):
+    if not isinstance(root, Scalar):
+        raise ValueError(&quot;root must be a Scalar&quot;)
+    seed = finite(seed)
+    # Iterative DFS: dependencies before consumers; gray nodes detect cycles.
+    order, state = [], {}
+    stack = [(root, False)]
+    while stack:
+        node, finishing = stack.pop()
+        if finishing:
+            state[node] = 2
+            order.append(node)
+        elif state.get(node) == 1:
+            raise ValueError(&quot;graph contains a cycle&quot;)
+        elif state.get(node) != 2:
+            state[node] = 1
+            stack.append((node, True))
+            for parent, _ in reversed(node.edges):
+                stack.append((parent, False))
+    adjoints = dict.fromkeys(order, 0.0)
+    adjoints[root] = seed
+    for node in reversed(order):
+        for parent, local in node.edges:
+            contribution = finite(adjoints[node] * local)
+            adjoints[parent] = finite(adjoints[parent] + contribution)
+    return adjoints
+
+
+def data_pairs(data):
+    if type(data) not in (list, tuple) or not data:
+        raise ValueError(&quot;data must be a nonempty list/tuple of pairs&quot;)
+    result = []
+    for pair in data:
+        if type(pair) not in (list, tuple) or len(pair) != 2:
+            raise ValueError(&quot;each example must contain input and target&quot;)
+        result.append((finite(pair[0]), finite(pair[1])))
+    return tuple(result)
+
+
+def parameters(theta):
+    if type(theta) not in (list, tuple) or len(theta) != 2:
+        raise ValueError(&quot;theta must contain weight and bias&quot;)
+    return finite(theta[0]), finite(theta[1])
+
+
+def predict(theta, x):
+    weight, bias = parameters(theta)
+    return finite(finite(weight * finite(x)) + bias)
+
+
+def loss_gradient(data, theta):
+    data = data_pairs(data)
+    weight, bias = parameters(theta)
+    losses, weight_terms, bias_terms = [], [], []
+    for x, y in data:
+        residual = finite(finite(finite(weight * x) + bias) - y)
+        losses.append(finite(residual * residual))
+        twice = finite(2.0 * residual)
+        weight_terms.append(finite(twice * x))
+        bias_terms.append(twice)
+    n = len(data)
+    return total(losses) / n, (total(weight_terms) / n, total(bias_terms) / n)
+
+
+def graph_loss_gradient(data, theta):
+    data = data_pairs(data)
+    weight, bias = map(Scalar, parameters(theta))
+    objective = Scalar(0.0)
+    for x, y in data:
+        residual = weight * x + bias - y
+        objective = objective + residual * residual
+    objective = objective * (1.0 / len(data))
+    adjoints = backward(objective)
+    return objective.value, (adjoints[weight], adjoints[bias])
+
+
+def descend(data, theta, rate, steps):
+    data = data_pairs(data)
+    theta = parameters(theta)
+    rate = finite(rate)
+    if rate &lt;= 0 or type(steps) is not int or steps &lt; 0:
+        raise ValueError(&quot;rate must be positive; steps a nonnegative integer&quot;)
+    history = [loss_gradient(data, theta)[0]]
+    for _ in range(steps):
+        _, gradient = loss_gradient(data, theta)
+        theta = tuple(finite(t - finite(rate * g))
+                      for t, g in zip(theta, gradient))
+        history.append(loss_gradient(data, theta)[0])
+    return theta, tuple(history)
+
+
+def central_gradient(data, theta, epsilon=1e-5):
+    data = data_pairs(data)
+    theta = parameters(theta)
+    epsilon = finite(epsilon)
+    if epsilon &lt;= 0:
+        raise ValueError(&quot;epsilon must be positive&quot;)
+    result = []
+    for j in range(2):
+        above, below = list(theta), list(theta)
+        above[j] = finite(theta[j] + epsilon)
+        below[j] = finite(theta[j] - epsilon)
+        if above[j] == theta[j] or below[j] == theta[j]:
+            raise ValueError(&quot;perturbation is not resolved at this parameter&quot;)
+        numerator = finite(loss_gradient(data, above)[0]
+                           - loss_gradient(data, below)[0])
+        denominator = finite(2.0 * epsilon)
+        result.append(finite(numerator / denominator))
+    return tuple(result)
+
+
+DATA = ((1.0, 4.0), (2.0, 6.0), (4.0, 7.0))
+
+
+def main():
+    initial = (0.0, 1.0)
+    loss, gradient = loss_gradient(DATA, initial)
+    graph_loss, graph_gradient = graph_loss_gradient(DATA, initial)
+    numeric = central_gradient(DATA, initial)
+    assert math.isclose(loss, 70 / 3)
+    assert math.isclose(graph_loss, loss)
+    assert all(math.isclose(a, b, rel_tol=1e-10, abs_tol=1e-9)
+               for a, b in zip(gradient, graph_gradient))
+    assert all(math.isclose(a, b, rel_tol=1e-8, abs_tol=1e-8)
+               for a, b in zip(gradient, numeric))
+    u = Scalar(2.0)
+    shared = u * u + u
+    assert shared.value == 6 and backward(shared)[u] == 5
+    assert backward(shared)[u] == 5  # fresh adjoints on each pass
+    first, first_losses = descend(DATA, initial, 0.01, 1)
+    _, stable = descend(DATA, initial, 0.01, 10)
+    _, unstable = descend(DATA, initial, 0.2, 10)
+    optimum = (13 / 14, 7 / 2)
+    optimum_loss, optimum_gradient = loss_gradient(DATA, optimum)
+    assert math.isclose(optimum_loss, 3 / 14)
+    assert max(map(abs, optimum_gradient)) &lt; 1e-12
+    assert all(b &lt; a for a, b in zip(stable, stable[1:]))
+    assert unstable[-1] &gt; unstable[0]
+    largest = 8 + 2 * math.sqrt(130) / 3
+    print(f&quot;initial mean loss: {loss:.9f}&quot;)
+    print(&quot;initial gradient:&quot;, &quot;, &quot;.join(f&quot;{g:.9f}&quot; for g in gradient))
+    print(&quot;graph gradient:&quot;, &quot;, &quot;.join(f&quot;{g:.9f}&quot; for g in graph_gradient))
+    print(&quot;central gradient:&quot;, &quot;, &quot;.join(f&quot;{g:.9f}&quot; for g in numeric))
+    print(f&quot;shared u*u+u: value={shared.value:.1f}, &quot;
+          f&quot;derivative={backward(shared)[u]:.1f}&quot;)
+    print(&quot;first parameters:&quot;, &quot;, &quot;.join(f&quot;{t:.9f}&quot; for t in first))
+    print(f&quot;first mean loss: {first_losses[-1]:.9f}&quot;)
+    print(f&quot;strict rate upper bound: {2 / largest:.9f}&quot;)
+    print(f&quot;ten steps at 0.01: {stable[-1]:.9f}&quot;)
+    print(f&quot;ten steps at 0.20: {unstable[-1]:.9f}&quot;)
+    print(f&quot;minimum mean loss: {optimum_loss:.9f}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></div>
+<div class="codewrap"><pre><code class="language-text" id="chapter02-stdout">initial mean loss: 23.333333333
+initial gradient: -24.666666667, -9.333333333
+graph gradient: -24.666666667, -9.333333333
+central gradient: -24.666666667, -9.333333333
+shared u*u+u: value=6.0, derivative=5.0
+first parameters: 0.246666667, 1.093333333
+first mean loss: 16.919837037
+strict rate upper bound: 0.128195518
+ten steps at 0.01: 1.746992047
+ten steps at 0.20: 75058023.026869923
+minimum mean loss: 0.214285714
+</code></pre></div>
+</section>
+
+<section><h2 id="exercises">Six worked exercises</h2>
+<div class="exercise"><h3>1. Derive a named-axis reverse contraction</h3><p>Let \(X\) have shape (example, feature) with sizes \((n,d)\), \(\beta\) have shape (feature), and \(y\) have shape (example). For \(J_{\rm sum}=\sum_i[(X\beta)_i-y_i]^2\), derive both \(\nabla_\beta J_{\rm sum}\) and \(\nabla_X J_{\rm sum}\). Specify named-axis contractions. Evaluate the weight gradient at the two-example fixture in Section 4. Why is matching output shape insufficient to validate the derivative?</p>
+<details class="solution"><summary>Worked solution</summary><p>Write \(e_i=\sum_jX_{ij}\beta_j-y_i\). Holding \(X,y\) fixed, \(\partial J/\partial\beta_j=\sum_i2e_iX_{ij}\). The derivative has shape (feature) and contraction <code>example feature, example -&gt; feature</code> using \(X\) and \(2e\). For an entry of \(X\), only its own example's residual changes, by \(\beta_j\); hence \(\partial J/\partial X_{ij}=2e_i\beta_j\). Its shape is (example, feature), with <code>example, feature -&gt; example feature</code> on \(2e\) and \(\beta\).</p><p>At \(e=(1,-2)\), \(2X^\top e=(2,8,-4)\). For \(\beta=(1,0,1)\), the data gradient is \(\begin{pmatrix}2&amp;0&amp;2\\-4&amp;0&amp;-4\end{pmatrix}\). A formula using \(X^\top e\) has the same weight shape but is missing the factor two. A transposed outer product can also have the right dimensions when \(n=d\) while swapping semantic roles. Differentiate entries and check asymmetric fixtures; shapes alone cannot establish correctness.</p></details></div>
+
+<div class="exercise"><h3>2. Change normalization without changing the trajectory</h3><p>For a fixed dataset with \(n\ge1\), relate mean and sum squared objectives, gradients and Hessians. Find the sum-objective learning rate that reproduces a mean-objective update with rate \(\eta\). Apply this to the three-point fixture and explain what happens when every example is duplicated.</p>
+<details class="solution"><summary>Worked solution</summary><p>By definition \(J_{\rm sum}=nJ\). Differentiating with fixed \(n\) gives \(\nabla J_{\rm sum}=n\nabla J\) and \(H_{\rm sum}=nH\). Equality of updates requires \(\eta_{\rm sum}n=\eta\), or \(\eta_{\rm sum}=\eta/n\). In our fixture, mean rate 0.01 corresponds to sum rate \(1/300\), not 0.01. Both yield \(\theta_1=(37/150,82/75)\). Using 0.01 on the sum instead triples this first displacement and changes subsequent steps.</p><p>If every example appears twice, \(n\) doubles, the mean and its gradient remain unchanged, and the sum and its gradient double. Keeping the sum trajectory requires halving its rate again. The sum's strict stability upper bound is also divided by \(n\), since its largest Hessian eigenvalue is multiplied by \(n\). Equal minimizers therefore do not imply equal trajectories or interchangeable numerical learning rates.</p></details></div>
+
+<div class="exercise"><h3>3. A shared graph and repeated slots</h3><p>For \(u=z_1+z_2\), \(v=u\times u\), \(q=v+u\), at \((z_1,z_2)=(2,3)\), produce the entire forward/final-adjoint table. Show a valid reverse order and the two separate contributions from the product. Diagnose a set-of-operands implementation and a traversal that propagates \(u\) before processing \(v\).</p>
+<details class="solution"><summary>Worked solution</summary><p>Forward values are \(z_1=2,z_2=3,u=5,v=25,q=30\). Seed \(\bar q=1\); processing \(q\) gives \(\bar v=1\) and \(\bar u=1\). Processing \(v\) adds \(5\bar v\) for each product slot, so \(\bar u=1+5+5=11\). Processing \(u\) sends 11 to each input. The final table is \((z_1,2,11),(z_2,3,11),(u,5,11),(v,25,1),(q,30,1)\), where each tuple lists name, value and adjoint. A valid reverse order is \(q,v,u,z_2,z_1\).</p><p>Deduplicating operand edges loses one factor-five contribution, returning input adjoints 6. Propagating \(u\) immediately after \(q\) sends only 1 to each input; the later product contributions raise \(\bar u\) to 11 but never reach the inputs if \(u\) is not processed again. A valid algorithm deduplicates nodes for topological ordering, retains both product slots for propagation, and processes each node after all consumers. Direct differentiation gives \(dq/dz_j=2(z_1+z_2)+1=11\), an independent check.</p></details></div>
+
+<div class="exercise"><h3>4. Find the optimum and expose an unstable convex step</h3><p>For the three-point fixture, derive the normal equations and the Hessian eigenvalues. State the rate interval that guarantees convergence from every initial point. Construct an explicit divergent initialization at rate 0.2 and describe the upper-endpoint behavior. Explain why the minimum loss is positive.</p>
+<details class="solution"><summary>Worked solution</summary><p>The design sums are \(\sum x_i=7,\sum x_i^2=21,\sum y_i=17,\sum x_iy_i=44\). Thus the normal equations are \(21w+7b=44\), \(7w+3b=17\), giving \(w=13/14,b=7/2\). The residuals \((3/7,-9/14,3/14)\) give \(J_*=3/14\). The data's successive slopes are 2 and 1/2, so no affine line interpolates all three observations.</p><p>The Hessian has trace 16 and determinant \(56/9\). Solving \(\lambda^2-16\lambda+56/9=0\) gives \(\lambda_\pm=8\pm2\sqrt{130}/3\). The sufficient-and-necessary interval for convergence from every initialization is \(0\lt\eta\lt2/\lambda_+\). Choose the unnormalized eigenvector \(v_+=(14/3,\lambda_+-14)^\top\): the first row of \((H-\lambda_+I)v_+\) vanishes, and the characteristic equation makes the second vanish. Start at \(\theta_0=\theta_*+v_+\). At rate 0.2, \(\theta_k-\theta_*=(1-0.2\lambda_+)^kv_+\), whose norm grows since \(|1-0.2\lambda_+|\gt1\). At \(\eta=2/\lambda_+\), it instead alternates sign with constant norm. Neither failure contradicts convexity. Starting exactly at \(\theta_*\) would stay there at either rate, demonstrating why the guarantee must state its initialization scope.</p></details></div>
+
+<div class="exercise"><h3>5. Fit predictions when parameters are unidentifiable</h3><p>Suppose the only examples are \((2,4),(2,6)\). Find all empirical minimizers. Derive the Hessian and characterize full-batch gradient descent with a stable constant rate. Which parameter combination stays unchanged, and what can be said about prediction at an unseen input?</p>
+<details class="solution"><summary>Worked solution</summary><p>Let \(a=2w+b\) denote the common training prediction. The mean loss is \(J=\tfrac12[(a-4)^2+(a-6)^2]=(a-5)^2+1\). Every pair with \(2w+b=5\) is a minimizer, with minimum 1; parameters are not unique. Here \(A\) has two identical rows \((2,1)\), and \(H=\begin{pmatrix}8&amp;4\\4&amp;2\end{pmatrix}\). Its eigenvalues are 10 and 0, with directions \((2,1)\) and \((1,-2)\).</p><p>The gradient is \(2(a-5)(2,1)\), so \(a_{k+1}=a_k-10\eta(a_k-5)\). For \(0\lt\eta\lt0.2\), \(a_k\to5\). But \(w-2b\), the coordinate along the null direction, stays constant because its inner product with \((2,1)\) is zero. Descent therefore selects the member of the minimizer line determined by initialization, not a uniquely data-identified parameter. At \(x=3\), the predictor is \(3w+b=5+w\), which varies along that line. Identical training predictions can coexist with arbitrarily different unseen predictions. An additional prior, regularizer or more varied inputs would change the identification problem; none is supplied by this dataset.</p></details></div>
+
+<div class="exercise"><h3>6. What can three observations establish?</h3><p>Let \(p(x)\) be a polynomial interpolating \((1,4),(2,6),(4,7)\). Construct infinitely many smooth predictors with identical zero training loss but arbitrarily different predictions at \(x=3\). Compare this with the affine minimum. Design a numerical and evaluation audit that can distinguish a derivative bug, incomplete optimization and unsupported deployment confidence.</p>
+<details class="solution"><summary>Worked solution</summary><p>Lagrange interpolation gives \(p(x)=\tfrac43(x-2)(x-4)-3(x-1)(x-4)+\tfrac76(x-1)(x-2)\), which evaluates to 4,6,7 at the three training inputs. For any \(c\in\mathbb R\), set \(p_c(x)=p(x)+c(x-1)(x-2)(x-4)\). The extra term vanishes at every observation, so all have zero training loss. At \(x=3\), \(p(3)=7\) and the added term is \(-2c\). Thus the unseen prediction can take any real value without changing fit. These polynomials lie outside the affine class, whose minimum \(3/14\) measures a different representational restriction.</p><p>First audit derivatives with analytic identities, graph gradients and resolved central differences at asymmetric, nonstationary points. Include repeated-operand cases and fresh-pass behavior; merely checking a minimum's zero gradient can miss a missing multiplicative factor. Next compare affine optimization against its known normal-equation solution and inspect the stable-rate contraction, rather than equating ten iterations with completion. Finally obtain separate labeled data reflecting actual deployment conditions and specify the relevant scheduling loss before evaluating. The three observations alone cannot choose the correct extrapolation, establish causal effects or certify appointment reliability. These are distinct missing sources of evidence, not errors that a backward pass can repair.</p></details></div>
+</section>
+
+<section><h2 id="references">Sources and limits</h2><ul><li><a href="https://www.youtube.com/watch?v=ypZJaTqrNdk">Learning I recording</a>: the topic sequence and timestamp locations, aligned to local machine transcription.</li><li><a href="https://github.com/stanford-cs221/lectures/tree/f70063773fe9e04ddcbc248059501837053b810a">Official executable lecture, retained commit f70063773fe9e04ddcbc248059501837053b810a</a>: <code>backpropagation.py</code> and <code>linear_regression.py</code> provide the fixed tensor examples, graph context, three-point data, parameter order and mean-loss update. They are notation/fact sources; the chapter program is original.</li><li><a href="https://jmlr.org/papers/volume18/17-468/17-468.pdf">Baydin, Pearlmutter, Radul and Siskind, Automatic Differentiation in Machine Learning: a Survey</a>, JMLR 18(153), 2018: PDF p.4 distinguishes finite differences; pp.12–13 explain adjoint accumulation, seeds, transposed-Jacobian products and storage costs. This technical survey is not cited as the original discovery of reverse differentiation.</li><li><a href="https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf">Rumelhart, Hinton and Williams, Learning representations by back-propagating errors</a>, Nature 323, 533–536, 1986: PDF p.3, equations 7–8, separates accumulated backward derivatives from negative-gradient parameter updates; its nonlinear-network discussion does not guarantee a global minimum.</li><li><a href="https://einops.rocks/api/einsum/">einops official einsum API</a>: named-axis contraction and reduction semantics. Documentation verifies stable semantics, not the lecture environment's exact historical installation.</li></ul>
+<p>No official slide deck or recording-frame set was inspected for this chapter. The graph traces above are fully specified original mathematical constructions, checked against the actual executable source and the inspected primary survey table; they do not claim to reproduce unseen lecture diagrams. The retained ASR supplies sequence and timing, not authoritative notation or human-verified wording. Historical names garbled in ASR and present-day framework rankings are not imported as claims.</p><p>The mathematical guarantees apply to the stated smooth finite graphs and quadratic objectives in real arithmetic. The implementation uses ordinary binary64 with explicit finite-intermediate checks. Neither its fixture nor the lecture establishes deployment generalization, causality, robot safety or universal optimizer performance. The next learning chapters build on these distinctions, rather than treating a lower empirical loss as a complete account of intelligence.</p></section>
+<!-- BOOK-CONTENT-END --></article><nav class="page-turn" aria-label="Chapter navigation"><a rel="prev" href="lecture-01-foundations-and-tensors.html">Previous available chapter</a><a href="index.html">Lecture index</a><a rel="next" href="lecture-03-classification-probabilities-and-text.html">Next available chapter</a></nav></main></div>
+<footer class="site-footer">Independent study notes. Stanford course recordings supply the topic sequence; added explanations and teaching constructions are separately attributed. Local edition in progress; a rendered page does not establish editorial completion.</footer></body></html>

@@ -1,0 +1,461 @@
+{
+  "title": "Objectives, gradients, and learning",
+  "number": 2,
+  "video_id": "ypZJaTqrNdk",
+  "source_type": "locally generated automatic speech recognition",
+  "status": "author draft; independent science-editor gate6b pending",
+  "authored_body_sha256": "6c98e9aa2aeb6fa735b31d38fe1b7d1edd62c5d686e87451ba0c538fbea5c832",
+  "sections": [
+    {
+      "section": "case",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recorded passage assigned.",
+      "research_extension": "Only individually cited support applies.",
+      "teaching_construction": "Original delivery-duration case and normalized formal model.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Stipulated normalized cargo/duration coordinates and affine family.",
+          "provenance": "original model"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Three-point data cannot be fit by one affine line.",
+          "provenance": "original arithmetic"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "axes",
+      "start": 5,
+      "end": 345.71,
+      "lecture_material": "Tensor order, semantic axes, identity and reduction.",
+      "research_extension": "Official einops named-axis reduction semantics.",
+      "teaching_construction": "Zero-initialized reduction trace; overwrite failure boundary.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Tensor order and named-axis output/reduction meaning.",
+          "provenance": "official lecture; einops API #einops.einsum"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Vector sum11 and overwrite failure.",
+          "provenance": "original arithmetic"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "products",
+      "start": 345,
+      "end": 674.86,
+      "lecture_material": "Elementwise, dot, outer and triple products.",
+      "research_extension": "No external performance claim.",
+      "teaching_construction": "Fully evaluated vector products; independent versus shared indices.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Shared/independent input indices and retained output indices.",
+          "provenance": "official lecture; einops API"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Elementwise/dot/outer/triple fixed outputs.",
+          "provenance": "original arithmetic"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "contractions",
+      "start": 674,
+      "end": 1053.34,
+      "lecture_material": "Matrix reductions, transpose, matrix-vector and Gram products.",
+      "research_extension": "No external performance claim.",
+      "teaching_construction": "All fixed contractions; example-space versus feature-space roles.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Row and feature Gram objects with declared axes.",
+          "provenance": "official lecture notation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Matrix reductions, Mv and both Gram arrays.",
+          "provenance": "original arithmetic"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "objective",
+      "start": 1053,
+      "end": 1440.86,
+      "lecture_material": "Two-example three-feature squared sum objective; uses of gradients.",
+      "research_extension": "No empirical adversarial-example result imported.",
+      "teaching_construction": "Explicit parameter/data roles, squared versus signed residuals, normalization.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Fixed-data squared sum objective and residual roles.",
+          "provenance": "official lecture notation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Loss5 versus17; signed residual cancellation.",
+          "provenance": "original arithmetic"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "derivative",
+      "start": 1440,
+      "end": 1584.74,
+      "lecture_material": "Scalar derivative as limiting change; x squared finite difference.",
+      "research_extension": "Baydin PDF p.4: finite differences differ from AD.",
+      "teaching_construction": "Exact forward quotient, central difference and unresolved-increment boundary.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Derivative limit and finite differences versus AD.",
+          "provenance": "Baydin PDF p.4; official lecture"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Quadratic difference identities; local central-order statement under smoothness.",
+          "provenance": "original derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Finite perturbation can round away.",
+          "provenance": "binary64 boundary fixture"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "geometry",
+      "start": 1584,
+      "end": 1978.67,
+      "lecture_material": "Partial derivatives, sum-then-square, gradient shape and sign.",
+      "research_extension": "No external empirical result.",
+      "teaching_construction": "Euclidean steepest-decrease proof, zero-gradient/finite-step counterexamples; input versus parameter versus constrained mixture-gradient roles.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Gradient and Euclidean displacement geometry.",
+          "provenance": "official lecture; original local definitions"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Nonzero negative gradient minimizes first-order Euclidean unit-direction change.",
+          "provenance": "original Cauchy–Schwarz proof"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Rate0.1 versus1, zero-gradient nonextremum, source sign repair, constrained-mixture domain violation.",
+          "provenance": "original arithmetic and actual source expressions"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "graph",
+      "start": 1978,
+      "end": 2501.81,
+      "lecture_material": "Elementary computations, graph construction, forward values.",
+      "research_extension": "Baydin PDF pp.12–13 supports graph/adjoint mechanism; no discovery attribution.",
+      "teaching_construction": "DAG/topological definitions; repeated product slots versus square primitive.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Finite smooth DAG, operand slots and forward topological order.",
+          "provenance": "official lecture; Baydin PDF pp.12–13"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Four-node value25 trace with repeated multiplication operand.",
+          "provenance": "original construction"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "chain",
+      "start": 2506,
+      "end": 2992.83,
+      "lecture_material": "Chain rule, adjoint interpretation, root seed, sum/square propagation.",
+      "research_extension": "Baydin PDF pp.12–13 Table 3: seed and consumer accumulation.",
+      "teaching_construction": "Slot-level chain rule, full trace and perturbation verification.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Root adjoint, unit scalar seed and elementary local slot rules.",
+          "provenance": "Baydin PDF pp.12–13 Table3; official lecture"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Finite smooth consumer-slot accumulation identity.",
+          "provenance": "original multivariable chain-rule derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Full value/adjoint trace at(2,3).",
+          "provenance": "original arithmetic"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "ordering",
+      "start": 2992,
+      "end": 3310.98,
+      "lecture_material": "Topological forward/backward algorithm and seed clarification.",
+      "research_extension": "Baydin PDF p.13: transposed-Jacobian output-seed products.",
+      "teaching_construction": "Reverse-order induction; complete tensor gradient and scalar-root boundary.",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Reverse topological propagation computes finite smooth graph adjoints.",
+          "provenance": "original descending induction"
+        },
+        {
+          "evidence_class": "theorem",
+          "claim": "Tensor weight/data sensitivity and seed-dependent Jacobian transpose product.",
+          "provenance": "original differential derivation; Baydin PDF p.13"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Three-feature gradient(2,8,-4).",
+          "provenance": "original arithmetic"
+        }
+      ],
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "sharing",
+      "start": 3310,
+      "end": 3401.52,
+      "lecture_material": "Shared inputs justify a graph, tensor derivative recap, transition to learning.",
+      "research_extension": "Baydin PDF p.13: bounded-operation/storage tradeoff; Rumelhart1986 PDFp3 eq7–8: accumulated derivatives versus separate update.",
+      "teaching_construction": "Repeated-slot and fresh-pass counterexamples; explicit computational limits.",
+      "claim_provenance": [
+        {
+          "evidence_class": "engineering check",
+          "claim": "Shared u*u+u derivative5; set-edge/overwrite/reset failures.",
+          "provenance": "original fixtures"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Traversal work under bounded local operations and stored-trace costs.",
+          "provenance": "Baydin PDF p.13; explicit scalar-graph scope"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Original neural-network paper sums outgoing error contributions and then adjusts weights separately.",
+          "provenance": "Rumelhart,Hinton,Williams1986 PDFp3 equations7–8; no earliest-discovery/global-minimum claim"
+        }
+      ],
+      "evidence_class": "engineering check"
+    },
+    {
+      "section": "learning",
+      "start": 3401,
+      "end": 3761.84,
+      "lecture_material": "Predictor, training examples, hypothesis class, parameters and architecture.",
+      "research_extension": "No present-day architecture-size claim imported.",
+      "teaching_construction": "Persistent delivery-duration model; affine versus linear and identifiability.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Predictor/data-to-predictor algorithm/hypothesis class distinction.",
+          "provenance": "official lecture"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Affine family and nonunique parameter/predictor identification.",
+          "provenance": "original examples"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "loss",
+      "start": 3761,
+      "end": 3978.93,
+      "lecture_material": "Squared residual, per-example loss and mean training loss.",
+      "research_extension": "No external measured result.",
+      "teaching_construction": "Exact two-predictor losses, normalization, units and population-risk boundary.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Mean empirical loss versus deployment-distribution risk.",
+          "provenance": "official lecture; original scope analysis"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Mean loss2 versus17/3 and duplication behavior.",
+          "provenance": "original arithmetic"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "update",
+      "start": 3981,
+      "end": 4157.57,
+      "lecture_material": "Optimization, averaged gradient and first rate0.01 update from(0,1).",
+      "research_extension": "No external measured result.",
+      "teaching_construction": "Full analytical gradient, exact70/3 loss and unrounded first update.",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Finite-average affine squared-loss gradient.",
+          "provenance": "original chain-rule derivation"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Exact70/3 initial loss, gradient and first updated mean loss.",
+          "provenance": "original rational arithmetic checked against official fixture"
+        }
+      ],
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "curvature",
+      "start": 4157,
+      "end": 4277.98,
+      "lecture_material": "Ten repeated updates, learning-rate caution, convex/nonconvex distinction.",
+      "research_extension": "No external convergence theorem used without proof.",
+      "teaching_construction": "Original normal equations, positive minimum, Hessian spectrum and exact rate proof.",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Quadratic convexity/full-rank minimizer and all-initialization fixed-rate interval.",
+          "provenance": "original curvature/eigenmode proof"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Normal equations, positive3/14 minimum, spectrum and diverging rate0.2.",
+          "provenance": "original exact/numerical fixtures"
+        }
+      ],
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "synthesis",
+      "start": 4277,
+      "end": 4345.26,
+      "lecture_material": "SGD/Adam forward pointer; three-part learning template and closing summary.",
+      "research_extension": "No universal optimizer ranking imported.",
+      "teaching_construction": "Separate optimization, approximation, generalization and causal evidence.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Full-batch and scoped SGD/Adam mention.",
+          "provenance": "official lecture; no performance ranking"
+        },
+        {
+          "evidence_class": "definition",
+          "claim": "Optimization/generalization/causal evidence are distinct.",
+          "provenance": "original model analysis"
+        }
+      ],
+      "evidence_class": "definition"
+    },
+    {
+      "section": "implementation",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recorded passage assigned.",
+      "research_extension": "Only individually cited support applies.",
+      "teaching_construction": "Original scalar reverse graph and affine numerical program.",
+      "claim_provenance": [
+        {
+          "evidence_class": "engineering check",
+          "claim": "Finite-binary64 scalar graph and regression contract, exact default stdout.",
+          "provenance": "original program; author validation pending independent review"
+        }
+      ],
+      "evidence_class": "engineering check"
+    },
+    {
+      "section": "exercises",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recorded passage assigned.",
+      "research_extension": "Only individually cited support applies.",
+      "teaching_construction": "Six original mixed exercises and complete worked solutions.",
+      "claim_provenance": [
+        {
+          "evidence_class": "theorem",
+          "claim": "Contraction gradients, normalization scaling, eigenmode/rank-deficient convergence, polynomial indistinguishability.",
+          "provenance": "original worked proofs"
+        },
+        {
+          "evidence_class": "engineering check",
+          "claim": "Shared-node trace, rational fixture and evaluation/implementation diagnosis.",
+          "provenance": "original worked examples"
+        }
+      ],
+      "evidence_class": "theorem"
+    },
+    {
+      "section": "references",
+      "start": null,
+      "end": null,
+      "lecture_material": "No additional recorded passage assigned.",
+      "research_extension": "Only individually cited support applies.",
+      "teaching_construction": "Source roles and bounded inspection/claim provenance.",
+      "claim_provenance": [
+        {
+          "evidence_class": "definition",
+          "claim": "Source roles, primary-page support and stated inspection/computational limits.",
+          "provenance": "original provenance statement"
+        }
+      ],
+      "evidence_class": "definition"
+    }
+  ],
+  "references": [
+    {
+      "title": "Baydin et al. (2018), Automatic Differentiation in Machine Learning: a Survey",
+      "url": "https://jmlr.org/papers/volume18/17-468/17-468.pdf",
+      "supports": "PDFp4:finite differences; pp12–13:adjoint accumulation, seeds, VJP and stored trace. Not an original-discovery citation."
+    },
+    {
+      "title": "Rumelhart, Hinton and Williams (1986), Learning representations by back-propagating errors",
+      "url": "https://www.cs.toronto.edu/~hinton/absps/naturebp.pdf",
+      "supports": "PDFp3 equations7–8: sum outgoing derivative contributions then perform a separate negative-gradient update. Original scanned paper inspected; no discovery-priority assertion."
+    },
+    {
+      "title": "einops official einsum API",
+      "url": "https://einops.rocks/api/einsum/",
+      "supports": "Named-axis contraction/reduction semantics; exact API examples and definition. Not historical package-version attestation."
+    },
+    {
+      "title": "Official CS221 executable lectures, retained commit f70063773fe9e04ddcbc248059501837053b810a",
+      "url": "https://github.com/stanford-cs221/lectures/tree/f70063773fe9e04ddcbc248059501837053b810a",
+      "supports": "backpropagation.py and linear_regression.py:fixed tensor/graph examples, data, parameter order, loss normalization and rate."
+    }
+  ],
+  "implementation": {
+    "program": "programs/chapter02.py",
+    "sha256": "fa0cef934f2436267cf0822d33beea72f829358c61777ad715f5719e86332844",
+    "dependencies": "Python standard library",
+    "evidence": "Exact embedded code and default stdout; author-only check artifacts retained privately."
+  },
+  "limitations": [
+    "Machine ASR establishes sequence/timing, not human wording verification.",
+    "No official deck or recording frames inspected; original tables do not attest unseen talk diagrams.",
+    "Baydin inspected PDFpages1,4,11–14; page13 table visually inspected; not full-paper review. Rumelhart1986 four scanned pages visually read; only equations7–8 and scoped limitations used.",
+    "Stipulated normalized delivery case is not measured robotics evidence.",
+    "Smooth finite-graph/quadratic guarantees are in real arithmetic; program uses finite binary64 rounding.",
+    "No deployment-generalization, causal, robot-safety or universal optimizer-ranking claim.",
+    "Human keyboard/screen-reader audit and root reader integration/render validation remain separate."
+  ]
+}
